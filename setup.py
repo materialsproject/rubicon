@@ -8,7 +8,7 @@ __email__ = "ajain@lbl.gov"
 __date__ = "Apr 10, 2013"
 
 from setuptools import setup, find_packages
-from mpworks import __version__
+from rubicon import __version__
 import os
 import multiprocessing, logging  # AJ: for some reason this is needed to not have "python setup.py test" freak out
 
