@@ -12,7 +12,7 @@ __email__ = 'ajain@lbl.gov'
 __date__ = 'Apr 10, 2013'
 
 
-def mol_to_wf(mol):
+def mol_to_wf(mol, name):
     spec = {'molecule': mol.to_dict,
             'charge': 0,
             'spin_multiplicity': 1,
@@ -22,7 +22,8 @@ def mol_to_wf(mol):
             'route_parameters': {'Opt': '', 'SCF': 'Tight'},
             'input_parameters': None,
             'link0_parameters': {'%mem': '100MW', '%chk': 'molecule'},
-            '_category': 'Molecules'}
+            '_category': 'Molecules',
+            'name': name}
 
     fw = FireWork([GaussianTask()], spec)
 
@@ -49,5 +50,5 @@ if __name__ == '__main__':
             mol = XYZ.from_file(os.path.join(module_dir, 'test_mols', f)).molecule
             print mol
             mol_name = f.split('.')[0]
-            wf = mol_to_wf(mol)
+            wf = mol_to_wf(mol, mol_name)
             wf.to_file(os.path.join(module_dir, 'test_wfs', mol_name+'.yaml'))

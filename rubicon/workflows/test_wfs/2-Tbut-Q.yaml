@@ -1,5 +1,5 @@
 fws:
-- created_on: '2013-04-11T21:15:13.926617'
+- created_on: '2013-04-11T21:22:57.908421'
   fw_id: -1
   spec:
     _category: Molecules
@@ -380,6 +380,7 @@ fws:
         - -3.077443
         - -1.502004
         - -1.305242
+    name: 2-Tbut-Q
     route_parameters:
       Opt: ''
       SCF: Tight

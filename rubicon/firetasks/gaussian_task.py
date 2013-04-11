@@ -32,4 +32,4 @@ class GaussianTask(FireTaskBase, FWSerializable):
             f.write(str(gi))
 
         # TODO: replace with a custodian
-        subprocess.call('g09l gaussian.in output', shell=True)
+        subprocess.call(['g09l',fw_spec['name']+'.in',fw_spec['name']+'.out'])

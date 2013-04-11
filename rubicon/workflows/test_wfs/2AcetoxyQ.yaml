@@ -1,5 +1,5 @@
 fws:
-- created_on: '2013-04-11T21:15:14.143585'
+- created_on: '2013-04-11T21:22:58.122237'
   fw_id: -1
   spec:
     _category: Molecules
@@ -289,6 +289,7 @@ fws:
         - 4.357364
         - 1.607289
         - 0.000148
+    name: 2AcetoxyQ
     route_parameters:
       Opt: ''
       SCF: Tight

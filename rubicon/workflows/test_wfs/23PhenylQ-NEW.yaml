@@ -1,5 +1,5 @@
 fws:
-- created_on: '2013-04-11T21:15:14.070319'
+- created_on: '2013-04-11T21:22:58.049645'
   fw_id: -1
   spec:
     _category: Molecules
@@ -484,6 +484,7 @@ fws:
         - 2.315271
         - -4.428804
         - 1.186776
+    name: 23PhenylQ-NEW
     route_parameters:
       Opt: ''
       SCF: Tight
