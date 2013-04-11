@@ -1,4 +1,6 @@
+import os
 from fireworks.core.firework import FireWork, Workflow
+from pymatgen.io.xyzio import XYZ
 from rubicon.firetasks.gaussian_task import GaussianTask
 from pymatgen import Molecule
 
@@ -28,6 +30,7 @@ def mol_to_wf(mol):
 
 
 if __name__ == '__main__':
+    """
     coords = [[0.000000, 0.000000, 0.000000],
               [0.000000, 0.000000, 1.089000],
               [1.026719, 0.000000, -0.363000],
@@ -38,3 +41,12 @@ if __name__ == '__main__':
     wf = mol_to_wf(mol)
 
     wf.to_file('CH4.yaml')
+    """
+
+    module_dir = os.path.dirname(os.path.abspath(__file__))
+    for f in os.listdir(os.path.join(module_dir, 'test_mols')):
+        if '.xyz' in f:
+            mol = XYZ.from_file(os.path.join(module_dir, 'test_mols', f)).molecule
+            mol_name = f.split('.')[0]
+            wf = mol_to_wf(mol)
+            wf.to_file(os.path.join(module_dir, 'test_wfs', mol_name+'.yaml'))
