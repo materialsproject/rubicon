@@ -1,5 +1,5 @@
 fws:
-- created_on: '2013-04-11T20:58:31.508417'
+- created_on: '2013-04-11T21:15:13.926617'
   fw_id: -1
   spec:
     _category: Molecules
@@ -26,6 +26,7 @@ fws:
           element: C
           occu: 1
         xyz:
+        - 3.908744
         - -0.116707
         - -2.3e-05
       - '@class': Site
@@ -38,6 +39,7 @@ fws:
           element: C
           occu: 1
         xyz:
+        - 2.981122
         - -1.13803
         - 2.3e-05
       - '@class': Site
@@ -50,6 +52,7 @@ fws:
           element: C
           occu: 1
         xyz:
+        - 1.596325
         - -0.833911
         - 5.6e-05
       - '@class': Site
@@ -62,6 +65,7 @@ fws:
           element: C
           occu: 1
         xyz:
+        - 1.171814
         - 0.528758
         - 7.0e-05
       - '@class': Site
@@ -74,6 +78,7 @@ fws:
           element: C
           occu: 1
         xyz:
+        - 2.146388
         - 1.559528
         - 1.7e-05
       - '@class': Site
@@ -86,6 +91,7 @@ fws:
           element: C
           occu: 1
         xyz:
+        - 3.488543
         - 1.238653
         - -3.5e-05
       - '@class': Site
@@ -98,6 +104,7 @@ fws:
           element: H
           occu: 1
         xyz:
+        - 4.970875
         - -0.347206
         - -5.3e-05
       - '@class': Site
@@ -110,6 +117,7 @@ fws:
           element: H
           occu: 1
         xyz:
+        - 3.276629
         - -2.183391
         - 3.2e-05
       - '@class': Site
@@ -122,6 +130,7 @@ fws:
           element: H
           occu: 1
         xyz:
+        - 1.802801
         - 2.590092
         - 2.6e-05
       - '@class': Site
@@ -134,6 +143,7 @@ fws:
           element: H
           occu: 1
         xyz:
+        - 4.234771
         - 2.028953
         - -8.1e-05
       - '@class': Site
@@ -146,6 +156,7 @@ fws:
           element: C
           occu: 1
         xyz:
+        - -1.033585
         - -0.12803
         - 0.000286
       - '@class': Site
@@ -158,6 +169,7 @@ fws:
           element: C
           occu: 1
         xyz:
+        - -0.587637
         - -1.493948
         - 0.000144
       - '@class': Site
@@ -170,6 +182,7 @@ fws:
           element: N
           occu: 1
         xyz:
+        - -0.155438
         - 0.854304
         - 0.000187
       - '@class': Site
@@ -182,6 +195,7 @@ fws:
           element: N
           occu: 1
         xyz:
+        - 0.677069
         - -1.845601
         - 5.1e-05
       - '@class': Site
@@ -194,6 +208,7 @@ fws:
           element: C
           occu: 1
         xyz:
+        - -2.531515
         - 0.196879
         - 1.9e-05
       - '@class': Site
@@ -206,6 +221,7 @@ fws:
           element: H
           occu: 1
         xyz:
+        - -1.312892
         - -2.305116
         - -8.0e-06
       - '@class': Site
@@ -218,6 +234,7 @@ fws:
           element: C
           occu: 1
         xyz:
+        - -2.765823
         - 1.717396
         - 0.001519
       - '@class': Site
@@ -230,6 +247,7 @@ fws:
           element: H
           occu: 1
         xyz:
+        - -2.323295
         - 2.192366
         - -0.879675
       - '@class': Site
@@ -242,6 +260,7 @@ fws:
           element: H
           occu: 1
         xyz:
+        - -3.84353
         - 1.921052
         - 0.001303
       - '@class': Site
@@ -254,6 +273,7 @@ fws:
           element: H
           occu: 1
         xyz:
+        - -2.324045
         - 2.190452
         - 0.884141
       - '@class': Site
@@ -266,6 +286,7 @@ fws:
           element: C
           occu: 1
         xyz:
+        - -3.18614
         - -0.414608
         - 1.263538
       - '@class': Site
@@ -278,6 +299,7 @@ fws:
           element: H
           occu: 1
         xyz:
+        - -4.258874
         - -0.186231
         - 1.275718
       - '@class': Site
@@ -290,6 +312,7 @@ fws:
           element: H
           occu: 1
         xyz:
+        - -3.079522
         - -1.504743
         - 1.300982
       - '@class': Site
@@ -302,6 +325,7 @@ fws:
           element: H
           occu: 1
         xyz:
+        - -2.741834
         - 4.7e-05
         - 2.17612
       - '@class': Site
@@ -314,6 +338,7 @@ fws:
           element: C
           occu: 1
         xyz:
+        - -3.184606
         - -0.411987
         - -1.265571
       - '@class': Site
@@ -326,6 +351,7 @@ fws:
           element: H
           occu: 1
         xyz:
+        - -4.257417
         - -0.183994
         - -1.278453
       - '@class': Site
@@ -338,6 +364,7 @@ fws:
           element: H
           occu: 1
         xyz:
+        - -2.739421
         - 0.004843
         - -2.176733
       - '@class': Site
@@ -350,6 +377,7 @@ fws:
           element: H
           occu: 1
         xyz:
+        - -3.077443
         - -1.502004
         - -1.305242
     route_parameters:

@@ -47,6 +47,7 @@ if __name__ == '__main__':
     for f in os.listdir(os.path.join(module_dir, 'test_mols')):
         if '.xyz' in f:
             mol = XYZ.from_file(os.path.join(module_dir, 'test_mols', f)).molecule
+            print mol
             mol_name = f.split('.')[0]
             wf = mol_to_wf(mol)
             wf.to_file(os.path.join(module_dir, 'test_wfs', mol_name+'.yaml'))
