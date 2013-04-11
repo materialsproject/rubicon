@@ -20,7 +20,7 @@ class GaussianTask(FireTaskBase, FWSerializable):
     _fw_name = "Gaussian Task"
 
     def run_task(self, fw_spec):
-        mol = Molecule.from_dict(fw_spec['mol'])
+        mol = Molecule.from_dict(fw_spec['molecule'])
         gi = GaussianInput(mol, fw_spec['charge'], fw_spec['spin_multiplicity'], fw_spec['title'], fw_spec['functional'], fw_spec['basis_set'], fw_spec['route_parameters'], fw_spec['input_parameters'], fw_spec['link0_parameters'])
 
         with open('gaussian.in') as f:
