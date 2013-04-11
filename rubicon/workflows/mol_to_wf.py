@@ -11,17 +11,16 @@ __date__ = 'Apr 10, 2013'
 
 
 def mol_to_wf(mol):
-    spec = {}
-    spec['molecule'] = mol.to_dict
-    spec['charge'] = 0
-    spec['spin_multiplicity'] = 1
-    spec['title'] = 'first test job'
-    spec['functional'] = 'B3LYP'
-    spec['basis_set'] = '6-31+G(d)'
-    spec['route_parameters'] = {'Opt':'', 'SCF':'Tight'}
-    spec['input_parameters'] = None
-    spec['link0_parameters'] = {'%mem': '100MW', '%chk':'molecule'}
-    spec['_category'] = 'Molecules'
+    spec = {'molecule': mol.to_dict,
+            'charge': 0,
+            'spin_multiplicity': 1,
+            'title': 'first test job',
+            'functional': 'B3LYP',
+            'basis_set': '6-31+G(d)',
+            'route_parameters': {'Opt': '', 'SCF': 'Tight'},
+            'input_parameters': None,
+            'link0_parameters': {'%mem': '100MW', '%chk': 'molecule'},
+            '_category': 'Molecules'}
 
     fw = FireWork([GaussianTask()], spec)
 
