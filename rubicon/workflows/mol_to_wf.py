@@ -11,6 +11,17 @@ __maintainer__ = 'Anubhav Jain'
 __email__ = 'ajain@lbl.gov'
 __date__ = 'Apr 10, 2013'
 
+'''
+The workflow decided during the initial meeting between Lei, Shyue, Anubhav, Kristin (~Apr. 10, 2013):
+
+* Use B3LYP functional
+* 6-31+G(d) for geometry
+* g-311+G(2d,p) for static (or do tests?)
+* Vertical IE/EA (delta-SCF)
+* Then relax those for doing adiabitic IE/EA
+* Vertical and adiabatic (both) for now
+* ASMD (PCM) ; test acetone, water, etc
+'''
 
 def mol_to_wf(mol, name):
     spec = {'molecule': mol.to_dict,
