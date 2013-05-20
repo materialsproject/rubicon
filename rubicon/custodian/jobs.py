@@ -1,0 +1,118 @@
+#!/usr/bin/env python
+
+"""
+This module implements basic kinds of jobs for Gaussian runs.
+"""
+
+from __future__ import division
+
+__author__ = "Shyue Ping Ong"
+__version__ = "0.1"
+__maintainer__ = "Shyue Ping Ong"
+__email__ = "shyuep@gmail.com"
+__status__ = "Beta"
+__date__ = "5/20/13"
+
+
+import subprocess
+import os
+
+from pymatgen.util.io_utils import zopen
+from pymatgen.serializers.json_coders import MSONable
+
+from custodian.custodian import Job
+
+
+class GaussianJob(Job, MSONable):
+    """
+    A basic Gaussian job. Just runs whatever is in the directory. But
+    conceivably can be a complex processing of inputs etc. with initialization.
+    """
+
+    def __init__(self, gau_cmd, input_file="gau.inp", output_file="gau.out",
+                 suffix="", final=True, gzipped=False, backup=True,
+                 settings_override=None):
+        """
+        This constructor is necessarily complex due to the need for
+        flexibility. For standard kinds of runs, it's often better to use one
+        of the static constructors.
+
+        Args:
+            gau_cmd:
+                Command to run Gaussian as a list of args. For example,
+                ["g09"].
+            output_file:
+                Name of file to direct standard out to.
+            suffix:
+                A suffix to be appended to the final output.
+            final:
+                Boolean indicating whether this is the final job in a
+                series. Defaults to True.
+            backup:
+                Boolean whether to backup the initial input files. If True,
+                the input files will be copied with a ".orig" appended.
+                Defaults to True.
+            gzipped:
+                Whether to gzip the final output. Defaults to False.
+            settings_override:
+                An ansible style list of dict to override changes.
+        """
+        self.gau_cmd = gau_cmd
+        self.input_file = input_file
+        self.output_file = output_file
+        self.final = final
+        self.backup = backup
+        self.gzipped = gzipped
+        self.suffix = suffix
+        self.settings_override = settings_override
+
+    def setup(self):
+        pass
+
+    def run(self):
+        with zopen(self.input_file) as fin, \
+            zopen(self.output_file, 'w') as fout:
+            return subprocess.Popen(self.gau_cmd, stdin=fin, stdout=fout)
+
+    def postprocess(self):
+        if self.gzipped:
+            gzip_directory(".")
+
+    @property
+    def name(self):
+        return "Gaussian Job"
+
+    @property
+    def to_dict(self):
+        d = dict(gau_cmd=self.gau_cmd, input_file=self.input_file,
+                 output_file=self.output_file, suffix=self.suffix,
+                 final=self.final, gzipped=self.gzipped, backup=self.backup,
+                 settings_override=self.settings_override
+                 )
+        d["@module"] = self.__class__.__module__
+        d["@class"] = self.__class__.__name__
+        return d
+
+    @staticmethod
+    def from_dict(d):
+        return GaussianJob(
+            gau_cmd=d["gau_cmd"], input_file=d["input_file"],
+            output_file=d["output_file"],
+            suffix=d["suffix"], final=d["final"], gzipped=d["gzipped"],
+            backup=d["backup"], settings_override=d["settings_override"])
+
+
+def gzip_directory(path):
+    """
+    Gzips all files in a directory.
+
+    Args:
+        path:
+            Path to directory.
+    """
+    for f in os.listdir(path):
+        if not f.endswith("gz"):
+            with zopen(f, 'rb') as f_in, \
+                    zopen('{}.gz'.format(f), 'wb') as f_out:
+                f_out.writelines(f_in)
+            os.remove(f)
