@@ -16,6 +16,7 @@ __date__ = "5/20/13"
 
 import subprocess
 import os
+import shutil
 
 from pymatgen.util.io_utils import zopen
 from pymatgen.serializers.json_coders import MSONable
@@ -30,7 +31,7 @@ class GaussianJob(Job, MSONable):
     """
 
     def __init__(self, gau_cmd, input_file="gau.inp", output_file="gau.out",
-                 suffix="", final=True, gzipped=False, backup=True,
+                 suffix="", gzipped=False, backup=True,
                  settings_override=None):
         """
         This constructor is necessarily complex due to the need for
@@ -45,9 +46,6 @@ class GaussianJob(Job, MSONable):
                 Name of file to direct standard out to.
             suffix:
                 A suffix to be appended to the final output.
-            final:
-                Boolean indicating whether this is the final job in a
-                series. Defaults to True.
             backup:
                 Boolean whether to backup the initial input files. If True,
                 the input files will be copied with a ".orig" appended.
@@ -56,6 +54,7 @@ class GaussianJob(Job, MSONable):
                 Whether to gzip the final output. Defaults to False.
             settings_override:
                 An ansible style list of dict to override changes.
+                TODO: Not implemented yet.
         """
         self.gau_cmd = gau_cmd
         self.input_file = input_file
@@ -67,7 +66,8 @@ class GaussianJob(Job, MSONable):
         self.settings_override = settings_override
 
     def setup(self):
-        pass
+        if self.backup:
+            shutil.copy(self.input_file, "{}.orig".format(self.input_file))
 
     def run(self):
         with zopen(self.input_file) as fin, \
@@ -86,7 +86,7 @@ class GaussianJob(Job, MSONable):
     def to_dict(self):
         d = dict(gau_cmd=self.gau_cmd, input_file=self.input_file,
                  output_file=self.output_file, suffix=self.suffix,
-                 final=self.final, gzipped=self.gzipped, backup=self.backup,
+                 gzipped=self.gzipped, backup=self.backup,
                  settings_override=self.settings_override
                  )
         d["@module"] = self.__class__.__module__
@@ -98,8 +98,8 @@ class GaussianJob(Job, MSONable):
         return GaussianJob(
             gau_cmd=d["gau_cmd"], input_file=d["input_file"],
             output_file=d["output_file"],
-            suffix=d["suffix"], final=d["final"], gzipped=d["gzipped"],
-            backup=d["backup"], settings_override=d["settings_override"])
+            suffix=d["suffix"], gzipped=d["gzipped"], backup=d["backup"],
+            settings_override=d["settings_override"])
 
 
 def gzip_directory(path):
