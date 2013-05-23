@@ -1,0 +1,225 @@
+%mem=800MB
+%rwf=a,1900MB,b,1900MB,c,1900MB,d,1900MB,e,1900MB
+%chk=hbdimerg305b32dftest
+# B3LYP/6-31G(2DF,P) opt(z-matrix) scf(direct)
+
+h2o dimer b3lyp/631g(2df,p) = -152.8637143
+
+0 1
+o1
+o2 o1 ro2
+h1 o1 rh1 o2 ah1
+h2 o1 rh2 h1 ah2 o2 th2
+h3 o2 rh3 o1 ah3 h1 th3
+h4 o2 rh4 o1 ah4 h3 th4
+
+ro2=2.79770423
+ rh1=0.96253559
+ ah1=110.86290081
+ rh2=0.96669401
+ ah2=103.9936596
+ th2=-43.15008595
+ rh3=0.9664807
+ ah3=43.37967231
+ th3=92.04687013
+ rh4=0.96262172
+ ah4=110.50813408
+ th4=88.85631445
+
+--link1--
+%mem=800MB
+%rwf=a,1900MB,b,1900MB,c,1900MB,d,1900MB,e,1900MB
+%chk=hbdimerg305b32dftest
+# B3LYP/6-31G(2DF,P) opt(z-matrix) scf(direct)
+
+methanol dimer b3lyp/6-31g(2df,p) = -231.4720804
+
+0 1
+o1
+o2 o1 ro2
+c1 o1 rc1 o2 ac1
+c2 o2 rc2 o1 ac2 c1 tc2
+h1 o1 rh1 c1 ah1 o2 th1
+h2 o2 rh2 c2 ah2 o1 th2
+h3 c1 rh3 o1 ah3 h1 th3
+h4 c1 rh4 o1 ah4 h3 th4
+h5 c1 rh5 o1 ah5 h3 th5
+h6 c2 rh6 o2 ah6 h1 th6
+h7 c2 rh7 o2 ah7 h6 th7
+h8 c2 rh8 o2 ah8 h6 th8
+
+ro2=2.84112714
+ rc1=1.40994328
+ ac1=116.07321499
+ rc2=1.42801979
+ ac2=93.34426716
+ tc2=-90.57073239
+ rh1=0.96955828
+ ah1=108.19650256
+ th1=12.8864112
+ rh2=0.96273101
+ ah2=107.82121502
+ th2=98.72341899
+ rh3=1.09470453
+ ah3=107.62121608
+ th3=178.70334122
+ rh4=1.10137332
+ ah4=112.86252549
+ th4=118.70410145
+ rh5=1.10175374
+ ah5=112.96995529
+ th5=-118.70092874
+ rh6=1.09691227
+ ah6=111.66913634
+ th6=-156.69183998
+ rh7=1.09639202
+ ah7=111.63035047
+ th7=123.22912488
+ rh8=1.09247495
+ ah8=106.66573706
+ th8=-118.29870691
+
+--link1--
+%mem=800MB
+%rwf=a,1900MB,b,1900MB,c,1900MB,d,1900MB,e,1900MB
+%chk=hbdimerg305b32dftest
+# B3LYP/6-31G(2DF,P) opt(z-matrix) scf(direct)
+
+acetone dimer c2 symmetry b3lyp/6-31g(2df,p) = -386.351091
+
+0 1
+c1
+c2 c1 rc2
+o1 c1 ro1 c2 ao1
+o2 c2 ro1 c1 ao1 o1 to2
+c3 c1 rc3 o1 ac3 c2 tc3
+c4 c2 rc3 o2 ac3 c1 tc3
+c5 c1 rc5 o1 ac5 c3 tc5
+c6 c2 rc5 o2 ac5 c4 tc5
+h1 c3 rh1 c1 ah1 c5 th1
+h2 c4 rh1 c2 ah1 c6 th1
+h3 c3 rh3 c1 ah3 h1 th3
+h4 c4 rh3 c2 ah3 h2 th3
+h5 c3 rh5 c1 ah5 h1 th5
+h6 c4 rh5 c2 ah5 h2 th5
+h7 c5 rh7 c1 ah7 c3 th7
+h8 c6 rh7 c2 ah7 c4 th7
+h9 c5 rh9 c1 ah9 h7 th9
+h10 c6 rh9 c2 ah9 h8 th9
+h11 c5 rh11 c1 ah11 h7 th11
+h12 c6 rh11 c2 ah11 h8 th11
+
+rc2=4.76992933
+ ro1=1.21200776
+ ao1=59.39404076
+ to2=178.95356635
+ rc3=1.51539099
+ ac3=122.50165404
+ tc3=-4.95534185
+ rc5=1.51987515
+ ac5=121.08670707
+ tc5=-179.79546699
+ rh1=1.09132745
+ ah1=111.03637338
+ th1=-174.51713919
+ rh3=1.09609824
+ ah3=110.3382956
+ th3=122.33975872
+ rh5=1.09715131
+ ah5=109.34562474
+ th5=-121.03857768
+ rh7=1.09055173
+ ah7=110.08193059
+ th7=-176.30172058
+ rh9=1.09566683
+ ah9=110.56294015
+ th9=121.66129204
+ rh11=1.09620252
+ ah11=109.95929313
+ th11=-120.78141099
+
+--link1--
+%mem=800MB
+%rwf=a,1900MB,b,1900MB,c,1900MB,d,1900MB,e,1900MB
+%chk=hbdimerg305b32dftest
+# B3LYP/6-31G(2DF,P) opt(z-matrix) scf(direct)
+
+hcl dimer b3lyp/6-31g(2df,p) = -921.6102517
+
+0 1
+Cl,0,-0.338784382,0.0000541922,-1.9273540079
+ H,0,-0.3371317795,0.0001702527,-0.6382615208
+ Cl,0,0.2686148377,0.0000615351,1.8694049734
+ H,0,1.5300140314,-0.0021376171,1.6233951062
+
+--link1--
+%mem=800MB
+%rwf=a,1900MB,b,1900MB,c,1900MB,d,1900MB,e,1900MB
+%chk=hbdimerg305b32dftest
+# B3LYP/6-31G(2DF,P) opt(z-matrix) scf(direct)
+
+acetic acid dimer c2 symmetry b3lyp/6-31g(2df,p) = -458.2412623
+
+0 1
+c1
+c2 c1 rc2
+o1 c1 ro1 c2 ao1
+o2 c2 ro1 c1 ao1 o1 to2
+o3 c1 ro3 o1 ao3 c2 to3
+o4 c2 ro3 o2 ao3 c1 to3
+c3 c1 rc3 o1 ac3 o3 tc3
+c4 c2 rc3 o2 ac3 o4 tc3
+h1 o3 rh1 c1 ah1 o1 th1
+h2 o4 rh1 c2 ah1 o2 th1
+h3 c3 rh3 c1 ah3 o1 th3
+h4 c4 rh3 c2 ah3 o2 th3
+h5 c3 rh5 c1 ah5 h3 th5
+h6 c4 rh5 c2 ah5 h4 th5
+h7 c3 rh7 c1 ah7 h3 th7
+h8 c4 rh7 c2 ah7 h4 th7
+
+rc2=3.81174747
+ ro1=1.22525169
+ ao1=58.36079971
+ to2=-179.88919032
+ ro3=1.3160719
+ ao3=124.3961955
+ to3=-0.13341607
+ rc3=1.50680339
+ ac3=122.51679506
+ tc3=-179.99908936
+ rh1=1.00341136
+ ah1=110.4911332
+ th1=0.01697128
+ rh3=1.0888047
+ ah3=110.01873535
+ th3=-0.01643895
+ rh5=1.09369517
+ ah5=109.62911536
+ th5=121.31239926
+ rh7=1.09369167
+ ah7=109.63202199
+ th7=-121.31687251
+
+--link1--
+%mem=800MB
+%rwf=a,1900MB,b,1900MB,c,1900MB,d,1900MB,e,1900MB
+%chk=hbdimerg305b32dftest
+# B3LYP/6-31G(2DF,P) opt(z-matrix) scf(direct)
+
+hf dimer b3lyp/6-31g(2df,p) = -200.8809317
+
+0 1
+f1
+h1 f1 rh1
+f2 f1 rf2 h1 af2
+h2 f2 rh2 f1 ah2 h1 th2
+
+rh1=0.92614243
+ rf2=2.51332621
+ af2=46.71923651
+ rh2=0.92602852
+ ah2=47.03389685
+ th2=179.99118091
+
+

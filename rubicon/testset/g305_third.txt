@@ -1,0 +1,609 @@
+%mem=3000000
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+ gallium
+
+0 2
+Ga
+
+--link1--
+%mem=3000000
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+ gallium cation
+ 
++1 1
+Ga
+
+--link1--
+%mem=3000000
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+ germanium
+
+0 3
+Ge
+
+--link1--
+%mem=3000000
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+ germanium cation
+
++1 2
+Ge
+
+--link1--
+%mem=3000000
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+ germanium anion
+
+-1 4
+Ge
+
+--link1--
+%mem=3000000
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+ 
+ arsenic
+
+0 4
+As
+
+--link1--
+%mem=3000000
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+ 
+ arsenic cation
+
++1 3
+As
+ 
+--link1--
+%mem=3000000
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+ 
+ selenium
+
+0 3
+Se
+
+--link1--
+%mem=3000000
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+ 
+ selenium cation
+
++1 4
+Se
+
+--link1--
+%mem=3000000
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+ bromine
+
+0 2
+Br
+
+--link1--
+%mem=3000000
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+ 
+ bromine cation
+
++1 3
+Br
+ 
+--link1--
+%mem=3000000
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+ bromine anion
+
+-1 1
+Br
+
+--link1--
+%mem=3000000
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+ 
+ krypton
+
+0 1
+Kr
+ 
+--link1--
+%mem=3000000
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+ 
+ krypton cation
+
++1 2
+Kr 
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+germanium tetrahydride //mp2(full)/vit631gd = -2077.6947174
+
+0,1
+Ge
+H,1,R
+H,1,R,2,A
+H,1,R,2,A,3,A,1
+H,1,R,2,A,3,A,-1
+
+R=1.5383936
+A=109.47122063
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+arsenic monohydride //mp2(full)/vit631gd = -2234.7559827
+
+0,3
+As
+H,1,L1
+
+L1=1.53682304
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+arsenic monohydride cation //mp2(full)/vit631gd = -2234.4075735
+
+1,2
+As
+H,1,l1
+
+l1=1.53379389
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+arsenic dihydride //mp2(full)/vit631gd = -2235.3471559
+
+0,2
+As
+H,1,L1
+H,1,L1,2,A1
+
+L1=1.52843542
+A1=91.33213984
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+arsenic dihydride cation //mp2(full)/vit631gd = -2235.0115124
+
+1,1
+As
+H,1,l1
+H,1,l1,2,a1
+
+l1=1.52807317
+a1=91.72148615
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+arsenic trihydride //mp2(full)/vit631gd = -2235.9517777
+
+0,1
+As
+X,1,L1
+H,1,L2,2,A1
+H,1,L2,2,A1,3,B1,0
+H,1,L2,2,A1,3,B2,0
+
+L2=1.52268216
+A1=123.33621458
+B1=120.
+B2=-120.
+L1=1.
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+selenium monohydride 1) mp2(fu)/6-31g* opt 2) mp2(fu)/gen opt(readfc) guess=check
+
+0,2
+Se
+H,1,L1
+
+L1=1.47756585
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+selenium monohydride cation //mp2(full)/vit631gd = -2400.0684922
+
+1,3
+Se
+H,1,L1
+
+L1=1.49029864
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+selenium monohydride anion //mp2(full)/vit631gd = -2400.4629974
+
+-1,1
+Se
+H,1,L1
+
+L1=1.48420945
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+Selenium Dihydride //mp2(full)/vit631gd = -2401.0171606
+
+0,1
+Se
+H,1,L1
+H,1,L1,2,A1
+
+L1=1.4717215
+A1=91.47008126
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+Selenium Dihydride cation //mp2(full)/vit631gd = -2400.6729855
+
+1,2
+Se
+H,1,L1
+H,1,L1,2,A1
+
+L1=1.4833324
+A1=92.21191861
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+Hydrogen Bromide //mp2(full)/vit631gd = -2573.0047271
+
+0,1
+Br
+H,1,L1
+
+L1=1.42823796
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+Hydrogen Bromide cation //mp2(full)/vit631gd = -2572.5867115
+
+1,2
+br1
+h1 br1 rh1
+
+rh1=1.454509637
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+Germanium Oxide //mp2(full)/vit631gd = -2150.444022
+
+0,1
+Ge
+O,1,R
+
+R=1.65629246
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+Germanium Disulfide //mp2(full)/vit631gd = -2870.7169363
+
+0,1
+Ge
+S,1,R
+X,1,1.,2,90.
+S,1,R,3,90.,2,180.,0
+
+R=2.0067015
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+Arsenic dimer //mp2(full)/vit631gd = -4468.4817154
+
+0,1
+As
+As,1,L1
+
+L1=2.15048025
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+Bromine Chloride //mp2(full)/vit631gd = -3032.0119889
+
+0,1
+Br
+Cl,1,L1
+
+L1=2.16113291
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+Bromine Fluoride //mp2(full)/vit631gd = -2671.9625909
+
+0,1
+Br
+F,1,L1
+
+L1=1.77923707
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+Bromine Fluoride cation //mp2(full)/vit631gd = -2671.5420029
+
+1,2
+Br
+F,1,L1
+
+L1=1.6939144
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+Bromine Monooxide //mp2(full)/vit631gd = -2647.3300881
+
+0,2
+Br
+O,1,R
+
+R=1.74437027
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+Bromine Monooxide anion //mp2(full)/vit631gd = -2647.3874997
+
+-1,1
+Br
+O,1,R
+
+R=1.82857443
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+HOBr //mp2(full)/vit631gd = -2647.9863029
+
+0,1
+Br
+O,1,R1
+H,2,R2,1,A
+
+R1=1.85443135
+R2=0.97886324
+A=102.382116
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+HOBr cation //mp2(full)/vit631gd = -2647.6106032
+
+1,2
+Br
+O,1,R1
+X,2,1.,1,90.
+H,2,R2,3,90.,1,A,0
+
+ R1=1.71697219
+ R2=1.0026617
+ A=110.60508429
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+Boron Bromide //mp2(full)/vit631gd = -2597.1048214
+
+0,1
+Br
+B,1,R
+
+R=1.89389569
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+Sodium Bromide //mp2(full)/vit631gd = -2734.3588315
+
+0,1
+Br
+Na,1,R
+
+R=2.53818944
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+Sodium Bromide cation OPT(Z-MATRIX,CALCFC,EXPERT)
+//mp2(full)/vit631gd = -2734.0566367
+
+1,2
+Br
+Na,1,R
+
+R=2.95522561
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+Bromine dimer //mp2(full)/vit631gd = -5144.8321958
+
+0,1
+Br
+Br,1,L1
+
+L1=2.30115698
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+Bromine dimer cation //mp2(full)/vit631gd = -5144.4513141
+
+1,2
+Br
+Br,1,L1
+
+L1=2.22312925
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+Bromo Methane //mp2(full)/vit631gd = -2612.1733329
+
+0,1
+C
+Br,1,R1
+H,1,R2,2,A
+H,1,R2,2,A,3,120.,0
+H,1,R2,2,A,3,-120.,0
+
+R1=1.94022548
+R2=1.08694512
+A=108.12410647
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+ch4br+ //mp2(full)/vit631gd = -2612.4202525
+
+1,1
+Br
+C,1,R1
+H,2,R2,1,A1
+H,2,R3,1,A2,3,A3,0
+H,2,R3,1,A2,3,-A3,0
+H,1,R4,2,A4,3,180.,0
+
+R1=1.98600678
+R2=1.08847304
+R3=1.08660245
+R4=1.44296787
+A1=103.17624002
+A2=106.48565916
+A3=118.7352566
+A4=97.21462091
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+Gallium Chloride //mp2(full)/vit631gd = -2382.9471981
+
+0,1
+ga1
+cl1 ga1 rcl1
+
+rcl1=2.204574483
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+Krypton Difluoride //mp2(full)/vit631gd = -2950.9920334
+
+0,1
+Kr
+F,1,R
+X,1,1.,2,90.
+F,1,R,3,90.,2,180.,0
+
+R=1.89120517
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+K 2S
+
+0 2
+k
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+K+ 1S
+
+1 1
+k
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+K- 1S
+
+-1 1
+k
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+Ca 1S
+
+0 1
+ca
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+Ca+ 2S
+
+1 2
+ca
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+K2 1S+g d*h MP2=-1198.5190252
+
+0,1
+K
+K,1,rk2
+
+rk2=4.03056411
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+KBr 1S+ c*v MP2=-3171.7737963
+
+0,1
+K
+Br,1,rbr1
+
+rbr1=2.85744701
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+KCl 1S+ c*v MP2=-1058.9599751
+
+0,1
+K
+Cl,1,rcl1
+
+rcl1=2.69944208
+
+--link1--
+# MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
+
+KF 1S+ c*v MP2=-698.9168417
+
+0,1
+K
+F,1,rf1
+
+rf1=2.12657184
+
+

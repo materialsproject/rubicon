@@ -1,0 +1,1315 @@
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+h hf/6-31g*
+
+0 2
+h
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+li mp2(full)/6-31g*
+
+0 2
+li
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+  be
+
+ 0 1
+be 
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+  b
+
+ 0 2
+B
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+ C  
+
+ 0 3
+ C
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+  N
+
+ 0 4
+ N
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+ O  
+
+ 0 3
+ O
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+  F
+
+ 0 2
+ F
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+na mp2(full)/6-31g*
+
+0 2
+na
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+  mg
+
+ 0 1
+mg 
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+  al
+
+ 0 2
+al 
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+ Si  
+
+ 0 3
+ Si
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+  p
+
+ 0 4
+ p
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+ S  
+
+ 0 3
+ S
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+  cl
+
+ 0 2
+ cl
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+ li+ mp2(full)/6-31g* -7.2359397
+
+ +1 1
+li
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+ Be+ mp2(full)/6-31g* MP2=-14.2785766
+
+ +1 2
+be
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+ B+ mp2(full)/6-31g* MP2=-24.2715012
+
+ +1 1
+B
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+ C+ mp2(full)/6-31g* MP2=-37.3343505
+
+ +1 2
+C
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+ N+ mp2(full)/6-31g* MP2=-53.9292719
+
+ +1 3
+N
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+ O+ mp2(full)/6-31g* MP2=-74.4061728
+
+ +1 4
+O
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+ F+ mp2(full)/6-31g* MP2=-98.871239
+
+ +1 3
+F
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+ na+ mp2(full)/6-31g* MP2=-161.6607843
+
+ +1 1
+na
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+ mg+ mp2(full)/6-31g* MP2=-199.3585131
+
+ +1 2
+mg
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+ Al+ mp2(full)/6-31g* MP2=-241.687734
+
+ +1 1
+Al
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+ Si+ mp2(full)/6-31g* MP2=-288.5959386
+
+ +1 2
+Si
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+ P+ mp2(full)/6-31g* MP2=-340.3829831
+
+ +1 3
+P
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+ S+ mp2(full)/6-31g* MP2=-397.2150009
+
+ +1 4
+S
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+ Cl+ mp2(full)/6-31g* MP2=-459.1100629
+
+ +1 3
+Cl
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+METHANE CATION 2-B2 //MP2(full)/6-31G* MP2=-39.8736814
+ 
+1,2
+C
+X,1,1.
+H,1,CH,2,HCX
+H,1,CH,2,HCX,3,180.,0
+H,1,CHP,2,HPCX,3,90.,0
+H,1,CHP,2,HPCX,3,-90.,0
+ 
+CH=1.173292
+CHP=1.083863
+HCX=29.280619
+HPCX=118.269863
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+PLANAR AMMONIA CATION //MP2(full)/6-31G* MP2=-56.006942
+ 
+1,2
+N
+H,1,RNH
+H,1,RNH,2,120.
+H,1,RNH,2,120.,3,180.,0
+ 
+RNH=1.025985
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+OH+ 3-SIGMA //MP2(full)/6-31G* MP2=-75.0677739
+ 
+1,3
+H
+O,1,R
+ 
+R=1.034581
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+WATER CATION OPTIMIZATION //MP2(full)/6-31G* MP2=-75.7569545
+ 
+1,2
+O
+H,1,R
+H,1,R,2,A
+ 
+R=1.010335
+A=109.95753
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+FH+ //MP2(full)/6-31G* MP2=-99.6189213
+ 
+1,2
+F
+H,1,R
+ 
+R=1.029648
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+SIH4+ H2---SIH2+ CS //MP2(full)/6-31G* MP2=-290.9225259
+ 
+1,2
+Si
+X,1,1.
+H,1,R1,2,HALF1
+H,1,R1,2,HALF1,3,180.,0
+X,1,1.,2,90.,3,90.,0
+X,1,1.,5,THETA,2,180.,0
+H,1,R3,6,HALF3,5,0.,0
+H,1,R4,6,HALF3,7,180.,0
+ 
+R1=1.47014
+R3=1.890457
+R4=1.83514
+HALF1=60.633314
+THETA=10.35464
+HALF3=11.861807
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+PH+ mp2(full)/6-31g* MP2=-340.9817281
+ 
+1,2
+P
+H,1,1.42
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+PH2+ 1A1 //MP2(full)/6-31G* MP2=-341.5970934
+ 
+1,1
+P
+H,1,R1
+H,1,R1,2,A
+ 
+R1=1.415438
+A=93.410417
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+PH3+ //MP2(full)/6-31G* MP2=-342.2239439
+ 
+1,2
+P
+X,1,RX
+H,1,R1,2,A
+H,1,R1,2,A,3,120.,0
+H,1,R1,2,A,3,-120.,0
+ 
+RX=1.
+R1=1.395097
+A=105.295842
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+SH+ //MP2(full)/6-31G* MP2=-397.8163661
+ 
+1,3
+S
+H,1,R1
+ 
+R1=1.356664
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+SH2+ 2B1 //MP2(full)/6-31G* MP2=-398.4357861
+ 
+1,2
+S
+H,1,R1
+H,1,R1,2,A
+ 
+R1=1.350793
+A=94.724008
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct guess=alter
+ 
+SH2+ 2A1 //MP2(full)/6-31G* MP2=-398.3480896
+ 
+1,2
+S
+H,1,R1
+H,1,R1,2,A
+ 
+R1=1.353158
+A=126.60501
+ 
+
+
+ 
+8,9
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+HCL+ //MP2(full)/6-31G* MP2=-459.7520272
+ 
+1,2
+Cl
+H,1,R
+ 
+R=1.3098
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+HCCH+ 2-PI-U LINEAR //MP2(full)/6-31G* MP2=-76.6728707
+ 
+1,2
+H
+C,1,CH
+X,2,1.,1,90.
+C,2,CC,3,90.,1,180.,0
+X,4,CC,2,90.,3,180.,0
+H,4,CH,5,90.,2,180.,0
+ 
+CH=1.081382
+CC=1.257817
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+H2C=CH2+ ETHYLENE CATION D2H //MP2(full)/6-31G* MP2=-77.926503
+ 
+1,2
+C
+C,1,CC
+H,1,CH,2,HCC
+H,1,CH,2,HCC,3,180.,0
+H,2,CH,1,HCC,3,180.,0
+H,2,CH,1,HCC,5,180.,0
+ 
+CC=1.41632
+CH=1.08624
+HCC=120.67794
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+CO+ //MP2(full)/6-31G* MP2=-112.5164734
+ 
+1,2
+C
+O,1,R
+ 
+R=1.102565
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+N2+ 2-sigma-g //MP2(full)/6-31G* MP2=-108.71122
+ 
+1,2
+N
+N,1,NN
+ 
+NN=1.146572
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct guess=alter
+ 
+N2+ 2-PI-u //MP2(full)/6-31G* MP2=-108.6493503
+ 
+1,2
+N
+N,1,NN
+ 
+NN=1.202845
+ 
+
+
+ 
+6,7
+ 
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+O2+ //MP2(full)/6-31G* MP2=-149.5310341
+ 
+1,2
+O
+O,1,OO
+ 
+OO=1.186898
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct guess=alter
+ 
+P2+ 2-PIU //MP2(full)/6-31G* MP2=-681.2796357
+alter B 14,15
+
+1,2
+P
+P,1,R1
+ 
+R1=2.009857
+ 
+
+
+
+14 15
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+S2+ 2-PIG //MP2(full)/6-31G* MP2=-794.9350475
+ 
+1,2
+S
+S,1,R1
+ 
+R1=1.86912
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+CL2+ 2-PIG //MP2(full)/6-31G* MP2=-918.7797275
+ 
+1,2
+Cl
+Cl,1,R1
+ 
+R1=1.928097
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+CLF+ //MP2(full)/6-31G* MP2=-558.6884868
+ 
+1,2
+Cl
+F,1,r
+ 
+r=1.5548
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+CS+ 2-SG  //MP2(full)/6-31G* MP2=-435.1305686
+ 
+1,2
+C
+S,1,R1
+ 
+R1=1.458781
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+  C  quartet mp2(full)/6-31g* MP2=-37.728092
+
+ -1 4
+ C
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+  Oxygen  doublet mp2(full)/6-31g* MP2=-74.8598673
+
+ -1 2
+ O
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+  F  singlet mp2(full)/6-31g* MP2=-99.5285086
+
+ -1 1
+ F
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+  Si  quartet mp2(full)/6-31g* MP2=-288.9099813
+
+ -1 4
+ Si
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+  P triplet mp2(full)/6-31g* MP2=-340.7341779
+
+ -1 3
+ P
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+  S  doublet mp2(full)/6-31g* MP2=-397.5987309
+
+ -1 2
+ S
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+  cl singlet mp2(full)/6-31g* MP2=-459.6618249
+
+ -1 1
+ cl
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+CH- mp2(full)/6-31g* MP2=-38.3343437
+
+-1 3
+c
+h c 1.161019
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+CH2- //mp2(full)/6-31g* MP2=-38.959817
+ 
+-1,2
+C
+H,1,r
+H,1,r,2,a
+ 
+r=1.14059
+a=97.917282
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+METHYL ANION C3V //mp2(full)/6-31g* MP2=-39.6070093
+ 
+-1,1
+C
+X,1,1.
+H,1,R,2,A
+H,1,R,2,A,3,120.,0
+H,1,R,2,A,3,-120.,0
+ 
+R=1.120888
+A=116.546186
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+NH- //mp2(full)/6-31g* MP2=-54.9981305
+ 
+-1,2
+N
+H,1,r
+ 
+r=1.057451
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+nh2- //mp2(full)/6-31g* MP2=-55.6499369
+ 
+-1,1
+N
+H,1,RNH
+H,1,RNH,2,HNH
+ 
+RNH=1.042632
+HNH=98.432415
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+OH- //mp2(full)/6-31g* MP2=-75.5154393
+ 
+-1,1
+O
+H,1,r
+ 
+r=0.980348
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+SIH- 3-sigma //mp2(full)/6-31g* MP2=-289.4951319
+ 
+-1,3
+Si
+H,1,R
+ 
+R=1.560836
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+SIH2- 2-B-1 //mp2(full)/6-31g* MP2=-290.0925952
+ 
+-1,2
+Si
+X,1,1.
+H,1,R,2,A
+H,1,R,2,A,3,180.,0
+ 
+R=1.550319
+A=46.188316
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+SIH3- C3V //mp2(full)/6-31G* MP2=-290.7018387
+
+-1,1
+Si
+X,1,1.
+H,1,R,2,BETA
+H,1,R,2,BETA,3,120.,0
+H,1,R,2,BETA,3,-120.,0
+
+R=1.542352
+BETA=121.760962
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+PH- //mp2(full)/6-31g* MP2=-341.3353403
+ 
+-1,2
+P
+H,1,R
+ 
+R=1.445714
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+ph2- //mp2(full)/6-31g* MP2=-341.9512749
+ 
+-1,1
+P
+X,1,1.
+H,1,R,2,A
+H,1,R,2,A,3,180.,0
+ 
+R=1.436823
+A=45.902715
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+SH- //mp2(full)/6-31g* MP2=-398.2207031
+ 
+-1,1
+S
+H,1,R
+ 
+R=1.353342
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+o2-  //mp2(full)/6-31g* MP2=-149.9202213
+ 
+-1,2
+O
+O,1,OO
+ 
+OO=1.379745
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+NO- 3Sigma- //mp2(full)/6-31g* MP2=-129.5232476
+ 
+-1,3
+N
+O,1,NO
+ 
+NO=1.28013
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+CN- //mp2(full)/6-31g* MP2=-92.5706802
+ 
+-1,1
+C
+N,1,CN
+ 
+CN=1.200154
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+PO- 3-sigma //mp2(full)/6-31g* MP2=-415.8394258
+ 
+-1,3
+P
+O,1,R
+ 
+R=1.580663
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+s2- 2-sigma //mp2(full)/6-31g* MP2=-795.2945538
+ 
+-1,2
+S
+S,1,R
+ 
+R=2.029189
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+cl2- //mp2(full)/6-31g* MP2=-919.26946
+ 
+-1,2
+Cl
+Cl,1,R
+ 
+R=2.651811
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+Ammonium, NH4+, //mp2(full)/6-31g* MP2=-56.7035842
+ 
+1,1
+N
+H,1,NH
+H,1,NH,2,109.47122
+H,1,NH,2,109.47122,3,109.47122,1
+H,1,NH,2,109.47122,3,109.47122,-1
+ 
+NH=1.02853
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+Hydronium, H3O+, //mp2(full)/6-31g* MP2=-76.4776092
+ 
+1,1
+O
+H,1,OH
+H,1,OH,2,HOH
+H,1,OH,2,HOH,3,HOH,1
+ 
+OH=0.99082
+HOH=111.42234
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+nonclassical vinyl cation, //mp2(full)/6-31g* MP2=-77.3235627
+ 
+1,1
+X
+C,1,HalfCC
+H,1,XHbr,2,90.
+C,1,HalfCC,3,90.,2,180.,0
+X,2,1.,4,HalfHCC,3,180.,0
+X,4,1.,2,HalfHCC,3,180.,0
+H,2,CH,5,HalfHCC,4,180.,0
+H,4,CH,6,HalfHCC,2,180.,0
+ 
+HalfCC=0.61597
+XHbr=1.11709
+CH=1.08124
+HalfHCC=90.13339
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+SIH5+ C1 //mp2(full)/6-31g* MP2=-291.5583167
+ 
+1,1
+Si
+X,1,1.8995
+H,2,H1X,1,A1
+H,2,H1X,1,A2,3,180.,0
+H,1,SIH2,2,A3,3,PH1,0
+H,1,SIH3,2,A4,5,PH2,0
+H,1,SIH4,2,A5,5,PH3,0
+ 
+H1X=0.386592
+SIH2=1.462962
+SIH3=1.46435
+SIH4=1.464287
+A1=79.847639
+A2=79.715238
+A3=96.353704
+A4=94.222646
+A5=94.290989
+PH1=88.984394
+PH2=120.274682
+PH3=-120.261719
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+PH4+ //mp2(full)/6-31g* MP2=-342.8710603
+ 
+1,1
+P
+H,1,R1
+H,1,R1,2,109.471221
+H,1,R1,2,109.471221,3,120.,0
+H,1,R1,2,109.471221,3,-120.,0
+ 
+R1=1.39292
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+SH3+ //mp2(full)/6-31g* MP2=-399.0732876
+ 
+1,1
+S
+X,1,RX
+H,1,R1,2,A
+H,1,R1,2,A,3,120.,0
+H,1,R1,2,A,3,-120.,0
+ 
+RX=1.
+R1=1.346968
+A=120.852951
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+ 
+H2CL+ //mp2(full)/6-31g* MP2=-460.4125779
+ 
+1,1
+Cl
+H,1,R1
+H,1,R1,2,A
+ 
+R1=1.302176
+A=96.635367
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=qc
+ 
+PO 2-PI //mp2(full)/6-31g* MP2=-415.8397251
+scf=qc for dft. For mp2: 1) hf/6-31g* 2) mp2 scf=qc
+ 
+0,2
+P
+O,1,R
+ 
+R=1.537713
+ 
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct
+
+PH TRIPLET //MP2(full)/6-31G*
+
+0,3
+P
+H,1,R
+
+R=1.425635
+
+
+
+--link1--
+%mem=5000000
+%chk=filename
+# mp2/6-31g* scf=direct   
+
+SiH //mp2(full)/6-31G* 
+
+0 2
+si
+h si 1.526259
+
+
+

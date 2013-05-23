@@ -1,0 +1,145 @@
+#!/usr/bin/env python
+
+import re
+import glob
+
+import requests
+import pybel as pb
+
+from pymatgen import Element, Molecule
+from pymatgen.io.gaussianio import GaussianInput
+from pymatgen.io.babelio import BabelMolAdaptor
+from pymatgen.io.xyzio import XYZ
+from pymatpro.db.mongo.query_engine_mongo import MongoQueryEngine
+
+
+def parse_file(filename):
+    with open(filename) as f:
+        txt = f.read()
+    toks = txt.split("--link1--")
+    for t in toks:
+        try:
+            lines = t.strip().split("\n")
+            lines = [l.strip() for l in lines]
+            gau = GaussianInput.from_string("\n".join(lines))
+            yield (gau.molecule, gau.charge, gau.spin_multiplicity)
+        except:
+            print "error in {}".format(t)
+
+
+def get_nih_names(smiles):
+    smi = re.sub("#", "%23", smiles)
+    response = requests.get(
+        "http://cactus.nci.nih.gov/chemical/structure/{}/names".format(smi))
+    if response.status_code == 200:
+        names = response.text.split("\n")
+        return [n.strip() for n in names if n.strip() != ""]
+    else:
+        print "{} not found.\n".format(smiles)
+        return []
+
+
+def insert_g3testset(coll):
+    all_mol = []
+    for f in glob.glob("g*.txt"):
+        print "Parsing " + f
+        for (m, charge, spin) in parse_file(f):
+            try:
+                clean_sites = []
+                for site in m:
+                    if Element.is_valid_symbol(site.specie.symbol):
+                        clean_sites.append(site)
+                clean_mol = Molecule.from_sites(clean_sites)
+                xyz = XYZ(clean_mol)
+                bb = BabelMolAdaptor.from_string(str(xyz), "xyz")
+                pbmol = pb.Molecule(bb.openbabel_mol)
+                smiles = pbmol.write("smi").split()[0]
+                can = pbmol.write("can").split()[0]
+                inchi = pbmol.write("inchi")
+                svg = pbmol.write("svg")
+                d = {"molecule": clean_mol.to_dict}
+                comp = clean_mol.composition
+                d["pretty_formula"] = comp.reduced_formula
+                d["formula"] = comp.formula
+                d["composition"] = comp.to_dict
+                d["elements"] = list(comp.to_dict.keys())
+                d["nelements"] = len(comp)
+                d["charge"] = charge
+                d["spin_multiplicity"] = spin
+                d["smiles"] = smiles
+                d["can"] = can
+                d["inchi"] = inchi
+                d["names"] = get_nih_names(smiles)
+                d["svg"] = svg
+                d["xyz"] = str(xyz)
+                d["tags"] = ["G305 test set"]
+                coll.insert(d)
+            except Exception as ex:
+                print "Error in {}".format(f)
+        print "{} parsed!".format(f)
+
+
+def insert_solvents(coll):
+
+    names = """THF
+    monoglyme
+    Dimethylacetamide
+    propylene carbonate
+    ethylene carbonate
+    dimethylcarbonate
+    DMSO
+    ACN
+    Diethylcarbonate
+    propyl glyme
+    ethyl glyme
+    ethyl diglyme
+    diglyme
+    Butyldiglyme
+    tetraglyme
+    Pentaethylene glycol diethyl ether
+    Tetraethylene glycol diethyl ether
+    Tetraethylene glycol dibutyl ether
+    Butyldiglyme"""
+
+    for n in names.split("\n"):
+        response = requests.get("http://cactus.nci.nih.gov/chemical/structure/{}/file?format=xyz".format(n))
+        if response.status_code == 200:
+            xyz = XYZ.from_string(response.text)
+            clean_mol = xyz.molecule
+            bb = BabelMolAdaptor(clean_mol)
+            pbmol = pb.Molecule(bb.openbabel_mol)
+            smiles = pbmol.write("smi").split()[0]
+            can = pbmol.write("can").split()[0]
+            inchi = pbmol.write("inchi")
+            svg = pbmol.write("svg")
+
+            d = {"molecule": clean_mol.to_dict}
+            comp = clean_mol.composition
+            d["pretty_formula"] = comp.reduced_formula
+            d["formula"] = comp.formula
+            d["composition"] = comp.to_dict
+            d["elements"] = list(comp.to_dict.keys())
+            d["nelements"] = len(comp)
+            d["charge"] = clean_mol.charge
+            d["spin_multiplicity"] = clean_mol.spin_multiplicity
+            d["smiles"] = smiles
+            d["can"] = can
+            d["inchi"] = inchi
+            d["names"] = get_nih_names(smiles)
+            d["svg"] = svg
+            d["xyz"] = str(xyz)
+            d["tags"] = ["Solvents"]
+            coll.insert(d)
+        else:
+            print "{} not found.\n".format(n)
+
+if __name__ == "__main__":
+
+    qe = MongoQueryEngine()
+    db = qe.db
+    coll = db["molecules"]
+    coll.remove({})
+    insert_g3testset(coll)
+    insert_solvents(coll)
+
+
