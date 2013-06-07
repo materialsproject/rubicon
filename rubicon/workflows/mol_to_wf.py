@@ -1,8 +1,9 @@
 import os
 from fireworks.core.firework import FireWork, Workflow
+from pymatgen.io.nwchemio import NwTask, NwInput
 from pymatgen.io.xyzio import XYZ
 from rubicon.firetasks.gaussian_task import GaussianTask
-from pymatgen import Molecule
+from rubicon.firetasks.nwchem_task import NWChemTask
 
 __author__ = 'Anubhav Jain'
 __copyright__ = 'Copyright 2013, The Materials Project'
@@ -25,7 +26,7 @@ The workflow decided during the initial meeting between Lei, Shyue, Anubhav, Kri
 
 def mol_to_wf(mol, name):
     spec = {'molecule': mol.to_dict,
-            'charge': 0,
+            'charge': mol.charge,
             'spin_multiplicity': 1,
             'title': 'first test job',
             'functional': 'B3LYP',
@@ -39,6 +40,47 @@ def mol_to_wf(mol, name):
     fw = FireWork([GaussianTask()], spec)
 
     return Workflow.from_FireWork(fw)
+
+
+def mol_to_wf_general(gi, name):
+    spec = {'molecule': gi.molecule.to_dict,
+            'title': gi.title,
+            'charge': gi.charge,
+            'spin_multiplicity': gi.spin_multiplicity,
+            'functional': gi.functional,
+            'basis_set': gi.basis_set,
+            'route_parameters': gi.route_parameters,
+            'input_parameters': gi.input_parameters,
+            'link0_parameters': gi.link0_parameters,
+            'name': 'gaussian'}
+
+    fw = FireWork([GaussianTask()], spec, name=name)
+
+    return Workflow.from_FireWork(fw, name=name)
+
+
+def mol_to_wf_nwchem(mol, name):
+
+    tasks = [
+        NwTask.dft_task(mol, operation="optimize", xc="b3lyp",
+                        basis_set="6-31++G*"),
+        NwTask.dft_task(mol, operation="freq", xc="b3lyp",
+                        basis_set="6-31++G*"),
+        NwTask.dft_task(mol, operation="energy", xc="b3lyp",
+                        basis_set="6-311++G**"),
+        NwTask.dft_task(mol, charge=mol.charge + 1, operation="energy",
+                        xc="b3lyp", basis_set="6-311++G**"),
+        NwTask.dft_task(mol, charge=mol.charge - 1, operation="energy",
+                        xc="b3lyp", basis_set="6-311++G**")
+    ]
+
+    nwi = NwInput(mol, tasks)
+    fw = FireWork([NWChemTask()], spec=nwi.to_dict, name=name)
+
+    return Workflow.from_FireWork(fw, name=name)
+
+
+
 
 
 if __name__ == '__main__':
