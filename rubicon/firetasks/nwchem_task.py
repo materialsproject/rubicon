@@ -1,3 +1,4 @@
+import shlex
 import subprocess
 from fireworks.core.firework import FireTaskBase
 from fireworks.utilities.fw_serializers import FWSerializable
@@ -24,4 +25,5 @@ class NWChemTask(FireTaskBase, FWSerializable):
         nwi.write_file('nwchem.nw')
 
         # TODO: replace with a custodian
-        subprocess.call(['nwchem', 'nwchem.nw'])
+        nwc_exe = shlex.split('aprun -n 24 nwchem nwchem.nw')
+        subprocess.call(nwc_exe)
