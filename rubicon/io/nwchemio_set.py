@@ -23,27 +23,32 @@ class JCESRDeltaSCFInputSet(object):
     """
 
     def __init__(self):
-        self.functional = "b3lyp"
-        self.geom_opt_bset = "aug-cc-pVDZ"
-        self.scf_bset = "aug-cc-pVTZ"
+        pass
 
     def get_nwinput(self, mol):
+        functional = "b3lyp"
+        geom_opt_bset = {}
+        scf_bset = {}
+        for el in mol.composition.elements:
+            geom_opt_bset[el.symbol] = "6-31+g*" if el.Z <= 18 \
+                else "6-311G*"
+            scf_bset[el.symbol] = "6-311g*"
         tasks = [
-            NwTask.dft_task(mol, operation="optimize", xc=self.functional,
-                            basis_set=self.geom_opt_bset),
-            NwTask.dft_task(mol, operation="energy", xc=self.functional,
-                            basis_set=self.scf_bset),
+            NwTask.dft_task(mol, operation="optimize", xc=functional,
+                            basis_set=geom_opt_bset),
+            NwTask.dft_task(mol, operation="energy", xc=functional,
+                            basis_set=scf_bset),
             NwTask.dft_task(mol, charge=mol.charge + 1, operation="energy",
-                            xc=self.functional, basis_set=self.scf_bset),
+                            xc=functional, basis_set=scf_bset),
             NwTask.dft_task(mol, charge=mol.charge - 1, operation="energy",
-                            xc=self.functional, basis_set=self.scf_bset)
+                            xc=functional, basis_set=scf_bset)
         ]
 
         if len(mol) > 1:
             #Insert freq job for molecules with more than one atom.
             tasks.insert(
-                1, NwTask.dft_task(mol, operation="freq", xc=self.functional,
-                                   basis_set=self.geom_opt_bset))
+                1, NwTask.dft_task(mol, operation="freq", xc=functional,
+                                   basis_set=geom_opt_bset))
 
         return NwInput(mol, tasks)
 
@@ -72,8 +77,8 @@ class JCESRDeltaSCFInputSetTest(unittest.TestCase):
         nwi = jis.get_nwinput(self.mol)
         self.assertEqual(nwi.tasks[0].theory, "dft")
         self.assertEqual(nwi.tasks[0].theory_directives["xc"], "b3lyp")
-        self.assertEqual(nwi.tasks[0].basis_set["C"], "aug-cc-pVDZ")
-        self.assertEqual(nwi.tasks[-1].basis_set["C"], "aug-cc-pVTZ")
+        self.assertEqual(nwi.tasks[0].basis_set["C"], "6-31+g*")
+        self.assertEqual(nwi.tasks[-1].basis_set["C"], "6-311g*")
 
         atom = Molecule(["C"], [[0, 0, 0]])
         nwi = jis.get_nwinput(atom)
