@@ -11,7 +11,7 @@ Ga
 # MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
 
  gallium cation
- 
+
 +1 1
 Ga
 
@@ -45,7 +45,7 @@ Ge
 --link1--
 %mem=3000000
 # MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
- 
+
  arsenic
 
 0 4
@@ -54,16 +54,16 @@ As
 --link1--
 %mem=3000000
 # MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
- 
+
  arsenic cation
 
 +1 3
 As
- 
+
 --link1--
 %mem=3000000
 # MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
- 
+
  selenium
 
 0 3
@@ -72,7 +72,7 @@ Se
 --link1--
 %mem=3000000
 # MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
- 
+
  selenium cation
 
 +1 4
@@ -90,12 +90,12 @@ Br
 --link1--
 %mem=3000000
 # MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
- 
+
  bromine cation
 
 +1 3
 Br
- 
+
 --link1--
 %mem=3000000
 # MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
@@ -108,20 +108,20 @@ Br
 --link1--
 %mem=3000000
 # MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
- 
+
  krypton
 
 0 1
 Kr
- 
+
 --link1--
 %mem=3000000
 # MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
- 
+
  krypton cation
 
 +1 2
-Kr 
+Kr
 
 --link1--
 # MP2(FULL)/GEN 6D 7F OPT(Z-MATRIX) SCF=DIRECT
@@ -132,8 +132,8 @@ germanium tetrahydride //mp2(full)/vit631gd = -2077.6947174
 Ge
 H,1,R
 H,1,R,2,A
-H,1,R,2,A,3,A,1
-H,1,R,2,A,3,A,-1
+H,1,R,2,A,3,A
+H,1,R,2,A,3,-A
 
 R=1.5383936
 A=109.47122063
