@@ -26,6 +26,8 @@ from pymatgen.util.io_utils import clean_json
 from pymatgen.io.babelio import BabelMolAdaptor
 from pymatgen.io.xyzio import XYZ
 
+from rubicon.testset.parse_mol import get_nih_names
+
 logger = logging.getLogger(__name__)
 
 
@@ -113,7 +115,7 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
         inchi = pbmol.write("inchi")
         svg = pbmol.write("svg")
         comp = mol.composition
-
+        initial_mol = data[0]["molecules"][0]
         calc_types = ["GeomOpt", "Freq", "SCF", "EA_SCF",
                       "IE_SCF"]
         if len(data) == 4:
@@ -121,6 +123,7 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
         data = dict(zip(calc_types, data))
         d = {"path": os.path.abspath(path),
              "calculations": data,
+             "initial_molecule": initial_mol.to_dict,
              "final_molecule": mol.to_dict,
              "pretty_formula": comp.reduced_formula,
              "formula": comp.formula,
@@ -131,6 +134,7 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
              "nelements": len(comp),
              "smiles": smiles, "can": can, "inchi": inchi, "svg": svg,
              "xyz": str(xyz),
+             "names": get_nih_names(smiles),
              "EA": data["SCF"]["energies"][-1] -
                    data["EA_SCF"]["energies"][-1],
              "IE": data["IE_SCF"]["energies"][-1] -
