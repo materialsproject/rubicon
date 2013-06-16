@@ -19,7 +19,7 @@ from pymatgen.io.nwchemio import NwTask, NwInput
 
 class JCESRDeltaSCFInputSet(object):
     """
-    Current works only for DFT based functionals.
+    Currently works only for DFT based functionals.
     """
 
     def __init__(self):

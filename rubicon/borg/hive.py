@@ -23,6 +23,8 @@ from pymongo import MongoClient
 from pymatgen.apps.borg.hive import AbstractDrone
 from pymatgen.io.nwchemio import NwOutput
 from pymatgen.util.io_utils import clean_json
+from pymatgen.io.babelio import BabelMolAdaptor
+from pymatgen.io.xyzio import XYZ
 
 logger = logging.getLogger(__name__)
 
@@ -102,13 +104,37 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
         logger.info("Getting task doc for base dir :{}".format(path))
         nwo = NwOutput(path)
         data = nwo.data
-        mol = data[0]["molecules"][0]
+        mol = data[0]["molecules"][-1]
+        bb = BabelMolAdaptor(mol)
+        pbmol = bb.pybel_mol
+        xyz = XYZ(mol)
+        smiles = pbmol.write("smi").split()[0]
+        can = pbmol.write("can").split()[0]
+        inchi = pbmol.write("inchi")
+        svg = pbmol.write("svg")
+        comp = mol.composition
+
+        calc_types = ["GeomOpt", "Freq", "SCF", "EA_SCF",
+                      "IE_SCF"]
+        if len(data) == 4:
+            calc_types.pop(1)
+        data = dict(zip(calc_types, data))
         d = {"path": os.path.abspath(path),
-             "pretty_formula": mol.composition.reduced_formula,
-             "calculations": dict(zip(["GeomOpt", "Freq", "SCF", "IE_SCF",
-                                       "EA_SCF"], data)),
-             "EA": data[2]["energies"][-1] - data[3]["energies"][-1],
-             "IE": data[4]["energies"][-1] - data[2]["energies"][-1]}
+             "calculations": data,
+             "final_molecule": mol.to_dict,
+             "pretty_formula": comp.reduced_formula,
+             "formula": comp.formula,
+             "charge": data["GeomOpt"]["Charge"],
+             "spin_mult": data["GeomOpt"]["Spin_multiplicity"],
+             "composition": comp.to_dict,
+             "elements": list(comp.to_dict.keys()),
+             "nelements": len(comp),
+             "smiles": smiles, "can": can, "inchi": inchi, "svg": svg,
+             "xyz": str(xyz),
+             "EA": data["SCF"]["energies"][-1] -
+                   data["EA_SCF"]["energies"][-1],
+             "IE": data["IE_SCF"]["energies"][-1] -
+                   data["SCF"]["energies"][-1]}
         return clean_json(d)
 
     def _insert_doc(self, d):
@@ -205,7 +231,8 @@ class DeltaSCFNwChemToDbTaskDroneTest(unittest.TestCase):
 
     def test_assimilate(self):
         drone = DeltaSCFNwChemToDbTaskDrone(
-            collection="mol_task_test")
+            collection="mol_task_test", user="admin_alia",
+            password="xJxj5N2PtJUTHd")
         q = BorgQueen(drone)
         q.serial_assimilate(test_dir)
 
