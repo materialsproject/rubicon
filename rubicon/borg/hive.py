@@ -22,7 +22,6 @@ from pymongo import MongoClient
 
 from pymatgen.apps.borg.hive import AbstractDrone
 from pymatgen.io.nwchemio import NwOutput
-from pymatgen.serializers.json_coders import PMGJSONEncoder
 from pymatgen.util.io_utils import clean_json
 
 logger = logging.getLogger(__name__)
@@ -30,6 +29,7 @@ logger = logging.getLogger(__name__)
 
 class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
     """
+    Assimilates a delta scf nwchem run and inserts it into the database.
     """
 
     #Version of this db creator document.

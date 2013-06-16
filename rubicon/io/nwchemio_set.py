@@ -31,8 +31,6 @@ class JCESRDeltaSCFInputSet(object):
         tasks = [
             NwTask.dft_task(mol, operation="optimize", xc=self.functional,
                             basis_set=self.geom_opt_bset),
-            NwTask.dft_task(mol, operation="freq", xc=self.functional,
-                            basis_set=self.geom_opt_bset),
             NwTask.dft_task(mol, operation="energy", xc=self.functional,
                             basis_set=self.scf_bset),
             NwTask.dft_task(mol, charge=mol.charge + 1, operation="energy",
@@ -40,6 +38,13 @@ class JCESRDeltaSCFInputSet(object):
             NwTask.dft_task(mol, charge=mol.charge - 1, operation="energy",
                             xc=self.functional, basis_set=self.scf_bset)
         ]
+
+        if len(mol) > 1:
+            #Insert freq job for molecules with more than one atom.
+            tasks.insert(
+                1, NwTask.dft_task(mol, operation="freq", xc=self.functional,
+                                   basis_set=self.geom_opt_bset))
+
         return NwInput(mol, tasks)
 
     def write_input(self, mol, filename):
@@ -69,6 +74,10 @@ class JCESRDeltaSCFInputSetTest(unittest.TestCase):
         self.assertEqual(nwi.tasks[0].theory_directives["xc"], "b3lyp")
         self.assertEqual(nwi.tasks[0].basis_set["C"], "aug-cc-pVDZ")
         self.assertEqual(nwi.tasks[-1].basis_set["C"], "aug-cc-pVTZ")
+
+        atom = Molecule(["C"], [[0, 0, 0]])
+        nwi = jis.get_nwinput(atom)
+        self.assertEqual(len(nwi.tasks), 4)
 
 if __name__ == "__main__":
     unittest.main()
