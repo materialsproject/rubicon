@@ -33,22 +33,26 @@ class JCESRDeltaSCFInputSet(object):
             geom_opt_bset[el.symbol] = "6-31+g*" if el.Z <= 18 \
                 else "6-311G*"
             scf_bset[el.symbol] = "6-311g*"
-        tasks = [
-            NwTask.dft_task(mol, operation="optimize", xc=functional,
-                            basis_set=geom_opt_bset),
+
+        if len(mol) > 1:
+            #Insert opt and freq job for molecules with more than one atom.
+            tasks = [
+                NwTask.dft_task(mol, operation="optimize", xc=functional,
+                                basis_set=geom_opt_bset),
+                NwTask.dft_task(mol, operation="freq", xc=functional,
+                                basis_set=geom_opt_bset)
+            ]
+        else:
+            tasks = []
+
+        tasks.extend([
             NwTask.dft_task(mol, operation="energy", xc=functional,
                             basis_set=scf_bset),
             NwTask.dft_task(mol, charge=mol.charge + 1, operation="energy",
                             xc=functional, basis_set=scf_bset),
             NwTask.dft_task(mol, charge=mol.charge - 1, operation="energy",
                             xc=functional, basis_set=scf_bset)
-        ]
-
-        if len(mol) > 1:
-            #Insert freq job for molecules with more than one atom.
-            tasks.insert(
-                1, NwTask.dft_task(mol, operation="freq", xc=functional,
-                                   basis_set=geom_opt_bset))
+        ])
 
         return NwInput(mol, tasks)
 
