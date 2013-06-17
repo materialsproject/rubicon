@@ -129,9 +129,9 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
             elif d["job_type"] == "NWChem DFT Module":
                 if d["charge"] == charge:
                     data_dict["scf"] = d
-                elif d["charge"] == charge - 1:
-                    data_dict["scf_IE"] = d
                 elif d["charge"] == charge + 1:
+                    data_dict["scf_IE"] = d
+                elif d["charge"] == charge - 1:
                     data_dict["scf_EA"] = d
 
         data = data_dict
@@ -151,14 +151,16 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
              "xyz": str(xyz),
              "names": get_nih_names(smiles)}
 
-        if (not data_dict["scf_EA"]["has_error"]) and (
-                not data_dict["scf"]["has_error"]):
-            d["EA"] = data["scf"]["energies"][-1] \
-                      - data["scf_EA"]["energies"][-1]
-        if (not data_dict["scf_IE"]["has_error"]) and (
-                not data_dict["scf"]["has_error"]):
-            d["IE"] = data["scf_IE"]["energies"][-1] \
-                      - data["scf"]["energies"][-1]
+        if "scf_EA" in data_dict and \
+                (not data_dict["scf_EA"]["has_error"]) and \
+                (not data_dict["scf"]["has_error"]):
+            d["EA"] = (data["scf"]["energies"][-1]
+                       - data["scf_EA"]["energies"][-1])
+        if "scf_IE" in data_dict and \
+                (not data_dict["scf_IE"]["has_error"]) and \
+                (not data_dict["scf"]["has_error"]):
+            d["IE"] = (data["scf_IE"]["energies"][-1]
+                       - data["scf"]["energies"][-1])
         return clean_json(d)
 
     def _insert_doc(self, d):
@@ -252,10 +254,13 @@ test_dir = os.path.join(os.path.dirname(__file__), "..", "..",
 class DeltaSCFNwChemToDbTaskDroneTest(unittest.TestCase):
 
     def test_assimilate(self):
+        import logging
+        logging.basicConfig(level=logging.INFO)
         drone = DeltaSCFNwChemToDbTaskDrone(
             collection="mol_task_test")
         q = BorgQueen(drone)
         q.serial_assimilate(test_dir)
+
 
 
 if __name__ == "__main__":

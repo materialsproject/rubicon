@@ -42,7 +42,7 @@ class NwchemErrorHandler(ErrorHandler, MSONable):
             if e == "autoz error":
                 #Hackish solution for autoz error.
                 with open("temp.nw", "w") as fout, \
-                    open(self.input_file) as fin:
+                        open(self.input_file) as fin:
                     for l in fin:
                         if l.lower().strip().startswith("geometry"):
                             fout.write("{} noautoz\n".format(l.strip()))
