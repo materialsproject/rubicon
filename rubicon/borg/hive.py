@@ -116,29 +116,49 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
         svg = pbmol.write("svg")
         comp = mol.composition
         initial_mol = data[0]["molecules"][0]
-        calc_types = ["GeomOpt", "Freq", "SCF", "EA_SCF",
-                      "IE_SCF"]
-        if len(data) == 4:
-            calc_types.pop(1)
-        data = dict(zip(calc_types, data))
+
+        data_dict = {}
+
+        for d in data:
+            if d["job_type"] == "NWChem Geometry Optimization":
+                data_dict["geom_opt"] = d
+                charge = d["charge"]
+            elif d["job_type"] == "NWChem Nuclear Hessian and Frequency " \
+                                  "Analysis":
+                data_dict["freq"] = d
+            elif d["job_type"] == "NWChem DFT Module":
+                if d["charge"] == charge:
+                    data_dict["scf"] = d
+                elif d["charge"] == charge - 1:
+                    data_dict["scf_IE"] = d
+                elif d["charge"] == charge + 1:
+                    data_dict["scf_EA"] = d
+
+        data = data_dict
+
         d = {"path": os.path.abspath(path),
              "calculations": data,
              "initial_molecule": initial_mol.to_dict,
              "final_molecule": mol.to_dict,
              "pretty_formula": comp.reduced_formula,
              "formula": comp.formula,
-             "charge": data["GeomOpt"]["Charge"],
-             "spin_mult": data["GeomOpt"]["Spin_multiplicity"],
+             "charge": charge,
+             "spin_mult": data["geom_opt"]["spin_multiplicity"],
              "composition": comp.to_dict,
              "elements": list(comp.to_dict.keys()),
              "nelements": len(comp),
              "smiles": smiles, "can": can, "inchi": inchi, "svg": svg,
              "xyz": str(xyz),
-             "names": get_nih_names(smiles),
-             "EA": data["SCF"]["energies"][-1] -
-                   data["EA_SCF"]["energies"][-1],
-             "IE": data["IE_SCF"]["energies"][-1] -
-                   data["SCF"]["energies"][-1]}
+             "names": get_nih_names(smiles)}
+
+        if (not data_dict["scf_EA"]["has_error"]) and (
+                not data_dict["scf"]["has_error"]):
+            d["EA"] = data["scf"]["energies"][-1] \
+                      - data["scf_EA"]["energies"][-1]
+        if (not data_dict["scf_IE"]["has_error"]) and (
+                not data_dict["scf"]["has_error"]):
+            d["IE"] = data["scf_IE"]["energies"][-1] \
+                      - data["scf"]["energies"][-1]
         return clean_json(d)
 
     def _insert_doc(self, d):
@@ -220,9 +240,7 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
         return output
 
 
-
 import unittest
-
 
 from pymatgen.apps.borg.queen import BorgQueen
 
@@ -235,8 +253,7 @@ class DeltaSCFNwChemToDbTaskDroneTest(unittest.TestCase):
 
     def test_assimilate(self):
         drone = DeltaSCFNwChemToDbTaskDrone(
-            collection="mol_task_test", user="admin_alia",
-            password="xJxj5N2PtJUTHd")
+            collection="mol_task_test")
         q = BorgQueen(drone)
         q.serial_assimilate(test_dir)
 
