@@ -24,13 +24,14 @@ from pymatgen.serializers.json_coders import MSONable
 from custodian.custodian import Job
 
 
-class GaussianJob(Job, MSONable):
+class NwchemJob(Job, MSONable):
     """
     A basic Gaussian job. Just runs whatever is in the directory. But
     conceivably can be a complex processing of inputs etc. with initialization.
     """
 
-    def __init__(self, gau_cmd, input_file="gau.inp", output_file="gau.out",
+    def __init__(self, nwchem_cmd, input_file="mol.nw",
+                 output_file="mol.nwout",
                  suffix="", gzipped=False, backup=True,
                  settings_override=None):
         """
@@ -39,9 +40,9 @@ class GaussianJob(Job, MSONable):
         of the static constructors.
 
         Args:
-            gau_cmd:
-                Command to run Gaussian as a list of args. For example,
-                ["g09"].
+            nwchem_cmd:
+                Command to run Nwchem as a list of args. For example,
+                ["nwchem"].
             output_file:
                 Name of file to direct standard out to.
             suffix:
@@ -56,7 +57,7 @@ class GaussianJob(Job, MSONable):
                 An ansible style list of dict to override changes.
                 TODO: Not implemented yet.
         """
-        self.gau_cmd = gau_cmd
+        self.nwchem_cmd = nwchem_cmd
         self.input_file = input_file
         self.output_file = output_file
         self.backup = backup
@@ -69,9 +70,9 @@ class GaussianJob(Job, MSONable):
             shutil.copy(self.input_file, "{}.orig".format(self.input_file))
 
     def run(self):
-        with zopen(self.input_file) as fin, \
-            zopen(self.output_file, 'w') as fout:
-            return subprocess.Popen(self.gau_cmd, stdin=fin, stdout=fout)
+        with zopen(self.output_file, 'w') as fout:
+            return subprocess.Popen(self.nwchem_cmd + [self.input_file],
+                                    stdout=fout)
 
     def postprocess(self):
         if self.gzipped:
@@ -79,11 +80,11 @@ class GaussianJob(Job, MSONable):
 
     @property
     def name(self):
-        return "Gaussian Job"
+        return "Nwchem Job"
 
     @property
     def to_dict(self):
-        d = dict(gau_cmd=self.gau_cmd, input_file=self.input_file,
+        d = dict(nwchem_cmd=self.nwchem_cmd, input_file=self.input_file,
                  output_file=self.output_file, suffix=self.suffix,
                  gzipped=self.gzipped, backup=self.backup,
                  settings_override=self.settings_override
@@ -94,8 +95,8 @@ class GaussianJob(Job, MSONable):
 
     @staticmethod
     def from_dict(d):
-        return GaussianJob(
-            gau_cmd=d["gau_cmd"], input_file=d["input_file"],
+        return NwchemJob(
+            nwchem_cmd=d["nwchem_cmd"], input_file=d["input_file"],
             output_file=d["output_file"],
             suffix=d["suffix"], gzipped=d["gzipped"], backup=d["backup"],
             settings_override=d["settings_override"])
