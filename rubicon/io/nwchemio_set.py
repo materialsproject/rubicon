@@ -48,9 +48,11 @@ class JCESRDeltaSCFInputSet(object):
             NwTask.dft_task(mol, operation="energy", xc=functional,
                             basis_set=scf_bset),
             NwTask.dft_task(mol, charge=mol.charge + 1, operation="energy",
-                            xc=functional, basis_set=scf_bset),
+                            xc=functional, basis_set=scf_bset,
+                            theory_directives={"CGMIN": ""}),
             NwTask.dft_task(mol, charge=mol.charge - 1, operation="energy",
-                            xc=functional, basis_set=scf_bset)
+                            xc=functional, basis_set=scf_bset,
+                            theory_directives={"CGMIN": ""})
         ])
 
         return NwInput(mol, tasks)

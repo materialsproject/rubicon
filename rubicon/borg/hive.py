@@ -116,13 +116,13 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
         svg = pbmol.write("svg")
         comp = mol.composition
         initial_mol = data[0]["molecules"][0]
-
+        charge = data[0]["charge"]
+        spin_mult = data[0]["spin_multiplicity"]
         data_dict = {}
 
         for d in data:
             if d["job_type"] == "NWChem Geometry Optimization":
                 data_dict["geom_opt"] = d
-                charge = d["charge"]
             elif d["job_type"] == "NWChem Nuclear Hessian and Frequency " \
                                   "Analysis":
                 data_dict["freq"] = d
@@ -143,7 +143,7 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
              "pretty_formula": comp.reduced_formula,
              "formula": comp.formula,
              "charge": charge,
-             "spin_mult": data["geom_opt"]["spin_multiplicity"],
+             "spin_mult": spin_mult,
              "composition": comp.to_dict,
              "elements": list(comp.to_dict.keys()),
              "nelements": len(comp),
