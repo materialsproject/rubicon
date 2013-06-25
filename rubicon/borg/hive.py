@@ -119,7 +119,10 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
         charge = data[0]["charge"]
         spin_mult = data[0]["spin_multiplicity"]
         data_dict = {}
+        from pymatgen.symmetry.pointgroup import PointGroupAnalyzer
 
+        pga = PointGroupAnalyzer(mol)
+        sch_symbol = pga.sch_symbol
         for d in data:
             if d["job_type"] == "NWChem Geometry Optimization":
                 data_dict["geom_opt"] = d
@@ -140,6 +143,7 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
              "calculations": data,
              "initial_molecule": initial_mol.to_dict,
              "final_molecule": mol.to_dict,
+             "pointgroup": sch_symbol,
              "pretty_formula": comp.reduced_formula,
              "formula": comp.formula,
              "charge": charge,
