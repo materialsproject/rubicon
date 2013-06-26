@@ -40,7 +40,6 @@ def get_nih_names(smiles):
 
 
 def insert_g3testset(coll):
-    all_mol = []
     for f in glob.glob("g*.txt"):
         print "Parsing " + f
         for (m, charge, spin) in parse_file(f):
@@ -133,13 +132,53 @@ def insert_solvents(coll):
         else:
             print "{} not found.\n".format(n)
 
+def insert_elements(coll):
+    for z in xrange(1, 19):
+        el = Element.from_Z(z)
+        r = coll.find({"formula": "{}1".format(el.symbol)})
+        if r.count() == 0:
+            try:
+                clean_mol = Molecule([el], [[0, 0, 0]])
+                xyz = XYZ(clean_mol)
+                bb = BabelMolAdaptor.from_string(str(xyz), "xyz")
+                pbmol = pb.Molecule(bb.openbabel_mol)
+                smiles = pbmol.write("smi").split()[0]
+                can = pbmol.write("can").split()[0]
+                inchi = pbmol.write("inchi")
+                svg = pbmol.write("svg")
+                d = {"molecule": clean_mol.to_dict}
+                comp = clean_mol.composition
+                d["pretty_formula"] = comp.reduced_formula
+                d["formula"] = comp.formula
+                d["composition"] = comp.to_dict
+                d["elements"] = list(comp.to_dict.keys())
+                d["nelements"] = len(comp)
+                d["charge"] = 0
+                d["spin_multiplicity"] = clean_mol.spin_multiplicity
+                d["smiles"] = smiles
+                d["can"] = can
+                d["inchi"] = inchi
+                d["names"] = get_nih_names(smiles)
+                d["svg"] = svg
+                d["xyz"] = str(xyz)
+                d["tags"] = ["G305 test set"]
+                coll.insert(d)
+            except Exception as ex:
+                print "Error in {}".format(el)
+        elif r.count() > 1:
+            print "More than 1 {} found. Removing...".format(el)
+            results = list(r)
+            for r in results[1:]:
+                print r["_id"]
+                coll.remove({"_id": r["_id"]})
+
+
 if __name__ == "__main__":
 
     qe = MongoQueryEngine()
     db = qe.db
     coll = db["molecules"]
-    coll.remove({})
-    insert_g3testset(coll)
-    insert_solvents(coll)
-
-
+    #coll.remove({})
+    #insert_g3testset(coll)
+    #insert_solvents(coll)
+    insert_elements(coll)
