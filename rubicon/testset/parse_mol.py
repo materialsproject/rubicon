@@ -5,6 +5,8 @@ import glob
 
 import requests
 import pybel as pb
+import traceback
+import sys
 
 from pymatgen import Element, Molecule
 from pymatgen.io.gaussianio import GaussianInput
@@ -68,13 +70,18 @@ def insert_g3testset(coll):
                 d["smiles"] = smiles
                 d["can"] = can
                 d["inchi"] = inchi
-                d["names"] = get_nih_names(smiles)
+                #d["names"] = get_nih_names(smiles)
                 d["svg"] = svg
                 d["xyz"] = str(xyz)
                 d["tags"] = ["G305 test set"]
-                coll.insert(d)
+                coll.update({"inchi": inchi, "charge": charge,
+                             "spin_multiplicity": spin}, {"$set": d},
+                            upsert=True)
             except Exception as ex:
                 print "Error in {}".format(f)
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                traceback.print_exception(exc_type, exc_value, exc_traceback,
+                                          limit=2, file=sys.stdout)
         print "{} parsed!".format(f)
 
 
@@ -124,15 +131,18 @@ def insert_solvents(coll):
             d["smiles"] = smiles
             d["can"] = can
             d["inchi"] = inchi
-            d["names"] = get_nih_names(smiles)
+            #d["names"] = get_nih_names(smiles)
             d["svg"] = svg
             d["xyz"] = str(xyz)
             d["tags"] = ["Solvents"]
-            coll.insert(d)
+            coll.update({"inchi": inchi, "charge": clean_mol.charge,
+                         "spin_multiplicity": clean_mol.spin_multiplicity},
+                        {"$set": d}, upsert=True)
         else:
             print "{} not found.\n".format(n)
 
 def insert_elements(coll):
+    print "adding missing elements."
     for z in xrange(1, 19):
         el = Element.from_Z(z)
         r = coll.find({"formula": "{}1".format(el.symbol)})
@@ -158,7 +168,7 @@ def insert_elements(coll):
                 d["smiles"] = smiles
                 d["can"] = can
                 d["inchi"] = inchi
-                d["names"] = get_nih_names(smiles)
+                #d["names"] = get_nih_names(smiles)
                 d["svg"] = svg
                 d["xyz"] = str(xyz)
                 d["tags"] = ["G305 test set"]
@@ -174,11 +184,10 @@ def insert_elements(coll):
 
 
 if __name__ == "__main__":
-
     qe = MongoQueryEngine()
     db = qe.db
     coll = db["molecules"]
     #coll.remove({})
     #insert_g3testset(coll)
-    #insert_solvents(coll)
-    insert_elements(coll)
+    insert_solvents(coll)
+    #insert_elements(coll)
