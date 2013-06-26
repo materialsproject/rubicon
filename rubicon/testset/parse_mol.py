@@ -50,7 +50,8 @@ def insert_g3testset(coll):
                 for site in m:
                     if Element.is_valid_symbol(site.specie.symbol):
                         clean_sites.append(site)
-                clean_mol = Molecule.from_sites(clean_sites)
+                clean_mol = Molecule.from_sites(clean_sites, charge=charge,
+                                                spin_multiplicity=spin)
                 xyz = XYZ(clean_mol)
                 bb = BabelMolAdaptor.from_string(str(xyz), "xyz")
                 pbmol = pb.Molecule(bb.openbabel_mol)
@@ -189,5 +190,5 @@ if __name__ == "__main__":
     coll = db["molecules"]
     #coll.remove({})
     insert_g3testset(coll)
-    insert_solvents(coll)
-    insert_elements(coll)
+    #insert_solvents(coll)
+    #insert_elements(coll)
