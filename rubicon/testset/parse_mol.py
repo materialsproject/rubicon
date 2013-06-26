@@ -188,6 +188,6 @@ if __name__ == "__main__":
     db = qe.db
     coll = db["molecules"]
     #coll.remove({})
-    #insert_g3testset(coll)
+    insert_g3testset(coll)
     insert_solvents(coll)
-    #insert_elements(coll)
+    insert_elements(coll)
