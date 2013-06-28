@@ -31,7 +31,7 @@ class JCESRDeltaSCFInputSet(object):
         scf_bset = {}
         for el in mol.composition.elements:
             geom_opt_bset[el.symbol] = "6-31+g*"
-            scf_bset[el.symbol] = "6-31++g**"
+            scf_bset[el.symbol] = "6-31++g**" if el.Z <= 18 else "6-31+g*"
 
         if len(mol) > 1:
             #Insert opt and freq job for molecules with more than one atom.
