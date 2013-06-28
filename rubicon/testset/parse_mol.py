@@ -29,9 +29,12 @@ def parse_file(filename):
             print "error in {}".format(t)
 
 
+session = requests.Session()
+
+
 def get_nih_names(smiles):
     smi = re.sub("#", "%23", smiles)
-    response = requests.get(
+    response = session.get(
         "http://cactus.nci.nih.gov/chemical/structure/{}/names".format(smi))
     if response.status_code == 200:
         names = response.text.split("\n")
