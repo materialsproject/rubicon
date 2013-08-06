@@ -1,4 +1,5 @@
 import shlex
+import socket
 import subprocess
 from fireworks.core.firework import FireTaskBase
 from fireworks.utilities.fw_serializers import FWSerializable
@@ -25,5 +26,12 @@ class NWChemTask(FireTaskBase, FWSerializable):
         nwi.write_file('nwchem.nw')
 
         # TODO: replace with a custodian
-        nwc_exe = shlex.split('aprun -n 24 nwchem nwchem.nw')
+        if 'nid' in socket.gethostname():  # hopper compute nodes
+            # TODO: can base ncores on FW_submit.script
+            nwc_exe = shlex.split('aprun -n 24 nwchem nwchem.nw')
+            print 'running on HOPPER'
+        elif 'c' in socket.gethostname():  # mendel compute nodes
+            # TODO: can base ncores on FW_submit.script
+            nwc_exe = shlex.split('mpirun -n 16 nwchem nwchem.nw')
+
         subprocess.call(nwc_exe)
