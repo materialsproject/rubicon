@@ -1,5 +1,5 @@
 import shlex
-import subprocess
+import socket
 from fireworks.core.firework import FireTaskBase
 from fireworks.utilities.fw_serializers import FWSerializable
 from pymatgen.io.nwchemio import NwInput
