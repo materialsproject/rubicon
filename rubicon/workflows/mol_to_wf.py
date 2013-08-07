@@ -64,7 +64,8 @@ def mol_to_wf_nwchem(mol, name):
     tasks = [
         NwTask.dft_task(mol, operation="optimize", xc="b3lyp",
                         basis_set="6-31++G*"),
-        NwTask.dft_task(mol, operation="freq", xc="b3lyp",
+        if len(mol.species)>1:
+            NwTask.dft_task(mol, operation="freq", xc="b3lyp",
                         basis_set="6-31++G*"),
         NwTask.dft_task(mol, operation="energy", xc="b3lyp",
                         basis_set="6-311++G**"),
