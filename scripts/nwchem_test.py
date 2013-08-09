@@ -17,6 +17,4 @@ tasks = [
         ]
 nwi = NwInput(mol, tasks)
 
-hdsf hds
-
 print str(nwi)
