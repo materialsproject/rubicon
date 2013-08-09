@@ -5,7 +5,7 @@ from pymatgen.io.xyzio import XYZ
 from rubicon.firetasks.gaussian_task import GaussianTask
 from rubicon.firetasks.nwchem_task import NWChemTask
 
-# pull test for nidhi ...
+# pull test for nidhi .. v 2.
 
 __author__ = 'Anubhav Jain'
 __copyright__ = 'Copyright 2013, The Materials Project'
