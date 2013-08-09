@@ -5,6 +5,8 @@ from pymatgen.io.xyzio import XYZ
 from rubicon.firetasks.gaussian_task import GaussianTask
 from rubicon.firetasks.nwchem_task import NWChemTask
 
+# pull test for nidhi ...
+
 __author__ = 'Anubhav Jain'
 __copyright__ = 'Copyright 2013, The Materials Project'
 __version__ = '0.1'
@@ -63,9 +65,13 @@ def mol_to_wf_nwchem(mol, name):
 
     tasks = [
         NwTask.dft_task(mol, operation="optimize", xc="b3lyp",
-                        basis_set="6-31++G*"),
-        NwTask.dft_task(mol, operation="freq", xc="b3lyp",
-                        basis_set="6-31++G*"),
+                        basis_set="6-31++G*")]
+
+    if len(mol.sites) > 1:
+        tasks += [NwTask.dft_task(mol, operation="freq", xc="b3lyp",
+                        basis_set="6-31++G*")]
+
+    tasks += [
         NwTask.dft_task(mol, operation="energy", xc="b3lyp",
                         basis_set="6-311++G**"),
         NwTask.dft_task(mol, charge=mol.charge + 1, operation="energy",
