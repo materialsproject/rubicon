@@ -3,3 +3,4 @@ pymatgen>=2.6
 fireworks>=0.1
 custodian>=0.3
 pymongo>=2.4.2
+BeautifulSoup>=3.2.1
