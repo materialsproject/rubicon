@@ -20,7 +20,7 @@ def get_table(url, title, keyname, result):
         print "Warning! webpage", url, "changed"
     for row in soup.table.findAll('tr')[1:]:
         tds = row.findAll('td')
-        formula = str(tds[0].p.text).strip().split(' ')[0].split('(')[0]
+        formula = str(tds[0].p.text).strip()
         d = result[formula]
         d[keyname] = dict(G3=float(tds[1].p.string), Expt=float(tds[2].p.string))
 
