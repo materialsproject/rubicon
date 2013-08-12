@@ -5,6 +5,8 @@ from pymatgen.io.xyzio import XYZ
 from rubicon.firetasks.gaussian_task import GaussianTask
 from rubicon.firetasks.nwchem_task import NWChemTask
 
+# pull test for xiahui .. v 2.
+
 __author__ = 'Anubhav Jain'
 __copyright__ = 'Copyright 2013, The Materials Project'
 __version__ = '0.1'
@@ -109,3 +111,4 @@ if __name__ == '__main__':
             mol_name = f.split('.')[0]
             wf = mol_to_wf(mol, mol_name)
             wf.to_file(os.path.join(module_dir, 'test_wfs', mol_name+'.yaml'))
+
