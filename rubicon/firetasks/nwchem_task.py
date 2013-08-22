@@ -66,4 +66,5 @@ class NWDBInsertionTask(FireTaskBase, FWSerializable):
             nwo = NwOutput("mol.nwout")
             output = {'data': nwo.data, 'job_info': nwo.job_info}
 
-            coll.insert(json.dumps(output, default=DATETIME_HANDLER))
+            coll.insert(json.loads(json.dumps(output, default=DATETIME_HANDLER)))
+
