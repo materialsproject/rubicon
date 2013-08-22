@@ -2,7 +2,7 @@ import shlex
 import socket
 from fireworks.core.firework import FireTaskBase
 from fireworks.utilities.fw_serializers import FWSerializable
-from pymatgen.io.nwchemio import NwInput
+from pymatgen.io.nwchemio import NwInput, NwOutput
 
 from custodian.custodian import Custodian
 from custodian.nwchem.handlers import NwchemErrorHandler
@@ -43,3 +43,17 @@ class NWChemTask(FireTaskBase, FWSerializable):
         handler = NwchemErrorHandler()
         c = Custodian(handlers=[handler], jobs=[job])
         c.run()
+
+
+class NWDBInsertionTask(FireTaskBase, FWSerializable):
+    _fw_name = "NWChem DB Insertion Task"
+
+    def run_task(self, fw_spec):
+
+        print 'STARTING DB INSERTION'
+        nwo = NwOutput("mol.nwout")
+
+        print '------'
+        print nwo.job_info
+        print '------'
+        print nwo.data

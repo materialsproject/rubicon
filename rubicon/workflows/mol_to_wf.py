@@ -3,7 +3,7 @@ from fireworks.core.firework import FireWork, Workflow
 from pymatgen.io.nwchemio import NwTask, NwInput
 from pymatgen.io.xyzio import XYZ
 from rubicon.firetasks.gaussian_task import GaussianTask
-from rubicon.firetasks.nwchem_task import NWChemTask
+from rubicon.firetasks.nwchem_task import NWChemTask, NWDBInsertionTask
 
 # pull test for xiahui .. v 2.
 
@@ -81,7 +81,7 @@ def mol_to_wf_nwchem(mol, name):
     ]
 
     nwi = NwInput(mol, tasks)
-    fw = FireWork([NWChemTask()], spec=nwi.to_dict, name=name)
+    fw = FireWork([NWChemTask(), NWDBInsertionTask()], spec=nwi.to_dict, name=name)
 
     return Workflow.from_FireWork(fw, name=name)
 
