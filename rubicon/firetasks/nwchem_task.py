@@ -63,7 +63,6 @@ class NWDBInsertionTask(FireTaskBase, FWSerializable):
             coll = db[d['collection']]
 
             nwo = NwOutput("mol.nwout")
-            output = nwo.data
-            output['job_info'] = nwo.job_info
+            output = {'data': nwo.data, 'job_info': nwo.job_info}
 
             coll.insert(json.dumps(output, default=DATETIME_HANDLER))
