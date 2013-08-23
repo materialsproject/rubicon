@@ -11,6 +11,7 @@ import os
 from rubicon.borg.hive import DeltaSCFNwChemToDbTaskDrone
 
 from fireworks.core.firework import FWAction
+from fireworks.core.fw_config import FWConfig
 
 __author__ = 'Anubhav Jain'
 __copyright__ = 'Copyright 2013, The Materials Project'
@@ -32,16 +33,30 @@ class NWChemTask(FireTaskBase, FWSerializable):
         nwi = NwInput.from_dict(fw_spec)
         nwi.write_file('mol.nw')
 
+        fw_conf = FWConfig()
+
         if 'macqu.dhcp.lbl.gov' == socket.gethostname() \
             or 'MacQu.local' == socket.gethostname(): # Xiaohui's Laptop
             nwc_exe = ['nwchem']
         elif 'nid' in socket.gethostname():  # hopper compute nodes
             # TODO: can base ncores on FW_submit.script
-            nwc_exe = shlex.split('aprun -n 24 nwchem')
+            if (not fw_conf.MULTIPROCESSING) or (fw_conf.NODE_LIST is None):
+                nwc_exe = shlex.split('aprun -n 24 nwchem')
+            else:
+                list_str = ','.join(fw_conf.NODE_LIST)
+                num_str = str(24*len(fw_conf.NODE_LIST))
+                nwc_exe = shlex.split('aprun -n ' + num_str +
+                                      ' -L ' + list_str + ' nwchem')
             print 'running on HOPPER'
         elif 'c' in socket.gethostname():  # mendel compute nodes
             # TODO: can base ncores on FW_submit.script
-            nwc_exe = shlex.split('mpirun -n 16 nwchem')
+            if (not fw_conf.MULTIPROCESSING) or (fw_conf.NODE_LIST is None):
+                nwc_exe = shlex.split('mpirun -n 16 nwchem')
+            else:
+                list_str = ','.join(fw_conf.NODE_LIST)
+                num_str = str(len(fw_conf.NODE_LIST))
+                nwc_exe = shlex.split('mpirun -n ' + num_str +
+                                      ' --host ' + list_str + ' nwchem')
 
         job = NwchemJob(nwchem_cmd=nwc_exe)
         handler = NwchemErrorHandler()
