@@ -25,6 +25,7 @@ from pymatgen.io.nwchemio import NwOutput
 from pymatgen.util.io_utils import clean_json
 from pymatgen.io.babelio import BabelMolAdaptor
 from pymatgen.io.xyzio import XYZ
+from fireworks.core.fw_config import FWConfig
 
 from rubicon.testset.parse_mol import get_nih_names
 
@@ -72,12 +73,17 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
         self.simulate = simulate_mode
         self.update_duplicates = update_duplicates
         if not simulate_mode:
+            fw_conf = FWConfig()
+            if fw_conf.MULTIPROCESSING:
+                fw_conf.PROCESS_LOCK.acquire()
             conn = MongoClient(self.host, self.port, j=True)
             db = conn[self.database]
             if self.user:
                 db.authenticate(self.user, self.password)
             if db.counter.find({"_id": "mol_taskid"}).count() == 0:
                 db.counter.insert({"_id": "mol_taskid", "c": 1})
+            if fw_conf.MULTIPROCESSING:
+                fw_conf.PROCESS_LOCK.release()
 
     def assimilate(self, path):
         """
@@ -90,8 +96,13 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
         """
         try:
             d = self.get_task_doc(path)
+            fw_conf = FWConfig()
+            if fw_conf.MULTIPROCESSING:
+                fw_conf.PROCESS_LOCK.acquire()
             tid = self._insert_doc(d)
-            return tid
+            if fw_conf.MULTIPROCESSING:
+                fw_conf.PROCESS_LOCK.release()
+            return d
         except Exception as ex:
             import traceback
             print traceback.format_exc(ex)

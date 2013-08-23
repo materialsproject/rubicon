@@ -7,6 +7,10 @@ from pymatgen.io.nwchemio import NwInput
 from custodian.custodian import Custodian
 from custodian.nwchem.handlers import NwchemErrorHandler
 from custodian.nwchem.jobs import NwchemJob
+import os
+from rubicon.borg.hive import DeltaSCFNwChemToDbTaskDrone
+
+from fireworks.core.firework import FWAction
 
 __author__ = 'Anubhav Jain'
 __copyright__ = 'Copyright 2013, The Materials Project'
@@ -28,7 +32,10 @@ class NWChemTask(FireTaskBase, FWSerializable):
         nwi = NwInput.from_dict(fw_spec)
         nwi.write_file('mol.nw')
 
-        if 'nid' in socket.gethostname():  # hopper compute nodes
+        if 'macqu.dhcp.lbl.gov' == socket.gethostname() \
+            or 'MacQu.local' == socket.gethostname(): # Xiaohui's Laptop
+            nwc_exe = ['nwchem']
+        elif 'nid' in socket.gethostname():  # hopper compute nodes
             # TODO: can base ncores on FW_submit.script
             nwc_exe = shlex.split('aprun -n 24 nwchem')
             print 'running on HOPPER'
@@ -36,10 +43,13 @@ class NWChemTask(FireTaskBase, FWSerializable):
             # TODO: can base ncores on FW_submit.script
             nwc_exe = shlex.split('mpirun -n 16 nwchem')
 
-        # nwc_exe = shlex.split('aprun -n 24 nwchem nwchem.nw')
-        # subprocess.call(nwc_exe)
-
         job = NwchemJob(nwchem_cmd=nwc_exe)
         handler = NwchemErrorHandler()
         c = Custodian(handlers=[handler], jobs=[job])
         c.run()
+        curdir = os.getcwd()
+        drone = DeltaSCFNwChemToDbTaskDrone()
+        fwa = FWAction()
+        d = drone.assimilate(curdir + "/mol.nwout")
+        fwa.stored_data.update({"Result": d})
+        return fwa
