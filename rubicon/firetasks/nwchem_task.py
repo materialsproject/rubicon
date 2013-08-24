@@ -1,8 +1,12 @@
+import json
 import shlex
+import os
 import socket
+import datetime
+from pymongo import MongoClient
 from fireworks.core.firework import FireTaskBase
 from fireworks.utilities.fw_serializers import FWSerializable
-from pymatgen.io.nwchemio import NwInput
+from pymatgen.io.nwchemio import NwInput, NwOutput
 
 from custodian.custodian import Custodian
 from custodian.nwchem.handlers import NwchemErrorHandler
@@ -16,6 +20,7 @@ __email__ = 'ajain@lbl.gov'
 __date__ = 'Jun 07, 2013'
 
 
+DATETIME_HANDLER = lambda obj: obj.isoformat() if isinstance(obj, datetime.datetime) else None
 
 class NWChemTask(FireTaskBase, FWSerializable):
     """
@@ -36,10 +41,30 @@ class NWChemTask(FireTaskBase, FWSerializable):
             # TODO: can base ncores on FW_submit.script
             nwc_exe = shlex.split('mpirun -n 16 nwchem')
 
-        # nwc_exe = shlex.split('aprun -n 24 nwchem nwchem.nw')
-        # subprocess.call(nwc_exe)
-
         job = NwchemJob(nwchem_cmd=nwc_exe)
         handler = NwchemErrorHandler()
         c = Custodian(handlers=[handler], jobs=[job])
         c.run()
+
+
+class NWDBInsertionTask(FireTaskBase, FWSerializable):
+    _fw_name = "NWChem DB Insertion Task"
+
+    def run_task(self, fw_spec):
+
+        # get the directory containing the db file
+        db_dir = os.environ['DB_LOC']
+        db_path = os.path.join(db_dir, 'molecules_db.json')
+
+        with open(db_path) as f:
+            d = json.load(f)
+            connection = MongoClient(d['host'], d['port'])
+            db = connection[d['database']]
+            db.authenticate(d['admin_user'], d['admin_password'])
+            coll = db[d['collection']]
+
+            nwo = NwOutput("mol.nwout")
+            output = {'data': nwo.data, 'job_info': nwo.job_info}
+
+            coll.insert(json.loads(json.dumps(output, default=DATETIME_HANDLER)))
+
