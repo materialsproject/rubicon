@@ -8,7 +8,7 @@ from rubicon.firetasks.nwchem_task import NWChemTask
 from fireworks.core.firework import Workflow
 from rubicon.workflows.mol_to_wf import mol_to_wf_nwchem
 
-lp = LaunchPad()
+lp = LaunchPad.from_file("/Users/xiaohuiqu/temp/fw_test/conf_files/my_launchpad.yaml")
 
 with open("../rubicon/testset/g2-97_cart_neut.txt") as f:
     txt = f.read()
