@@ -5,22 +5,17 @@ import os
 import socket
 import datetime
 import sys
+
 from fireworks.core.firework import FireTaskBase, FWAction
 from fireworks.utilities.fw_serializers import FWSerializable
 from pymatgen.io.nwchemio import NwInput
-
 from custodian.custodian import Custodian
 from custodian.nwchem.handlers import NwchemErrorHandler
 from custodian.nwchem.jobs import NwchemJob
-<<<<<<< HEAD
-import os
+from fireworks.core.fw_config import FWConfig
+
 from rubicon.borg.hive import DeltaSCFNwChemToDbTaskDrone
 
-from fireworks.core.firework import FWAction
-from fireworks.core.fw_config import FWConfig
-=======
-from rubicon.borg.hive import DeltaSCFNwChemToDbTaskDrone
->>>>>>> master
 
 __author__ = 'Anubhav Jain'
 __copyright__ = 'Copyright 2013, The Materials Project'
@@ -57,10 +52,8 @@ class NWChemTask(FireTaskBase, FWSerializable):
                 num_str = str(24*len(fw_conf.NODE_LIST))
                 nwc_exe = shlex.split('aprun -n ' + num_str +
                                       ' -L ' + list_str + ' nwchem')
-            print 'running on HOPPER'
         elif 'c' in socket.gethostname():  # mendel compute nodes
             # TODO: can base ncores on FW_submit.script
-<<<<<<< HEAD
             if (not fw_conf.MULTIPROCESSING) or (fw_conf.NODE_LIST is None):
                 nwc_exe = shlex.split('mpirun -n 16 nwchem')
             else:
@@ -68,22 +61,11 @@ class NWChemTask(FireTaskBase, FWSerializable):
                 num_str = str(len(fw_conf.NODE_LIST))
                 nwc_exe = shlex.split('mpirun -n ' + num_str +
                                       ' --host ' + list_str + ' nwchem')
-=======
-            nwc_exe = shlex.split('mpirun -n 16 nwchem')
->>>>>>> master
 
         job = NwchemJob(nwchem_cmd=nwc_exe)
         handler = NwchemErrorHandler()
         c = Custodian(handlers=[handler], jobs=[job])
         c.run()
-<<<<<<< HEAD
-        curdir = os.getcwd()
-        drone = DeltaSCFNwChemToDbTaskDrone()
-        fwa = FWAction()
-        d = drone.assimilate(curdir + "/mol.nwout")
-        fwa.stored_data.update({"Result": d})
-        return fwa
-=======
 
 
 class NWDBInsertionTask(FireTaskBase, FWSerializable):
@@ -97,7 +79,7 @@ class NWDBInsertionTask(FireTaskBase, FWSerializable):
         db_path = os.path.join(db_dir, 'molecules_db.json')
 
         logging.basicConfig(level=logging.INFO)
-        logger = logging.getLogger('MPVaspDrone')
+        logger = logging.getLogger('NWChemDrone')
         logger.setLevel(logging.INFO)
         sh = logging.StreamHandler(stream=sys.stdout)
         sh.setLevel(getattr(logging, 'INFO'))
@@ -113,4 +95,4 @@ class NWDBInsertionTask(FireTaskBase, FWSerializable):
             t_id, d = drone.assimilate(os.path.abspath(os.path.join(os.getcwd(), "mol.nwout")))
 
         return FWAction(stored_data={'task_id': t_id})
->>>>>>> master
+
