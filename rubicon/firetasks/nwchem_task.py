@@ -1,16 +1,18 @@
 import json
+import logging
 import shlex
 import os
 import socket
 import datetime
 from pymongo import MongoClient
-from fireworks.core.firework import FireTaskBase
+from fireworks.core.firework import FireTaskBase, FWAction
 from fireworks.utilities.fw_serializers import FWSerializable
 from pymatgen.io.nwchemio import NwInput, NwOutput
 
 from custodian.custodian import Custodian
 from custodian.nwchem.handlers import NwchemErrorHandler
 from custodian.nwchem.jobs import NwchemJob
+from rubicon.borg.hive import DeltaSCFNwChemToDbTaskDrone
 
 __author__ = 'Anubhav Jain'
 __copyright__ = 'Copyright 2013, The Materials Project'
@@ -52,19 +54,25 @@ class NWDBInsertionTask(FireTaskBase, FWSerializable):
 
     def run_task(self, fw_spec):
 
+
         # get the directory containing the db file
         db_dir = os.environ['DB_LOC']
         db_path = os.path.join(db_dir, 'molecules_db.json')
 
+        logging.basicConfig(level=logging.INFO)
+        logger = logging.getLogger('MPVaspDrone')
+        logger.setLevel(logging.INFO)
+        sh = logging.StreamHandler(stream=sys.stdout)
+        sh.setLevel(getattr(logging, 'INFO'))
+        logger.addHandler(sh)
+
         with open(db_path) as f:
-            d = json.load(f)
-            connection = MongoClient(d['host'], d['port'])
-            db = connection[d['database']]
-            db.authenticate(d['admin_user'], d['admin_password'])
-            coll = db[d['collection']]
+            db_creds = json.load(f)
+            drone = DeltaSCFNwChemToDbTaskDrone(
+                host=db_creds['host'], port=db_creds['port'],
+                database=db_creds['database'], user=db_creds['admin_user'],
+                password=db_creds['admin_password'],
+                collection=db_creds['collection'])
+            t_id, d = drone.assimilate(os.getcwd())
 
-            nwo = NwOutput("mol.nwout")
-            output = {'data': nwo.data, 'job_info': nwo.job_info}
-
-            coll.insert(json.loads(json.dumps(output, default=DATETIME_HANDLER)))
-
+        return FWAction(stored_data={'task_id': t_id})
