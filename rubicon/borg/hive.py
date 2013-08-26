@@ -103,7 +103,7 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
             tid = self._insert_doc(d)
             if fw_conf.MULTIPROCESSING:
                 fw_conf.PROCESS_LOCK.release()
-            return d
+            return tid, d
         except Exception as ex:
             import traceback
             print traceback.format_exc(ex)
