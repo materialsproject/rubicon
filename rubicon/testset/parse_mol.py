@@ -12,7 +12,6 @@ from pymatgen import Element, Molecule
 from pymatgen.io.gaussianio import GaussianInput
 from pymatgen.io.babelio import BabelMolAdaptor
 from pymatgen.io.xyzio import XYZ
-from pymatpro.db.mongo.query_engine_mongo import MongoQueryEngine
 
 
 def parse_file(filename):
@@ -188,6 +187,7 @@ def insert_elements(coll):
 
 
 if __name__ == "__main__":
+    from pymatpro.db.mongo.query_engine_mongo import MongoQueryEngine
     qe = MongoQueryEngine()
     db = qe.db
     coll = db["molecules"]
