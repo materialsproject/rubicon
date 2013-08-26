@@ -4,10 +4,10 @@ import shlex
 import os
 import socket
 import datetime
-from pymongo import MongoClient
+import sys
 from fireworks.core.firework import FireTaskBase, FWAction
 from fireworks.utilities.fw_serializers import FWSerializable
-from pymatgen.io.nwchemio import NwInput, NwOutput
+from pymatgen.io.nwchemio import NwInput
 
 from custodian.custodian import Custodian
 from custodian.nwchem.handlers import NwchemErrorHandler
