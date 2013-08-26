@@ -41,7 +41,8 @@ class NWChemTask(FireTaskBase, FWSerializable):
         fw_conf = FWConfig()
 
         if 'macqu.dhcp.lbl.gov' == socket.gethostname() \
-            or 'MacQu.local' == socket.gethostname(): # Xiaohui's Laptop
+            or 'MacQu.local' == socket.gethostname() \
+            or 'macqu.dhcp.lbnl.us': # Xiaohui's Laptop
             nwc_exe = ['nwchem']
         elif 'nid' in socket.gethostname():  # hopper compute nodes
             # TODO: can base ncores on FW_submit.script
