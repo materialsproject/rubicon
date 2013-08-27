@@ -64,19 +64,19 @@ def mol_to_wf_nwchem(mol, name):
 
     tasks = [
         NwTask.dft_task(mol, operation="optimize", xc="b3lyp",
-                        basis_set="6-31++G*")]
+                        basis_set="6-31++G*", theory_directives={"odft": ""})]
 
     if len(mol.sites) > 1:
         tasks += [NwTask.dft_task(mol, operation="freq", xc="b3lyp",
-                        basis_set="6-31++G*")]
+                        basis_set="6-31++G*", theory_directives={"odft": ""})]
 
     tasks += [
         NwTask.dft_task(mol, operation="energy", xc="b3lyp",
-                        basis_set="6-311++G**"),
+                        basis_set="6-311++G**", theory_directives={"odft": ""}),
         NwTask.dft_task(mol, charge=mol.charge + 1, operation="energy",
-                        xc="b3lyp", basis_set="6-311++G**"),
+                        xc="b3lyp", basis_set="6-311++G**", theory_directives={"odft": ""}),
         NwTask.dft_task(mol, charge=mol.charge - 1, operation="energy",
-                        xc="b3lyp", basis_set="6-311++G**")
+                        xc="b3lyp", basis_set="6-311++G**", theory_directives={"odft": ""})
     ]
 
     nwi = NwInput(mol, tasks)
