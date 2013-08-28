@@ -101,14 +101,15 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
             if fw_conf.MULTIPROCESSING:
                 fw_conf.PROCESS_LOCK.acquire()
             tid = self._insert_doc(d)
-            if fw_conf.MULTIPROCESSING:
-                fw_conf.PROCESS_LOCK.release()
             return tid, d
         except Exception as ex:
             import traceback
             print traceback.format_exc(ex)
             logger.error(traceback.format_exc(ex))
-            return False
+            return {"Error": traceback.format_exc(ex)}, {"Error": traceback.format_exc(ex)}
+        finally:
+            if fw_conf.MULTIPROCESSING:
+                fw_conf.PROCESS_LOCK.release()
 
     @classmethod
     def get_task_doc(cls, path):
