@@ -49,7 +49,7 @@ class NWChemTask(FireTaskBase, FWSerializable):
             if (not fw_conf.MULTIPROCESSING) or (fw_conf.NODE_LIST is None):
                 nwc_exe = shlex.split('aprun -n 24 nwchem')
             else:
-                list_str = ','.join(fw_conf.NODE_LIST)
+                list_str = ','.join(set(fw_conf.NODE_LIST))
                 num_str = str(24*len(fw_conf.NODE_LIST))
                 nwc_exe = shlex.split('aprun -n ' + num_str +
                                       ' -L ' + list_str + ' nwchem')
