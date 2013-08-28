@@ -50,7 +50,7 @@ class NWChemTask(FireTaskBase, FWSerializable):
                 nwc_exe = shlex.split('aprun -n 24 nwchem')
             else:
                 list_str = ','.join(set(fw_conf.NODE_LIST))
-                num_str = str(24*len(fw_conf.NODE_LIST))
+                num_str = str(24*len(set(fw_conf.NODE_LIST)))
                 nwc_exe = shlex.split('aprun -n ' + num_str +
                                       ' -L ' + list_str + ' nwchem')
         elif 'c' in socket.gethostname():  # mendel compute nodes
