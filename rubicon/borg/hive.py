@@ -96,10 +96,10 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
             purposes. Else, only the task_id of the inserted doc is returned.
         """
         try:
-            d = self.get_task_doc(path)
             fw_conf = FWConfig()
             if fw_conf.MULTIPROCESSING:
                 fw_conf.PROCESS_LOCK.acquire()
+            d = self.get_task_doc(path)
             tid = self._insert_doc(d)
             return tid, d
         except Exception as ex:
