@@ -64,19 +64,27 @@ def mol_to_wf_nwchem(mol, name):
 
     tasks = [
         NwTask.dft_task(mol, operation="optimize", xc="b3lyp",
-                        basis_set="6-31++G*")]
-
-    if len(mol.sites) > 1:
-        tasks += [NwTask.dft_task(mol, operation="freq", xc="b3lyp",
-                        basis_set="6-31++G*")]
-
-    tasks += [
+                        basis_set="6-31++G*"),
+        NwTask.dft_task(mol, operation="freq", xc="b3lyp",
+                        basis_set="6-31++G*"),
         NwTask.dft_task(mol, operation="energy", xc="b3lyp",
                         basis_set="6-311++G**"),
         NwTask.dft_task(mol, charge=mol.charge + 1, operation="energy",
                         xc="b3lyp", basis_set="6-311++G**"),
         NwTask.dft_task(mol, charge=mol.charge - 1, operation="energy",
-                        xc="b3lyp", basis_set="6-311++G**")
+                        xc="b3lyp", basis_set="6-311++G**"),
+        NwTask.dft_task(mol, charge=mol.charge + 1, operation="energy",
+                        xc="b3lyp", basis_set="6-311++G**",alternate_directives={'cosmo':"cosmo"}),
+        NwTask.dft_task(mol, charge=mol.charge - 1, operation="energy",
+                        xc="b3lyp", basis_set="6-311++G**",alternate_directives={'cosmo':"cosmo"}),
+        NwTask.dft_task(mol, charge=mol.charge, operation="energy",
+                        xc="b3lyp", basis_set="6-311++G**",alternate_directives={'cosmo':"cosmo"}),
+        NwTask.esp_task(mol, charge=mol.charge + 1, operation="",
+                         basis_set="6-311++G**"),
+        NwTask.esp_task(mol, charge=mol.charge - 1, operation="",
+                         basis_set="6-311++G**"),
+        NwTask.esp_task(mol, charge=mol.charge, operation="",
+                         basis_set="6-311++G**")
     ]
 
     nwi = NwInput(mol, tasks)
@@ -110,4 +118,3 @@ if __name__ == '__main__':
             mol_name = f.split('.')[0]
             wf = mol_to_wf(mol, mol_name)
             wf.to_file(os.path.join(module_dir, 'test_wfs', mol_name+'.yaml'))
-
