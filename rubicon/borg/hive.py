@@ -78,6 +78,7 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
                 db.authenticate(self.user, self.password)
             if db.counter.find({"_id": "mol_taskid"}).count() == 0:
                 db.counter.insert({"_id": "mol_taskid", "c": 1})
+            conn.close()
 
     def assimilate(self, path):
         """
@@ -202,6 +203,7 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
                 return d["task_id"]
             else:
                 logger.info("Skipping duplicate {}".format(d["dir_name"]))
+            conn.close()
         else:
             d["task_id"] = 0
             logger.info("Simulated insert into database for {} with task_id {}"
