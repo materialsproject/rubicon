@@ -25,7 +25,6 @@ from pymatgen.io.nwchemio import NwOutput
 from pymatgen.util.io_utils import clean_json
 from pymatgen.io.babelio import BabelMolAdaptor
 from pymatgen.io.xyzio import XYZ
-from fireworks.core.fw_config import FWConfig
 
 from rubicon.testset.parse_mol import get_nih_names
 
@@ -73,18 +72,12 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
         self.simulate = simulate_mode
         self.update_duplicates = update_duplicates
         if not simulate_mode:
-            fw_conf = FWConfig()
-            if fw_conf.MULTIPROCESSING:
-                fw_conf.PROCESS_LOCK.acquire()
             conn = MongoClient(self.host, self.port, j=True)
             db = conn[self.database]
             if self.user:
                 db.authenticate(self.user, self.password)
             if db.counter.find({"_id": "mol_taskid"}).count() == 0:
                 db.counter.insert({"_id": "mol_taskid", "c": 1})
-            conn.close()
-            if fw_conf.MULTIPROCESSING:
-                fw_conf.PROCESS_LOCK.release()
 
     def assimilate(self, path):
         """
@@ -96,20 +89,14 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
             purposes. Else, only the task_id of the inserted doc is returned.
         """
         try:
-            fw_conf = FWConfig()
-            if fw_conf.MULTIPROCESSING:
-                fw_conf.PROCESS_LOCK.acquire()
             d = self.get_task_doc(path)
             tid = self._insert_doc(d)
-            return tid, d
+            return tid
         except Exception as ex:
             import traceback
             print traceback.format_exc(ex)
             logger.error(traceback.format_exc(ex))
-            return {"Error": traceback.format_exc(ex)}, {"Error": traceback.format_exc(ex)}
-        finally:
-            if fw_conf.MULTIPROCESSING:
-                fw_conf.PROCESS_LOCK.release()
+            return False
 
     @classmethod
     def get_task_doc(cls, path):
@@ -215,7 +202,6 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
                 return d["task_id"]
             else:
                 logger.info("Skipping duplicate {}".format(d["dir_name"]))
-            conn.close()
         else:
             d["task_id"] = 0
             logger.info("Simulated insert into database for {} with task_id {}"
