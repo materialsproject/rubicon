@@ -7,6 +7,7 @@ import datetime
 import sys
 
 from fireworks.core.firework import FireTaskBase, FWAction
+from fireworks.core.jp_config import JPConfig
 from fireworks.utilities.fw_serializers import FWSerializable
 from pymatgen.io.nwchemio import NwInput
 from custodian.custodian import Custodian
@@ -38,7 +39,7 @@ class NWChemTask(FireTaskBase, FWSerializable):
         nwi = NwInput.from_dict(fw_spec)
         nwi.write_file('mol.nw')
 
-        fw_conf = FWConfig()
+        jp_conf = JPConfig()
 
         if 'macqu.dhcp.lbl.gov' == socket.gethostname() \
             or 'MacQu.local' == socket.gethostname() \
@@ -46,20 +47,20 @@ class NWChemTask(FireTaskBase, FWSerializable):
             nwc_exe = ['nwchem']
         elif 'nid' in socket.gethostname():  # hopper compute nodes
             # TODO: can base ncores on FW_submit.script
-            if (not fw_conf.MULTIPROCESSING) or (fw_conf.NODE_LIST is None):
+            if (not jp_conf.MULTIPROCESSING) or (jp_conf.NODE_LIST is None):
                 nwc_exe = shlex.split('aprun -n 24 nwchem')
             else:
-                list_str = ','.join(set(fw_conf.NODE_LIST))
-                num_str = str(24*len(set(fw_conf.NODE_LIST)))
+                list_str = ','.join(jp_conf.NODE_LIST)
+                num_str = str(jp_conf.SUB_NPROCS)
                 nwc_exe = shlex.split('aprun -n ' + num_str +
                                       ' -L ' + list_str + ' nwchem')
         elif 'c' in socket.gethostname():  # mendel compute nodes
             # TODO: can base ncores on FW_submit.script
-            if (not fw_conf.MULTIPROCESSING) or (fw_conf.NODE_LIST is None):
+            if (not jp_conf.MULTIPROCESSING) or (jp_conf.NODE_LIST is None):
                 nwc_exe = shlex.split('mpirun -n 16 nwchem')
             else:
-                list_str = ','.join(fw_conf.NODE_LIST)
-                num_str = str(len(fw_conf.NODE_LIST))
+                list_str = ','.join(jp_conf.NODE_LIST)
+                num_str = str(jp_conf.SUB_NPROCS)
                 nwc_exe = shlex.split('mpirun -n ' + num_str +
                                       ' --host ' + list_str + ' nwchem')
 
