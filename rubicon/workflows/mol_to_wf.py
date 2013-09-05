@@ -80,11 +80,11 @@ def mol_to_wf_nwchem(mol, name):
         NwTask.dft_task(mol, charge=mol.charge, operation="energy",
                         xc="b3lyp", basis_set="6-311++G**",alternate_directives={'cosmo':"cosmo"},theory_directives={"iterations": 300}),
         NwTask.esp_task(mol, charge=mol.charge + 1, operation="",
-                         basis_set="6-311++G**",theory_directives={"iterations": 300}),
+                         basis_set="6-311++G**"),
         NwTask.esp_task(mol, charge=mol.charge - 1, operation="",
-                         basis_set="6-311++G**",theory_directives={"iterations": 300}),
+                         basis_set="6-311++G**"),
         NwTask.esp_task(mol, charge=mol.charge, operation="",
-                         basis_set="6-311++G**",theory_directives={"iterations": 300})
+                         basis_set="6-311++G**")
     ]
 
     nwi = NwInput(mol, tasks)
