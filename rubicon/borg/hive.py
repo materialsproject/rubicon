@@ -28,6 +28,8 @@ from pymatgen.io.xyzio import XYZ
 
 from rubicon.testset.parse_mol import get_nih_names
 
+import json
+
 logger = logging.getLogger(__name__)
 
 
@@ -100,6 +102,15 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
             return False
 
     @classmethod
+    def get_user_tags(cls, path):
+        fwjsonfile = os.path.join(os.path.dirname(path), 'FW.json')
+        with open(fwjsonfile) as f:
+            d = json.load(f)
+        if 'user_tags' in d['spec'].keys():
+            return d['spec']['user_tags']
+        return None
+
+    @classmethod
     def get_task_doc(cls, path):
         """
         Get the entire task doc for a path, including any post-processing.
@@ -155,6 +166,11 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
              "smiles": smiles, "can": can, "inchi": inchi, "svg": svg,
              "xyz": str(xyz),
              "names": get_nih_names(smiles)}
+
+        user_tags = cls.get_user_tags(path)
+
+        if user_tags:
+            d['user_tags'] = user_tags
 
         if "scf_EA" in data_dict and \
                 (not data_dict["scf_EA"]["has_error"]) and \
