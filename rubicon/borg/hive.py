@@ -108,11 +108,17 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
         The user_tags can be set in the creation of FireWork
         '''
         fwjsonfile = os.path.join(os.path.dirname(path), 'FW.json')
+        user_tags = {}
         with open(fwjsonfile) as f:
             d = json.load(f)
         if 'user_tags' in d['spec'].keys():
-            return d['spec']['user_tags']
-        return None
+            user_tags = d['spec']['user_tags']
+        if 'name' in d:
+            user_tags['fw_name'] = d['name']
+        if len(user_tags)>0:
+            return user_tags
+        else:
+            return None
 
     @classmethod
     def get_task_doc(cls, path):

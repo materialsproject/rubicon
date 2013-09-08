@@ -7,25 +7,25 @@
                 "query": "{}", 
                 "name": "Automatically generated Worker"
             }, 
-            "ip": "131.243.15.172", 
+            "ip": "192.168.2.2", 
             "fw_id": 1, 
             "state": "RUNNING", 
-            "host": "macqu.dhcp.lbl.gov", 
-            "launch_dir": "/Users/xiaohuiqu/temp/fw_test/scratch/launcher_Process-2_2013-09-06-22-18-55-526005", 
+            "host": "MacQu.local", 
+            "launch_dir": "/Users/xiaohuiqu/temp/fw_test/scratch/shyue/launcher_Process-2_2013-09-07-03-16-08-268888", 
             "action": null, 
             "launch_id": 1, 
             "state_history": [
                 {
-                    "updated_on": "2013-09-06T22:18:55.873967", 
+                    "updated_on": "2013-09-07T03:16:08.424202", 
                     "state": "RUNNING", 
-                    "created_on": "2013-09-06T22:18:55.873945"
+                    "created_on": "2013-09-07T03:16:08.424137"
                 }
             ]
         }
     ], 
     "fw_id": 1, 
     "state": "RUNNING", 
-    "created_on": "2013-09-06T22:18:19.252059", 
+    "created_on": "2013-09-07T03:14:56.735920", 
     "spec": {
         "_tasks": [
             {
@@ -49,8 +49,8 @@
                 "spin_multiplicity": 1, 
                 "operation": "optimize", 
                 "basis_set": {
-                    "H": "6-31+g*", 
-                    "O": "6-31+g*"
+                    "H": "6-31+G*", 
+                    "O": "6-31+G*"
                 }, 
                 "@class": "NwTask"
             }, 
@@ -67,8 +67,8 @@
                 "spin_multiplicity": 1, 
                 "operation": "freq", 
                 "basis_set": {
-                    "H": "6-31+g*", 
-                    "O": "6-31+g*"
+                    "H": "6-31+G*", 
+                    "O": "6-31+G*"
                 }, 
                 "@class": "NwTask"
             }, 
@@ -85,8 +85,8 @@
                 "spin_multiplicity": 1, 
                 "operation": "energy", 
                 "basis_set": {
-                    "H": "6-31+g*", 
-                    "O": "6-31+g*"
+                    "H": "6-311++G(2d,2p)", 
+                    "O": "6-311++G(2d,2p)"
                 }, 
                 "@class": "NwTask"
             }, 
@@ -103,8 +103,8 @@
                 "spin_multiplicity": 2, 
                 "operation": "energy", 
                 "basis_set": {
-                    "H": "6-31+g*", 
-                    "O": "6-31+g*"
+                    "H": "6-311++G(2d,2p)", 
+                    "O": "6-311++G(2d,2p)"
                 }, 
                 "@class": "NwTask"
             }, 
@@ -121,13 +121,15 @@
                 "spin_multiplicity": 2, 
                 "operation": "energy", 
                 "basis_set": {
-                    "H": "6-31+g*", 
-                    "O": "6-31+g*"
+                    "H": "6-311++G(2d,2p)", 
+                    "O": "6-311++G(2d,2p)"
                 }, 
                 "@class": "NwTask"
             }
         ], 
-        "mission": "G3 Test Set Benchmark (Larry Scheme)", 
+        "user_tags": {
+            "mission": "G3 Test Set Benchmark (Shyue Scheme)"
+        }, 
         "directives": [], 
         "mol": {
             "charge": 0, 
