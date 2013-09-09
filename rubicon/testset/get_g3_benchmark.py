@@ -27,6 +27,7 @@ def get_g3_bench_collection():
 collection = get_g3_bench_collection()
 
 mission_tag = "G2-97 Test Set Benchmark (Shyue Scheme)"
+bench_key_name = "Shyue"
 
 with open('G3_ref.json') as f:
     bench = json.load(f)
@@ -39,3 +40,16 @@ calc_result = list(result_cursor)
 with open("gauname2refname.json") as f:
     gau2web_name_map = json.load(f)
 
+no_bench = {}
+
+for m in calc_result:
+    fw_name = m['user_tags']['fw_name']
+    if fw_name in gau2web_name_map:
+        web_name = gau2web_name_map[fw_name]
+        d = bench[web_name]
+        if 'IP' in d and 'IE' in m:
+            d['IP'][bench_key_name] = m['IE']
+        if 'EA' in d and 'EA' in m:
+            d['EA'][bench_key_name] = m['EA']
+
+print bench
