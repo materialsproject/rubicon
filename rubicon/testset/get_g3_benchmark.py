@@ -26,10 +26,12 @@ def get_g3_bench_collection():
 
 collection = get_g3_bench_collection()
 
-mission_tag = "G3 Test Set Benchmark (Shyue Scheme)"
+mission_tag = "G2-97 Test Set Benchmark (Shyue Scheme)"
+
+with open('G3_ref.json') as f:
+    bench = json.load(f)
 
 result = collection.find({"user_tags.mission": mission_tag},
-                         fields=['pretty_formula', 'IE', 'EA', 'charge'])
+                         fields=['pretty_formula', 'IE', 'EA', 'charge',
+                                 'user_tags.fw_name'])
 
-for m in result:
-    print m

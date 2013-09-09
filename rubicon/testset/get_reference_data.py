@@ -28,5 +28,11 @@ def get_table(url, title, keyname, result):
 get_table(ip_url, "G3 Ionization Potentials", "IP", bench_dict)
 get_table(ea_url, "G3 Electron Affinities", "EA", bench_dict)
 
-with open("G3_Bench.json", 'w') as f:
+bench_dict["CH3O CS (2A')"]["EA"] = bench_dict["CH3O"]["EA"]
+bench_dict.pop('CH3O')
+
+bench_dict["HS"]['IP'] = bench_dict['SH']['IP']
+bench_dict.pop('SH')
+
+with open("G3_ref.json", 'w') as f:
     json.dump(bench_dict, f, indent=4, sort_keys=True)
