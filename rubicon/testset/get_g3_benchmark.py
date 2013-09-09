@@ -42,7 +42,7 @@ def get_calcualtion_result(mission_tag, bench_key_name, bench_dict, db_collectio
         fw_name = m['user_tags']['fw_name']
         if fw_name in gau2web_name_map:
             web_name = gau2web_name_map[fw_name]
-            d = bench[web_name]
+            d = bench_dict[web_name]
             if 'IE' in m:
                 if 'IP' in d:
                     d['IP'][bench_key_name] = m['IE']
