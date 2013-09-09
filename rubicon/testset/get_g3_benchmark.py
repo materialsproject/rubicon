@@ -35,3 +35,6 @@ result = collection.find({"user_tags.mission": mission_tag},
                          fields=['pretty_formula', 'IE', 'EA', 'charge',
                                  'user_tags.fw_name'])
 
+with open("gauname2refname.json") as f:
+    gau2web_name_map = json.load(f)
+
