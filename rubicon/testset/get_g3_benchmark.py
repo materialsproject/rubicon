@@ -31,9 +31,10 @@ mission_tag = "G2-97 Test Set Benchmark (Shyue Scheme)"
 with open('G3_ref.json') as f:
     bench = json.load(f)
 
-result = collection.find({"user_tags.mission": mission_tag},
+result_cursor = collection.find({"user_tags.mission": mission_tag},
                          fields=['pretty_formula', 'IE', 'EA', 'charge',
                                  'user_tags.fw_name'])
+calc_result = list(result_cursor)
 
 with open("gauname2refname.json") as f:
     gau2web_name_map = json.load(f)
