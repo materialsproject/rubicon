@@ -5,6 +5,8 @@ from pymongo.mongo_client import MongoClient
 __author__ = 'xiaohuiqu'
 
 
+KCAL_TO_EV = 0.0433634
+
 def get_g3_bench_collection():
     global db_dir, db_path, f, db_creds, host, port, user, password, database_name, collection_name, conn, db, collection
     db_dir = os.environ['DB_LOC']
@@ -32,6 +34,12 @@ bench_key_name = "Shyue"
 with open('G3_ref.json') as f:
     bench = json.load(f)
 
+for m in bench.items():
+    if m[0] != 'unit':
+        for i, v in m[1].items():
+            v['Expt'] *= KCAL_TO_EV
+            v['G3'] *= KCAL_TO_EV
+
 result_cursor = collection.find({"user_tags.mission": mission_tag},
                          fields=['pretty_formula', 'IE', 'EA', 'charge',
                                  'user_tags.fw_name'])
@@ -47,9 +55,14 @@ for m in calc_result:
     if fw_name in gau2web_name_map:
         web_name = gau2web_name_map[fw_name]
         d = bench[web_name]
-        if 'IP' in d and 'IE' in m:
-            d['IP'][bench_key_name] = m['IE']
-        if 'EA' in d and 'EA' in m:
-            d['EA'][bench_key_name] = m['EA']
+        if 'IE' in m:
+            if 'IP' in d:
+                d['IP'][bench_key_name] = m['IE']
+            else:
+                d['IP'] = {bench_key_name: m['IE']}
+        if 'EA' in m:
+            if 'EA' in d:
+                d['EA'][bench_key_name] = m['EA']
+            else:
+                d['EA'] = {bench_key_name: m['EA']}
 
-print bench
