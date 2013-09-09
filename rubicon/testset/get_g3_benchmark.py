@@ -1,3 +1,4 @@
+import copy
 import os
 import json
 from pymongo.mongo_client import MongoClient
@@ -26,43 +27,48 @@ def get_g3_bench_collection():
     collection = db[collection_name]
     return collection
 
-collection = get_g3_bench_collection()
 
-mission_tag = "G2-97 Test Set Benchmark (Shyue Scheme)"
-bench_key_name = "Shyue"
 
-with open('G3_ref.json') as f:
-    bench = json.load(f)
+def get_calcualtion_result(mission_tag, bench_key_name, bench_dict, db_collection):
+    result_cursor = db_collection.find({"user_tags.mission": mission_tag},
+                             fields=['pretty_formula', 'IE', 'EA', 'charge',
+                                     'user_tags.fw_name'])
+    calc_result = list(result_cursor)
 
-for m in bench.items():
-    if m[0] != 'unit':
-        for i, v in m[1].items():
-            v['Expt'] *= KCAL_TO_EV
-            v['G3'] *= KCAL_TO_EV
+    with open("gauname2refname.json") as f:
+        gau2web_name_map = json.load(f)
 
-result_cursor = collection.find({"user_tags.mission": mission_tag},
-                         fields=['pretty_formula', 'IE', 'EA', 'charge',
-                                 'user_tags.fw_name'])
-calc_result = list(result_cursor)
+    for m in calc_result:
+        fw_name = m['user_tags']['fw_name']
+        if fw_name in gau2web_name_map:
+            web_name = gau2web_name_map[fw_name]
+            d = bench[web_name]
+            if 'IE' in m:
+                if 'IP' in d:
+                    d['IP'][bench_key_name] = m['IE']
+                else:
+                    d['IP'] = {bench_key_name: m['IE']}
+            if 'EA' in m:
+                if 'EA' in d:
+                    d['EA'][bench_key_name] = m['EA']
+                else:
+                    d['EA'] = {bench_key_name: m['EA']}
 
-with open("gauname2refname.json") as f:
-    gau2web_name_map = json.load(f)
+if __name__ == '__main__':
 
-no_bench = {}
+    with open('G3_ref.json') as f:
+        ref_data = json.load(f)
+    bench = copy.deepcopy(ref_data)
+    for m in bench.items():
+        if m[0] != 'unit':
+            for i, v in m[1].items():
+                v['Expt'] *= KCAL_TO_EV
+                v['G3'] *= KCAL_TO_EV
 
-for m in calc_result:
-    fw_name = m['user_tags']['fw_name']
-    if fw_name in gau2web_name_map:
-        web_name = gau2web_name_map[fw_name]
-        d = bench[web_name]
-        if 'IE' in m:
-            if 'IP' in d:
-                d['IP'][bench_key_name] = m['IE']
-            else:
-                d['IP'] = {bench_key_name: m['IE']}
-        if 'EA' in m:
-            if 'EA' in d:
-                d['EA'][bench_key_name] = m['EA']
-            else:
-                d['EA'] = {bench_key_name: m['EA']}
+    collection = get_g3_bench_collection()
 
+    get_calcualtion_result("G2-97 Test Set Benchmark (Shyue Scheme)", "Shyue", bench, collection)
+    get_calcualtion_result("G2-97 Test Set Benchmark (Larry Scheme)", "Larry", bench, collection)
+
+    with open("G3_bench.json", 'w') as f:
+        json.dump(bench, f, indent=4, sort_keys=True)
