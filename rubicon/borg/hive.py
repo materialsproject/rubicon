@@ -141,6 +141,7 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
                     data_dict["sol_en_=1"] = d
 
         data = data_dict
+        #
 
         d = {"path": os.path.abspath(path),
              "calculations": data,
