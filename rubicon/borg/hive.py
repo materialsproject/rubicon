@@ -132,10 +132,13 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
             elif d["job_type"] == "NWChem DFT Module":
                 if d["charge"] == charge:
                     data_dict["scf"] = d
+                    data_dict["sol_en_0"] = d
                 elif d["charge"] == charge + 1:
                     data_dict["scf_IE"] = d
+                    data_dict["sol_en_-1"] = d
                 elif d["charge"] == charge - 1:
                     data_dict["scf_EA"] = d
+                    data_dict["sol_en_=1"] = d
 
         data = data_dict
 
