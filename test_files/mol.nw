@@ -1,0 +1,145 @@
+geometry units angstroms
+ O 0.0 0.0 0.0
+ O 0.0 0.0 2.91290214
+ H 0.892596492666 0.0 -0.373265731391
+ H 0.143969938371 0.00021929468789 0.96435102517
+ H -0.582554004172 0.765401220892 3.04278320758
+ H -0.580710976505 -0.766761435132 3.04301172965
+end
+
+title "H4O2 dft optimize"
+charge 0
+basis
+ H library "6-31++G*"
+ O library "6-31++G*"
+end
+dft
+ xc b3lyp
+ iterations 300
+ mult 1
+end
+task dft optimize
+
+title "H4O2 dft freq"
+charge 0
+basis
+ H library "6-31++G*"
+ O library "6-31++G*"
+end
+dft
+ xc b3lyp
+ iterations 300
+ mult 1
+end
+task dft freq
+
+title "H4O2 dft energy"
+charge 0
+basis
+ H library "6-311++G**"
+ O library "6-311++G**"
+end
+dft
+ xc b3lyp
+ iterations 300
+ mult 1
+end
+task dft energy
+
+title "H4O2 dft energy"
+charge 1
+basis
+ H library "6-311++G**"
+ O library "6-311++G**"
+end
+dft
+ xc b3lyp
+ iterations 300
+ mult 2
+end
+task dft energy
+
+title "H4O2 dft energy"
+charge -1
+basis
+ H library "6-311++G**"
+ O library "6-311++G**"
+end
+dft
+ xc b3lyp
+ iterations 300
+ mult 2
+end
+task dft energy
+
+title "H4O2 dft energy"
+charge 1
+basis
+ H library "6-311++G**"
+ O library "6-311++G**"
+end
+dft
+ xc b3lyp
+ iterations 300
+ mult 2
+end
+cosmo
+ dielec 78.0
+end
+task dft energy
+
+title "H4O2 dft energy"
+charge -1
+basis
+ H library "6-311++G**"
+ O library "6-311++G**"
+end
+dft
+ xc b3lyp
+ iterations 300
+ mult 2
+end
+cosmo
+ dielec 78.0
+end
+task dft energy
+
+title "H4O2 dft energy"
+charge 0
+basis
+ H library "6-311++G**"
+ O library "6-311++G**"
+end
+dft
+ xc b3lyp
+ iterations 300
+ mult 1
+end
+cosmo
+ dielec 78.0
+end
+task dft energy
+
+title "H4O2 esp "
+charge 1
+basis
+ H library "6-311++G**"
+ O library "6-311++G**"
+end
+task esp
+
+title "H4O2 esp "
+charge -1
+basis
+ H library "6-311++G**"
+ O library "6-311++G**"
+end
+task esp
+
+title "H4O2 esp "
+charge 0
+basis
+ H library "6-311++G**"
+ O library "6-311++G**"
+end
+task esp
