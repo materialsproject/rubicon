@@ -1,7 +1,9 @@
+from collections import defaultdict
 import copy
 import os
 import json
 from pymongo.mongo_client import MongoClient
+import csv
 
 __author__ = 'xiaohuiqu'
 
@@ -54,6 +56,32 @@ def get_calcualtion_result(mission_tag, bench_key_name, bench_dict, db_collectio
                 else:
                     d['EA'] = {bench_key_name: m['EA']}
 
+def write_csv(bench):
+    source_names = set()
+    property_names = set()
+    for m in bench.items():
+        if m[0] != 'unit':
+            for i, v in m[1].items():
+                property_names.add(i)
+                source_names = source_names | set(v.keys())
+    headings = ['Molecule'] + ['{}-{}'.format(i, j)
+                               for i in sorted(list(property_names))
+                               for j in sorted(list(source_names))]
+    with open("G3_bench.csv", 'w') as f:
+        writer = csv.DictWriter(f, fieldnames=headings)
+        writer.writeheader()
+        mols = sorted(bench.keys())
+        mols.remove('unit')
+        for m in mols:
+            row_dict = defaultdict(str)
+            row_dict["Molecule"] = m
+            for property, source_names in bench[m].items():
+                for source in source_names:
+                    col_name = '{}-{}'.format(property, source)
+                    row_dict[col_name] = bench[m][property][source]
+            writer.writerow(row_dict)
+
+
 if __name__ == '__main__':
 
     with open('G3_ref.json') as f:
@@ -72,3 +100,5 @@ if __name__ == '__main__':
 
     with open("G3_bench.json", 'w') as f:
         json.dump(bench, f, indent=4, sort_keys=True)
+
+    write_csv(bench)
