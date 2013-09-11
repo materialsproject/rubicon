@@ -140,9 +140,9 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
                 if d["charge"] == charge:
                     data_dict["sol_scf"] = d
                 elif d["charge"] == charge + 1:
-                    data_dict["sol_EA"] = d
-                elif d["charge"] == charge - 1:
                     data_dict["sol_IE"] = d
+                elif d["charge"] == charge - 1:
+                    data_dict["sol_EA"] = d
 
 
 
