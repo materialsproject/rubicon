@@ -1,6 +1,7 @@
 fws:
-- created_on: '2013-04-11T21:22:58.122237'
+- created_on: '2013-09-05T00:19:09.702124'
   fw_id: -1
+  name: Unnamed FW
   spec:
     _category: Molecules
     _tasks:
@@ -15,280 +16,198 @@ fws:
     molecule:
       '@class': Molecule
       '@module': pymatgen.core.structure
+      charge: 0
       sites:
-      - '@class': Site
-        '@module': pymatgen.core.sites
-        name: C
+      - name: C
         properties: {}
         species:
-        - '@class': Element
-          '@module': pymatgen.core.periodic_table
-          element: C
+        - element: C
           occu: 1
         xyz:
         - -3.560439
         - -0.070098
         - 9.0e-06
-      - '@class': Site
-        '@module': pymatgen.core.sites
-        name: C
+      - name: C
         properties: {}
         species:
-        - '@class': Element
-          '@module': pymatgen.core.periodic_table
-          element: C
+        - element: C
           occu: 1
         xyz:
         - -2.652432
         - -1.108316
         - -1.4e-05
-      - '@class': Site
-        '@module': pymatgen.core.sites
-        name: C
+      - name: C
         properties: {}
         species:
-        - '@class': Element
-          '@module': pymatgen.core.periodic_table
-          element: C
+        - element: C
           occu: 1
         xyz:
         - -1.262069
         - -0.830877
         - -1.8e-05
-      - '@class': Site
-        '@module': pymatgen.core.sites
-        name: C
+      - name: C
         properties: {}
         species:
-        - '@class': Element
-          '@module': pymatgen.core.periodic_table
-          element: C
+        - element: C
           occu: 1
         xyz:
         - -0.817922
         - 0.531199
         - 1.4e-05
-      - '@class': Site
-        '@module': pymatgen.core.sites
-        name: C
+      - name: C
         properties: {}
         species:
-        - '@class': Element
-          '@module': pymatgen.core.periodic_table
-          element: C
+        - element: C
           occu: 1
         xyz:
         - -1.775449
         - 1.580241
         - 3.1e-05
-      - '@class': Site
-        '@module': pymatgen.core.sites
-        name: C
+      - name: C
         properties: {}
         species:
-        - '@class': Element
-          '@module': pymatgen.core.periodic_table
-          element: C
+        - element: C
           occu: 1
         xyz:
         - -3.120597
         - 1.280534
         - 2.8e-05
-      - '@class': Site
-        '@module': pymatgen.core.sites
-        name: H
+      - name: H
         properties: {}
         species:
-        - '@class': Element
-          '@module': pymatgen.core.periodic_table
-          element: H
+        - element: H
           occu: 1
         xyz:
         - -4.626173
         - -0.28281
         - 1.3e-05
-      - '@class': Site
-        '@module': pymatgen.core.sites
-        name: H
+      - name: H
         properties: {}
         species:
-        - '@class': Element
-          '@module': pymatgen.core.periodic_table
-          element: H
+        - element: H
           occu: 1
         xyz:
         - -2.966982
         - -2.147773
         - -3.2e-05
-      - '@class': Site
-        '@module': pymatgen.core.sites
-        name: H
+      - name: H
         properties: {}
         species:
-        - '@class': Element
-          '@module': pymatgen.core.periodic_table
-          element: H
+        - element: H
           occu: 1
         xyz:
         - -1.414262
         - 2.604594
         - 4.9e-05
-      - '@class': Site
-        '@module': pymatgen.core.sites
-        name: H
+      - name: H
         properties: {}
         species:
-        - '@class': Element
-          '@module': pymatgen.core.periodic_table
-          element: H
+        - element: H
           occu: 1
         xyz:
         - -3.855522
         - 2.080975
         - 4.3e-05
-      - '@class': Site
-        '@module': pymatgen.core.sites
-        name: C
+      - name: C
         properties: {}
         species:
-        - '@class': Element
-          '@module': pymatgen.core.periodic_table
-          element: C
+        - element: C
           occu: 1
         xyz:
         - 1.355633
         - -0.183728
         - -2.8e-05
-      - '@class': Site
-        '@module': pymatgen.core.sites
-        name: C
+      - name: C
         properties: {}
         species:
-        - '@class': Element
-          '@module': pymatgen.core.periodic_table
-          element: C
+        - element: C
           occu: 1
         xyz:
         - 0.908048
         - -1.541346
         - -5.1e-05
-      - '@class': Site
-        '@module': pymatgen.core.sites
-        name: N
+      - name: N
         properties: {}
         species:
-        - '@class': Element
-          '@module': pymatgen.core.periodic_table
-          element: N
+        - element: N
           occu: 1
         xyz:
         - 0.50977
         - 0.831041
         - 2.5e-05
-      - '@class': Site
-        '@module': pymatgen.core.sites
-        name: N
+      - name: N
         properties: {}
         species:
-        - '@class': Element
-          '@module': pymatgen.core.periodic_table
-          element: N
+        - element: N
           occu: 1
         xyz:
         - -0.366912
         - -1.862962
         - -4.7e-05
-      - '@class': Site
-        '@module': pymatgen.core.sites
-        name: H
+      - name: H
         properties: {}
         species:
-        - '@class': Element
-          '@module': pymatgen.core.periodic_table
-          element: H
+        - element: H
           occu: 1
         xyz:
         - 1.638925
         - -2.344976
         - -4.7e-05
-      - '@class': Site
-        '@module': pymatgen.core.sites
-        name: C
+      - name: C
         properties: {}
         species:
-        - '@class': Element
-          '@module': pymatgen.core.periodic_table
-          element: C
+        - element: C
           occu: 1
         xyz:
         - 2.834055
         - 0.114764
         - 3.5e-05
-      - '@class': Site
-        '@module': pymatgen.core.sites
-        name: O
+      - name: O
         properties: {}
         species:
-        - '@class': Element
-          '@module': pymatgen.core.periodic_table
-          element: O
+        - element: O
           occu: 1
         xyz:
         - 3.635347
         - -0.808679
         - 0.000135
-      - '@class': Site
-        '@module': pymatgen.core.sites
-        name: C
+      - name: C
         properties: {}
         species:
-        - '@class': Element
-          '@module': pymatgen.core.periodic_table
-          element: C
+        - element: C
           occu: 1
         xyz:
         - 3.266463
         - 1.562461
         - -8.7e-05
-      - '@class': Site
-        '@module': pymatgen.core.sites
-        name: H
+      - name: H
         properties: {}
         species:
-        - '@class': Element
-          '@module': pymatgen.core.periodic_table
-          element: H
+        - element: H
           occu: 1
         xyz:
         - 2.866289
         - 2.083118
         - -0.877478
-      - '@class': Site
-        '@module': pymatgen.core.sites
-        name: H
+      - name: H
         properties: {}
         species:
-        - '@class': Element
-          '@module': pymatgen.core.periodic_table
-          element: H
+        - element: H
           occu: 1
         xyz:
         - 2.865837
         - 2.083468
         - 0.876866
-      - '@class': Site
-        '@module': pymatgen.core.sites
-        name: H
+      - name: H
         properties: {}
         species:
-        - '@class': Element
-          '@module': pymatgen.core.periodic_table
-          element: H
+        - element: H
           occu: 1
         xyz:
         - 4.357364
         - 1.607289
         - 0.000148
+      spin_multiplicity: 1
     name: 2AcetoxyQ
     route_parameters:
       Opt: ''
@@ -296,5 +215,7 @@ fws:
     spin_multiplicity: 1
     title: first test job
 links:
-  -1: []
+  '-1': []
 metadata: {}
+name: unnamed WF
+updated_on: 2013-09-05 00:19:09.702148
