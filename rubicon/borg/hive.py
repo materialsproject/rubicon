@@ -136,8 +136,18 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
                     data_dict["scf_IE"] = d
                 elif d["charge"] == charge - 1:
                     data_dict["scf_EA"] = d
+            elif  d["job_type"] == "NWChem DFT Module COSMO":
+                if d["charge"] == charge:
+                    data_dict["sol_scf"] = d
+                elif d["charge"] == charge + 1:
+                    data_dict["sol_IE"] = d
+                elif d["charge"] == charge - 1:
+                    data_dict["sol_EA"] = d
+
+
 
         data = data_dict
+
 
         d = {"path": os.path.abspath(path),
              "calculations": data,
