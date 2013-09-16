@@ -64,27 +64,19 @@ def mol_to_wf_nwchem(mol, name):
 
     tasks = [
         NwTask.dft_task(mol, operation="optimize", xc="b3lyp",
-                        basis_set="6-31++G*",theory_directives={"iterations": 300}),
-        NwTask.dft_task(mol, operation="freq", xc="b3lyp",
-                        basis_set="6-31++G*",theory_directives={"iterations": 300}),
+                        basis_set="6-31++G*")]
+
+    if len(mol.sites) > 1:
+        tasks += [NwTask.dft_task(mol, operation="freq", xc="b3lyp",
+                        basis_set="6-31++G*")]
+
+    tasks += [
         NwTask.dft_task(mol, operation="energy", xc="b3lyp",
-                        basis_set="6-311++G**",theory_directives={"iterations": 300}),
+                        basis_set="6-311++G**"),
         NwTask.dft_task(mol, charge=mol.charge + 1, operation="energy",
-                        xc="b3lyp", basis_set="6-311++G**",theory_directives={"iterations": 300}),
+                        xc="b3lyp", basis_set="6-311++G**"),
         NwTask.dft_task(mol, charge=mol.charge - 1, operation="energy",
-                        xc="b3lyp", basis_set="6-311++G**",theory_directives={"iterations": 300}),
-        NwTask.dft_task(mol, charge=mol.charge + 1, operation="energy",
-                        xc="b3lyp", basis_set="6-311++G**",alternate_directives={'cosmo':"cosmo"},theory_directives={"iterations": 300}),
-        NwTask.dft_task(mol, charge=mol.charge - 1, operation="energy",
-                        xc="b3lyp", basis_set="6-311++G**",alternate_directives={'cosmo':"cosmo"},theory_directives={"iterations": 300}),
-        NwTask.dft_task(mol, charge=mol.charge, operation="energy",
-                        xc="b3lyp", basis_set="6-311++G**",alternate_directives={'cosmo':"cosmo"},theory_directives={"iterations": 300}),
-        NwTask.esp_task(mol, charge=mol.charge + 1, operation="",
-                         basis_set="6-311++G**"),
-        NwTask.esp_task(mol, charge=mol.charge - 1, operation="",
-                         basis_set="6-311++G**"),
-        NwTask.esp_task(mol, charge=mol.charge, operation="",
-                         basis_set="6-311++G**")
+                        xc="b3lyp", basis_set="6-311++G**")
     ]
 
     nwi = NwInput(mol, tasks)

@@ -32,8 +32,7 @@ def get_cas_number(text):
 
 
 def str_to_obmols(text):
-    mol_texts = [s+'$$$$\n' for s in text.split('$$$$\n')
-                 if not ('ISO' in s or ' * ' in s)]
+    mol_texts = [s+'$$$$\n' for s in text.split('$$$$\n')]
     return [(read_mol_text(s), get_cas_number(s)) for s in mol_texts if len(s.split('\n'))>5]
 
 
@@ -55,7 +54,7 @@ if __name__ == '__main__':
             text = f.read()
         mol_tokens = str_to_obmols(text)
         for (i, (mol, cas)) in enumerate(mol_tokens):
-            print "processing molecule", i+1, cas,  "of", len(mol_tokens), "molecules"
+            print "processing molecule", i+1, "of", len(mol_tokens), "molecules"
             try:
                 build3d(mol)
             except:

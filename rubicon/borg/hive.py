@@ -28,6 +28,8 @@ from pymatgen.io.xyzio import XYZ
 
 from rubicon.testset.parse_mol import get_nih_names
 
+import json
+
 logger = logging.getLogger(__name__)
 
 
@@ -78,6 +80,7 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
                 db.authenticate(self.user, self.password)
             if db.counter.find({"_id": "mol_taskid"}).count() == 0:
                 db.counter.insert({"_id": "mol_taskid", "c": 1})
+            conn.close()
 
     def assimilate(self, path):
         """
@@ -97,6 +100,25 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
             print traceback.format_exc(ex)
             logger.error(traceback.format_exc(ex))
             return False
+
+    @classmethod
+    def get_user_tags(cls, path):
+        '''
+        Parse the user_tags from the FW.json file.
+        The user_tags can be set in the creation of FireWork
+        '''
+        fwjsonfile = os.path.join(os.path.dirname(path), 'FW.json')
+        user_tags = {}
+        with open(fwjsonfile) as f:
+            d = json.load(f)
+        if 'user_tags' in d['spec'].keys():
+            user_tags = d['spec']['user_tags']
+        if 'name' in d:
+            user_tags['fw_name'] = d['name']
+        if len(user_tags)>0:
+            return user_tags
+        else:
+            return None
 
     @classmethod
     def get_task_doc(cls, path):
@@ -165,6 +187,11 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
              "xyz": str(xyz),
              "names": get_nih_names(smiles)}
 
+        user_tags = cls.get_user_tags(path)
+
+        if user_tags:
+            d['user_tags'] = user_tags
+
         if "scf_EA" in data_dict and \
                 (not data_dict["scf_EA"]["has_error"]) and \
                 (not data_dict["scf"]["has_error"]):
@@ -212,6 +239,7 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
                 return d["task_id"]
             else:
                 logger.info("Skipping duplicate {}".format(d["dir_name"]))
+            conn.close()
         else:
             d["task_id"] = 0
             logger.info("Simulated insert into database for {} with task_id {}"

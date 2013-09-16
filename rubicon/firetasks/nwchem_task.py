@@ -35,13 +35,30 @@ class NWChemTask(FireTaskBase, FWSerializable):
         nwi = NwInput.from_dict(fw_spec)
         nwi.write_file('mol.nw')
 
-        if 'nid' in socket.gethostname():  # hopper compute nodes
+        jp_conf = JPConfig()
+
+        if 'macqu.dhcp.lbl.gov' == socket.gethostname() \
+            or 'MacQu.local' == socket.gethostname() \
+            or 'macqu.dhcp.lbnl.us' == socket.gethostname(): # Xiaohui's Laptop
+            nwc_exe = ['nwchem']
+        elif 'nid' in socket.gethostname():  # hopper compute nodes
             # TODO: can base ncores on FW_submit.script
-            nwc_exe = shlex.split('aprun -n 24 nwchem')
-            print 'running on HOPPER'
+            if (not jp_conf.MULTIPROCESSING) or (jp_conf.NODE_LIST is None):
+                nwc_exe = shlex.split('aprun -n 24 nwchem')
+            else:
+                list_str = ','.join(jp_conf.NODE_LIST)
+                num_str = str(jp_conf.SUB_NPROCS)
+                nwc_exe = shlex.split('aprun -n ' + num_str +
+                                      ' -L ' + list_str + ' nwchem')
         elif 'c' in socket.gethostname():  # mendel compute nodes
             # TODO: can base ncores on FW_submit.script
-            nwc_exe = shlex.split('mpirun -n 16 nwchem')
+            if (not jp_conf.MULTIPROCESSING) or (jp_conf.NODE_LIST is None):
+                nwc_exe = shlex.split('mpirun -n 16 nwchem')
+            else:
+                list_str = ','.join(jp_conf.NODE_LIST)
+                num_str = str(jp_conf.SUB_NPROCS)
+                nwc_exe = shlex.split('mpirun -n ' + num_str +
+                                      ' --host ' + list_str + ' nwchem')
 
         job = NwchemJob(nwchem_cmd=nwc_exe)
         handler = NwchemErrorHandler()
@@ -60,7 +77,7 @@ class NWDBInsertionTask(FireTaskBase, FWSerializable):
         db_path = os.path.join(db_dir, 'molecules_db.json')
 
         logging.basicConfig(level=logging.INFO)
-        logger = logging.getLogger('MPVaspDrone')
+        logger = logging.getLogger('NWChemDrone')
         logger.setLevel(logging.INFO)
         sh = logging.StreamHandler(stream=sys.stdout)
         sh.setLevel(getattr(logging, 'INFO'))
@@ -73,6 +90,8 @@ class NWDBInsertionTask(FireTaskBase, FWSerializable):
                 database=db_creds['database'], user=db_creds['admin_user'],
                 password=db_creds['admin_password'],
                 collection=db_creds['collection'])
-            t_id= drone.assimilate(os.path.abspath(os.path.join(os.getcwd(), "mol.nwout")))
+            t_id = drone.assimilate(os.path.abspath(os.path.join(os.getcwd(), "mol.nwout")))
 
-        return FWAction(stored_data={'task_id': t_id})
+        if t_id:
+            return FWAction(stored_data={'task_id': t_id})
+
