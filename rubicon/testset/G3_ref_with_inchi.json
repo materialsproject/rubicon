@@ -7,13 +7,15 @@
         "IP": {
             "Expt": 138.0, 
             "G3": 137.4
-        }
+        }, 
+        "inchi": "InChI=1S/Al\n"
     }, 
     "Ar": {
         "IP": {
             "Expt": 363.4, 
             "G3": 361.8
-        }
+        }, 
+        "inchi": "InChI=1S/Ar\n"
     }, 
     "B": {
         "EA": {
@@ -23,37 +25,43 @@
         "IP": {
             "Expt": 191.4, 
             "G3": 189.9
-        }
+        }, 
+        "inchi": "InChI=1S/B\n"
     }, 
     "B2F4": {
         "IP": {
             "Expt": 278.3, 
             "G3": 271.3
-        }
+        }, 
+        "inchi": "InChI=1S/B2F4/c3-1(4)2(5)6\n"
     }, 
     "B2H4": {
         "IP": {
             "Expt": 223.7, 
             "G3": 221.6
-        }
+        }, 
+        "inchi": "InChI=1S/B2H4/c1-2/h1H,2H3\n"
     }, 
     "BCl3": {
         "IP": {
             "Expt": 267.5, 
             "G3": 268.6
-        }
+        }, 
+        "inchi": "InChI=1S/BCl3/c2-1(3)4\n"
     }, 
     "BF3": {
         "IP": {
             "Expt": 358.8, 
             "G3": 359.9
-        }
+        }, 
+        "inchi": "InChI=1S/BF3/c2-1(3)4\n"
     }, 
     "Be": {
         "IP": {
             "Expt": 214.9, 
             "G3": 218.1
-        }
+        }, 
+        "inchi": "InChI=1S/Be\n"
     }, 
     "C": {
         "EA": {
@@ -63,103 +71,120 @@
         "IP": {
             "Expt": 259.7, 
             "G3": 258.5
-        }
+        }, 
+        "inchi": "InChI=1S/C\n"
     }, 
     "C2": {
         "EA": {
             "Expt": 75.5, 
             "G3": 72.8
-        }
+        }, 
+        "inchi": "InChI=1S/C2/c1-2\n"
     }, 
     "C2H": {
         "EA": {
             "Expt": 68.5, 
             "G3": 69.1
-        }
+        }, 
+        "inchi": "InChI=1S/C2H/c1-2/h1H\n"
     }, 
     "C2H2": {
         "IP": {
             "Expt": 262.9, 
             "G3": 263.1
-        }
+        }, 
+        "inchi": "InChI=1S/C2H2/c1-2/h1-2H\n"
     }, 
     "C2H3": {
         "EA": {
             "Expt": 15.4, 
             "G3": 15.1
-        }
+        }, 
+        "inchi": "InChI=1S/C2H3/c1-2/h1H,2H2\n"
     }, 
     "C2H4": {
         "IP": {
             "Expt": 242.3, 
             "G3": 243.5
-        }
+        }, 
+        "inchi": "InChI=1S/C2H4/c1-2/h1-2H2\n"
     }, 
     "C2H4S (thiirane)": {
         "IP": {
             "Expt": 208.7, 
             "G3": 209.1
-        }
+        }, 
+        "inchi": "InChI=1S/C2H4S/c1-2-3-1/h1-2H2\n"
     }, 
     "C2H5(2A')": {
         "IP": {
             "Expt": 187.2, 
             "G3": 188.3
-        }
+        }, 
+        "inchi": "InChI=1S/C2H5/c1-2/h1H2,2H3\n"
     }, 
     "C2H5OH": {
         "IP": {
             "Expt": 241.4, 
             "G3": 244.8
-        }
+        }, 
+        "inchi": "InChI=1S/C2H6O/c1-2-3/h3H,2H2,1H3\n"
     }, 
     "C2O": {
         "EA": {
             "Expt": 52.8, 
             "G3": 52.8
-        }
+        }, 
+        "inchi": "InChI=1S/C2O/c1-2-3\n"
     }, 
     "C3H4(cyclopropene)": {
         "IP": {
             "Expt": 223.0, 
             "G3": 224.5
-        }
+        }, 
+        "inchi": "InChI=1S/C3H4/c1-2-3-1/h1-2H,3H2\n"
     }, 
     "C4H4O (furan)": {
         "IP": {
             "Expt": 203.6, 
             "G3": 205.0
-        }
+        }, 
+        "inchi": "InChI=1S/C4H4O/c1-2-4-5-3-1/h1-4H\n"
     }, 
     "C4H5N (pyrrole)": {
         "IP": {
             "Expt": 189.3, 
             "G3": 188.7
-        }
+        }, 
+        "inchi": "InChI=1S/C4H5N/c1-2-4-5-3-1/h1-5H\n"
     }, 
     "C6H5CH3": {
         "IP": {
             "Expt": 203.6, 
             "G3": 192.9
-        }
+        }, 
+        "inchi": "InChI=1S/C7H8/c1-7-5-3-2-4-6-7/h2-6H,1H3\n"
     }, 
     "C6H5NH2(aniline)": {
         "IP": {
             "Expt": 178.0, 
             "G3": 166.0
-        }
+        }, 
+        "inchi": "InChI=1S/C6H7N/c7-6-4-2-1-3-5-6/h1-5H,7H2\n"
     }, 
     "C6H5OH (phenol)": {
         "IP": {
             "Expt": 196.2, 
             "G3": 185.1
-        }
+        }, 
+        "inchi": "InChI=1S/C6H6O/c7-6-4-2-1-3-5-6/h1-5,7H\n"
     }, 
     "C6H6": {
         "IP": {
             "Expt": 213.2, 
             "G3": 214.7
-        }
+        }, 
+        "inchi": "InChI=1S/C6H6/c1-2-4-6-5-3-1/h1-6H\n"
     }, 
     "CF2": {
         "EA": {
@@ -169,13 +194,15 @@
         "IP": {
             "Expt": 263.3, 
             "G3": 263.8
-        }
+        }, 
+        "inchi": "InChI=1S/CF2/c2-1-3\n"
     }, 
     "CH": {
         "EA": {
             "Expt": 28.6, 
             "G3": 27.2
-        }
+        }, 
+        "inchi": "InChI=1S/CH/h1H\n"
     }, 
     "CH2": {
         "EA": {
@@ -185,37 +212,43 @@
         "IP": {
             "Expt": 239.7, 
             "G3": 239.7
-        }
+        }, 
+        "inchi": "InChI=1S/CH2/h1H2\n"
     }, 
     "CH2=C=CH2": {
         "IP": {
             "Expt": 223.5, 
             "G3": 223.6
-        }
+        }, 
+        "inchi": "InChI=1S/C3H4/c1-3-2/h1-2H2\n"
     }, 
     "CH2CHCH2": {
         "EA": {
             "Expt": 10.9, 
             "G3": 10.2
-        }
+        }, 
+        "inchi": "InChI=1S/C3H5/c1-3-2/h3H,1-2H2\n"
     }, 
     "CH2CHO": {
         "EA": {
             "Expt": 42.1, 
             "G3": 42.3
-        }
+        }, 
+        "inchi": "InChI=1S/C2H3O/c1-2-3/h2H,1H2\n"
     }, 
     "CH2CN": {
         "EA": {
             "Expt": 35.6, 
             "G3": 35.0
-        }
+        }, 
+        "inchi": "InChI=1S/C2H2N/c1-2-3/h1H2\n"
     }, 
     "CH2NC": {
         "EA": {
             "Expt": 24.4, 
             "G3": 25.5
-        }
+        }, 
+        "inchi": "InChI=1S/C2H2N/c1-3-2/h1H2\n"
     }, 
     "CH2S": {
         "EA": {
@@ -225,13 +258,15 @@
         "IP": {
             "Expt": 216.2, 
             "G3": 215.8
-        }
+        }, 
+        "inchi": "InChI=1S/CH2S/c1-2/h1H2\n"
     }, 
     "CH2SH": {
         "IP": {
             "Expt": 173.8, 
             "G3": 173.0
-        }
+        }, 
+        "inchi": "InChI=1S/CH3S/c1-2/h2H,1H2\n"
     }, 
     "CH3": {
         "EA": {
@@ -241,43 +276,50 @@
         "IP": {
             "Expt": 227.0, 
             "G3": 227.6
-        }
+        }, 
+        "inchi": "InChI=1S/CH3/h1H3\n"
     }, 
     "CH3CH2O": {
         "EA": {
             "Expt": 39.5, 
             "G3": 40.4
-        }
+        }, 
+        "inchi": "InChI=1S/C2H5O/c1-2-3/h2H2,1H3\n"
     }, 
     "CH3CH2S": {
         "EA": {
             "Expt": 45.0, 
             "G3": 46.4
-        }
+        }, 
+        "inchi": "InChI=1S/C2H5S/c1-2-3/h2H2,1H3\n"
     }, 
     "CH3CHO": {
         "IP": {
             "Expt": 235.9, 
             "G3": 236.9
-        }
+        }, 
+        "inchi": "InChI=1S/C2H4O/c1-2-3/h2H,1H3\n"
     }, 
     "CH3CO": {
         "EA": {
             "Expt": 9.8, 
             "G3": 9.3
-        }
+        }, 
+        "inchi": "InChI=1S/C2H3O/c1-2-3/h1H3\n"
     }, 
     "CH3Cl": {
         "IP": {
             "Expt": 258.7, 
             "G3": 262.6
-        }
+        }, 
+        "inchi": "InChI=1S/CH3Cl/c1-2/h1H3\n"
     }, 
     "CH3F": {
         "IP": {
             "Expt": 287.6, 
             "G3": 292.5
-        }
+        }, 
+        "inchi": "InChI=1S/CH3F/c1-2/h1H3\n"
     }, 
     "CH3O CS (2A')": {
         "EA": {
@@ -287,43 +329,50 @@
         "IP": {
             "Expt": 247.3, 
             "G3": 247.7
-        }
+        }, 
+        "inchi": "InChI=1S/CH3O/c1-2/h1H3\n"
     }, 
     "CH3OF": {
         "IP": {
             "Expt": 261.5, 
             "G3": 262.9
-        }
+        }, 
+        "inchi": "InChI=1S/CH3FO/c1-3-2/h1H3\n"
     }, 
     "CH3OH": {
         "IP": {
             "Expt": 250.2, 
             "G3": 251.8
-        }
+        }, 
+        "inchi": "InChI=1S/CH4O/c1-2/h2H,1H3\n"
     }, 
     "CH3S": {
         "EA": {
             "Expt": 43.1, 
             "G3": 42.9
-        }
+        }, 
+        "inchi": "InChI=1S/CH3S/c1-2/h1H3\n"
     }, 
     "CH3SH": {
         "IP": {
             "Expt": 217.7, 
             "G3": 218.1
-        }
+        }, 
+        "inchi": "InChI=1S/CH4S/c1-2/h2H,1H3\n"
     }, 
     "CH4": {
         "IP": {
             "Expt": 291.0, 
             "G3": 291.8
-        }
+        }, 
+        "inchi": "InChI=1S/CH4/h1H4\n"
     }, 
     "CHCO": {
         "EA": {
             "Expt": 54.2, 
             "G3": 53.3
-        }
+        }, 
+        "inchi": "InChI=1S/C2HO/c1-2-3/h1H\n"
     }, 
     "CHO": {
         "IP": {
@@ -339,19 +388,22 @@
         "IP": {
             "Expt": 313.6, 
             "G3": 319.6
-        }
+        }, 
+        "inchi": "InChI=1S/CN/c1-2\n"
     }, 
     "CO": {
         "IP": {
             "Expt": 323.1, 
             "G3": 323.2
-        }
+        }, 
+        "inchi": "InChI=1S/CO/c1-2\n"
     }, 
     "CO2": {
         "IP": {
             "Expt": 317.6, 
             "G3": 315.9
-        }
+        }, 
+        "inchi": "InChI=1S/CO2/c2-1-3\n"
     }, 
     "COS": {
         "IP": {
@@ -373,7 +425,8 @@
         "IP": {
             "Expt": 299.1, 
             "G3": 297.3
-        }
+        }, 
+        "inchi": "InChI=1S/Cl\n"
     }, 
     "Cl2": {
         "EA": {
@@ -383,19 +436,22 @@
         "IP": {
             "Expt": 265.2, 
             "G3": 265.8
-        }
+        }, 
+        "inchi": "InChI=1S/Cl2/c1-2\n"
     }, 
     "ClF": {
         "IP": {
             "Expt": 291.9, 
             "G3": 292.0
-        }
+        }, 
+        "inchi": "InChI=1S/ClF/c1-2\n"
     }, 
     "ClH": {
         "IP": {
             "Expt": 294.0, 
             "G3": 293.3
-        }
+        }, 
+        "inchi": "InChI=1S/ClH/h1H\n"
     }, 
     "F": {
         "EA": {
@@ -405,13 +461,15 @@
         "IP": {
             "Expt": 401.7, 
             "G3": 401.0
-        }
+        }, 
+        "inchi": "InChI=1S/F\n"
     }, 
     "FH": {
         "IP": {
             "Expt": 369.9, 
             "G3": 370.0
-        }
+        }, 
+        "inchi": "InChI=1S/FH/h1H\n"
     }, 
     "H": {
         "IP": {
@@ -423,49 +481,57 @@
         "EA": {
             "Expt": 41.4, 
             "G3": 42.2
-        }
+        }, 
+        "inchi": "InChI=1S/C3H2/c1-3-2/h1H2\n"
     }, 
     "H2C=C=CH": {
         "EA": {
             "Expt": 20.6, 
             "G3": 20.9
-        }
+        }, 
+        "inchi": "InChI=1S/C3H3/c1-3-2/h1H,2H2\n"
     }, 
     "H2COH (2A)": {
         "IP": {
             "Expt": 174.2, 
             "G3": 173.7
-        }
+        }, 
+        "inchi": "InChI=1S/CH3O/c1-2/h2H,1H2\n"
     }, 
     "HCF": {
         "EA": {
             "Expt": 12.5, 
             "G3": 12.2
-        }
+        }, 
+        "inchi": "InChI=1S/CHF/c1-2/h1H\n"
     }, 
     "HCO": {
         "EA": {
             "Expt": 7.2, 
             "G3": 7.1
-        }
+        }, 
+        "inchi": "InChI=1S/CHO/c1-2/h1H\n"
     }, 
     "HNO": {
         "EA": {
             "Expt": 7.8, 
             "G3": 6.8
-        }
+        }, 
+        "inchi": "InChI=1S/HNO/c1-2/h1H\n"
     }, 
     "HO2": {
         "EA": {
             "Expt": 24.9, 
             "G3": 24.2
-        }
+        }, 
+        "inchi": "InChI=1S/HO2/c1-2/h1H\n"
     }, 
     "HOF": {
         "IP": {
             "Expt": 293.1, 
             "G3": 293.3
-        }
+        }, 
+        "inchi": "InChI=1S/FHO/c1-2/h2H\n"
     }, 
     "HS": {
         "EA": {
@@ -475,7 +541,8 @@
         "IP": {
             "Expt": 239.1, 
             "G3": 238.1
-        }
+        }, 
+        "inchi": "InChI=1S/HS/h1H\n"
     }, 
     "He": {
         "IP": {
@@ -491,25 +558,29 @@
         "IP": {
             "Expt": 124.3, 
             "G3": 124.5
-        }
+        }, 
+        "inchi": "InChI=1S/Li\n"
     }, 
     "LiH": {
         "EA": {
             "Expt": 7.9, 
             "G3": 9.1
-        }
+        }, 
+        "inchi": "InChI=1S/Li.H\n"
     }, 
     "Mg": {
         "IP": {
             "Expt": 176.3, 
             "G3": 179.5
-        }
+        }, 
+        "inchi": "InChI=1S/Mg\n"
     }, 
     "N": {
         "IP": {
             "Expt": 335.3, 
             "G3": 334.5
-        }
+        }, 
+        "inchi": "InChI=1S/N\n"
     }, 
     "N2(2Pcation)": {
         "IP": {
@@ -527,25 +598,29 @@
         "IP": {
             "Expt": 221.1, 
             "G3": 223.1
-        }
+        }, 
+        "inchi": "InChI=1S/H4N2/c1-2/h1-2H2\n"
     }, 
     "N2H3": {
         "IP": {
             "Expt": 175.5, 
             "G3": 175.6
-        }
+        }, 
+        "inchi": "InChI=1S/H3N2/c1-2/h1H,2H2\n"
     }, 
     "NCCN": {
         "IP": {
             "Expt": 308.3, 
             "G3": 309.0
-        }
+        }, 
+        "inchi": "InChI=1S/C2N2/c3-1-2-4\n"
     }, 
     "NCO": {
         "EA": {
             "Expt": 83.2, 
             "G3": 82.5
-        }
+        }, 
+        "inchi": "InChI=1S/CNO/c2-1-3\n"
     }, 
     "NH": {
         "EA": {
@@ -555,7 +630,8 @@
         "IP": {
             "Expt": 311.1, 
             "G3": 311.2
-        }
+        }, 
+        "inchi": "InChI=1S/HN/h1H\n"
     }, 
     "NH2": {
         "EA": {
@@ -565,25 +641,29 @@
         "IP": {
             "Expt": 256.9, 
             "G3": 256.4
-        }
+        }, 
+        "inchi": "InChI=1S/H2N/h1H2\n"
     }, 
     "NH3": {
         "IP": {
             "Expt": 234.8, 
             "G3": 233.8
-        }
+        }, 
+        "inchi": "InChI=1S/H3N/h1H3\n"
     }, 
     "NO": {
         "EA": {
             "Expt": 0.5, 
             "G3": -0.1
-        }
+        }, 
+        "inchi": "InChI=1S/NO/c1-2\n"
     }, 
     "NO2": {
         "EA": {
             "Expt": 52.4, 
             "G3": 52.6
-        }
+        }, 
+        "inchi": "InChI=1S/NO2/c2-1-3\n"
     }, 
     "Na": {
         "EA": {
@@ -593,13 +673,15 @@
         "IP": {
             "Expt": 118.5, 
             "G3": 117.9
-        }
+        }, 
+        "inchi": "InChI=1S/Na\n"
     }, 
     "Ne": {
         "IP": {
             "Expt": 497.2, 
             "G3": 497.6
-        }
+        }, 
+        "inchi": "InChI=1S/Ne\n"
     }, 
     "O": {
         "EA": {
@@ -609,7 +691,8 @@
         "IP": {
             "Expt": 313.8, 
             "G3": 312.4
-        }
+        }, 
+        "inchi": "InChI=1S/O\n"
     }, 
     "O2": {
         "EA": {
@@ -619,19 +702,22 @@
         "IP": {
             "Expt": 278.3, 
             "G3": 282.4
-        }
+        }, 
+        "inchi": "InChI=1S/O2/c1-2\n"
     }, 
     "O3": {
         "EA": {
             "Expt": 48.5, 
             "G3": 48.5
-        }
+        }, 
+        "inchi": "InChI=1S/O3/c1-3-2\n"
     }, 
     "OF": {
         "EA": {
             "Expt": 52.4, 
             "G3": 51.9
-        }
+        }, 
+        "inchi": "InChI=1S/FO/c1-2\n"
     }, 
     "OH": {
         "EA": {
@@ -641,13 +727,15 @@
         "IP": {
             "Expt": 300.0, 
             "G3": 298.3
-        }
+        }, 
+        "inchi": "InChI=1S/HO/h1H\n"
     }, 
     "OH2": {
         "IP": {
             "Expt": 291.0, 
             "G3": 290.4
-        }
+        }, 
+        "inchi": "InChI=1S/H2O/h1H2\n"
     }, 
     "P": {
         "EA": {
@@ -657,13 +745,15 @@
         "IP": {
             "Expt": 241.9, 
             "G3": 241.3
-        }
+        }, 
+        "inchi": "InChI=1S/P\n"
     }, 
     "P2": {
         "IP": {
             "Expt": 242.8, 
             "G3": 243.3
-        }
+        }, 
+        "inchi": "InChI=1S/P2/c1-2\n"
     }, 
     "PH": {
         "EA": {
@@ -673,7 +763,8 @@
         "IP": {
             "Expt": 234.1, 
             "G3": 234.9
-        }
+        }, 
+        "inchi": "InChI=1S/HP/h1H\n"
     }, 
     "PH2": {
         "EA": {
@@ -683,19 +774,22 @@
         "IP": {
             "Expt": 226.4, 
             "G3": 226.4
-        }
+        }, 
+        "inchi": "InChI=1S/H2P/h1H2\n"
     }, 
     "PH3": {
         "IP": {
             "Expt": 227.6, 
             "G3": 227.9
-        }
+        }, 
+        "inchi": "InChI=1S/H3P/h1H3\n"
     }, 
     "PO": {
         "EA": {
             "Expt": 25.1, 
             "G3": 22.6
-        }
+        }, 
+        "inchi": "InChI=1S/OP/c1-2\n"
     }, 
     "S": {
         "EA": {
@@ -705,7 +799,8 @@
         "IP": {
             "Expt": 238.9, 
             "G3": 236.8
-        }
+        }, 
+        "inchi": "InChI=1S/S\n"
     }, 
     "S2": {
         "EA": {
@@ -715,19 +810,22 @@
         "IP": {
             "Expt": 215.8, 
             "G3": 216.3
-        }
+        }, 
+        "inchi": "InChI=1S/S2/c1-2\n"
     }, 
     "S2O": {
         "EA": {
             "Expt": 43.3, 
             "G3": 45.9
-        }
+        }, 
+        "inchi": "InChI=1S/OS2/c1-3-2\n"
     }, 
     "SC": {
         "IP": {
             "Expt": 261.3, 
             "G3": 262.7
-        }
+        }, 
+        "inchi": "InChI=1S/CS/c1-2\n"
     }, 
     "SH22A1": {
         "IP": {
@@ -745,7 +843,8 @@
         "EA": {
             "Expt": 25.5, 
             "G3": 27.3
-        }
+        }, 
+        "inchi": "InChI=1S/O2S/c1-3-2\n"
     }, 
     "Si": {
         "EA": {
@@ -755,49 +854,57 @@
         "IP": {
             "Expt": 187.9, 
             "G3": 187.4
-        }
+        }, 
+        "inchi": "InChI=1S/Si\n"
     }, 
     "Si2H2": {
         "IP": {
             "Expt": 189.1, 
             "G3": 190.4
-        }
+        }, 
+        "inchi": "InChI=1S/H2Si2/c1-2/h1H2\n"
     }, 
     "Si2H4": {
         "IP": {
             "Expt": 186.6, 
             "G3": 187.8
-        }
+        }, 
+        "inchi": "InChI=1S/H4Si2/c1-2/h1-2H2\n"
     }, 
     "Si2H5": {
         "IP": {
             "Expt": 175.3, 
             "G3": 177.5
-        }
+        }, 
+        "inchi": "InChI=1S/H5Si2/c1-2/h1H2,2H3\n"
     }, 
     "Si2H6": {
         "IP": {
             "Expt": 224.6, 
             "G3": 223.6
-        }
+        }, 
+        "inchi": "InChI=1S/H6Si2/c1-2/h1-2H3\n"
     }, 
     "SiH": {
         "EA": {
             "Expt": 29.4, 
             "G3": 29.3
-        }
+        }, 
+        "inchi": "InChI=1S/HSi/h1H\n"
     }, 
     "SiH2": {
         "EA": {
             "Expt": 25.9, 
             "G3": 24.8
-        }
+        }, 
+        "inchi": "InChI=1S/H2Si/h1H2\n"
     }, 
     "SiH21A1": {
         "IP": {
             "Expt": 211.0, 
             "G3": 212.0
-        }
+        }, 
+        "inchi": "InChI=1S/H2Si/h1H2\n"
     }, 
     "SiH3": {
         "EA": {
@@ -807,19 +914,22 @@
         "IP": {
             "Expt": 187.6, 
             "G3": 188.0
-        }
+        }, 
+        "inchi": "InChI=1S/H3Si/h1H3\n"
     }, 
     "SiH4": {
         "IP": {
             "Expt": 253.7, 
             "G3": 254.2
-        }
+        }, 
+        "inchi": "InChI=1S/H4Si/h1H4\n"
     }, 
     "sec-C3H7": {
         "IP": {
             "Expt": 170.0, 
             "G3": 172.1
-        }
+        }, 
+        "inchi": "InChI=1S/C3H7/c1-3-2/h3H,1-2H3\n"
     }, 
     "unit": "kcal/mol"
 }

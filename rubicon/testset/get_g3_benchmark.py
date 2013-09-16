@@ -95,7 +95,7 @@ def write_csv(bench_dict, no_expt_bench_dict):
 
 if __name__ == '__main__':
 
-    with open('G3_ref.json') as f:
+    with open('G3_ref_with_inchi.json') as f:
         ref_data = json.load(f)
     bench = copy.deepcopy(ref_data)
     for m in bench.items():
