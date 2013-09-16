@@ -11,7 +11,6 @@ __author__ = 'xiaohuiqu'
 KCAL_TO_EV = 0.0433634
 
 def get_g3_bench_collection():
-    global db_dir, db_path, f, db_creds, host, port, user, password, database_name, collection_name, conn, db, collection
     db_dir = os.environ['DB_LOC']
     db_path = os.path.join(db_dir, 'molecules_db.json')
     with open(db_path) as f:
