@@ -8,6 +8,7 @@ import sys
 from fireworks.core.firework import FireTaskBase, FWAction
 from fireworks.core.fw_config import FWData
 from fireworks.utilities.fw_serializers import FWSerializable
+from pymatgen import zopen
 from pymatgen.io.nwchemio import NwInput
 
 from custodian.custodian import Custodian
@@ -33,8 +34,15 @@ class NWChemTask(FireTaskBase, FWSerializable):
     _fw_name = "NWChem Task"
 
     def run_task(self, fw_spec):
-        nwi = NwInput.from_dict(fw_spec)
-        nwi.write_file('mol.nw')
+        if "inputs" in fw_spec:
+            nwi_dicts = fw_spec["inputs"]
+            nwis = [NwInput.from_dict(d) for d in nwi_dicts]
+            text = '\n'.join(str(nwis))
+            with zopen("mol.nw", "w") as f:
+                f.write(text)
+        else:
+            nwi = NwInput.from_dict(fw_spec)
+            nwi.write_file('mol.nw')
 
         fw_data = FWData()
 
