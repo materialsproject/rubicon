@@ -6,6 +6,7 @@ import socket
 import datetime
 import sys
 from fireworks.core.firework import FireTaskBase, FWAction
+from fireworks.core.fw_config import FWData
 from fireworks.utilities.fw_serializers import FWSerializable
 from pymatgen.io.nwchemio import NwInput
 
@@ -35,7 +36,7 @@ class NWChemTask(FireTaskBase, FWSerializable):
         nwi = NwInput.from_dict(fw_spec)
         nwi.write_file('mol.nw')
 
-        jp_conf = JPConfig()
+        fw_data = FWData()
 
         if 'macqu.dhcp.lbl.gov' == socket.gethostname() \
             or 'MacQu.local' == socket.gethostname() \
@@ -43,20 +44,20 @@ class NWChemTask(FireTaskBase, FWSerializable):
             nwc_exe = ['nwchem']
         elif 'nid' in socket.gethostname():  # hopper compute nodes
             # TODO: can base ncores on FW_submit.script
-            if (not jp_conf.MULTIPROCESSING) or (jp_conf.NODE_LIST is None):
+            if (not fw_data.MULTIPROCESSING) or (fw_data.NODE_LIST is None):
                 nwc_exe = shlex.split('aprun -n 24 nwchem')
             else:
-                list_str = ','.join(jp_conf.NODE_LIST)
-                num_str = str(jp_conf.SUB_NPROCS)
+                list_str = ','.join(fw_data.NODE_LIST)
+                num_str = str(fw_data.SUB_NPROCS)
                 nwc_exe = shlex.split('aprun -n ' + num_str +
                                       ' -L ' + list_str + ' nwchem')
         elif 'c' in socket.gethostname():  # mendel compute nodes
             # TODO: can base ncores on FW_submit.script
-            if (not jp_conf.MULTIPROCESSING) or (jp_conf.NODE_LIST is None):
+            if (not fw_data.MULTIPROCESSING) or (fw_data.NODE_LIST is None):
                 nwc_exe = shlex.split('mpirun -n 16 nwchem')
             else:
-                list_str = ','.join(jp_conf.NODE_LIST)
-                num_str = str(jp_conf.SUB_NPROCS)
+                list_str = ','.join(fw_data.NODE_LIST)
+                num_str = str(fw_data.SUB_NPROCS)
                 nwc_exe = shlex.split('mpirun -n ' + num_str +
                                       ' --host ' + list_str + ' nwchem')
 
