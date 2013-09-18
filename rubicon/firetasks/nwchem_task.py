@@ -36,8 +36,8 @@ class NWChemTask(FireTaskBase, FWSerializable):
     def run_task(self, fw_spec):
         if "inputs" in fw_spec:
             nwi_dicts = fw_spec["inputs"]
-            nwis = [NwInput.from_dict(d) for d in nwi_dicts]
-            text = '\n'.join(str(nwis))
+            nwis = [str(NwInput.from_dict(d)) for d in nwi_dicts]
+            text = '\n'.join(nwis)
             with zopen("mol.nw", "w") as f:
                 f.write(text)
         else:
