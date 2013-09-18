@@ -93,8 +93,8 @@ def write_csv(bench_dict, no_expt_bench_dict):
         write_dict(no_expt_bench_dict, writer)
 
 
-if __name__ == '__main__':
-
+def get_1st_round_benchmark():
+    global f, ref_data, bench, m, i, v, no_expt_bench, collection, all_bench
     with open('G3_ref_with_inchi.json') as f:
         ref_data = json.load(f)
     bench = copy.deepcopy(ref_data)
@@ -104,16 +104,19 @@ if __name__ == '__main__':
                 v['Expt'] *= KCAL_TO_EV
                 v['G3'] *= KCAL_TO_EV
     no_expt_bench = {}
-
     collection = get_g3_bench_collection()
-
-    get_calcualtion_result("G2-97 Test Set Benchmark (Shyue Scheme)", "Shyue", bench, no_expt_bench, collection)
-    get_calcualtion_result("G2-97 Test Set Benchmark (Larry Scheme)", "Larry", bench, no_expt_bench, collection)
-
+    get_calcualtion_result("G2-97 Test Set Benchmark (Shyue Scheme)", "Shyue", bench, no_expt_bench,
+                           collection)
+    get_calcualtion_result("G2-97 Test Set Benchmark (Larry Scheme)", "Larry", bench, no_expt_bench,
+                           collection)
     all_bench = {}
     all_bench.update(bench)
     all_bench.update(no_expt_bench)
     with open("G3_bench.json", 'w') as f:
         json.dump(all_bench, f, indent=4, sort_keys=True)
-
     write_csv(bench, no_expt_bench)
+
+
+if __name__ == '__main__':
+
+    get_1st_round_benchmark()
