@@ -54,7 +54,7 @@ if __name__ == '__main__':
             text = f.read()
         mol_tokens = str_to_obmols(text)
         for (i, (mol, cas)) in enumerate(mol_tokens):
-            print "processing molecule", i+1, "of", len(mol_tokens), "molecules"
+            print "processing molecule", i+1, cas, "of", len(mol_tokens), "molecules"
             try:
                 build3d(mol)
             except:
