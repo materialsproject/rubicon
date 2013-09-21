@@ -1,7 +1,9 @@
+import copy
 import os
 from fireworks.core.firework import FireWork, Workflow
 from pymatgen.io.nwchemio import NwTask, NwInput
 from pymatgen.io.xyzio import XYZ
+from pymatgen.symmetry.pointgroup import PointGroupAnalyzer
 from rubicon.firetasks.gaussian_task import GaussianTask
 from rubicon.firetasks.nwchem_task import NWChemTask, NWDBInsertionTask
 
@@ -93,7 +95,40 @@ def mol_to_wf_nwchem(mol, name):
     return Workflow.from_FireWork(fw, name=name)
 
 
+def mol_to_nwchem_IPEA_wf_with_guess_fix(mol, name, initial_inchi, mission):
+    td = {"iterations": 300, "vectors": "atomic"}
+    bs = '6-31+G*'
+    symmetry_options = None
+    pga = PointGroupAnalyzer(mol)
+    if pga.sch_symbol == 'D*h' or pga.sch_symbol == 'C*v':
+        # linear molecule, turn off symmetry
+        symmetry_options = ['c1']
+    tasks = [
+        NwTask.dft_task(mol, operation="optimize", xc="b3lyp", basis_set=bs,
+                        theory_directives=copy.deepcopy(td))]
 
+    if len(mol.sites) > 1:
+        tasks += [NwTask.dft_task(mol, operation="freq", xc="b3lyp",
+                                  basis_set=bs,
+                                  theory_directives=copy.deepcopy(td))]
+
+    tasks += [
+        NwTask.dft_task(mol, operation="energy", xc="b3lyp", basis_set=bs,
+                        theory_directives=copy.deepcopy(td)),
+        NwTask.dft_task(mol, charge=mol.charge + 1, operation="energy",
+                        xc="b3lyp", basis_set=bs,
+                        theory_directives=copy.deepcopy(td)),
+        NwTask.dft_task(mol, charge=mol.charge - 1, operation="energy",
+                        xc="b3lyp", basis_set=bs,
+                        theory_directives=copy.deepcopy(td))
+    ]
+
+    nwi = NwInput(mol, tasks, symmetry_options=symmetry_options)
+    spec = nwi.to_dict
+    spec['user_tags'] = {'mission': mission, "initial_inchi": initial_inchi}
+    fw = FireWork([NWChemTask(), NWDBInsertionTask()], spec=spec, name=name)
+
+    return Workflow.from_FireWork(fw, name=name)
 
 
 if __name__ == '__main__':

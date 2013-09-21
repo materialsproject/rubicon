@@ -187,11 +187,6 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
              "xyz": str(xyz),
              "names": get_nih_names(smiles)}
 
-        user_tags = cls.get_user_tags(path)
-
-        if user_tags:
-            d['user_tags'] = user_tags
-
         if "scf_EA" in data_dict and \
                 (not data_dict["scf_EA"]["has_error"]) and \
                 (not data_dict["scf"]["has_error"]):
@@ -202,6 +197,22 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
                 (not data_dict["scf"]["has_error"]):
             d["IE"] = (data["scf_IE"]["energies"][-1]
                        - data["scf"]["energies"][-1])
+
+        user_tags = cls.get_user_tags(path)
+        if user_tags:
+            d['user_tags'] = user_tags
+            if "initial_inchi" in user_tags:
+                initial_inchi = user_tags['initial_inchi']
+                if initial_inchi != d['inchi']:
+                    d['state'] = 'rejected'
+                    d['reject_reason'] = 'structural change'
+        if "state" not in d:
+            for scf in data_dict.values():
+                if scf['has_error']:
+                    d["state"] = "error"
+        if "state" not in d:
+            d["state"] = "successful"
+
         return clean_json(d)
 
     def _insert_doc(self, d):
