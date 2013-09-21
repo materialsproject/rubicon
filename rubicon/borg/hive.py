@@ -172,6 +172,8 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
 
 
         d = {"path": os.path.abspath(path),
+             "folder": os.path.basename(os.path.dirname(os.path.abspath(
+                 path))),
              "calculations": data,
              "initial_molecule": initial_mol.to_dict,
              "final_molecule": mol.to_dict,
