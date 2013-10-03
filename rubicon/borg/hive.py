@@ -179,6 +179,7 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
              "final_molecule": mol.to_dict,
              "pointgroup": sch_symbol,
              "pretty_formula": comp.reduced_formula,
+             "reduced_cell_formula_abc": comp.alphabetical_formula,
              "formula": comp.formula,
              "charge": charge,
              "spin_mult": spin_mult,
@@ -234,10 +235,12 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
                 d["last_updated"] = datetime.datetime.today()
                 if result is None:
                     if ("task_id" not in d) or (not d["task_id"]):
-                        d["task_id"] = db.counter.find_and_modify(
+                        id_num = db.counter.find_and_modify(
                             query={"_id": "mol_taskid"},
                             update={"$inc": {"c": 1}}
                         )["c"]
+                        d["task_id"] = "mol-" + str(id_num)
+                        d["task_id_deprecated"] = id_num
                     logger.info("Inserting {} with taskid = {}"
                                 .format(d["path"], d["task_id"]))
                 elif self.update_duplicates:
