@@ -228,9 +228,6 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
                 db.authenticate(self.user, self.password)
             coll = db[self.collection]
 
-            # Insert dos data into gridfs and then remove it from the dict.
-            # DOS data tends to be above the 4Mb limit for mongo docs. A ref
-            # to the dos file is in the dos_fs_id.
             result = coll.find_one({"path": d["path"]},
                                    fields=["path", "task_id"])
             if result is None or self.update_duplicates:
