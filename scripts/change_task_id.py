@@ -1,6 +1,7 @@
 import json
 import os
 import bson
+from pymatgen import Composition
 from pymongo import MongoClient
 
 __author__ = 'xiaohuiqu'
@@ -31,6 +32,12 @@ def rename_task_id(collection):
 def add_new_task_id(db):
     for doc in db.molecules.find():
         doc["task_id"] = "mol-" + str(doc["task_id_deprecated"])
+        db.molecules.save(doc)
+
+def add_field_reduced_cell_formula_abc(db):
+    for doc in db.molecules.find():
+        doc["reduced_cell_formula_abc"] = Composition(doc["pretty_formula"])\
+            .alphabetical_formula
         db.molecules.save(doc)
 
 def mark_g3_success(collection):
@@ -187,4 +194,5 @@ if __name__ == '__main__':
     #add_new_task_id(db)
     #mark_g3_success(collection)
     #mark_imaginary_freq_error(collection)
-    mark_geom_failed_error(collection)
+    #mark_geom_failed_error(collection)
+    add_field_reduced_cell_formula_abc(db)
