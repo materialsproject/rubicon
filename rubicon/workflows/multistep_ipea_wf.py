@@ -26,7 +26,7 @@ def mol_to_geom_fw(mol, bs, charge_shift, fw_id, name, sym, td, user_tags):
     spec['user_tags'] = user_tags
     charge_state_name = {0: "original", 1: "cation", -1: "anion"}
     spec['charge_state'] = charge_state_name[charge_shift]
-    task_name = name + ' ' + charge_state_name + ' geom opt'
+    task_name = name + ' ' + charge_state_name[charge_shift] + ' geom opt'
     fw_geom = FireWork([NWChemTask(), NWChemGeomOptDBInsertionTask()],
                        spec=spec, name=task_name, fw_id=fw_id)
     return fw_geom
@@ -42,7 +42,7 @@ def mol_to_freq_fw(mol, bs, charge_shift, fw_id, name, sym, td, user_tags):
     spec['user_tags'] = user_tags
     charge_state_name = {0: "original", 1: "cation", -1: "anion"}
     spec['charge_state'] = charge_state_name[charge_shift]
-    task_name = name + ' ' + charge_state_name + ' freq'
+    task_name = name + ' ' + charge_state_name[charge_shift] + ' freq'
     fw_freq = FireWork([NWChemTask(), NWChemFrequencyDBInsertionTask()],
                        spec=spec, name=task_name, fw_id=fw_id)
     return fw_freq
@@ -63,7 +63,7 @@ def mol_to_sp_fw(mol, bs, charge_shift, fw_id, name, sym, td, user_tags):
     spec['user_tags'] = user_tags
     charge_state_name = {0: "original", 1: "cation", -1: "anion"}
     spec['user_tags']['charge_state'] = charge_state_name[charge_shift]
-    task_name = name + ' ' + charge_state_name + ' geom opt'
+    task_name = name + ' ' + charge_state_name[charge_shift] + ' geom opt'
     fw_sp = FireWork([NWChemTask(), NWChemGeomOptDBInsertionTask()],
                      spec=spec, name=task_name, fw_id=fw_id)
     return fw_sp
