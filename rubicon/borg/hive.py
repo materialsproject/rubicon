@@ -94,7 +94,7 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
         try:
             d = self.get_task_doc(path)
             tid = self._insert_doc(d)
-            return tid
+            return tid, d
         except Exception as ex:
             import traceback
             print traceback.format_exc(ex)

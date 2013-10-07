@@ -62,7 +62,7 @@ def mol_to_sp_fw(mol, bs, charge_shift, fw_id, name, sym, td, user_tags):
     spec = nwi.to_dict
     spec['user_tags'] = user_tags
     charge_state_name = {0: "original", 1: "cation", -1: "anion"}
-    spec['charge_state'] = charge_state_name[charge_shift]
+    spec['user_tags']['charge_state'] = charge_state_name[charge_shift]
     task_name = name + ' ' + charge_state_name + ' geom opt'
     fw_sp = FireWork([NWChemTask(), NWChemGeomOptDBInsertionTask()],
                      spec=spec, name=task_name, fw_id=fw_id)

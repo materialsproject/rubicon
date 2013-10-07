@@ -99,8 +99,12 @@ class NWDBInsertionTask(FireTaskBase, FWSerializable):
                 database=db_creds['database'], user=db_creds['admin_user'],
                 password=db_creds['admin_password'],
                 collection=db_creds['collection'])
-            t_id = drone.assimilate(os.path.abspath(os.path.join(os.getcwd(), "mol.nwout")))
-
+            assi_result = drone.assimilate(os.path.abspath(
+                                           os.path.join(os.getcwd(), "mol.nwout")))
+        t_id = None
+        d = None
+        if assi_result:
+            t_id, d = assi_result
         if t_id:
             return FWAction(stored_data={'task_id': t_id})
 
