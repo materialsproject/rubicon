@@ -95,7 +95,7 @@ class NWChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
 
 
 class NWChemSinglePointEnergyDBInsertionTask(FireTaskBase, FWSerializable):
-    _fw_name = "NWChem Frequency DB Insertion Task"
+    _fw_name = "NWChem Single Point Energy DB Insertion Task"
 
     def run_task(self, fw_spec):
         db_dir = os.environ['DB_LOC']
