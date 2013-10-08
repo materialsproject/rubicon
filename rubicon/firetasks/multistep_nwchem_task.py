@@ -82,7 +82,7 @@ class NWChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
             t_id, d = assi_result
         if t_id:
             if d["state"] == "successful":
-                if d['structure_type'] == 'minimum':
+                if d['stationary_type'] == 'minimum':
                     return FWAction(stored_data={'task_id': t_id})
                 else:
                     return FWAction(stored_data={'task_id': t_id},
