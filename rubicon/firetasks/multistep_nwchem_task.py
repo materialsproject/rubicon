@@ -83,13 +83,16 @@ class NWChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
         if t_id:
             if d["state"] == "successful":
                 if d['stationary_type'] == 'minimum':
-                    return FWAction(stored_data={'task_id': t_id})
+                    return FWAction(stored_data={'task_id': t_id},
+                                    update_spec={"mol": d["final_molecule"]})
                 else:
                     return FWAction(stored_data={'task_id': t_id},
-                                    defuse_children=True)
+                                    defuse_children=True,
+                                    update_spec={"mol": d["final_molecule"]})
             else:
                 return FWAction(stored_data={'task_id': t_id},
-                                defuse_children=True)
+                                defuse_children=True,
+                                update_spec={"mol": d["final_molecule"]})
         else:
             return FWAction(defuse_children=True)
 
@@ -124,10 +127,12 @@ class NWChemSinglePointEnergyDBInsertionTask(FireTaskBase, FWSerializable):
             t_id, d = assi_result
         if t_id:
             if d["state"] == "successful":
-                return FWAction(stored_data={'task_id': t_id})
+                return FWAction(stored_data={'task_id': t_id},
+                                update_spec={"mol": d["final_molecule"]})
             else:
                 return FWAction(stored_data={'task_id': t_id},
-                                defuse_children=True)
+                                defuse_children=True,
+                                update_spec={"mol": d["final_molecule"]})
         else:
             return FWAction(defuse_children=True)
 
