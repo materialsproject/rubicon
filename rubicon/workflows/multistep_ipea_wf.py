@@ -89,15 +89,16 @@ def mol_to_ipea_wf(mol, name, mission):
     links_dict = dict()
 
     # the task in the order of anion, neutral, cation
-    charge_shifts = (-1, 0, 1)
-    fw_ids = range(0, 3)
-    fws = (mol_to_geom_fw(mol, '6-31+G*', cs, fwid, name, sym, td, user_tags)
-           for cs, fwid in zip(charge_shifts, fw_ids))
-    cg_fwid, ng_fwid, ag_fwid = fw_ids
-    fireworks.extend(fws)
-
+    cg_fwid, ng_fwid, ag_fwid = (None, None, None)
     cf_fwid, nf_fwid, af_fwid = (None, None, None)
     if len(mol) > 1:
+        charge_shifts = (-1, 0, 1)
+        fw_ids = range(0, 3)
+        fws = (mol_to_geom_fw(mol, '6-31+G*', cs, fwid, name, sym, td, user_tags)
+               for cs, fwid in zip(charge_shifts, fw_ids))
+        cg_fwid, ng_fwid, ag_fwid = fw_ids
+        fireworks.extend(fws)
+
         fw_ids = range(3, 3+3)
         fws = (mol_to_freq_fw(mol, '6-31+G*', cs, fwid, name, sym, td,
                               user_tags)
@@ -116,9 +117,6 @@ def mol_to_ipea_wf(mol, name, mission):
     if len(mol) > 1:
         links_dict.update({cf_fwid: csp_fwid, nf_fwid: nsp_fwid,
                            af_fwid: asp_fwid})
-    else:
-        links_dict.update({cg_fwid: csp_fwid, ng_fwid: nsp_fwid,
-                           ag_fwid: asp_fwid})
     links_dict.update({nsp_fwid: [cg_fwid, ag_fwid]})
 
     return Workflow(fireworks, links_dict, name)
