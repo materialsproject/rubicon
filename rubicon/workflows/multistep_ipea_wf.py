@@ -3,7 +3,7 @@ from fireworks.core.firework import FireWork, Workflow
 from pymatgen.io.babelio import BabelMolAdaptor
 from pymatgen.io.nwchemio import NwTask, NwInput
 from pymatgen.symmetry.pointgroup import PointGroupAnalyzer
-from rubicon.firetasks.multistep_nwchem_task import NWChemGeomOptDBInsertionTask, NWChemFrequencyDBInsertionTask
+from rubicon.firetasks.multistep_nwchem_task import NWChemGeomOptDBInsertionTask, NWChemFrequencyDBInsertionTask, NWChemSinglePointEnergyDBInsertionTask
 from rubicon.firetasks.nwchem_task import NWChemTask
 
 __author__ = 'xiaohuiqu'
@@ -64,7 +64,7 @@ def mol_to_sp_fw(mol, bs, charge_shift, fw_id, name, sym, td, user_tags):
     charge_state_name = {0: "original", 1: "cation", -1: "anion"}
     spec['user_tags']['charge_state'] = charge_state_name[charge_shift]
     task_name = name + ' ' + charge_state_name[charge_shift] + ' geom opt'
-    fw_sp = FireWork([NWChemTask(), NWChemGeomOptDBInsertionTask()],
+    fw_sp = FireWork([NWChemTask(), NWChemSinglePointEnergyDBInsertionTask()],
                      spec=spec, name=task_name, fw_id=fw_id)
     return fw_sp
 
