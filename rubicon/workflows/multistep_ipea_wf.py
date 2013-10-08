@@ -117,6 +117,9 @@ def mol_to_ipea_wf(mol, name, mission):
     if len(mol) > 1:
         links_dict.update({cf_fwid: csp_fwid, nf_fwid: nsp_fwid,
                            af_fwid: asp_fwid})
-    links_dict.update({nsp_fwid: [cg_fwid, ag_fwid]})
+        links_dict.update({nsp_fwid: [cg_fwid, ag_fwid]})
+    else:
+        links_dict.update({nsp_fwid: [csp_fwid, asp_fwid]})
+
 
     return Workflow(fireworks, links_dict, name)
