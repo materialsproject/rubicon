@@ -145,17 +145,18 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
 
         pga = PointGroupAnalyzer(mol)
         sch_symbol = pga.sch_symbol
-        structure_type = None
+        stationary_type = None
         for d in data:
             if d["job_type"] == "NWChem Geometry Optimization":
                 data_dict["geom_opt"] = d
             elif d["job_type"] == "NWChem Nuclear Hessian and Frequency " \
                                   "Analysis":
                 data_dict["freq"] = d
-                if d['frequencies'][0][0] < 0:
-                    structure_type = "minimum"
+                if d['frequencies'][0][0] < -0.00:
+                    # it is stupied that -0.00 is less than 0.00
+                    stationary_type = "minimum"
                 else:
-                    structure_type = "non-minimum"
+                    stationary_type = "non-minimum"
             elif d["job_type"] == "NWChem DFT Module":
                 if d["charge"] == charge:
                     data_dict["scf"] = d
@@ -206,8 +207,8 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
             d["IE"] = (data["scf_IE"]["energies"][-1]
                        - data["scf"]["energies"][-1])
 
-        if structure_type:
-            d['structure_type'] = structure_type
+        if stationary_type:
+            d['stationary_type'] = stationary_type
 
         user_tags = cls.get_user_tags(path)
         if user_tags:
