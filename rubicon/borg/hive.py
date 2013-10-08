@@ -154,9 +154,9 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
                 data_dict["freq"] = d
                 if d['frequencies'][0][0] < -0.00:
                     # it is stupied that -0.00 is less than 0.00
-                    stationary_type = "minimum"
-                else:
                     stationary_type = "non-minimum"
+                else:
+                    stationary_type = "minimum"
             elif d["job_type"] == "NWChem DFT Module":
                 if d["charge"] == charge:
                     data_dict["scf"] = d
