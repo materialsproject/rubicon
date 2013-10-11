@@ -206,7 +206,7 @@ class NWChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                 db_creds = json.load(f)
             conn = MongoClient(db_creds['host'], db_creds['port'])
             db = conn[db_creds['database']]
-            if self.user:
+            if db_creds['admin_user']:
                 db.authenticate(db_creds['admin_user'],
                                 db_creds['admin_password'])
             coll = db[db_creds['collection']]
