@@ -220,7 +220,7 @@ class NWChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
         else:
             old_mol = Molecule.from_dict(d['final_molecule'])
             vib_mode = d['calculations']['freq']['frequencies']
-            new_coords = [[c+v for c, v in zip(site.xyz, mode[1])]
+            new_coords = [[c+v for c, v in zip(site.coords, mode[1])]
                           for site, mode in zip(old_mol.sites, vib_mode)]
             species = [site.specie.elements[0].symbol
                        for site in old_mol.sites]
