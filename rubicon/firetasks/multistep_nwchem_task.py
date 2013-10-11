@@ -7,7 +7,6 @@ import sys
 from pymatgen.core.structure import Molecule
 from pymongo import MongoClient
 from rubicon.borg.hive import DeltaSCFNwChemToDbTaskDrone
-from rubicon.workflows import multistep_ipea_wf
 import rubicon.workflows.multistep_ipea_wf
 
 __author__ = 'xiaohuiqu'
@@ -130,7 +129,8 @@ class NWChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
             species = [site.specie.elements[0].symbol
                        for site in old_mol.sites]
             new_mol = Molecule(species, new_coords)
-            fw_creator = multistep_ipea_wf.NWChemFireWorkCreator(new_mol,
+            fw_creator = rubicon.workflows.multistep_ipea_wf.\
+                         NWChemFireWorkCreator(new_mol,
                              d['user_tags']['molname'],
                              d['user_tags']['mission'],
                              additional_user_tags={'freq_fix_time': fix_time})
