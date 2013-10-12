@@ -229,12 +229,12 @@ class NWChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                              d['user_tags']['molname'],
                              d['user_tags']['mission'],
                              additional_user_tags={'freq_fix_time': fix_time})
-            geom_fwid, freq_fwid = 0, 1
+            geom_fwid, freq_fwid = -1, -2
             geom_fw = fw_creator.geom_fw(d['user_tags']['charge_shift'], geom_fwid)
             freq_fw = fw_creator.freq_fw(d['user_tags']['charge_shift'], freq_fwid)
             wf = Workflow([geom_fw, freq_fw],
                           links_dict={geom_fwid: freq_fwid})
-            return FWAction(stored_data={'task_id': t_id},detours=wf)
+            return FWAction(stored_data={'task_id': t_id}, detours=wf)
 
 
 
