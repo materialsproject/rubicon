@@ -29,6 +29,7 @@ from pymatgen.io.xyzio import XYZ
 from rubicon.testset.parse_mol import get_nih_names
 
 import json
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -129,8 +130,8 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
         new_tokens = []
         for line in tokens:
             if "line" in line:
-                line = line.replace('stroke-width=\"1\"',
-                                     'stroke-width=\"3\"')
+                line = re.sub('stroke-width="\d+.?\d*"',
+                              'stroke-width="3.0"', line)
             new_tokens.append(line)
         new_svg = '\n'.join(new_tokens)
         return new_svg
