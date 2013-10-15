@@ -121,6 +121,22 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
             return None
 
     @classmethod
+    def modify_svg(cls, svg):
+        '''
+        hack to the svg code to increase the width of the bond
+        '''
+        tokens = svg.split('\n')
+        new_tokens = []
+        for line in tokens:
+            if "line" in line:
+                line = new_tokens.replace('stroke-width=\"1\"',
+                                     'stroke-width=\"3\"')
+            new_tokens.append(line)
+        new_svg = '\n'.join(new_tokens)
+        return new_svg
+
+
+    @classmethod
     def get_task_doc(cls, path):
         """
         Get the entire task doc for a path, including any post-processing.
@@ -135,7 +151,7 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
         smiles = pbmol.write("smi").split()[0]
         can = pbmol.write("can").split()[0]
         inchi = pbmol.write("inchi").strip()
-        svg = pbmol.write("svg")
+        svg = cls.modify_svg(pbmol.write("svg"))
         comp = mol.composition
         initial_mol = data[0]["molecules"][0]
         charge = data[0]["charge"]
