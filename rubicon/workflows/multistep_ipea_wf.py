@@ -1,7 +1,110 @@
-from fireworks.core.firework import Workflow
-from rubicon.firetasks.multistep_nwchem_task import NWChemFireWorkCreator
+import copy
+from fireworks.core.firework import Workflow, FireWork
+from pymatgen.io.babelio import BabelMolAdaptor
+from pymatgen.io.nwchemio import NwTask, NwInput
+from pymatgen.symmetry.pointgroup import PointGroupAnalyzer
+from rubicon.firetasks.nwchem_task import NWChemTask
 
 __author__ = 'xiaohuiqu'
+
+
+class NWChemFireWorkCreator():
+    def __init__(self, mol, molname, mission, additional_user_tags=None):
+        theory_directive = {"iterations": 300, "vectors": "atomic"}
+        symmetry_options = None
+        pga = PointGroupAnalyzer(mol)
+        if pga.sch_symbol == 'D*h' or pga.sch_symbol == 'C*v':
+            # linear molecule, turn off symmetry
+            symmetry_options = ['c1']
+        initial_inchi = self.get_inchi(mol)
+        user_tags = {'mission': mission,
+                     "initial_inchi": initial_inchi,
+                     "molname": molname}
+        if additional_user_tags:
+            user_tags.update(additional_user_tags)
+
+        self.td = lambda: copy.deepcopy(theory_directive)
+        self.sym = lambda: copy.deepcopy(symmetry_options)
+        self.bs = '6-31+G*'
+        self.ut = lambda: copy.deepcopy(user_tags)
+        self.mol = mol
+
+
+    def get_inchi(self, mol):
+        bb = BabelMolAdaptor(mol)
+        pbmol = bb.pybel_mol
+        return pbmol.write("inchi").strip()
+
+
+    def geom_fw(self, charge_shift, fw_id):
+        charge = self.mol.charge + charge_shift
+        tasks_geom = [NwTask.dft_task(self.mol, charge=charge,
+                                      operation="optimize",
+                                      xc="b3lyp", basis_set=self.bs,
+                                      theory_directives=self.td(),
+                                      alternate_directives={"driver":
+                                                            {"maxiter": 300}})]
+        nwi = NwInput(self.mol, tasks_geom, symmetry_options=self.sym())
+        spec = nwi.to_dict
+        spec['user_tags'] = self.ut()
+        charge_state_name = {0: "original", 1: "cation", -1: "anion"}
+        spec['user_tags']['charge_state'] = charge_state_name[charge_shift]
+        spec['user_tags']['charge_shift'] = charge_shift
+        task_name = charge_state_name[charge_shift] + ' geom opt'
+        from rubicon.firetasks.multistep_nwchem_task \
+            import NWChemGeomOptDBInsertionTask
+        fw_geom = FireWork([NWChemTask(),
+                            NWChemGeomOptDBInsertionTask()],
+                           spec=spec, name=task_name, fw_id=fw_id)
+        return fw_geom
+
+
+    def freq_fw(self, charge_shift, fw_id):
+        charge = self.mol.charge + charge_shift
+        tasks_geom = [NwTask.dft_task(self.mol, charge=charge,
+                                      operation="freq",
+                                      xc="b3lyp", basis_set=self.bs,
+                                      theory_directives=self.td())]
+        nwi = NwInput(self.mol, tasks_geom, symmetry_options=self.sym())
+        spec = nwi.to_dict
+        spec['user_tags'] = self.ut()
+        charge_state_name = {0: "original", 1: "cation", -1: "anion"}
+        spec['user_tags']['charge_state'] = charge_state_name[charge_shift]
+        spec['user_tags']['charge_shift'] = charge_shift
+        task_name = charge_state_name[charge_shift] + ' freq'
+        from rubicon.firetasks.multistep_nwchem_task \
+            import NWChemFrequencyDBInsertionTask
+        fw_freq = FireWork([NWChemTask(),
+                            NWChemFrequencyDBInsertionTask()],
+                           spec=spec, name=task_name, fw_id=fw_id)
+        return fw_freq
+
+
+    def sp_fw(self, charge_shift, fw_id):
+        charge = self.mol.charge + charge_shift
+        tasks_geom = [NwTask.dft_task(self.mol, charge=charge,
+                                      operation="energy",
+                                      xc="b3lyp", basis_set=self.bs,
+                                      theory_directives=self.td()),
+                      NwTask.dft_task(self.mol, charge=charge,
+                                      operation="energy",
+                                      xc="b3lyp", basis_set=self.bs,
+                                      theory_directives=self.td(),
+                                      alternate_directives={'cosmo':
+                                                            {"dielec": 78.0}})]
+        nwi = NwInput(self.mol, tasks_geom, symmetry_options=self.sym())
+        spec = nwi.to_dict
+        spec['user_tags'] = self.ut()
+        charge_state_name = {0: "original", 1: "cation", -1: "anion"}
+        spec['user_tags']['charge_state'] = charge_state_name[charge_shift]
+        spec['user_tags']['charge_shift'] = charge_shift
+        task_name = charge_state_name[charge_shift] + ' single point energy'
+        from rubicon.firetasks.multistep_nwchem_task \
+            import NWChemSinglePointEnergyDBInsertionTask
+        fw_sp = FireWork([NWChemTask(),
+                          NWChemSinglePointEnergyDBInsertionTask()],
+                         spec=spec, name=task_name, fw_id=fw_id)
+        return fw_sp
 
 
 def mol_to_ipea_wf(mol, name, mission):
