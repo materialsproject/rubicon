@@ -129,7 +129,7 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
         new_tokens = []
         for line in tokens:
             if "line" in line:
-                line = new_tokens.replace('stroke-width=\"1\"',
+                line = line.replace('stroke-width=\"1\"',
                                      'stroke-width=\"3\"')
             new_tokens.append(line)
         new_svg = '\n'.join(new_tokens)
