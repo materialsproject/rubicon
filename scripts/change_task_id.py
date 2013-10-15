@@ -195,4 +195,7 @@ if __name__ == '__main__':
     #mark_g3_success(collection)
     #mark_imaginary_freq_error(collection)
     #mark_geom_failed_error(collection)
-    add_field_reduced_cell_formula_abc(db)
+    #add_field_reduced_cell_formula_abc(db)
+    missions = collection.find().distinct("user_tags.mission")
+    for mi in missions:
+        print mi
