@@ -132,6 +132,8 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
             if "line" in line:
                 line = re.sub('stroke-width="\d+.?\d*"',
                               'stroke-width="3.0"', line)
+            if "rect" in line:
+                line = re.sub(r'fill=".*"', 'fill="BlueViolet"', line)
             new_tokens.append(line)
         new_svg = '\n'.join(new_tokens)
         return new_svg
