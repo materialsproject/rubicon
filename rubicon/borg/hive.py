@@ -124,7 +124,9 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
     @classmethod
     def modify_svg(cls, svg):
         '''
-        hack to the svg code to increase the width of the bond
+        Hack to the svg code to enhance the molecule.
+        Because Xiaohui have no aeshetic cell, please change it a more
+        beautiful color scheme
         '''
         tokens = svg.split('\n')
         new_tokens = []
@@ -133,10 +135,10 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
                 line = re.sub('stroke-width="\d+.?\d*"',
                               'stroke-width="3.0"', line)
             if "rect" in line:
-                line = re.sub(r'fill=".*"', 'fill="BlueViolet"', line)
+                line = re.sub(r'fill=".+?"', 'fill="Beige"', line)
             if ">H</text>" in line:
-                line = re.sub(r'fill=".*"', 'fill="DimGray"', line)
-                line = re.sub(r'stroke=".*"', 'fill="DimGray"', line)
+                line = re.sub(r'fill=".+?"', 'fill="DimGray"', line)
+                line = re.sub(r'stroke=".+?"', 'stroke="DimGray"', line)
             new_tokens.append(line)
         new_svg = '\n'.join(new_tokens)
         return new_svg
