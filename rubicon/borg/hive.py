@@ -134,7 +134,7 @@ class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
         xyz = XYZ(mol)
         smiles = pbmol.write("smi").split()[0]
         can = pbmol.write("can").split()[0]
-        inchi = pbmol.write("inchi")
+        inchi = pbmol.write("inchi").strip()
         svg = pbmol.write("svg")
         comp = mol.composition
         initial_mol = data[0]["molecules"][0]

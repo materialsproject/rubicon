@@ -42,7 +42,7 @@ class NWChemFireWorkCreator():
     def get_inchi(self, mol):
         bb = BabelMolAdaptor(mol)
         pbmol = bb.pybel_mol
-        return pbmol.write("inchi")
+        return pbmol.write("inchi").strip()
 
 
     def geom_fw(self, charge_shift, fw_id):
