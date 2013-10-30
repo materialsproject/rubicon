@@ -23,7 +23,7 @@ def get_meta_from_structure(mol):
     bb = BabelMolAdaptor(mol)
     pbmol = bb.pybel_mol
     inchi = pbmol.write("inchi").strip()
-    meta = {'natoms': len(mol),
+    meta = {'nsites': len(mol),
             'elements': elsyms,
             'nelements': len(elsyms),
             'formula': comp.formula,
