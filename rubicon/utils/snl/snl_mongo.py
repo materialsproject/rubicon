@@ -67,7 +67,7 @@ class SNLMongoAdapter(FWSerializable):
 
     def add_snl(self, snl, force_new=False, snlgroup_guess=None):
         snl_id = self._get_next_snl_id()
-        pointgroup = PointGroupAnalyzer(snl.structure)
+        pointgroup = PointGroupAnalyzer(snl.structure).sch_symbol
         egsnl = EGStructureNL.from_snl(snl, snl_id, pointgroup)
         snlgroup, add_new = self.add_egsnl(egsnl, force_new, snlgroup_guess)
         return egsnl, snlgroup.snlgroup_id
