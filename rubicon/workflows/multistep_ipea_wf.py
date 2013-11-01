@@ -130,7 +130,7 @@ def multistep_ipea_fws(mol, name, mission, dupefinder=DupeFinderEG, priority=1, 
         if not (isinstance(parent_fwid, int) or isinstance(parent_fwid, list)):
             raise ValueError("Parent FireWork ID must be integer or list")
         parent_fwid = parent_fwid if isinstance(parent_fwid, list) else [parent_fwid]
-        fwid_base = max(parent_fwid)
+        fwid_base = max(parent_fwid) + 1
     fireworks = []
     links_dict = dict()
     # the task in the order of anion, neutral, cation

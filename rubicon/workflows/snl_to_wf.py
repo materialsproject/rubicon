@@ -27,10 +27,10 @@ def snl_to_wf(snl, parameters=None):
         del spec['snl']
     fws.append(FireWork(tasks, spec,
                         name=get_slug(f + ' -- Add to SNL database'),
-                        fw_id=0))
+                        fw_id=1))
 
     ipea_fws, connections = multistep_ipea_fws(snl.structure, f, mission, DupeFinderEG, priority,
-                                               0)
+                                               1)
     fws.extend(ipea_fws)
 
     wf_meta = get_meta_from_structure(snl.structure)
