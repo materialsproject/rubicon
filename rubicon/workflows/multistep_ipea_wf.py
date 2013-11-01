@@ -124,7 +124,7 @@ class NWChemFireWorkCreator():
 
 
 def multistep_ipea_fws(mol, name, mission, dupefinder=DupeFinderEG, priority=1, parent_fwid = None):
-    fw_creator = NWChemFireWorkCreator(mol, name, mission, dupefinder, priority)
+    fw_creator = NWChemFireWorkCreator(mol, name, mission, None, dupefinder, priority)
     fwid_base = 1
     if parent_fwid:
         if not (isinstance(parent_fwid, int) or isinstance(parent_fwid, list)):
