@@ -3,7 +3,7 @@ from fireworks.core.firework import Workflow, FireWork
 from pymatgen.io.babelio import BabelMolAdaptor
 from pymatgen.io.nwchemio import NwTask, NwInput
 from pymatgen.symmetry.pointgroup import PointGroupAnalyzer
-from rubicon.dupefinder.dupefinder_eg import DupeFinderEG
+from rubicon.dupefinders.dupefinder_eg import DupeFinderEG
 from rubicon.firetasks.nwchem_task import NWChemTask
 
 __author__ = 'xiaohuiqu'

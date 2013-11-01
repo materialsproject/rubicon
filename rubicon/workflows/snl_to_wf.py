@@ -1,7 +1,7 @@
 from fireworks.core.firework import FireWork, Workflow
 from fireworks.utilities.fw_utilities import get_slug
 from pymatgen import Composition
-from rubicon.dupefinder.dupefinder_eg import DupeFinderEG
+from rubicon.dupefinders.dupefinder_eg import DupeFinderEG
 from rubicon.firetasks.snl_tasks import AddSNLTask
 from rubicon.utils.snl.egsnl import EGStructureNL, get_meta_from_structure
 from rubicon.workflows.multistep_ipea_wf import multistep_ipea_fws
