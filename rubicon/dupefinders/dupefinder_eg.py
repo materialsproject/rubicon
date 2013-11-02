@@ -15,6 +15,5 @@ class DupeFinderEG(DupeFinderBase):
         return spec1['user_tags'] == spec2['user_tags']
 
     def query(self, spec):
-        print spec
         return {'spec.task_type': spec['task_type'],
                 'spec.snlgroup_id': spec['snlgroup_id']}
