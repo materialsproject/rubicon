@@ -42,13 +42,19 @@ class NWChemGeomOptDBInsertionTask(FireTaskBase, FWSerializable):
         if t_id:
             if d["state"] == "successful":
                 return FWAction(stored_data={'task_id': t_id},
-                                update_spec={"mol": d["final_molecule"]})
+                                update_spec={"mol": d["final_molecule"],
+                                             'egsnl': fw_spec['egsnl'],
+                                             'snlgroup_id': fw_spec['snlgroup_id']})
             else:
                 return FWAction(stored_data={'task_id': t_id},
-                                update_spec={"mol": d["final_molecule"]},
+                                update_spec={"mol": d["final_molecule"],
+                                             'egsnl': fw_spec['egsnl'],
+                                             'snlgroup_id': fw_spec['snlgroup_id']},
                                 defuse_children=True)
         else:
-            return FWAction(defuse_children=True)
+            return FWAction(defuse_children=True,
+                            update_spec={'egsnl': fw_spec['egsnl'],
+                                         'snlgroup_id': fw_spec['snlgroup_id']})
 
 
 
@@ -84,15 +90,21 @@ class NWChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
             if d["state"] == "successful":
                 if d['stationary_type'] == 'minimum':
                     return FWAction(stored_data={'task_id': t_id},
-                                    update_spec={"mol": d["final_molecule"]})
+                                    update_spec={"mol": d["final_molecule"],
+                                                 'egsnl': fw_spec['egsnl'],
+                                                 'snlgroup_id': fw_spec['snlgroup_id']})
                 else:
                     return self.img_freq_action(fw_spec, d, t_id)
             else:
                 return FWAction(stored_data={'task_id': t_id},
                                 defuse_children=True,
-                                update_spec={"mol": d["final_molecule"]})
+                                update_spec={"mol": d["final_molecule"],
+                                             'egsnl': fw_spec['egsnl'],
+                                             'snlgroup_id': fw_spec['snlgroup_id']})
         else:
-            return FWAction(defuse_children=True)
+            return FWAction(defuse_children=True,
+                            update_spec={'egsnl': fw_spec['egsnl'],
+                                         'snlgroup_id': fw_spec['snlgroup_id']})
 
     def img_freq_action(self, fw_spec, d, t_id):
         if 'img_freq_max_trial' in fw_spec:
@@ -119,7 +131,9 @@ class NWChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
         if fix_time > max_fix_time:
             return FWAction(stored_data={'task_id': t_id},
                             defuse_children=True,
-                            update_spec={"mol": d["final_molecule"]})
+                            update_spec={"mol": d["final_molecule"],
+                                         'egsnl': fw_spec['egsnl'],
+                                         'snlgroup_id': fw_spec['snlgroup_id']})
         else:
             old_mol = Molecule.from_dict(d['final_molecule'])
             vib_mode = d['calculations']['freq']['frequencies'][0][1]
@@ -139,7 +153,9 @@ class NWChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
             freq_fw = fw_creator.freq_fw(d['user_tags']['charge_shift'], freq_fwid)
             wf = Workflow([geom_fw, freq_fw],
                           links_dict={geom_fwid: freq_fwid})
-            return FWAction(stored_data={'task_id': t_id}, detours=wf)
+            return FWAction(stored_data={'task_id': t_id}, detours=wf,
+                            update_spec={'egsnl': fw_spec['egsnl'],
+                                         'snlgroup_id': fw_spec['snlgroup_id']})
 
 
 
@@ -174,11 +190,17 @@ class NWChemSinglePointEnergyDBInsertionTask(FireTaskBase, FWSerializable):
         if t_id:
             if d["state"] == "successful":
                 return FWAction(stored_data={'task_id': t_id},
-                                update_spec={"mol": d["final_molecule"]})
+                                update_spec={"mol": d["final_molecule"],
+                                             'egsnl': fw_spec['egsnl'],
+                                             'snlgroup_id': fw_spec['snlgroup_id']})
             else:
                 return FWAction(stored_data={'task_id': t_id},
                                 defuse_children=True,
-                                update_spec={"mol": d["final_molecule"]})
+                                update_spec={"mol": d["final_molecule"],
+                                             'egsnl': fw_spec['egsnl'],
+                                             'snlgroup_id': fw_spec['snlgroup_id']})
         else:
-            return FWAction(defuse_children=True)
+            return FWAction(defuse_children=True,
+                            update_spec={'egsnl': fw_spec['egsnl'],
+                                         'snlgroup_id': fw_spec['snlgroup_id']})
 
