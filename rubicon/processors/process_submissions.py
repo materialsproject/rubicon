@@ -115,10 +115,8 @@ class SubmissionProcessor():
                         # if task_id is not there, it means we went on DETOUR...
                         if l.state == 'COMPLETED' and 'task_id' in l.action.stored_data:
                             t_id = l.action.stored_data['task_id']
-                            if 'prev_task_type' in fw.spec:
-                                m_taskdict[fw.spec['prev_task_type']] = t_id
-                            else:
-                                m_taskdict[fw.spec['_fizzled_parents'][0]['spec']['task_type']] = t_id
+                            if 'task_type' in fw.spec:
+                                m_taskdict[fw.spec['task_type']] = t_id
                             break
 
         self.sma.update_state(submission_id, wf.state, details, m_taskdict)
