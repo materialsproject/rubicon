@@ -147,7 +147,11 @@ class NWChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
             fw_creator = NWChemFireWorkCreator(new_mol,
                              d['user_tags']['molname'],
                              d['user_tags']['mission'],
-                             additional_user_tags={'freq_fix_time': fix_time})
+                             additional_user_tags={'freq_fix_time': fix_time},
+                             dupefinder=None,
+                             priority=fw_spec['_priority'],
+                             update_spec={'egsnl': fw_spec['egsnl'],
+                                          'snlgroup_id': fw_spec['snlgroup_id']})
             geom_fwid, freq_fwid = -1, -2
             geom_fw = fw_creator.geom_fw(d['user_tags']['charge_shift'], geom_fwid)
             freq_fw = fw_creator.freq_fw(d['user_tags']['charge_shift'], freq_fwid)

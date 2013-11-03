@@ -11,7 +11,7 @@ __author__ = 'xiaohuiqu'
 
 class NWChemFireWorkCreator():
     def __init__(self, mol, molname, mission, additional_user_tags=None, dupefinder=DupeFinderEG,
-                 priority=1):
+                 priority=1, update_spec=None):
         theory_directive = {"iterations": 300, "vectors": "atomic"}
         symmetry_options = None
         pga = PointGroupAnalyzer(mol)
@@ -32,6 +32,7 @@ class NWChemFireWorkCreator():
         self.mol = mol
         self.dupefinder = dupefinder
         self.priority = priority
+        self.update_spec = update_spec
 
 
     def get_inchi(self, mol):
@@ -55,9 +56,12 @@ class NWChemFireWorkCreator():
         spec['user_tags']['charge_state'] = charge_state_name[charge_shift]
         spec['user_tags']['charge_shift'] = charge_shift
         spec['_priority'] = self.priority
-        spec['_dupefinder'] = self.dupefinder().to_dict()
+        if self.dupefinder:
+            spec['_dupefinder'] = self.dupefinder().to_dict()
         spec['user_tags']['methods'] = "B3LYP/" + self.bs
         spec['task_type'] = charge_state_name[charge_shift] + ' Geometry Optimization'
+        if self.update_spec:
+            spec.update(self.update_spec)
         task_name = charge_state_name[charge_shift] + ' geom opt'
         from rubicon.firetasks.multistep_nwchem_task \
             import NWChemGeomOptDBInsertionTask
@@ -80,9 +84,12 @@ class NWChemFireWorkCreator():
         spec['user_tags']['charge_state'] = charge_state_name[charge_shift]
         spec['user_tags']['charge_shift'] = charge_shift
         spec['_priority'] = self.priority
-        spec['_dupefinder'] = self.dupefinder().to_dict()
+        if self.dupefinder:
+            spec['_dupefinder'] = self.dupefinder().to_dict()
         spec['user_tags']['methods'] = "B3LYP/" + self.bs
         spec['task_type'] = charge_state_name[charge_shift] + ' Vibrational Frequency'
+        if self.update_spec:
+            spec.update(self.update_spec)
         task_name = charge_state_name[charge_shift] + ' freq'
         from rubicon.firetasks.multistep_nwchem_task \
             import NWChemFrequencyDBInsertionTask
@@ -111,9 +118,12 @@ class NWChemFireWorkCreator():
         spec['user_tags']['charge_state'] = charge_state_name[charge_shift]
         spec['user_tags']['charge_shift'] = charge_shift
         spec['_priority'] = self.priority
-        spec['_dupefinder'] = self.dupefinder().to_dict()
+        if self.dupefinder:
+            spec['_dupefinder'] = self.dupefinder().to_dict()
         spec['user_tags']['methods'] = "B3LYP/" + self.bs
         spec['task_type'] = charge_state_name[charge_shift] + ' Single Point Energy'
+        if self.update_spec:
+            spec.update(self.update_spec)
         task_name = charge_state_name[charge_shift] + ' single point energy'
         from rubicon.firetasks.multistep_nwchem_task \
             import NWChemSinglePointEnergyDBInsertionTask
