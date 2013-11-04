@@ -36,13 +36,15 @@ class NWChemTask(FireTaskBase, FWSerializable):
     def run_task(self, fw_spec):
         if "inputs" in fw_spec:
             nwi_dicts = fw_spec["inputs"]
-            nwis = [str(NwInput.from_dict(d)) for d in nwi_dicts]
+            nwis = ['memory total 1000 mb'] + [str(NwInput.from_dict(d)) for d in nwi_dicts]
             text = '\n'.join(nwis)
             with zopen("mol.nw", "w") as f:
                 f.write(text)
         else:
             nwi = NwInput.from_dict(fw_spec)
-            nwi.write_file('mol.nw')
+            nwi_text = 'memory total 1000 mb' + str(nwi)
+            with zopen("mol.nw", "w") as f:
+                f.write(nwi_text)
 
         fw_data = FWData()
 
@@ -53,12 +55,12 @@ class NWChemTask(FireTaskBase, FWSerializable):
         elif 'nid' in socket.gethostname():  # hopper compute nodes
             # TODO: can base ncores on FW_submit.script
             if (not fw_data.MULTIPROCESSING) or (fw_data.NODE_LIST is None):
-                nwc_exe = shlex.split('aprun -n 24 nwchem')
+                nwc_exe = shlex.split('aprun  -n 24 -N 12 -S 3 nwchem')
             else:
                 list_str = ','.join(fw_data.NODE_LIST)
-                num_str = str(fw_data.SUB_NPROCS)
+                num_str = str(int(fw_data.SUB_NPROCS)/2)
                 nwc_exe = shlex.split('aprun -n ' + num_str +
-                                      ' -L ' + list_str + ' nwchem')
+                                      ' -L ' + list_str + ' -N 12 -S 3 nwchem')
         elif 'c' in socket.gethostname():  # mendel compute nodes
             # TODO: can base ncores on FW_submit.script
             if (not fw_data.MULTIPROCESSING) or (fw_data.NODE_LIST is None):
