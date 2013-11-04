@@ -36,15 +36,13 @@ class NWChemTask(FireTaskBase, FWSerializable):
     def run_task(self, fw_spec):
         if "inputs" in fw_spec:
             nwi_dicts = fw_spec["inputs"]
-            nwis = ['memory total 1000 mb'] + [str(NwInput.from_dict(d)) for d in nwi_dicts]
+            nwis = [str(NwInput.from_dict(d)) for d in nwi_dicts]
             text = '\n'.join(nwis)
             with zopen("mol.nw", "w") as f:
                 f.write(text)
         else:
             nwi = NwInput.from_dict(fw_spec)
-            nwi_text = 'memory total 1000 mb' + str(nwi)
-            with zopen("mol.nw", "w") as f:
-                f.write(nwi_text)
+            nwi.write_file("mol.nw")
 
         fw_data = FWData()
 
