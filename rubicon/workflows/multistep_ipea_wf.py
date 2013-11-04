@@ -79,7 +79,7 @@ class NWChemFireWorkCreator():
                                       theory_directives=self.td())]
         nwi = NwInput(self.mol, tasks_geom,
                       symmetry_options=self.sym(),
-                      memory_options={"total": "1000mb"})
+                      memory_options="total 1000 mb")
         spec = nwi.to_dict
         spec['user_tags'] = self.ut()
         charge_state_name = {0: "original", 1: "cation", -1: "anion"}
