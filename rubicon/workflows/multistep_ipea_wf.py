@@ -12,7 +12,7 @@ __author__ = 'xiaohuiqu'
 class NWChemFireWorkCreator():
     def __init__(self, mol, molname, mission, additional_user_tags=None, dupefinder=DupeFinderEG,
                  priority=1, update_spec=None):
-        theory_directive = {"iterations": 300, "vectors": "atomic"}
+        theory_directive = {"iterations": 400, "vectors": "atomic"}
         symmetry_options = None
         pga = PointGroupAnalyzer(mol)
         if pga.sch_symbol == 'D*h' or pga.sch_symbol == 'C*v':
@@ -48,7 +48,7 @@ class NWChemFireWorkCreator():
                                       xc="b3lyp", basis_set=self.bs,
                                       theory_directives=self.td(),
                                       alternate_directives={"driver":
-                                                            {"maxiter": 300}})]
+                                                            {"maxiter": 400}})]
         nwi = NwInput(self.mol, tasks_geom, symmetry_options=self.sym())
         spec = nwi.to_dict
         spec['user_tags'] = self.ut()
