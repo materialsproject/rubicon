@@ -34,7 +34,7 @@ import re
 logger = logging.getLogger(__name__)
 
 
-class DeltaSCFNwChemToDbTaskDrone(AbstractDrone):
+class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
     """
     Assimilates a delta scf nwchem run and inserts it into the database.
     """

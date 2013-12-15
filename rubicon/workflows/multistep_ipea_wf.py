@@ -4,7 +4,7 @@ from pymatgen.io.babelio import BabelMolAdaptor
 from pymatgen.io.nwchemio import NwTask, NwInput
 from pymatgen.symmetry.pointgroup import PointGroupAnalyzer
 from rubicon.dupefinders.dupefinder_eg import DupeFinderEG
-from rubicon.firetasks.nwchem_task import NWChemTask
+from rubicon.firetasks.qchem_task import NWChemTask
 
 __author__ = 'xiaohuiqu'
 

@@ -5,7 +5,7 @@ from pymatgen.io.nwchemio import NwTask, NwInput
 from pymatgen.io.xyzio import XYZ
 from pymatgen.symmetry.pointgroup import PointGroupAnalyzer
 from rubicon.firetasks.gaussian_task import GaussianTask
-from rubicon.firetasks.nwchem_task import NWChemTask, NWDBInsertionTask
+from rubicon.firetasks.qchem_task import NWChemTask, NWDBInsertionTask
 
 
 __author__ = 'Anubhav Jain'
