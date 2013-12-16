@@ -1,12 +1,17 @@
+import copy
 import json
 import logging
 import os
+import sys
+import math
+
 from fireworks.core.firework import FireTaskBase, FWAction, Workflow
 from fireworks.utilities.fw_serializers import FWSerializable
-import sys
 from pymatgen import Molecule
-from pymongo import MongoClient
-from rubicon.borg.hive import DeltaSCFNwChemToDbTaskDrone, DeltaSCFQChemToDbTaskDrone
+from pymatgen.io.qchemio import QcBatchInput
+
+from rubicon.borg.hive import DeltaSCFQChemToDbTaskDrone
+
 
 __author__ = 'xiaohuiqu'
 
@@ -33,7 +38,7 @@ class QChemGeomOptDBInsertionTask(FireTaskBase, FWSerializable):
             password=db_creds['admin_password'],
             collection=db_creds['collection'])
         assi_result = drone.assimilate(os.path.abspath(
-                                os.path.join(os.getcwd(), "mol.qcout")))
+            os.path.join(os.getcwd(), "mol.qcout")))
 
         t_id = None
         d = None
@@ -44,12 +49,14 @@ class QChemGeomOptDBInsertionTask(FireTaskBase, FWSerializable):
                 return FWAction(stored_data={'task_id': t_id},
                                 update_spec={"mol": d["final_molecule"],
                                              'egsnl': fw_spec['egsnl'],
-                                             'snlgroup_id': fw_spec['snlgroup_id']})
+                                             'snlgroup_id':
+                                             fw_spec['snlgroup_id']})
             else:
                 return FWAction(stored_data={'task_id': t_id},
                                 update_spec={"mol": d["final_molecule"],
                                              'egsnl': fw_spec['egsnl'],
-                                             'snlgroup_id': fw_spec['snlgroup_id']},
+                                             'snlgroup_id':
+                                             fw_spec['snlgroup_id']},
                                 defuse_children=True)
         else:
             return FWAction(defuse_children=True,
@@ -57,9 +64,9 @@ class QChemGeomOptDBInsertionTask(FireTaskBase, FWSerializable):
                                          'snlgroup_id': fw_spec['snlgroup_id']})
 
 
-
 class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
     _fw_name = "QChem Frequency DB Insertion Task"
+    molecule_perturb_scale = 0.3
 
     def run_task(self, fw_spec):
         db_dir = os.environ['DB_LOC']
@@ -80,7 +87,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
             password=db_creds['admin_password'],
             collection=db_creds['collection'])
         assi_result = drone.assimilate(os.path.abspath(
-                                os.path.join(os.getcwd(), "mol.qcout")))
+            os.path.join(os.getcwd(), "mol.qcout")))
 
         t_id = None
         d = None
@@ -92,7 +99,8 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                     return FWAction(stored_data={'task_id': t_id},
                                     update_spec={"mol": d["final_molecule"],
                                                  'egsnl': fw_spec['egsnl'],
-                                                 'snlgroup_id': fw_spec['snlgroup_id']})
+                                                 'snlgroup_id':
+                                                 fw_spec['snlgroup_id']})
                 else:
                     return self.img_freq_action(fw_spec, d, t_id)
             else:
@@ -100,66 +108,97 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                                 defuse_children=True,
                                 update_spec={"mol": d["final_molecule"],
                                              'egsnl': fw_spec['egsnl'],
-                                             'snlgroup_id': fw_spec['snlgroup_id']})
+                                             'snlgroup_id':
+                                             fw_spec['snlgroup_id']})
         else:
             return FWAction(defuse_children=True,
                             update_spec={'egsnl': fw_spec['egsnl'],
                                          'snlgroup_id': fw_spec['snlgroup_id']})
 
-    def img_freq_action(self, fw_spec, d, t_id):
-        if 'img_freq_max_trial' in fw_spec:
-            max_fix_time = fw_spec['img_freq_max_trial']
-        else:
-            max_fix_time = 3
-        if 'freq_fix_time' in d['user_tags']:
-            fix_time = d['user_tags']['freq_fix_time'] + 1
-        else:
-            fix_time = 1
-            db_dir = os.environ['DB_LOC']
-            db_path = os.path.join(db_dir, 'nwchem_calc_db.json')
-            with open(db_path) as f:
-                db_creds = json.load(f)
-            conn = MongoClient(db_creds['host'], db_creds['port'])
-            db = conn[db_creds['database']]
-            if db_creds['admin_user']:
-                db.authenticate(db_creds['admin_user'],
-                                db_creds['admin_password'])
-            coll = db[db_creds['collection']]
-            coll.update({"task_id": t_id},
-                        {"$set": {'user_tags.freq_fix_time': 0}}, upsert=True)
+    @staticmethod
+    def spawn_opt_freq_wf(mol, molname, mission, additional_user_tags,
+                          priority, update_spec, charge_shift, grid=None):
+        from rubicon.workflows.multistep_ipea_wf \
+            import QChemFireWorkCreator
+        fw_creator = QChemFireWorkCreator(mol, molname, mission,
+                                          additional_user_tags, priority,
+                                          update_spec)
+        geom_fwid, freq_fwid = -1, -2
+        geom_fw = fw_creator.geom_fw(charge_shift, geom_fwid)
+        freq_fw = fw_creator.freq_fw(charge_shift, freq_fwid)
+        if grid:
+            for fw in [geom_fw, freq_fw]:
+                qcinp = QcBatchInput.from_dict(fw.spec["qcinp"])
+                for j in qcinp.jobs:
+                    j.set_dft_grids(*grid)
+                fw.spec["qcinp"] = qcinp.to_dict
+        wf = Workflow([geom_fw, freq_fw],
+                      links_dict={geom_fwid: freq_fwid})
+        return wf
 
-        if fix_time > max_fix_time:
+    @classmethod
+    def perturb_molecule(cls, d):
+        old_mol = Molecule.from_dict(d['final_molecule'])
+        vib_mode = d['calculations']['freq']['frequencies'][0]["vib_mode"]
+        max_dis = max([math.sqrt(sum([x ** 2 for x in mode]))
+                       for mode in vib_mode])
+        scale = cls.molecule_perturb_scale / max_dis
+        normalized_mode = [[x * scale for x in mode]
+                           for mode in vib_mode]
+        new_coords = [[c+v for c, v in zip(site.coords, mode)]
+                      for site, mode in zip(old_mol.sites, normalized_mode)]
+        species = [site.specie.symbol
+                   for site in old_mol.sites]
+        new_mol = Molecule(species, new_coords)
+        return new_mol
+
+    def img_freq_action(self, fw_spec, d, t_id):
+        if "img_freq_eli" in d['user_tags']:
+            img_freq_eli = copy.deepcopy(d['user_tags'])
+            img_freq_eli['current_method_id'] += 1
+        else:
+            img_freq_eli = {"methods": ["dir_dis_opt", "den_dis_opt",
+                                        "alt_den_dis_opt"],
+                            "current_method_id": 0}
+
+        if img_freq_eli['current_method_id'] >= len(img_freq_eli['methods']):
             return FWAction(stored_data={'task_id': t_id},
                             defuse_children=True,
                             update_spec={"mol": d["final_molecule"],
                                          'egsnl': fw_spec['egsnl'],
                                          'snlgroup_id': fw_spec['snlgroup_id']})
-        else:
-            old_mol = Molecule.from_dict(d['final_molecule'])
-            vib_mode = d['calculations']['freq']['frequencies'][0][1]
-            new_coords = [[c+v for c, v in zip(site.coords, mode)]
-                          for site, mode in zip(old_mol.sites, vib_mode)]
-            species = [site.specie.symbol
-                       for site in old_mol.sites]
-            new_mol = Molecule(species, new_coords)
-            from rubicon.workflows.multistep_ipea_wf \
-                import NWChemFireWorkCreator
-            fw_creator = NWChemFireWorkCreator(new_mol,
-                             d['user_tags']['molname'],
-                             d['user_tags']['mission'],
-                             additional_user_tags={'freq_fix_time': fix_time},
-                             priority=fw_spec['_priority'],
-                             update_spec={'egsnl': fw_spec['egsnl'],
-                                          'snlgroup_id': fw_spec['snlgroup_id']},)
-            geom_fwid, freq_fwid = -1, -2
-            geom_fw = fw_creator.geom_fw(d['user_tags']['charge_shift'], geom_fwid)
-            freq_fw = fw_creator.freq_fw(d['user_tags']['charge_shift'], freq_fwid)
-            wf = Workflow([geom_fw, freq_fw],
-                          links_dict={geom_fwid: freq_fwid})
-            return FWAction(stored_data={'task_id': t_id}, detours=wf,
-                            update_spec={'egsnl': fw_spec['egsnl'],
-                                         'snlgroup_id': fw_spec['snlgroup_id']})
 
+        new_mol = self.perturb_molecule(d)
+        molname = d['user_tags']['molname']
+        mission = d['user_tags']['mission']
+        additional_user_tags = {"img_freq_eli": img_freq_eli}
+        priority = fw_spec['_priotity']
+        update_specs = {'egsnl': fw_spec['egsnl'],
+                        'snlgroup_id': fw_spec['snlgroup_id']}
+        charge_shift = d['user_tags']['charge_shift']
+
+        method = img_freq_eli["methods"][img_freq_eli["current_method_id"]]
+        if method == "dir_dis_opt":
+            wf = self.spawn_opt_freq_wf(new_mol, molname, mission,
+                                        additional_user_tags, priority,
+                                        update_specs, charge_shift,
+                                        grid=None)
+        elif method == "den_dis_opt":
+            wf = self.spawn_opt_freq_wf(new_mol, molname, mission,
+                                        additional_user_tags, priority,
+                                        update_specs, charge_shift,
+                                        grid=(128, 302))
+        elif method == "alt_den_dis_opt":
+            wf = self.spawn_opt_freq_wf(new_mol, molname, mission,
+                                        additional_user_tags, priority,
+                                        update_specs, charge_shift,
+                                        grid=(90, 590))
+        else:
+            raise Exception("Unknown imaginary frequency fixing method")
+
+        return FWAction(stored_data={'task_id': t_id}, detours=wf,
+                        update_spec={'egsnl': fw_spec['egsnl'],
+                                     'snlgroup_id': fw_spec['snlgroup_id']})
 
 
 class QChemSinglePointEnergyDBInsertionTask(FireTaskBase, FWSerializable):
@@ -184,7 +223,7 @@ class QChemSinglePointEnergyDBInsertionTask(FireTaskBase, FWSerializable):
             password=db_creds['admin_password'],
             collection=db_creds['collection'])
         assi_result = drone.assimilate(os.path.abspath(
-                                os.path.join(os.getcwd(), "mol.qcout")))
+            os.path.join(os.getcwd(), "mol.qcout")))
 
         t_id = None
         d = None
@@ -195,15 +234,17 @@ class QChemSinglePointEnergyDBInsertionTask(FireTaskBase, FWSerializable):
                 return FWAction(stored_data={'task_id': t_id},
                                 update_spec={"mol": d["final_molecule"],
                                              'egsnl': fw_spec['egsnl'],
-                                             'snlgroup_id': fw_spec['snlgroup_id']})
+                                             'snlgroup_id':
+                                             fw_spec['snlgroup_id']})
             else:
                 return FWAction(stored_data={'task_id': t_id},
                                 defuse_children=True,
                                 update_spec={"mol": d["final_molecule"],
                                              'egsnl': fw_spec['egsnl'],
-                                             'snlgroup_id': fw_spec['snlgroup_id']})
+                                             'snlgroup_id':
+                                             fw_spec['snlgroup_id']})
         else:
             return FWAction(defuse_children=True,
                             update_spec={'egsnl': fw_spec['egsnl'],
-                                         'snlgroup_id': fw_spec['snlgroup_id']})
-
+                                         'snlgroup_id':
+                                         fw_spec['snlgroup_id']})

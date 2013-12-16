@@ -11,6 +11,7 @@ from fireworks.core.firework import FireTaskBase, FWAction
 from fireworks.utilities.fw_serializers import FWSerializable
 
 from custodian.custodian import Custodian
+from pymatgen.core.structure import Molecule
 from pymatgen.io.qchemio import QcBatchInput
 from rubicon.borg.hive import DeltaSCFQChemToDbTaskDrone
 
@@ -35,6 +36,9 @@ class QChemTask(FireTaskBase, FWSerializable):
 
     def run_task(self, fw_spec):
         qcbat = QcBatchInput.from_dict(fw_spec["qcbat"])
+        if 'mol' in fw_spec:
+            mol = Molecule.from_dict(fw_spec["mol"])
+            qcbat.jobs[0].mol = mol
         qcbat.write_file("mol.qcinp")
         if 'nid' in socket.gethostname():  # hopper compute nodes
             qc_exe = shlex.split("qchem -np 24")

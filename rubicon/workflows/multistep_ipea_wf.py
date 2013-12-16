@@ -9,7 +9,7 @@ from rubicon.firetasks.qchem_task import NWChemTask
 __author__ = 'xiaohuiqu'
 
 
-class NWChemFireWorkCreator():
+class QChemFireWorkCreator():
     def __init__(self, mol, molname, mission, additional_user_tags=None, dupefinder=DupeFinderEG,
                  priority=1, update_spec=None):
         theory_directive = {"iterations": 400, "vectors": "atomic"}
