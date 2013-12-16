@@ -183,12 +183,14 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
                     stationary_type = "minimum"
             elif d["jobtype"] == "sp":
                 # noinspection PyTypeChecker
+                suffix = "" if d["solvent_method"] == "NA" \
+                    else "_" + d["solvent_method"]
                 if d["molecules"][-1].charge == charge:
-                    data_dict["scf"] = d
+                    data_dict["scf" + suffix] = d
                 elif d["molecules"][-1].charge == charge + 1:
-                    data_dict["scf_IE"] = d
+                    data_dict["scf_IE" + suffix] = d
                 elif d["molecules"][-1].charge == charge - 1:
-                    data_dict["scf_EA"] = d
+                    data_dict["scf_EA" + suffix] = d
 
         data = data_dict
 
