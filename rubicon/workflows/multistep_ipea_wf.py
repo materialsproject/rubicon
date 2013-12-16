@@ -63,7 +63,7 @@ class NWChemFireWorkCreator():
         if self.update_spec:
             spec.update(self.update_spec)
         task_name = charge_state_name[charge_shift] + ' geom opt'
-        from rubicon.firetasks.multistep_nwchem_task \
+        from rubicon.firetasks.multistep_qchem_task \
             import NWChemGeomOptDBInsertionTask
         fw_geom = FireWork([NWChemTask(),
                             NWChemGeomOptDBInsertionTask()],
@@ -93,7 +93,7 @@ class NWChemFireWorkCreator():
         if self.update_spec:
             spec.update(self.update_spec)
         task_name = charge_state_name[charge_shift] + ' freq'
-        from rubicon.firetasks.multistep_nwchem_task \
+        from rubicon.firetasks.multistep_qchem_task \
             import NWChemFrequencyDBInsertionTask
         fw_freq = FireWork([NWChemTask(),
                             NWChemFrequencyDBInsertionTask()],
@@ -127,7 +127,7 @@ class NWChemFireWorkCreator():
         if self.update_spec:
             spec.update(self.update_spec)
         task_name = charge_state_name[charge_shift] + ' single point energy'
-        from rubicon.firetasks.multistep_nwchem_task \
+        from rubicon.firetasks.multistep_qchem_task \
             import NWChemSinglePointEnergyDBInsertionTask
         fw_sp = FireWork([NWChemTask(),
                           NWChemSinglePointEnergyDBInsertionTask()],

@@ -6,20 +6,20 @@ from fireworks.utilities.fw_serializers import FWSerializable
 import sys
 from pymatgen import Molecule
 from pymongo import MongoClient
-from rubicon.borg.hive import DeltaSCFNwChemToDbTaskDrone
+from rubicon.borg.hive import DeltaSCFNwChemToDbTaskDrone, DeltaSCFQChemToDbTaskDrone
 
 __author__ = 'xiaohuiqu'
 
 
-class NWChemGeomOptDBInsertionTask(FireTaskBase, FWSerializable):
-    _fw_name = "NWChem Geometry Optimization DB Insertion Task"
+class QChemGeomOptDBInsertionTask(FireTaskBase, FWSerializable):
+    _fw_name = "QChem Geometry Optimization DB Insertion Task"
 
     def run_task(self, fw_spec):
         db_dir = os.environ['DB_LOC']
-        db_path = os.path.join(db_dir, 'nwchem_calc_db.json')
+        db_path = os.path.join(db_dir, 'qchem_calc_db.json')
 
         logging.basicConfig(level=logging.INFO)
-        logger = logging.getLogger('NWChemDrone')
+        logger = logging.getLogger('QChemDrone')
         logger.setLevel(logging.INFO)
         sh = logging.StreamHandler(stream=sys.stdout)
         sh.setLevel(getattr(logging, 'INFO'))
@@ -27,13 +27,13 @@ class NWChemGeomOptDBInsertionTask(FireTaskBase, FWSerializable):
 
         with open(db_path) as f:
             db_creds = json.load(f)
-        drone = DeltaSCFNwChemToDbTaskDrone(
+        drone = DeltaSCFQChemToDbTaskDrone(
             host=db_creds['host'], port=db_creds['port'],
             database=db_creds['database'], user=db_creds['admin_user'],
             password=db_creds['admin_password'],
             collection=db_creds['collection'])
         assi_result = drone.assimilate(os.path.abspath(
-                                os.path.join(os.getcwd(), "mol.nwout")))
+                                os.path.join(os.getcwd(), "mol.qcout")))
 
         t_id = None
         d = None
@@ -58,15 +58,15 @@ class NWChemGeomOptDBInsertionTask(FireTaskBase, FWSerializable):
 
 
 
-class NWChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
-    _fw_name = "NWChem Frequency DB Insertion Task"
+class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
+    _fw_name = "QChem Frequency DB Insertion Task"
 
     def run_task(self, fw_spec):
         db_dir = os.environ['DB_LOC']
-        db_path = os.path.join(db_dir, 'nwchem_calc_db.json')
+        db_path = os.path.join(db_dir, 'qchem_calc_db.json')
 
         logging.basicConfig(level=logging.INFO)
-        logger = logging.getLogger('NWChemDrone')
+        logger = logging.getLogger('QChemDrone')
         logger.setLevel(logging.INFO)
         sh = logging.StreamHandler(stream=sys.stdout)
         sh.setLevel(getattr(logging, 'INFO'))
@@ -74,13 +74,13 @@ class NWChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
 
         with open(db_path) as f:
             db_creds = json.load(f)
-        drone = DeltaSCFNwChemToDbTaskDrone(
+        drone = DeltaSCFQChemToDbTaskDrone(
             host=db_creds['host'], port=db_creds['port'],
             database=db_creds['database'], user=db_creds['admin_user'],
             password=db_creds['admin_password'],
             collection=db_creds['collection'])
         assi_result = drone.assimilate(os.path.abspath(
-                                os.path.join(os.getcwd(), "mol.nwout")))
+                                os.path.join(os.getcwd(), "mol.qcout")))
 
         t_id = None
         d = None
@@ -162,15 +162,15 @@ class NWChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
 
 
 
-class NWChemSinglePointEnergyDBInsertionTask(FireTaskBase, FWSerializable):
+class QChemSinglePointEnergyDBInsertionTask(FireTaskBase, FWSerializable):
     _fw_name = "NWChem Single Point Energy DB Insertion Task"
 
     def run_task(self, fw_spec):
         db_dir = os.environ['DB_LOC']
-        db_path = os.path.join(db_dir, 'nwchem_calc_db.json')
+        db_path = os.path.join(db_dir, 'qchem_calc_db.json')
 
         logging.basicConfig(level=logging.INFO)
-        logger = logging.getLogger('NWChemDrone')
+        logger = logging.getLogger('QChemDrone')
         logger.setLevel(logging.INFO)
         sh = logging.StreamHandler(stream=sys.stdout)
         sh.setLevel(getattr(logging, 'INFO'))
@@ -178,13 +178,13 @@ class NWChemSinglePointEnergyDBInsertionTask(FireTaskBase, FWSerializable):
 
         with open(db_path) as f:
             db_creds = json.load(f)
-        drone = DeltaSCFNwChemToDbTaskDrone(
+        drone = DeltaSCFQChemToDbTaskDrone(
             host=db_creds['host'], port=db_creds['port'],
             database=db_creds['database'], user=db_creds['admin_user'],
             password=db_creds['admin_password'],
             collection=db_creds['collection'])
         assi_result = drone.assimilate(os.path.abspath(
-                                os.path.join(os.getcwd(), "mol.nwout")))
+                                os.path.join(os.getcwd(), "mol.qcout")))
 
         t_id = None
         d = None
