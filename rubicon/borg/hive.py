@@ -5,6 +5,7 @@ TODO: Modify module doc.
 """
 
 from __future__ import division
+from pymatgen.io.qchemio import QcOutput
 
 __author__ = "Shyue Ping Ong"
 __copyright__ = "Copyright 2012, The Materials Project"
@@ -21,7 +22,6 @@ import datetime
 from pymongo import MongoClient
 
 from pymatgen.apps.borg.hive import AbstractDrone
-from pymatgen.io.nwchemio import NwOutput
 from pymatgen.util.io_utils import clean_json
 from pymatgen.io.babelio import BabelMolAdaptor
 from pymatgen.io.xyzio import XYZ
@@ -104,10 +104,10 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
 
     @classmethod
     def get_user_tags(cls, path):
-        '''
+        """
         Parse the user_tags from the FW.json file.
         The user_tags can be set in the creation of FireWork
-        '''
+        """
         fwjsonfile = os.path.join(os.path.dirname(path), 'FW.json')
         user_tags = {}
         with open(fwjsonfile) as f:
@@ -116,18 +116,18 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
             user_tags = d['spec']['user_tags']
         if 'name' in d:
             user_tags['fw_name'] = d['name']
-        if len(user_tags)>0:
+        if len(user_tags) > 0:
             return user_tags
         else:
             return None
 
     @classmethod
     def modify_svg(cls, svg):
-        '''
+        """
         Hack to the svg code to enhance the molecule.
         Because Xiaohui have no aeshetic cell, please change it a more
         beautiful color scheme
-        '''
+        """
         tokens = svg.split('\n')
         new_tokens = []
         for line in tokens:
@@ -143,15 +143,14 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
         new_svg = '\n'.join(new_tokens)
         return new_svg
 
-
     @classmethod
     def get_task_doc(cls, path):
         """
         Get the entire task doc for a path, including any post-processing.
         """
         logger.info("Getting task doc for base dir :{}".format(path))
-        nwo = NwOutput(path)
-        data = nwo.data
+        qcinp = QcOutput(path)
+        data = qcinp.data
         mol = data[0]["molecules"][-1]
         bb = BabelMolAdaptor(mol)
         pbmol = bb.pybel_mol
@@ -162,8 +161,8 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
         svg = cls.modify_svg(pbmol.write("svg"))
         comp = mol.composition
         initial_mol = data[0]["molecules"][0]
-        charge = data[0]["charge"]
-        spin_mult = data[0]["spin_multiplicity"]
+        charge = mol.charge
+        spin_mult = mol.spin_multiplicity
         data_dict = {}
         from pymatgen.symmetry.pointgroup import PointGroupAnalyzer
 
@@ -171,35 +170,27 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
         sch_symbol = pga.sch_symbol
         stationary_type = None
         for d in data:
-            if d["job_type"] == "NWChem Geometry Optimization":
+            # noinspection PyTypeChecker
+            if d["jobtype"] == "opt":
                 data_dict["geom_opt"] = d
-            elif d["job_type"] == "NWChem Nuclear Hessian and Frequency " \
-                                  "Analysis":
+            elif d["jobtype"] == "freq":
                 data_dict["freq"] = d
-                if d['frequencies'][0][0] < -0.00:
+                # noinspection PyTypeChecker
+                if d['frequencies'][0]["frequency"] < -0.00:
                     # it is stupied that -0.00 is less than 0.00
                     stationary_type = "non-minimum"
                 else:
                     stationary_type = "minimum"
-            elif d["job_type"] == "NWChem DFT Module":
-                if d["charge"] == charge:
+            elif d["jobtype"] == "sp":
+                # noinspection PyTypeChecker
+                if d["molecules"][-1].charge == charge:
                     data_dict["scf"] = d
-                elif d["charge"] == charge + 1:
+                elif d["molecules"][-1].charge == charge + 1:
                     data_dict["scf_IE"] = d
-                elif d["charge"] == charge - 1:
+                elif d["molecules"][-1].charge == charge - 1:
                     data_dict["scf_EA"] = d
-            elif  d["job_type"] == "NWChem DFT Module COSMO":
-                if d["charge"] == charge:
-                    data_dict["sol_scf"] = d
-                elif d["charge"] == charge + 1:
-                    data_dict["sol_IE"] = d
-                elif d["charge"] == charge - 1:
-                    data_dict["sol_EA"] = d
-
-
 
         data = data_dict
-
 
         d = {"path": os.path.abspath(path),
              "folder": os.path.basename(os.path.dirname(os.path.abspath(
@@ -223,13 +214,13 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
         if "scf_EA" in data_dict and \
                 (not data_dict["scf_EA"]["has_error"]) and \
                 (not data_dict["scf"]["has_error"]):
-            d["EA"] = (data["scf"]["energies"][-1]
-                       - data["scf_EA"]["energies"][-1])
+            d["EA"] = (data["scf"]["energies"][-1][-1]
+                       - data["scf_EA"]["energies"][-1][-1])
         if "scf_IE" in data_dict and \
                 (not data_dict["scf_IE"]["has_error"]) and \
                 (not data_dict["scf"]["has_error"]):
-            d["IE"] = (data["scf_IE"]["energies"][-1]
-                       - data["scf"]["energies"][-1])
+            d["IE"] = (data["scf_IE"]["energies"][-1][-1]
+                       - data["scf"]["energies"][-1][-1])
 
         if stationary_type:
             d['stationary_type'] = stationary_type
@@ -306,10 +297,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
         (parent, subdirs, files) = path
 
         return [os.path.join(parent, f) for f in files
-                if f.endswith(".nwout")]
-
-    def convert(self, d):
-        return d
+                if f.endswith(".qcout")]
 
     def __str__(self):
         return self.__class__.__name__
@@ -328,28 +316,3 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
         output = {"name": self.__class__.__name__,
                   "init_args": init_args, "version": __version__}
         return output
-
-
-import unittest
-
-from pymatgen.apps.borg.queen import BorgQueen
-
-
-test_dir = os.path.join(os.path.dirname(__file__), "..", "..",
-                        'test_files')
-
-
-class DeltaSCFNwChemToDbTaskDroneTest(unittest.TestCase):
-
-    def test_assimilate(self):
-        import logging
-        logging.basicConfig(level=logging.INFO)
-        drone = DeltaSCFNwChemToDbTaskDrone(
-            collection="mol_task_test")
-        q = BorgQueen(drone)
-        q.serial_assimilate(test_dir)
-
-
-
-if __name__ == "__main__":
-    unittest.main()
