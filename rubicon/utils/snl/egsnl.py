@@ -1,6 +1,7 @@
 import datetime
 from pymatgen import Composition, PMGJSONDecoder, Structure, Molecule
-from pymatgen.analysis.molecule_matcher import MoleculeMatcher, InchiMolAtomMapper
+from pymatgen.analysis.molecule_matcher import \
+    MoleculeMatcher, InchiMolAtomMapper
 from pymatgen.io.babelio import BabelMolAdaptor
 from pymatgen.matproj.snl import StructureNL
 
@@ -145,7 +146,8 @@ class SNLGroup():
 
         # make sure the structure is not already in all_structures
         if cand_snl.snl_id in self.all_snl_ids:
-            print 'WARNING: add_if_belongs() has detected that you are trying to add the same SNL id twice!'
+            print 'WARNING: add_if_belongs() has detected that you are ' \
+                  'trying to add the same SNL id twice!'
             return False
 
         if exact_match:
