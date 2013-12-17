@@ -83,25 +83,31 @@ class SNLMongoAdapter(FWSerializable):
             print 'MATCH FOUND, grouping (snl_id, snlgroup): {}'.\
                 format((egsnl.snl_id, snlgroup.snlgroup_id))
             if not testing_mode:
-                self.snlgroups.update({'snlgroup_id': snlgroup.snlgroup_id}, snlgroup.to_dict)
+                self.snlgroups.update({'snlgroup_id': snlgroup.snlgroup_id},
+                                      snlgroup.to_dict)
             return True
         return False
 
-    def build_groups(self, egsnl, force_new=False, snlgroup_guess=None, testing_mode=False):
-        # testing mode is used to see if something already exists in DB w/o adding it to the db
+    def build_groups(self, egsnl, force_new=False, snlgroup_guess=None,
+                     testing_mode=False):
+        # testing mode is used to see if something already exists in DB w/o
+        # adding it to the db
         match_found = False
         if not force_new:
             if snlgroup_guess:
                 sgp = self.snlgroups.find_one({'snlgroup_id': snlgroup_guess})
                 snlgroup = SNLGroup.from_dict(sgp)
-                match_found = self._add_if_belongs(snlgroup, egsnl, testing_mode)
+                match_found = self._add_if_belongs(snlgroup, egsnl,
+                                                   testing_mode)
 
             if not match_found:
                 # look at all potential matches
-                for entry in self.snlgroups.find({'snlgroup_key': egsnl.snlgroup_key},
-                                                 sort=[("num_snl", DESCENDING)]):
+                for entry in self.snlgroups.find(
+                        {'snlgroup_key': egsnl.snlgroup_key},
+                        sort=[("num_snl", DESCENDING)]):
                     snlgroup = SNLGroup.from_dict(entry)
-                    match_found = self._add_if_belongs(snlgroup, egsnl, testing_mode)
+                    match_found = self._add_if_belongs(snlgroup, egsnl,
+                                                       testing_mode)
                     if match_found:
                         break
 
@@ -121,7 +127,8 @@ class SNLMongoAdapter(FWSerializable):
 
         all_snl_ids = [sid for sid in snlgroup.all_snl_ids]
         if canonical_egsnl.snl_id not in all_snl_ids:
-            raise ValueError('Canonical SNL must already be in snlgroup to switch!')
+            raise ValueError('Canonical SNL must already be in snlgroup to '
+                             'switch!')
 
         new_group = SNLGroup(snlgroup_id, canonical_egsnl, all_snl_ids)
         self.snlgroups.update({'snlgroup_id': snlgroup_id}, new_group.to_dict)
