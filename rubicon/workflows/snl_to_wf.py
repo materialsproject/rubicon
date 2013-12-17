@@ -9,18 +9,20 @@ from rubicon.workflows.multistep_ipea_wf import multistep_ipea_fws
 
 def snl_to_wf(snl, parameters=None):
     fws = []
-    connections = {}
     parameters = parameters if parameters else {}
 
     snl_priority = parameters.get('priority', 1)
     mission = parameters.get('mission', 'Electron Genome Production')
     priority = snl_priority * 2  # once we start a job, keep going!
 
-    f = Composition.from_formula(snl.structure.composition.reduced_formula).alphabetical_formula
+    f = Composition.from_formula(snl.structure.composition.reduced_formula).\
+        alphabetical_formula
 
     # add the SNL to the SNL DB and figure out duplicate group
     tasks = [AddSNLTask()]
-    spec = {'task_type': 'Add to SNL database', 'snl': snl.to_dict, '_priority': snl_priority}
+    spec = {'task_type': 'Add to SNL database',
+            'snl': snl.to_dict,
+            '_priority': snl_priority}
     if 'snlgroup_id' in parameters and isinstance(snl, EGStructureNL):
         spec['force_egsnl'] = snl.to_dict
         spec['force_snlgroup_id'] = parameters['snlgroup_id']
@@ -29,16 +31,18 @@ def snl_to_wf(snl, parameters=None):
                         name=get_slug(f + ' -- Add to SNL database'),
                         fw_id=1))
 
-    ipea_fws, connections = multistep_ipea_fws(snl.structure, f, mission, DupeFinderEG, priority,
-                                               1)
+    ipea_fws, connections = multistep_ipea_fws(snl.structure, f, mission,
+                                               DupeFinderEG, priority, 1)
     fws.extend(ipea_fws)
 
     wf_meta = get_meta_from_structure(snl.structure)
     wf_meta['run_version'] = 'Oct 29, 2013'
 
-    if '_electrolytegenome' in snl.data and 'submission_id' in snl.data['_electrolytegenome']:
-        wf_meta['submission_id'] = snl.data['_electrolytegenome']['submission_id']
-    return Workflow(fws, connections, name=Composition.from_formula(
-        snl.structure.composition.reduced_formula).alphabetical_formula, metadata=wf_meta)
-
-
+    if '_electrolytegenome' in snl.data and \
+            'submission_id' in snl.data['_electrolytegenome']:
+        wf_meta['submission_id'] = snl.data['_electrolytegenome'][
+            'submission_id']
+    return Workflow(fws, connections,
+                    name=Composition.from_formula(snl.structure.composition.
+                    reduced_formula).alphabetical_formula,
+                    metadata=wf_meta)
