@@ -50,7 +50,7 @@ class QChemFireWorkCreator():
             spec['_dupefinder'] = self.dupefinder().to_dict()
         tracker_out = Tracker("mol.qcout", nlines=20)
         tracker_std = Tracker("mol.qclog", nlines=10)
-        spec["_trackers"] = [tracker_out.to_dict(), tracker_std.to_dict()]
+        spec["_trackers"] = [tracker_out, tracker_std]
         spec['user_tags']['methods'] = "B3LYP/" + self.bs
         spec['task_type'] = charge_state_name[charge_shift] + \
             ' Geometry Optimization'
@@ -82,7 +82,7 @@ class QChemFireWorkCreator():
             spec['_dupefinder'] = self.dupefinder().to_dict()
         tracker_out = Tracker("mol.qcout", nlines=20)
         tracker_std = Tracker("mol.qclog", nlines=10)
-        spec["_trackers"] = [tracker_out.to_dict(), tracker_std.to_dict()]
+        spec["_trackers"] = [tracker_out, tracker_std]
         spec['user_tags']['methods'] = "B3LYP/" + self.bs
         spec['task_type'] = charge_state_name[charge_shift] + \
             ' Vibrational Frequency'
@@ -120,7 +120,7 @@ class QChemFireWorkCreator():
             spec['_dupefinder'] = self.dupefinder().to_dict()
         tracker_out = Tracker("mol.qcout", nlines=20)
         tracker_std = Tracker("mol.qclog", nlines=10)
-        spec["_trackers"] = [tracker_out.to_dict(), tracker_std.to_dict()]
+        spec["_trackers"] = [tracker_out, tracker_std]
         spec['user_tags']['methods'] = "B3LYP/" + self.bs
         spec['task_type'] = charge_state_name[charge_shift] + \
             ' Single Point Energy'
