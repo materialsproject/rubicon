@@ -71,7 +71,9 @@ class SubmissionMongoAdapter(object):
     def resubmit(self, submission_id):
         self.jobs.update(
             {'submission_id': submission_id},
-            {'$set': {'state': 'SUBMITTED', 'state_details': {}, 'task_dict': {}}})
+            {'$set': {'state': 'SUBMITTED',
+                      'state_details': {},
+                      'task_dict': {}}})
 
     def cancel_submission(self, submission_id):
         # TODO: implement me
@@ -80,7 +82,8 @@ class SubmissionMongoAdapter(object):
         raise NotImplementedError()
 
     def get_states(self, crit):
-        props = ['state', 'state_details', 'task_dict', 'submission_id', 'formula']
+        props = ['state', 'state_details', 'task_dict', 'submission_id',
+                 'formula']
         infos = []
         for j in self.jobs.find(crit, dict([(p, 1) for p in props])):
             infos.append(dict([(p, j[p]) for p in props]))
@@ -97,7 +100,9 @@ class SubmissionMongoAdapter(object):
 
     def update_state(self, submission_id, state, state_details, task_dict):
         self.jobs.find_and_modify({'submission_id': submission_id},
-                                  {'$set': {'state': state, 'state_details': state_details, 'task_dict': task_dict}})
+                                  {'$set': {'state': state,
+                                            'state_details': state_details,
+                                            'task_dict': task_dict}})
 
     @classmethod
     def from_dict(cls, d):
@@ -115,7 +120,9 @@ class SubmissionMongoAdapter(object):
         :param f_format: the format to output to (default json)
         """
         if f_format == 'json':
-            return json.dumps(self.to_dict(), default=DATETIME_HANDLER, **kwargs)
+            return json.dumps(self.to_dict(),
+                              default=DATETIME_HANDLER,
+                              **kwargs)
         elif f_format == 'yaml':
             # start with the JSON format, and convert to YAML
             return yaml.dump(self.to_dict(), default_flow_style=YAML_STYLE,
