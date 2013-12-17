@@ -52,7 +52,8 @@ class QChemTask(FireTaskBase, FWSerializable):
         else:
             qc_exe = ["qchem"]
 
-        job = QchemJob(qc_exe)
+        job = QchemJob(qc_exe, input_file="mol.qcinp", output_file="mol.qcout",
+                       qclog_file="mol.qclog")
         handler = QChemErrorHandler()
         c = Custodian(handlers=[handler], jobs=[job])
         c.run()
