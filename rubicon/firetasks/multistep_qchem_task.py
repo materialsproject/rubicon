@@ -149,7 +149,9 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                       for site, mode in zip(old_mol.sites, normalized_mode)]
         species = [site.specie.symbol
                    for site in old_mol.sites]
-        new_mol = Molecule(species, new_coords)
+        charge_shift = d['user_tags']['charge_shift']
+        charge = old_mol.charge - charge_shift
+        new_mol = Molecule(species, new_coords, charge)
         return new_mol
 
     def img_freq_action(self, fw_spec, d, t_id):
