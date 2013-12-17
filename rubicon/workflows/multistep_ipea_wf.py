@@ -88,7 +88,7 @@ class QChemFireWorkCreator():
             ' Vibrational Frequency'
         if self.update_spec:
             spec.update(self.update_spec)
-        task_name = charge_state_name[charge_shift] + ' '
+        task_name = charge_state_name[charge_shift] + ' Vibrational Frequency'
         from rubicon.firetasks.multistep_qchem_task \
             import QChemFrequencyDBInsertionTask
         fw_freq = FireWork([QChemTask(),
@@ -126,7 +126,7 @@ class QChemFireWorkCreator():
             ' Single Point Energy'
         if self.update_spec:
             spec.update(self.update_spec)
-        task_name = charge_state_name[charge_shift] + ' '
+        task_name = charge_state_name[charge_shift] + ' Single Point Energy'
         from rubicon.firetasks.multistep_qchem_task \
             import QChemSinglePointEnergyDBInsertionTask
         fw_freq = FireWork([QChemTask(),
