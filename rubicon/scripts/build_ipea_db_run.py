@@ -52,33 +52,33 @@ def build_ipea_db():
                 {'task_id': neutral_tid},
                 fields={"_id": False,
                         "calculations.scf.energies": True,
-                        "calculations.sol_scf.energies": True})[0]
+                        "calculations.scf_pcm.energies": True})[0]
             neutral_vaccum_energy = neutral_energy_dict['calculations'][
-                'scf']['energies'][0]
+                'scf']['energies'][-1][-1]
             neutral_sol_energy = neutral_energy_dict['calculations'][
-                'sol_scf']['energies'][0]['sol phase']
+                'scf_pcm']['energies'][-1][-1]
 
         if cation_tid:
             cation_energy_dict = calc_coll.find(
                 {'task_id': cation_tid},
                 fields={"_id": False,
                         "calculations.scf.energies": True,
-                        "calculations.sol_scf.energies": True})[0]
+                        "calculations.scf_pcm.energies": True})[0]
             cation_vaccum_energy = cation_energy_dict['calculations']['scf'][
-                'energies'][0]
-            cation_sol_energy = cation_energy_dict['calculations']['sol_scf'][
-                'energies'][0]['sol phase']
+                'energies'][-1][-1]
+            cation_sol_energy = cation_energy_dict['calculations']['scf_pcm'][
+                'energies'][-1][-1]
 
         if anion_tid:
             anion_energy_dict = calc_coll.find(
                 {'task_id': anion_tid},
                 fields={"_id": False,
                         "calculations.scf.energies": True,
-                        "calculations.sol_scf.energies": True})[0]
+                        "calculations.scf_pcm.energies": True})[0]
             anion_vaccum_energy = anion_energy_dict['calculations']['scf'][
-                'energies'][0]
-            anion_sol_energy = anion_energy_dict['calculations']['sol_scf'][
-                'energies'][0]['sol phase']
+                'energies'][-1][-1]
+            anion_sol_energy = anion_energy_dict['calculations']['scf_pcm'][
+                'energies'][-1][-1]
         if neutral_tid:
             if cation_tid:
                 ip_vaccum = cation_vaccum_energy - neutral_vaccum_energy
