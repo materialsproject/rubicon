@@ -1,7 +1,7 @@
 import json
 import os
 from pymongo import MongoClient
-from rubicon.submission.submission_mongo import SubmissionMongoAdapter
+from rubicon.submission.submission_mongo import SubmissionMongoAdapterJCESR
 
 __author__ = 'xiaohuiqu'
 
@@ -21,7 +21,7 @@ def get_calculation_db():
 
 
 def build_ipea_db():
-    sma = SubmissionMongoAdapter.auto_load()
+    sma = SubmissionMongoAdapterJCESR.auto_load()
     jobs = sma.jobs
     calc_coll, ipea_coll = get_calculation_db()
     ipea_coll.remove()
