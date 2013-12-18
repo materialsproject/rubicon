@@ -1,7 +1,7 @@
 import copy
 from fireworks.core.firework import Workflow, FireWork, Tracker
 from pymatgen.io.babelio import BabelMolAdaptor
-from pymatgen.io.qchemio import QcBatchInput, QcInput
+from pymatgen.io.qchemio import QcBatchInput, QcTask
 from rubicon.dupefinders.dupefinder_eg import DupeFinderEG
 from rubicon.firetasks.qchem_task import QChemTask
 
@@ -37,7 +37,7 @@ class QChemFireWorkCreator():
         charge_state_name = {0: "original", 1: "cation", -1: "anion"}
         title = self.molname + " " + self.dft + " " + self.bs + \
             charge_state_name[charge_shift] + " Geometry Optimization"
-        qcinp = QcInput(self.mol, charge=charge, jobtype="opt", title=title,
+        qcinp = QcTask(self.mol, charge=charge, jobtype="opt", title=title,
                         exchange=self.dft, basis_set=self.bs)
         qcbat = QcBatchInput([qcinp])
         spec = dict()
@@ -69,7 +69,7 @@ class QChemFireWorkCreator():
         charge_state_name = {0: "original", 1: "cation", -1: "anion"}
         title = self.molname + " " + self.dft + " " + self.bs + \
             charge_state_name[charge_shift] + " Vibrational Frequency Analysis"
-        qcinp = QcInput(self.mol, charge=charge, jobtype="freq", title=title,
+        qcinp = QcTask(self.mol, charge=charge, jobtype="freq", title=title,
                         exchange=self.dft, basis_set=self.bs)
         qcbat = QcBatchInput([qcinp])
         spec = dict()
@@ -102,10 +102,10 @@ class QChemFireWorkCreator():
         title = self.molname + " " + self.dft + " " + self.bs + \
             charge_state_name[charge_shift] + " Single Point Energy"
         title += "\n Gas Phase"
-        qcinp_vac = QcInput(self.mol, charge=charge, jobtype="sp", title=title,
+        qcinp_vac = QcTask(self.mol, charge=charge, jobtype="sp", title=title,
                             exchange=self.dft, basis_set=self.bs)
         title = " Solution Phase"
-        qcinp_sol = QcInput(self.mol, charge=charge, jobtype="sp", title=title,
+        qcinp_sol = QcTask(self.mol, charge=charge, jobtype="sp", title=title,
                             exchange=self.dft, basis_set=self.bs)
         qcinp_sol.use_pcm()
         qcinp_sol.set_scf_initial_guess(guess="read")
