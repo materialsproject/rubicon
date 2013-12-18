@@ -120,9 +120,10 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                           priority, update_spec, charge_shift, grid=None):
         from rubicon.workflows.multistep_ipea_wf \
             import QChemFireWorkCreator
-        fw_creator = QChemFireWorkCreator(mol, molname, mission,
-                                          additional_user_tags, priority,
-                                          update_spec)
+        fw_creator = QChemFireWorkCreator(
+            mol=mol, molname=molname, mission=mission,
+            additional_user_tags=additional_user_tags, priority=priority,
+            update_spec=update_spec)
         geom_fwid, freq_fwid = -1, -2
         geom_fw = fw_creator.geom_fw(charge_shift, geom_fwid)
         freq_fw = fw_creator.freq_fw(charge_shift, freq_fwid)
