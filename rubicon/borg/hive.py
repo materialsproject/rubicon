@@ -103,21 +103,27 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
             return False
 
     @classmethod
-    def get_user_tags(cls, path):
+    def get_fw_tags(cls, path):
         """
-        Parse the user_tags from the FW.json file.
-        The user_tags can be set in the creation of FireWork
+        Parse the useful tags from the FW.json file.
+        The useful tags can be set in the creation of FireWork
         """
         fwjsonfile = os.path.join(os.path.dirname(path), 'FW.json')
-        user_tags = {}
+        fw_tags = dict()
         with open(fwjsonfile) as f:
             d = json.load(f)
         if 'user_tags' in d['spec'].keys():
-            user_tags = d['spec']['user_tags']
+            fw_tags["user_tags"] = d['spec']['user_tags']
         if 'name' in d:
-            user_tags['fw_name'] = d['name']
-        if len(user_tags) > 0:
-            return user_tags
+            if "user_tags" not in fw_tags:
+                fw_tags["user_tags"] = dict()
+            fw_tags["user_tags"]['fw_name'] = d['name']
+        if "snlgroup_id" in d['spec']:
+            fw_tags["snlgroup_id"] = d['spec']["snlgroup_id"]
+        if "egsnl" in d['spec']:
+            fw_tags["initial_snl"] = d['spec']["egsnl"]
+        if len(fw_tags) > 0:
+            return fw_tags
         else:
             return None
 
@@ -230,9 +236,10 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
         if stationary_type:
             d['stationary_type'] = stationary_type
 
-        user_tags = cls.get_user_tags(path)
+        fw_tags = cls.get_fw_tags(path)
+        user_tags = fw_tags.get("user_tags", None)
+        d.update(fw_tags)
         if user_tags:
-            d['user_tags'] = user_tags
             if "initial_inchi" in user_tags:
                 initial_inchi = user_tags['initial_inchi']
                 if initial_inchi != d['inchi']:
