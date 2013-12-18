@@ -131,7 +131,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
             for fw in [geom_fw, freq_fw]:
                 qcinp = QcBatchInput.from_dict(fw.spec["qcinp"])
                 for j in qcinp.jobs:
-                    j.set_dft_grids(*grid)
+                    j.set_dft_grid(*grid)
                 fw.spec["qcinp"] = qcinp.to_dict
         wf = Workflow([geom_fw, freq_fw],
                       links_dict={geom_fwid: freq_fwid})
