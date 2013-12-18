@@ -176,11 +176,14 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
             elif d["jobtype"] == "freq":
                 data_dict["freq"] = d
                 # noinspection PyTypeChecker
-                if d['frequencies'][0]["frequency"] < -0.00:
-                    # it is stupied that -0.00 is less than 0.00
-                    stationary_type = "non-minimum"
+                if not d["has_error"]:
+                    if d['frequencies'][0]["frequency"] < -0.00:
+                        # it is stupied that -0.00 is less than 0.00
+                        stationary_type = "non-minimum"
+                    else:
+                        stationary_type = "minimum"
                 else:
-                    stationary_type = "minimum"
+                    stationary_type = "unknown"
             elif d["jobtype"] == "sp":
                 # noinspection PyTypeChecker
                 suffix = "" if d["solvent_method"] == "NA" \
