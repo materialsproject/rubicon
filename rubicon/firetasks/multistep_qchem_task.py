@@ -8,7 +8,7 @@ import math
 from fireworks.core.firework import FireTaskBase, FWAction, Workflow
 from fireworks.utilities.fw_serializers import FWSerializable
 from pymatgen import Molecule
-from pymatgen.io.qchemio import QcBatchInput
+from pymatgen.io.qchemio import QcInput
 
 from rubicon.borg.hive import DeltaSCFQChemToDbTaskDrone
 
@@ -129,13 +129,13 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
         freq_fw = fw_creator.freq_fw(charge_shift, freq_fwid)
         if grid:
             for fw in [geom_fw, freq_fw]:
-                qcinp = QcBatchInput.from_dict(fw.spec["qcinp"])
-                for j in qcinp.jobs:
+                qctask = QcInput.from_dict(fw.spec["qctask"])
+                for j in qctask.jobs:
                     j.set_dft_grid(*grid)
                     if j.params["rem"]["jobtype"] == "opt":
                         j.scale_geom_opt_threshold(0.1, 0.1, 0.1)
                         j.set_geom_max_iterations(100)
-                fw.spec["qcinp"] = qcinp.to_dict
+                fw.spec["qctask"] = qctask.to_dict
         wf = Workflow([geom_fw, freq_fw],
                       links_dict={geom_fwid: freq_fwid})
         return wf

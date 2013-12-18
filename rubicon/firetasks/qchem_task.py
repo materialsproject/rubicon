@@ -13,7 +13,7 @@ from fireworks.utilities.fw_serializers import FWSerializable
 
 from custodian.custodian import Custodian
 from pymatgen.core.structure import Molecule
-from pymatgen.io.qchemio import QcBatchInput
+from pymatgen.io.qchemio import QcInput
 from rubicon.borg.hive import DeltaSCFQChemToDbTaskDrone
 
 __author__ = 'Anubhav Jain'
@@ -36,11 +36,11 @@ class QChemTask(FireTaskBase, FWSerializable):
     _fw_name = "QChem Task"
 
     def run_task(self, fw_spec):
-        qcbat = QcBatchInput.from_dict(fw_spec["qcinp"])
+        qcinp = QcInput.from_dict(fw_spec["qctask"])
         if 'mol' in fw_spec:
             mol = Molecule.from_dict(fw_spec["mol"])
-            qcbat.jobs[0].mol = mol
-        qcbat.write_file("mol.qcinp")
+            qcinp.jobs[0].mol = mol
+        qcinp.write_file("mol.qctask")
         hopper_name_pattern = re.compile("nid\d+")
         carver_name_pattern = re.compile("c[0-9]{4}-ib")
         if hopper_name_pattern.match(socket.gethostname()):
@@ -59,7 +59,7 @@ class QChemTask(FireTaskBase, FWSerializable):
         sh.setLevel(getattr(logging, 'INFO'))
         logger.addHandler(sh)
 
-        job = QchemJob(qc_exe, input_file="mol.qcinp", output_file="mol.qcout",
+        job = QchemJob(qc_exe, input_file="mol.qctask", output_file="mol.qcout",
                        qclog_file="mol.qclog")
         handler = QChemErrorHandler()
         c = Custodian(handlers=[handler], jobs=[job], max_errors=50)

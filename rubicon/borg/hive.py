@@ -149,8 +149,8 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
         Get the entire task doc for a path, including any post-processing.
         """
         logger.info("Getting task doc for base dir :{}".format(path))
-        qcinp = QcOutput(path)
-        data = qcinp.data
+        qctask = QcOutput(path)
+        data = qctask.data
         mol = data[0]["molecules"][-1]
         bb = BabelMolAdaptor(mol)
         pbmol = bb.pybel_mol
