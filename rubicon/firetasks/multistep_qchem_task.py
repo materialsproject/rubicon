@@ -174,7 +174,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
         molname = d['user_tags']['molname']
         mission = d['user_tags']['mission']
         additional_user_tags = {"img_freq_eli": img_freq_eli}
-        priority = fw_spec['_priotity']
+        priority = fw_spec['_priority']
         update_specs = {'egsnl': fw_spec['egsnl'],
                         'snlgroup_id': fw_spec['snlgroup_id']}
         charge_shift = d['user_tags']['charge_shift']
