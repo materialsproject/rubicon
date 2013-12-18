@@ -52,10 +52,17 @@ class QChemTask(FireTaskBase, FWSerializable):
         else:
             qc_exe = ["qchem"]
 
+        logging.basicConfig(level=logging.INFO)
+        logger = logging.getLogger('QChemDrone')
+        logger.setLevel(logging.INFO)
+        sh = logging.StreamHandler(stream=sys.stdout)
+        sh.setLevel(getattr(logging, 'INFO'))
+        logger.addHandler(sh)
+
         job = QchemJob(qc_exe, input_file="mol.qcinp", output_file="mol.qcout",
                        qclog_file="mol.qclog")
         handler = QChemErrorHandler()
-        c = Custodian(handlers=[handler], jobs=[job])
+        c = Custodian(handlers=[handler], jobs=[job], max_errors=50)
         c.run()
 
 
