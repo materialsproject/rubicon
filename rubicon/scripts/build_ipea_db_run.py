@@ -6,24 +6,24 @@ from rubicon.submission.submission_mongo import SubmissionMongoAdapterJCESR
 __author__ = 'xiaohuiqu'
 
 
-def get_calculation_db():
+def get_calculation_db(credential_file):
     db_dir = os.environ['DB_LOC']
-    db_path = os.path.join(db_dir, 'qchem_calc_db.json')
+    db_path = os.path.join(db_dir, credential_file)
     with open(db_path) as f:
         db_creds = json.load(f)
     conn = MongoClient(db_creds['host'], db_creds['port'])
     db = conn[db_creds['database']]
     if db_creds['admin_user']:
         db.authenticate(db_creds['admin_user'], db_creds['admin_password'])
-    calc_coll = db[db_creds['collection']]
-    ipea_coll = db[db_creds['ipea_collection']]
-    return calc_coll, ipea_coll
+    coll = db[db_creds['collection']]
+    return coll
 
 
 def build_ipea_db():
     sma = SubmissionMongoAdapterJCESR.auto_load()
     jobs = sma.jobs
-    calc_coll, ipea_coll = get_calculation_db()
+    tasks_coll = get_calculation_db("tasks_db.json")
+    ipea_coll = get_calculation_db("molecules_db.json")
     ipea_coll.remove()
     for j in jobs.find():
         neutral_tid = None
@@ -48,7 +48,7 @@ def build_ipea_db():
             anion_tid = j['task_dict']['anion Single Point Energy']
 
         if neutral_tid:
-            neutral_energy_dict = calc_coll.find(
+            neutral_energy_dict = tasks_coll.find(
                 {'task_id': neutral_tid},
                 fields={"_id": False,
                         "calculations.scf.energies": True,
@@ -59,7 +59,7 @@ def build_ipea_db():
                 'scf_pcm']['energies'][-1][-1]
 
         if cation_tid:
-            cation_energy_dict = calc_coll.find(
+            cation_energy_dict = tasks_coll.find(
                 {'task_id': cation_tid},
                 fields={"_id": False,
                         "calculations.scf.energies": True,
@@ -70,7 +70,7 @@ def build_ipea_db():
                 'energies'][-1][-1]
 
         if anion_tid:
-            anion_energy_dict = calc_coll.find(
+            anion_energy_dict = tasks_coll.find(
                 {'task_id': anion_tid},
                 fields={"_id": False,
                         "calculations.scf.energies": True,

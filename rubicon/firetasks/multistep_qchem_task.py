@@ -21,7 +21,7 @@ class QChemGeomOptDBInsertionTask(FireTaskBase, FWSerializable):
 
     def run_task(self, fw_spec):
         db_dir = os.environ['DB_LOC']
-        db_path = os.path.join(db_dir, 'qchem_calc_db.json')
+        db_path = os.path.join(db_dir, 'tasks_db.json')
 
         logging.basicConfig(level=logging.INFO)
         logger = logging.getLogger('QChemDrone')
@@ -70,7 +70,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
 
     def run_task(self, fw_spec):
         db_dir = os.environ['DB_LOC']
-        db_path = os.path.join(db_dir, 'qchem_calc_db.json')
+        db_path = os.path.join(db_dir, 'tasks_db.json')
 
         logging.basicConfig(level=logging.INFO)
         logger = logging.getLogger('QChemDrone')
@@ -221,7 +221,7 @@ class QChemSinglePointEnergyDBInsertionTask(FireTaskBase, FWSerializable):
 
     def run_task(self, fw_spec):
         db_dir = os.environ['DB_LOC']
-        db_path = os.path.join(db_dir, 'qchem_calc_db.json')
+        db_path = os.path.join(db_dir, 'tasks_db.json')
 
         logging.basicConfig(level=logging.INFO)
         logger = logging.getLogger('QChemDrone')
