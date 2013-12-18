@@ -36,11 +36,11 @@ class QChemTask(FireTaskBase, FWSerializable):
     _fw_name = "QChem Task"
 
     def run_task(self, fw_spec):
-        qcinp = QcInput.from_dict(fw_spec["qctask"])
+        qcinp = QcInput.from_dict(fw_spec["qcinp"])
         if 'mol' in fw_spec:
             mol = Molecule.from_dict(fw_spec["mol"])
             qcinp.jobs[0].mol = mol
-        qcinp.write_file("mol.qctask")
+        qcinp.write_file("mol.qcinp")
         hopper_name_pattern = re.compile("nid\d+")
         carver_name_pattern = re.compile("c[0-9]{4}-ib")
         if hopper_name_pattern.match(socket.gethostname()):
@@ -59,7 +59,7 @@ class QChemTask(FireTaskBase, FWSerializable):
         sh.setLevel(getattr(logging, 'INFO'))
         logger.addHandler(sh)
 
-        job = QchemJob(qc_exe, input_file="mol.qctask", output_file="mol.qcout",
+        job = QchemJob(qc_exe, input_file="mol.qcinp", output_file="mol.qcout",
                        qclog_file="mol.qclog")
         handler = QChemErrorHandler()
         c = Custodian(handlers=[handler], jobs=[job], max_errors=50)

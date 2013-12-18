@@ -41,7 +41,7 @@ class QChemFireWorkCreator():
                         exchange=self.dft, basis_set=self.bs)
         qcinp = QcInput([qctask])
         spec = dict()
-        spec["qctask"] = qcinp.to_dict
+        spec["qcinp"] = qcinp.to_dict
         spec['user_tags'] = self.ut()
         spec['user_tags']['charge_state'] = charge_state_name[charge_shift]
         spec['user_tags']['charge_shift'] = charge_shift
@@ -73,7 +73,7 @@ class QChemFireWorkCreator():
                         exchange=self.dft, basis_set=self.bs)
         qcinp = QcInput([qctask])
         spec = dict()
-        spec["qctask"] = qcinp.to_dict
+        spec["qcinp"] = qcinp.to_dict
         spec['user_tags'] = self.ut()
         spec['user_tags']['charge_state'] = charge_state_name[charge_shift]
         spec['user_tags']['charge_shift'] = charge_shift
@@ -111,7 +111,7 @@ class QChemFireWorkCreator():
         qctask_sol.set_scf_initial_guess(guess="read")
         qcinp = QcInput([qctask_vac, qctask_sol])
         spec = dict()
-        spec["qctask"] = qcinp.to_dict
+        spec["qcinp"] = qcinp.to_dict
         spec['user_tags'] = self.ut()
         spec['user_tags']['charge_state'] = charge_state_name[charge_shift]
         spec['user_tags']['charge_shift'] = charge_shift
