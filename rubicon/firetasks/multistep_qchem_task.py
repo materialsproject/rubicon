@@ -165,6 +165,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                             "current_method_id": 0}
 
         if img_freq_eli['current_method_id'] >= len(img_freq_eli['methods']):
+            logging.error("Failed to eliminate imaginary frequency")
             return FWAction(stored_data={'task_id': t_id},
                             defuse_children=True,
                             update_spec={"mol": d["final_molecule"],
@@ -182,16 +183,24 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
 
         method = img_freq_eli["methods"][img_freq_eli["current_method_id"]]
         if method == "dir_dis_opt":
+            logging.info("Eliminate Imaginary Frequency By Perturbing the "
+                         "Structure of Molecule")
             wf = self.spawn_opt_freq_wf(new_mol, molname, mission,
                                         additional_user_tags, priority,
                                         update_specs, charge_shift,
                                         grid=None)
         elif method == "den_dis_opt":
+            logging.info("Eliminate Imaginary Frequency By Perturbing the "
+                         "Structure of Molecule, and increase the grid "
+                         "density")
             wf = self.spawn_opt_freq_wf(new_mol, molname, mission,
                                         additional_user_tags, priority,
                                         update_specs, charge_shift,
                                         grid=(128, 302))
         elif method == "alt_den_dis_opt":
+            logging.info("Eliminate Imaginary Frequency By Perturbing the "
+                         "Structure of Molecule, and increase the grid "
+                         "density")
             wf = self.spawn_opt_freq_wf(new_mol, molname, mission,
                                         additional_user_tags, priority,
                                         update_specs, charge_shift,
