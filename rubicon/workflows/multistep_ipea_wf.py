@@ -60,7 +60,7 @@ class QChemFireWorkCreator():
             ' Geometry Optimization'
         if self.update_spec:
             spec.update(self.update_spec)
-        task_name = charge_state_name[charge_shift] + ' geom opt'
+        task_name = charge_state_name[charge_shift] + ' Geometry Optimization'
         from rubicon.firetasks.multistep_qchem_task \
             import QChemGeomOptDBInsertionTask
         fw_geom = FireWork([QChemTask(),
@@ -93,10 +93,11 @@ class QChemFireWorkCreator():
                              tracker_jobout]
         spec['user_tags']['methods'] = "B3LYP/" + self.bs
         spec['task_type'] = charge_state_name[charge_shift] + \
-            ' Vibrational Frequency'
+            ' Vibrational Frequency Analysis'
         if self.update_spec:
             spec.update(self.update_spec)
-        task_name = charge_state_name[charge_shift] + ' Vibrational Frequency'
+        task_name = charge_state_name[charge_shift] + \
+                    ' Vibrational Frequency Analysis'
         from rubicon.firetasks.multistep_qchem_task \
             import QChemFrequencyDBInsertionTask
         fw_freq = FireWork([QChemTask(),
