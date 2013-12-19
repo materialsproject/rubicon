@@ -45,10 +45,10 @@ class QChemTask(FireTaskBase, FWSerializable):
         carver_name_pattern = re.compile("c[0-9]{4}-ib")
         if hopper_name_pattern.match(socket.gethostname()):
         # hopper compute nodes
-            qc_exe = shlex.split("qchem -np 24")
+            qc_exe = shlex.split("qchem -np {}".format(min(24, len(mol))))
         elif carver_name_pattern.match(socket.gethostname()):
         # mendel compute nodes
-            qc_exe = shlex.split("qchem -np 8")
+            qc_exe = shlex.split("qchem -np {}".format(min(8, len(mol))))
         else:
             qc_exe = ["qchem"]
 
