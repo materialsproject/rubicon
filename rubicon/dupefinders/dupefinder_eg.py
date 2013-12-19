@@ -17,4 +17,6 @@ class DupeFinderEG(DupeFinderBase):
 
     def query(self, spec):
         return {'spec.task_type': spec['task_type'],
-                'spec.snlgroup_id': spec['snlgroup_id']}
+                'spec.snlgroup_id': spec['snlgroup_id'],
+                'spec.charge': spec['charge'],
+                'spec.spin_multiplicity': spec['spin_multiplicity']}
