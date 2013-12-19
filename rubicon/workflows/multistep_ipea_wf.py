@@ -56,8 +56,11 @@ class QChemFireWorkCreator():
         spec["_trackers"] = [tracker_out, tracker_std, tracker_joberr,
                              tracker_jobout]
         spec['user_tags']['methods'] = "B3LYP/" + self.bs
-        spec['task_type'] = charge_state_name[charge_shift] + \
-            ' Geometry Optimization'
+        spec['task_type'] = 'geometry optimization'
+        spec['run_tags'] = dict()
+        spec['run_tags']['charge'] = qctask.charge
+        spec['run_tags']['spin_multiplicity'] = qctask.spin_multiplicity
+        spec['run_tags']['methods'] = "b3lyp/6-31+g*"
         if self.update_spec:
             spec.update(self.update_spec)
         task_name = charge_state_name[charge_shift] + ' Geometry Optimization'
@@ -92,8 +95,11 @@ class QChemFireWorkCreator():
         spec["_trackers"] = [tracker_out, tracker_std, tracker_joberr,
                              tracker_jobout]
         spec['user_tags']['methods'] = "B3LYP/" + self.bs
-        spec['task_type'] = charge_state_name[charge_shift] + \
-            ' Vibrational Frequency Analysis'
+        spec['task_type'] = 'vibrational frequency analysis'
+        spec['run_tags'] = dict()
+        spec['run_tags']['charge'] = qctask.charge
+        spec['run_tags']['spin_multiplicity'] = qctask.spin_multiplicity
+        spec['run_tags']['methods'] = "b3lyp/6-31+g*"
         if self.update_spec:
             spec.update(self.update_spec)
         task_name = charge_state_name[charge_shift] + \
@@ -136,8 +142,11 @@ class QChemFireWorkCreator():
         spec["_trackers"] = [tracker_out, tracker_std, tracker_joberr,
                              tracker_jobout]
         spec['user_tags']['methods'] = "B3LYP/" + self.bs
-        spec['task_type'] = charge_state_name[charge_shift] + \
-            ' Single Point Energy'
+        spec['task_type'] ='single point energy'
+        spec['run_tags'] = dict()
+        spec['run_tags']['charge'] = qctask_sol.charge
+        spec['run_tags']['spin_multiplicity'] = qctask_sol.spin_multiplicity
+        spec['run_tags']['methods'] = ["b3lyp/6-31+g*", "vacuum", "pcm"]
         if self.update_spec:
             spec.update(self.update_spec)
         task_name = charge_state_name[charge_shift] + ' Single Point Energy'
