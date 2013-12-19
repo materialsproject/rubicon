@@ -51,7 +51,10 @@ class QChemFireWorkCreator():
             spec['_dupefinder'] = self.dupefinder().to_dict()
         tracker_out = Tracker("mol.qcout", nlines=20)
         tracker_std = Tracker("mol.qclog", nlines=10)
-        spec["_trackers"] = [tracker_out, tracker_std]
+        tracker_joberr = Tracker("FW_job.error", nlines=20)
+        tracker_jobout = Tracker("FW_job.out", nlines=20)
+        spec["_trackers"] = [tracker_out, tracker_std, tracker_joberr,
+                             tracker_jobout]
         spec['user_tags']['methods'] = "B3LYP/" + self.bs
         spec['task_type'] = charge_state_name[charge_shift] + \
             ' Geometry Optimization'
@@ -84,7 +87,10 @@ class QChemFireWorkCreator():
             spec['_dupefinder'] = self.dupefinder().to_dict()
         tracker_out = Tracker("mol.qcout", nlines=20)
         tracker_std = Tracker("mol.qclog", nlines=10)
-        spec["_trackers"] = [tracker_out, tracker_std]
+        tracker_joberr = Tracker("FW_job.error", nlines=20)
+        tracker_jobout = Tracker("FW_job.out", nlines=20)
+        spec["_trackers"] = [tracker_out, tracker_std, tracker_joberr,
+                             tracker_jobout]
         spec['user_tags']['methods'] = "B3LYP/" + self.bs
         spec['task_type'] = charge_state_name[charge_shift] + \
             ' Vibrational Frequency'
@@ -106,13 +112,13 @@ class QChemFireWorkCreator():
         title += "\n Gas Phase"
         qctask_vac = QcTask(self.mol, charge=charge, jobtype="sp", title=title,
                             exchange=self.dft, basis_set=self.bs)
-        qctask_vac.set_memory(total=25000, static=3000)
+        qctask_vac.set_memory(total=28000, static=3000)
         title = " Solution Phase"
         qctask_sol = QcTask(self.mol, charge=charge, jobtype="sp", title=title,
                             exchange=self.dft, basis_set=self.bs)
         qctask_sol.use_pcm()
         qctask_sol.set_scf_initial_guess(guess="read")
-        qctask_sol.set_memory(total=25000, static=3000)
+        qctask_sol.set_memory(total=28000, static=3000)
         qcinp = QcInput([qctask_vac, qctask_sol])
         spec = dict()
         spec["qcinp"] = qcinp.to_dict
@@ -124,7 +130,10 @@ class QChemFireWorkCreator():
             spec['_dupefinder'] = self.dupefinder().to_dict()
         tracker_out = Tracker("mol.qcout", nlines=20)
         tracker_std = Tracker("mol.qclog", nlines=10)
-        spec["_trackers"] = [tracker_out, tracker_std]
+        tracker_joberr = Tracker("FW_job.error", nlines=20)
+        tracker_jobout = Tracker("FW_job.out", nlines=20)
+        spec["_trackers"] = [tracker_out, tracker_std, tracker_joberr,
+                             tracker_jobout]
         spec['user_tags']['methods'] = "B3LYP/" + self.bs
         spec['task_type'] = charge_state_name[charge_shift] + \
             ' Single Point Energy'
