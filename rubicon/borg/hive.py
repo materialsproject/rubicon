@@ -118,10 +118,6 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
             if "user_tags" not in fw_tags:
                 fw_tags["user_tags"] = dict()
             fw_tags["user_tags"]['fw_name'] = d['name']
-        if "snlgroup_id" in d['spec']:
-            fw_tags["snlgroup_id"] = d['spec']["snlgroup_id"]
-        if "egsnl" in d['spec']:
-            fw_tags["initial_snl"] = d['spec']["egsnl"]
         if len(fw_tags) > 0:
             return fw_tags
         else:

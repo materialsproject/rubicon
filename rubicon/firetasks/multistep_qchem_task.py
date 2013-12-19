@@ -11,6 +11,8 @@ from pymatgen import Molecule
 from pymatgen.io.qchemio import QcInput
 
 from rubicon.borg.hive import DeltaSCFQChemToDbTaskDrone
+from rubicon.utils.snl.egsnl import EGStructureNL
+from rubicon.utils.snl.egsnl_mongo import EGSNLMongoAdapter
 
 
 __author__ = 'xiaohuiqu'
@@ -42,21 +44,48 @@ class QChemGeomOptDBInsertionTask(FireTaskBase, FWSerializable):
 
         t_id = None
         d = None
+        egsnl = None
+        snlgroup_id = None
         if assi_result:
             t_id, d = assi_result
+            d['eg_snl'] = fw_spec['egsnl']
+            d['snlgroup_id'] = fw_spec['snlgroup_id']
+            d['task_type'] = fw_spec['task_type']
+            new_s = Molecule.from_dict(d["final_molecule"])
+            old_snl = EGStructureNL.from_dict(d['egsnl'])
+            history = old_snl.history
+            history.append(
+                {'name': 'Electrolyte Genome Project structure optimization',
+                 'url': 'http://www.materialsproject.org',
+                 'description': {'task_type': d['task_type'],
+                                 'fw_id': d['fw_id'],
+                                 'task_id': d['task_id']}})
+            new_snl = EGStructureNL(new_s, old_snl.authors, old_snl.projects,
+                                    old_snl.references, old_snl.remarks,
+                                    old_snl.data, history)
+
+            # enter new SNL into SNL db
+            # get the SNL mongo adapter
+            sma = EGSNLMongoAdapter.auto_load()
+
+            # add snl
+            egsnl, snlgroup_id = sma.add_snl(new_snl,
+                                             snlgroup_guess=d['snlgroup_id'])
+            d['snl_final'] = egsnl.to_dict
+            d['snlgroup_id_final'] = snlgroup_id
+            d['snlgroup_changed'] = (d['snlgroup_id'] !=
+                                     d['snlgroup_id_final'])
         if t_id:
             if d["state"] == "successful":
                 return FWAction(stored_data={'task_id': t_id},
                                 update_spec={"mol": d["final_molecule"],
-                                             'egsnl': fw_spec['egsnl'],
-                                             'snlgroup_id':
-                                             fw_spec['snlgroup_id']})
+                                             'egsnl': egsnl,
+                                             'snlgroup_id': snlgroup_id})
             else:
                 return FWAction(stored_data={'task_id': t_id},
                                 update_spec={"mol": d["final_molecule"],
-                                             'egsnl': fw_spec['egsnl'],
-                                             'snlgroup_id':
-                                             fw_spec['snlgroup_id']},
+                                             'egsnl': egsnl,
+                                             'snlgroup_id': snlgroup_id},
                                 defuse_children=True)
         else:
             return FWAction(defuse_children=True,
