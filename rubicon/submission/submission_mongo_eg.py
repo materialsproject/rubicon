@@ -10,7 +10,7 @@ DATETIME_HANDLER = lambda obj: obj.isoformat() \
 YAML_STYLE = False  # False = YAML is formatted as blocks
 
 
-class SubmissionMongoAdapterJCESR(object):
+class SubmissionMongoAdapterEG(object):
     # This is the user interface to submissions
 
     def __init__(self, host='localhost', port=27017, db='snl', username=None,
@@ -112,7 +112,7 @@ class SubmissionMongoAdapterJCESR(object):
     def auto_load(cls):
         s_dir = os.environ['DB_LOC']
         s_file = os.path.join(s_dir, 'submission_db.yaml')
-        return SubmissionMongoAdapterJCESR.from_file(s_file)
+        return SubmissionMongoAdapterEG.from_file(s_file)
 
     def to_format(self, f_format='json', **kwargs):
         """

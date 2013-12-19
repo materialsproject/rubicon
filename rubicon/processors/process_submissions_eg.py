@@ -2,12 +2,12 @@ import time
 import traceback
 from fireworks.core.launchpad import LaunchPad
 from pymatgen.matproj.snl import StructureNL
-from rubicon.submission.submission_mongo import SubmissionMongoAdapterJCESR
+from rubicon.submission.submission_mongo_eg import SubmissionMongoAdapterEG
 from rubicon.utils.snl.egsnl import EGStructureNL
-from rubicon.workflows.snl_to_wf import snl_to_wf
+from rubicon.workflows.snl_to_eg_wf import snl_to_eg_wf
 
 
-class SubmissionProcessor():
+class SubmissionProcessorEG():
     MAX_SITES = 200
 
     # This is run on the server end
@@ -43,7 +43,7 @@ class SubmissionProcessor():
                     snl = EGStructureNL.from_dict(job)
                 else:
                     snl = StructureNL.from_dict(job)
-                if len(snl.structure.sites) > SubmissionProcessor.MAX_SITES:
+                if len(snl.structure.sites) > SubmissionProcessorEG.MAX_SITES:
                     self.sma.update_state(submission_id, 'REJECTED',
                                           'too many sites', {})
                     print 'REJECTED WORKFLOW FOR {} - too many sites ' \
@@ -62,7 +62,7 @@ class SubmissionProcessor():
                         = submission_id
 
                     # create a workflow
-                    wf = snl_to_wf(snl, job['parameters'])
+                    wf = snl_to_eg_wf(snl, job['parameters'])
                     self.launchpad.add_wf(wf)
                     print 'ADDED WORKFLOW FOR {}'.format(snl.structure.formula)
             except:
@@ -140,7 +140,7 @@ class SubmissionProcessor():
 
     @classmethod
     def auto_load(cls):
-        sma = SubmissionMongoAdapterJCESR.auto_load()
+        sma = SubmissionMongoAdapterEG.auto_load()
         lp = LaunchPad.auto_load()
 
-        return SubmissionProcessor(sma, lp)
+        return SubmissionProcessorEG(sma, lp)

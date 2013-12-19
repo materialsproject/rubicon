@@ -1,7 +1,7 @@
 import json
 import os
 from pymongo import MongoClient
-from rubicon.submission.submission_mongo import SubmissionMongoAdapterJCESR
+from rubicon.submission.submission_mongo_eg import SubmissionMongoAdapterEG
 
 __author__ = 'xiaohuiqu'
 
@@ -20,7 +20,7 @@ def get_calculation_db(credential_file):
 
 
 def build_ipea_db():
-    sma = SubmissionMongoAdapterJCESR.auto_load()
+    sma = SubmissionMongoAdapterEG.auto_load()
     jobs = sma.jobs
     tasks_coll = get_calculation_db("tasks_db.json")
     ipea_coll = get_calculation_db("molecules_db.json")

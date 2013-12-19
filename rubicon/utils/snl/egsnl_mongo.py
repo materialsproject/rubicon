@@ -6,7 +6,7 @@ from pymongo import MongoClient, DESCENDING
 from rubicon.utils.snl.egsnl import EGStructureNL, SNLGroup
 
 
-class SNLMongoAdapter(FWSerializable):
+class EGSNLMongoAdapter(FWSerializable):
     def __init__(self, host='localhost', port=27017, db='snl', username=None,
                  password=None):
         self.host = host
@@ -143,11 +143,11 @@ class SNLMongoAdapter(FWSerializable):
 
     @classmethod
     def from_dict(cls, d):
-        return SNLMongoAdapter(d['host'], d['port'], d['db'], d['username'],
+        return EGSNLMongoAdapter(d['host'], d['port'], d['db'], d['username'],
                                d['password'])
 
     @classmethod
     def auto_load(cls):
         s_dir = os.environ['DB_LOC']
         s_file = os.path.join(s_dir, 'snl_db.yaml')
-        return SNLMongoAdapter.from_file(s_file)
+        return EGSNLMongoAdapter.from_file(s_file)

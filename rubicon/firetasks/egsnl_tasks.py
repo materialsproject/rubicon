@@ -1,15 +1,15 @@
 from fireworks.core.firework import FireTaskBase, FWAction
 from fireworks.utilities.fw_serializers import FWSerializable
 from pymatgen.matproj.snl import StructureNL
-from rubicon.utils.snl.snl_mongo import SNLMongoAdapter
+from rubicon.utils.snl.egsnl_mongo import EGSNLMongoAdapter
 
 
-class AddSNLTask(FireTaskBase, FWSerializable):
+class AddEGSNLTask(FireTaskBase, FWSerializable):
     """
     Add a new SNL into the SNL database, and build duplicate groups
     """
 
-    _fw_name = "Add SNL Task"
+    _fw_name = "Add EG SNL Task"
 
     def run_task(self, fw_spec):
         # pass-through option for when we start with an egsnl and don't
@@ -20,7 +20,7 @@ class AddSNLTask(FireTaskBase, FWSerializable):
                                          'snlgroup_id':
                                          fw_spec['force_snlgroup_id']})
 
-        sma = SNLMongoAdapter.auto_load()
+        sma = EGSNLMongoAdapter.auto_load()
         snl = StructureNL.from_dict(fw_spec['snl'])
         egsnl, snlgroup_id = sma.add_snl(snl)
 

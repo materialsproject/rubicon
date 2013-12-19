@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from rubicon.processors.process_submissions import SubmissionProcessor
+from rubicon.processors.process_submissions_eg import SubmissionProcessorEG
 
 
 def go_submissions():
@@ -16,7 +16,7 @@ def go_submissions():
                         action='store_true')
     args = parser.parse_args()
 
-    sp = SubmissionProcessor.auto_load()
+    sp = SubmissionProcessorEG.auto_load()
     sp.run(args.sleep, args.infinite)
 
 if __name__ == '__main__':

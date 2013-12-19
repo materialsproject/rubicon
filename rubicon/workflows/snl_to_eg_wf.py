@@ -2,12 +2,12 @@ from fireworks.core.firework import FireWork, Workflow
 from fireworks.utilities.fw_utilities import get_slug
 from pymatgen import Composition
 from rubicon.dupefinders.dupefinder_eg import DupeFinderEG
-from rubicon.firetasks.snl_tasks import AddSNLTask
+from rubicon.firetasks.egsnl_tasks import AddEGSNLTask
 from rubicon.utils.snl.egsnl import EGStructureNL, get_meta_from_structure
 from rubicon.workflows.multistep_ipea_wf import multistep_ipea_fws
 
 
-def snl_to_wf(snl, parameters=None):
+def snl_to_eg_wf(snl, parameters=None):
     fws = []
     parameters = parameters if parameters else {}
 
@@ -19,7 +19,7 @@ def snl_to_wf(snl, parameters=None):
         alphabetical_formula
 
     # add the SNL to the SNL DB and figure out duplicate group
-    tasks = [AddSNLTask()]
+    tasks = [AddEGSNLTask()]
     spec = {'task_type': 'Add to SNL database',
             'snl': snl.to_dict,
             '_priority': snl_priority}
