@@ -205,7 +205,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
              "reduced_cell_formula_abc": comp.alphabetical_formula,
              "formula": comp.formula,
              "charge": charge,
-             "spin_mult": spin_mult,
+             "spin_multiplicity": spin_mult,
              "composition": comp.to_dict,
              "elements": list(comp.to_dict.keys()),
              "nelements": len(comp),
