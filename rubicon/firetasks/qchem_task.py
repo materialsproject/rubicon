@@ -40,6 +40,7 @@ class QChemTask(FireTaskBase, FWSerializable):
         if 'mol' in fw_spec:
             mol = Molecule.from_dict(fw_spec["mol"])
             qcinp.jobs[0].mol = mol
+        mol = qcinp.jobs[0].mol
         qcinp.write_file("mol.qcinp")
         hopper_name_pattern = re.compile("nid\d+")
         carver_name_pattern = re.compile("c[0-9]{4}-ib")
