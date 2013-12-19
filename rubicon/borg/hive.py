@@ -190,12 +190,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
                 # noinspection PyTypeChecker
                 suffix = "" if d["solvent_method"] == "NA" \
                     else "_" + d["solvent_method"]
-                if d["molecules"][-1].charge == charge:
-                    data_dict["scf" + suffix] = d
-                elif d["molecules"][-1].charge == charge + 1:
-                    data_dict["scf_IE" + suffix] = d
-                elif d["molecules"][-1].charge == charge - 1:
-                    data_dict["scf_EA" + suffix] = d
+                data_dict["scf" + suffix] = d
 
         data = data_dict
 
@@ -217,17 +212,6 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
              "smiles": smiles, "can": can, "inchi": inchi, "svg": svg,
              "xyz": str(xyz),
              "names": get_nih_names(smiles)}
-
-        if "scf_EA" in data_dict and \
-                (not data_dict["scf_EA"]["has_error"]) and \
-                (not data_dict["scf"]["has_error"]):
-            d["EA"] = (data["scf"]["energies"][-1][-1]
-                       - data["scf_EA"]["energies"][-1][-1])
-        if "scf_IE" in data_dict and \
-                (not data_dict["scf_IE"]["has_error"]) and \
-                (not data_dict["scf"]["has_error"]):
-            d["IE"] = (data["scf_IE"]["energies"][-1][-1]
-                       - data["scf"]["energies"][-1][-1])
 
         if stationary_type:
             d['stationary_type'] = stationary_type
