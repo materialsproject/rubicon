@@ -39,6 +39,7 @@ class QChemFireWorkCreator():
             charge_state_name[charge_shift] + " Geometry Optimization"
         qctask = QcTask(self.mol, charge=charge, jobtype="opt", title=title,
                         exchange=self.dft, basis_set=self.bs)
+        qctask.set_memory(total=28000, static=3000)
         qcinp = QcInput([qctask])
         spec = dict()
         spec["qcinp"] = qcinp.to_dict
@@ -71,6 +72,7 @@ class QChemFireWorkCreator():
             charge_state_name[charge_shift] + " Vibrational Frequency Analysis"
         qctask = QcTask(self.mol, charge=charge, jobtype="freq", title=title,
                         exchange=self.dft, basis_set=self.bs)
+        qctask.set_memory(total=28000, static=3000)
         qcinp = QcInput([qctask])
         spec = dict()
         spec["qcinp"] = qcinp.to_dict
@@ -104,11 +106,13 @@ class QChemFireWorkCreator():
         title += "\n Gas Phase"
         qctask_vac = QcTask(self.mol, charge=charge, jobtype="sp", title=title,
                             exchange=self.dft, basis_set=self.bs)
+        qctask_vac.set_memory(total=25000, static=3000)
         title = " Solution Phase"
         qctask_sol = QcTask(self.mol, charge=charge, jobtype="sp", title=title,
                             exchange=self.dft, basis_set=self.bs)
         qctask_sol.use_pcm()
         qctask_sol.set_scf_initial_guess(guess="read")
+        qctask_sol.set_memory(total=25000, static=3000)
         qcinp = QcInput([qctask_vac, qctask_sol])
         spec = dict()
         spec["qcinp"] = qcinp.to_dict
