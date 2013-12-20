@@ -13,7 +13,13 @@ class DupeFinderEG(DupeFinderBase):
     def verify(self, spec1, spec2):
         # assert: task_type and snlgroup_id have already been checked through
         # query
-        return spec1['run_tags'] == spec2['run_tags']
+        comp_tags1 = dict()
+        comp_tags2 = dict()
+        comp_tags1['run_tags'] = spec1['run_tags']
+        comp_tags1['implicit_solvent'] = spec1['implicit_solvent']
+        comp_tags2['run_tags'] = spec2['run_tags']
+        comp_tags2['implicit_solvent'] = spec2['implicit_solvent']
+        return comp_tags1 == comp_tags2
 
     def query(self, spec):
         return {'spec.task_type': spec['task_type'],

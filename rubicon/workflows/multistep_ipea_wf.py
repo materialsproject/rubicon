@@ -22,7 +22,7 @@ class QChemFireWorkCreator():
         if additional_user_tags:
             user_tags.update(additional_user_tags)
         spec = dict()
-        spec['user_tags'] =user_tags
+        spec['user_tags'] = user_tags
         spec['_priority'] = priority
         spec['_dupefinder'] = dupefinder().to_dict()
         tracker_out = Tracker("mol.qcout", nlines=20)
@@ -33,6 +33,7 @@ class QChemFireWorkCreator():
                              tracker_jobout]
         spec['run_tags'] = dict()
         spec['run_tags']['methods'] = [self.bs.lower(), self.dft.lower()]
+        spec['implicit_solvent'] = {}
         if update_spec:
             spec.update(update_spec)
         self.base_spec = lambda: copy.deepcopy(spec)
@@ -53,7 +54,7 @@ class QChemFireWorkCreator():
         task_type = "geometry optimizaiton"
         state_name = self.get_state_name(charge, spin_multiplicity)
         title = self.molname + " " + state_name + " " + self.dft + " " + \
-                self.bs + " " + task_type
+            self.bs + " " + task_type
         qctask = QcTask(self.mol, charge=charge,
                         spin_multiplicity=spin_multiplicity,
                         jobtype="opt", title=title,
@@ -76,8 +77,8 @@ class QChemFireWorkCreator():
     def freq_fw(self, charge, spin_multiplicity, fw_id):
         task_type = "vibrational frequency"
         state_name = self.get_state_name(charge, spin_multiplicity)
-        title = self.molname + state_name + " " + self.dft + " " + self.bs + \
-            " " + task_type
+        title = self.molname + " " + state_name + " " + self.dft + " " +\
+            self.bs + " " + task_type
         qctask = QcTask(self.mol, charge=charge,
                         spin_multiplicity=spin_multiplicity,
                         jobtype="freq", title=title,
@@ -101,7 +102,7 @@ class QChemFireWorkCreator():
         task_type = "single point energy"
         state_name = self.get_state_name(charge, spin_multiplicity)
         title = self.molname + " " + state_name + " " + self.dft + " " + \
-                self.bs + " " + task_type
+            self.bs + " " + task_type
         title += "\n Gas Phase"
         qctask_vac = QcTask(self.mol, charge=charge,
                             spin_multiplicity=spin_multiplicity,
@@ -119,9 +120,15 @@ class QChemFireWorkCreator():
         qcinp = QcInput([qctask_vac, qctask_sol])
         spec = self.base_spec()
         spec["qcinp"] = qcinp.to_dict
-        spec['task_type'] = state_name + ' ' + task_type
+        spec['task_type'] = task_type
         spec['charge'] = charge
         spec['spin_multiplicity'] = spin_multiplicity
+        implicit_solvent = dict()
+        implicit_solvent['model'] = 'ief-pcm'
+        implicit_solvent['dielectric_constant'] = 78.3553
+        implicit_solvent['radii'] = 'uff'
+        implicit_solvent['vdwscale'] = 1.1
+        spec['implicit_solvent'] = implicit_solvent
         task_name = state_name + ' ' + task_type
         from rubicon.firetasks.multistep_qchem_task \
             import QChemSinglePointEnergyDBInsertionTask
