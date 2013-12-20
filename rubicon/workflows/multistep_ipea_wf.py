@@ -11,20 +11,31 @@ __author__ = 'xiaohuiqu'
 class QChemFireWorkCreator():
     def __init__(self, mol, molname, mission, additional_user_tags=None,
                  dupefinder=DupeFinderEG, priority=1, update_spec=None):
+        self.bs = '6-31+G*'
+        self.dft = 'B3LYP'
+        self.molname = molname
+        self.mol = mol
         initial_inchi = self.get_inchi(mol)
         user_tags = {'mission': mission,
                      "initial_inchi": initial_inchi,
                      "molname": molname}
         if additional_user_tags:
             user_tags.update(additional_user_tags)
-        self.bs = '6-31+G*'
-        self.dft = 'B3LYP'
-        self.molname = molname
-        self.ut = lambda: copy.deepcopy(user_tags)
-        self.mol = mol
-        self.dupefinder = dupefinder
-        self.priority = priority
-        self.update_spec = update_spec
+        spec = dict()
+        spec['user_tags'] =user_tags
+        spec['_priority'] = priority
+        spec['_dupefinder'] = dupefinder().to_dict()
+        tracker_out = Tracker("mol.qcout", nlines=20)
+        tracker_std = Tracker("mol.qclog", nlines=10)
+        tracker_joberr = Tracker("FW_job.error", nlines=20)
+        tracker_jobout = Tracker("FW_job.out", nlines=20)
+        spec["_trackers"] = [tracker_out, tracker_std, tracker_joberr,
+                             tracker_jobout]
+        spec['run_tags'] = dict()
+        spec['run_tags']['methods'] = "b3lyp/6-31+g*"
+        if update_spec:
+            spec.update(self.update_spec)
+        self.base_spec = lambda: copy.deepcopy(spec)
 
     @staticmethod
     def get_inchi(mol):
@@ -41,25 +52,11 @@ class QChemFireWorkCreator():
                         exchange=self.dft, basis_set=self.bs)
         qctask.set_memory(total=28000, static=3000)
         qcinp = QcInput([qctask])
-        spec = dict()
+        spec = self.base_spec()
         spec["qcinp"] = qcinp.to_dict
-        spec['user_tags'] = self.ut()
-        spec['_priority'] = self.priority
-        if self.dupefinder:
-            spec['_dupefinder'] = self.dupefinder().to_dict()
-        tracker_out = Tracker("mol.qcout", nlines=20)
-        tracker_std = Tracker("mol.qclog", nlines=10)
-        tracker_joberr = Tracker("FW_job.error", nlines=20)
-        tracker_jobout = Tracker("FW_job.out", nlines=20)
-        spec["_trackers"] = [tracker_out, tracker_std, tracker_joberr,
-                             tracker_jobout]
         spec['task_type'] = 'geometry optimization'
-        spec['run_tags'] = dict()
-        spec['charge'] = qctask.charge
-        spec['spin_multiplicity'] = qctask.spin_multiplicity
-        spec['run_tags']['methods'] = "b3lyp/6-31+g*"
-        if self.update_spec:
-            spec.update(self.update_spec)
+        spec['charge'] = charge
+        spec['spin_multiplicity'] = spin_multiplicity
         task_name = 'geometry optimization'
         from rubicon.firetasks.multistep_qchem_task \
             import QChemGeomOptDBInsertionTask
@@ -77,25 +74,12 @@ class QChemFireWorkCreator():
                         exchange=self.dft, basis_set=self.bs)
         qctask.set_memory(total=28000, static=3000)
         qcinp = QcInput([qctask])
-        spec = dict()
+        spec = self.base_spec()
         spec["qcinp"] = qcinp.to_dict
-        spec['user_tags'] = self.ut()
-        spec['_priority'] = self.priority
-        if self.dupefinder:
-            spec['_dupefinder'] = self.dupefinder().to_dict()
-        tracker_out = Tracker("mol.qcout", nlines=20)
-        tracker_std = Tracker("mol.qclog", nlines=10)
-        tracker_joberr = Tracker("FW_job.error", nlines=20)
-        tracker_jobout = Tracker("FW_job.out", nlines=20)
-        spec["_trackers"] = [tracker_out, tracker_std, tracker_joberr,
-                             tracker_jobout]
-        spec['run_tags'] = dict()
-        spec['charge'] = qctask.charge
-        spec['spin_multiplicity'] = qctask.spin_multiplicity
-        spec['run_tags']['methods'] = "b3lyp/6-31+g*"
-        if self.update_spec:
-            spec.update(self.update_spec)
-        task_name = 'vibrational frequency analysis'
+        spec['task_type'] = 'vibrational frequency'
+        spec['charge'] = charge
+        spec['spin_multiplicity'] = spin_multiplicity
+        task_name = 'vibrational frequency'
         from rubicon.firetasks.multistep_qchem_task \
             import QChemFrequencyDBInsertionTask
         fw_freq = FireWork([QChemTask(),
@@ -121,25 +105,11 @@ class QChemFireWorkCreator():
         qctask_sol.set_scf_initial_guess(guess="read")
         qctask_sol.set_memory(total=28000, static=3000)
         qcinp = QcInput([qctask_vac, qctask_sol])
-        spec = dict()
+        spec = self.base_spec()
         spec["qcinp"] = qcinp.to_dict
-        spec['user_tags'] = self.ut()
-        spec['_priority'] = self.priority
-        if self.dupefinder:
-            spec['_dupefinder'] = self.dupefinder().to_dict()
-        tracker_out = Tracker("mol.qcout", nlines=20)
-        tracker_std = Tracker("mol.qclog", nlines=10)
-        tracker_joberr = Tracker("FW_job.error", nlines=20)
-        tracker_jobout = Tracker("FW_job.out", nlines=20)
-        spec["_trackers"] = [tracker_out, tracker_std, tracker_joberr,
-                             tracker_jobout]
-        spec['task_type'] ='single point energy'
-        spec['run_tags'] = dict()
-        spec['charge'] = qctask_sol.charge
-        spec['spin_multiplicity'] = qctask_sol.spin_multiplicity
-        spec['run_tags']['methods'] = ["b3lyp/6-31+g*", "vacuum", "pcm"]
-        if self.update_spec:
-            spec.update(self.update_spec)
+        spec['task_type'] = 'single point energy'
+        spec['charge'] = charge
+        spec['spin_multiplicity'] = spin_multiplicity
         task_name = 'single point energy'
         from rubicon.firetasks.multistep_qchem_task \
             import QChemSinglePointEnergyDBInsertionTask
