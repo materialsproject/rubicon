@@ -9,7 +9,6 @@ __author__ = 'xiaohuiqu'
 
 
 class QChemFireWorkCreator():
-    charge_state_name = {0: "original", 1: "cation", -1: "anion"}
     def __init__(self, mol, molname, mission, additional_user_tags=None,
                  dupefinder=DupeFinderEG, priority=1, update_spec=None):
         initial_inchi = self.get_inchi(mol)
@@ -33,20 +32,18 @@ class QChemFireWorkCreator():
         pbmol = bb.pybel_mol
         return pbmol.write("inchi").strip()
 
-    def geom_fw(self, charge_shift, fw_id):
-        charge = self.mol.charge + charge_shift
-        title = self.molname + " " + self.dft + " " + self.bs + \
-            self.charge_state_name[charge_shift] + " Geometry Optimization"
-        qctask = QcTask(self.mol, charge=charge, jobtype="opt", title=title,
+    def geom_fw(self, charge, spin_multiplicity, fw_id):
+        title = self.molname + " " + self.dft + " " + self.bs +\
+            " Geometry Optimization"
+        qctask = QcTask(self.mol, charge=charge,
+                        spin_multiplicity=spin_multiplicity,
+                        jobtype="opt", title=title,
                         exchange=self.dft, basis_set=self.bs)
         qctask.set_memory(total=28000, static=3000)
         qcinp = QcInput([qctask])
         spec = dict()
         spec["qcinp"] = qcinp.to_dict
         spec['user_tags'] = self.ut()
-        spec['user_tags']['charge_state'] = self.charge_state_name[
-            charge_shift]
-        spec['user_tags']['charge_shift'] = charge_shift
         spec['_priority'] = self.priority
         if self.dupefinder:
             spec['_dupefinder'] = self.dupefinder().to_dict()
@@ -56,7 +53,6 @@ class QChemFireWorkCreator():
         tracker_jobout = Tracker("FW_job.out", nlines=20)
         spec["_trackers"] = [tracker_out, tracker_std, tracker_joberr,
                              tracker_jobout]
-        spec['user_tags']['methods'] = "B3LYP/" + self.bs
         spec['task_type'] = 'geometry optimization'
         spec['run_tags'] = dict()
         spec['charge'] = qctask.charge
@@ -64,8 +60,7 @@ class QChemFireWorkCreator():
         spec['run_tags']['methods'] = "b3lyp/6-31+g*"
         if self.update_spec:
             spec.update(self.update_spec)
-        task_name = self.charge_state_name[charge_shift] + ' Geometry ' \
-                                                        'Optimization'
+        task_name = 'geometry optimization'
         from rubicon.firetasks.multistep_qchem_task \
             import QChemGeomOptDBInsertionTask
         fw_geom = FireWork([QChemTask(),
@@ -73,21 +68,18 @@ class QChemFireWorkCreator():
                            spec=spec, name=task_name, fw_id=fw_id)
         return fw_geom
 
-    def freq_fw(self, charge_shift, fw_id):
-        charge = self.mol.charge + charge_shift
+    def freq_fw(self, charge, spin_multiplicity, fw_id):
         title = self.molname + " " + self.dft + " " + self.bs + \
-            self.charge_state_name[charge_shift] + " Vibrational Frequency " \
-                                               "Analysis"
-        qctask = QcTask(self.mol, charge=charge, jobtype="freq", title=title,
+            " Vibrational Frequency Analysis"
+        qctask = QcTask(self.mol, charge=charge,
+                        spin_multiplicity=spin_multiplicity,
+                        jobtype="freq", title=title,
                         exchange=self.dft, basis_set=self.bs)
         qctask.set_memory(total=28000, static=3000)
         qcinp = QcInput([qctask])
         spec = dict()
         spec["qcinp"] = qcinp.to_dict
         spec['user_tags'] = self.ut()
-        spec['user_tags']['charge_state'] = self.charge_state_name[
-            charge_shift]
-        spec['user_tags']['charge_shift'] = charge_shift
         spec['_priority'] = self.priority
         if self.dupefinder:
             spec['_dupefinder'] = self.dupefinder().to_dict()
@@ -97,16 +89,13 @@ class QChemFireWorkCreator():
         tracker_jobout = Tracker("FW_job.out", nlines=20)
         spec["_trackers"] = [tracker_out, tracker_std, tracker_joberr,
                              tracker_jobout]
-        spec['user_tags']['methods'] = "B3LYP/" + self.bs
-        spec['task_type'] = 'vibrational frequency analysis'
         spec['run_tags'] = dict()
         spec['charge'] = qctask.charge
         spec['spin_multiplicity'] = qctask.spin_multiplicity
         spec['run_tags']['methods'] = "b3lyp/6-31+g*"
         if self.update_spec:
             spec.update(self.update_spec)
-        task_name = self.charge_state_name[charge_shift] + \
-                    ' Vibrational Frequency Analysis'
+        task_name = 'vibrational frequency analysis'
         from rubicon.firetasks.multistep_qchem_task \
             import QChemFrequencyDBInsertionTask
         fw_freq = FireWork([QChemTask(),
@@ -114,16 +103,19 @@ class QChemFireWorkCreator():
                            spec=spec, name=task_name, fw_id=fw_id)
         return fw_freq
 
-    def sp_fw(self, charge_shift, fw_id):
-        charge = self.mol.charge + charge_shift
+    def sp_fw(self, charge, spin_multiplicity, fw_id):
         title = self.molname + " " + self.dft + " " + self.bs + \
-            self.charge_state_name[charge_shift] + " Single Point Energy"
+            " Single Point Energy"
         title += "\n Gas Phase"
-        qctask_vac = QcTask(self.mol, charge=charge, jobtype="sp", title=title,
+        qctask_vac = QcTask(self.mol, charge=charge,
+                            spin_multiplicity=spin_multiplicity,
+                            jobtype="sp", title=title,
                             exchange=self.dft, basis_set=self.bs)
         qctask_vac.set_memory(total=28000, static=3000)
         title = " Solution Phase"
-        qctask_sol = QcTask(self.mol, charge=charge, jobtype="sp", title=title,
+        qctask_sol = QcTask(self.mol, charge=charge,
+                            spin_multiplicity=spin_multiplicity,
+                            jobtype="sp", title=title,
                             exchange=self.dft, basis_set=self.bs)
         qctask_sol.use_pcm()
         qctask_sol.set_scf_initial_guess(guess="read")
@@ -132,9 +124,6 @@ class QChemFireWorkCreator():
         spec = dict()
         spec["qcinp"] = qcinp.to_dict
         spec['user_tags'] = self.ut()
-        spec['user_tags']['charge_state'] = self.charge_state_name[
-            charge_shift]
-        spec['user_tags']['charge_shift'] = charge_shift
         spec['_priority'] = self.priority
         if self.dupefinder:
             spec['_dupefinder'] = self.dupefinder().to_dict()
@@ -144,7 +133,6 @@ class QChemFireWorkCreator():
         tracker_jobout = Tracker("FW_job.out", nlines=20)
         spec["_trackers"] = [tracker_out, tracker_std, tracker_joberr,
                              tracker_jobout]
-        spec['user_tags']['methods'] = "B3LYP/" + self.bs
         spec['task_type'] ='single point energy'
         spec['run_tags'] = dict()
         spec['charge'] = qctask_sol.charge
@@ -152,8 +140,7 @@ class QChemFireWorkCreator():
         spec['run_tags']['methods'] = ["b3lyp/6-31+g*", "vacuum", "pcm"]
         if self.update_spec:
             spec.update(self.update_spec)
-        task_name = self.charge_state_name[charge_shift] + ' Single Point ' \
-                                                          'Energy'
+        task_name = 'single point energy'
         from rubicon.firetasks.multistep_qchem_task \
             import QChemSinglePointEnergyDBInsertionTask
         fw_freq = FireWork([QChemTask(),
@@ -178,25 +165,25 @@ def multistep_ipea_fws(mol, name, mission, dupefinder=DupeFinderEG, priority=1,
     # the task in the order of anion, neutral, cation
     cg_fwid, ng_fwid, ag_fwid = (None, None, None)
     cf_fwid, nf_fwid, af_fwid = (None, None, None)
+    charge = (-1, 0, 1)
+    spin_multiplicity = (2, 1, 2)
     if len(mol) > 1:
-        charge_shifts = (-1, 0, 1)
         fw_ids = range(fwid_base + 0, fwid_base + 3)
-        fws = (fw_creator.geom_fw(cs, fwid)
-               for cs, fwid in zip(charge_shifts, fw_ids))
+        fws = (fw_creator.geom_fw(ch, spin, fwid)
+               for ch, spin, fwid in zip(charge, spin_multiplicity, fw_ids))
         cg_fwid, ng_fwid, ag_fwid = fw_ids
         fireworks.extend(fws)
 
         fw_ids = range(fwid_base + 3, fwid_base + 3 + 3)
-        fws = (fw_creator.freq_fw(cs, fwid)
-               for cs, fwid in zip(charge_shifts, fw_ids))
+        fws = (fw_creator.freq_fw(ch, spin, fwid)
+               for ch, spin, fwid in zip(charge, spin_multiplicity, fw_ids))
         cf_fwid, nf_fwid, af_fwid = fw_ids
         fireworks.extend(fws)
         links_dict.update({cg_fwid: cf_fwid, ng_fwid: nf_fwid,
                            ag_fwid: af_fwid})
-    charge_shifts = (-1, 0, 1)
     fw_ids = range(fwid_base + 6, fwid_base + 6 + 3)
-    fws = (fw_creator.sp_fw(cs, fwid)
-           for cs, fwid in zip(charge_shifts, fw_ids))
+    fws = (fw_creator.sp_fw(ch, spin, fwid)
+           for ch, spin, fwid in zip(charge, spin_multiplicity, fw_ids))
     csp_fwid, nsp_fwid, asp_fwid = fw_ids
     fireworks.extend(fws)
     if len(mol) > 1:
