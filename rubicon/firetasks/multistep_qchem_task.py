@@ -48,7 +48,7 @@ class QChemGeomOptDBInsertionTask(FireTaskBase, FWSerializable):
         snlgroup_id = None
         if assi_result:
             t_id, d = assi_result
-            d['eg_snl'] = fw_spec['egsnl']
+            d['egsnl'] = fw_spec['egsnl']
             d['snlgroup_id'] = fw_spec['snlgroup_id']
             d['task_type'] = fw_spec['task_type']
             new_s = Molecule.from_dict(d["final_molecule"])
@@ -58,7 +58,6 @@ class QChemGeomOptDBInsertionTask(FireTaskBase, FWSerializable):
                 {'name': 'Electrolyte Genome Project structure optimization',
                  'url': 'http://www.materialsproject.org',
                  'description': {'task_type': d['task_type'],
-                                 'fw_id': d['fw_id'],
                                  'task_id': d['task_id']}})
             new_snl = EGStructureNL(new_s, old_snl.authors, old_snl.projects,
                                     old_snl.references, old_snl.remarks,
