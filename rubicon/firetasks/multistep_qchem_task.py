@@ -4,6 +4,7 @@ import logging
 import os
 import sys
 import math
+import datetime
 
 from fireworks.core.firework import FireTaskBase, FWAction, Workflow
 from fireworks.utilities.fw_serializers import FWSerializable
@@ -58,7 +59,8 @@ class QChemGeomOptDBInsertionTask(FireTaskBase, FWSerializable):
                 {'name': 'Electrolyte Genome Project structure optimization',
                  'url': 'http://www.materialsproject.org',
                  'description': {'task_type': d['task_type'],
-                                 'task_id': d['task_id']}})
+                                 'task_id': d['task_id']},
+                 'when': datetime.datetime.utcnow()})
             new_snl = EGStructureNL(new_s, old_snl.authors, old_snl.projects,
                                     old_snl.references, old_snl.remarks,
                                     old_snl.data, history)
@@ -213,7 +215,27 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
         mission = d['user_tags']['mission']
         additional_user_tags = {"img_freq_eli": img_freq_eli}
         priority = fw_spec['_priority']
-        update_specs = {'egsnl': fw_spec['egsnl'],
+        d['egsnl'] = fw_spec['egsnl']
+        old_snl = EGStructureNL.from_dict(d['egsnl'])
+        history = old_snl.history
+        history.append(
+            {'name': 'Electrolyte Genome Project eliminate imaginary '
+                     'frequency by perturb molecular geometry',
+             'url': 'http://www.materialsproject.org',
+             'description': {'task_type': d['task_type'],
+                             'task_id': d['task_id'],
+                             'max_displacement': self.molecule_perturb_scale},
+             'when': datetime.datetime.utcnow()})
+        new_snl = EGStructureNL(new_mol, old_snl.authors, old_snl.projects,
+                                old_snl.references, old_snl.remarks,
+                                old_snl.data, history)
+
+        # enter new SNL into SNL db
+        # get the SNL mongo adapter
+        sma = EGSNLMongoAdapter.auto_load()
+        egsnl, snlgroup_id = sma.add_snl(new_snl,
+                                         snlgroup_guess=d['snlgroup_id'])
+        update_specs = {'egsnl': egsnl,
                         'snlgroup_id': fw_spec['snlgroup_id']}
         charge_shift = d['user_tags']['charge_shift']
 
