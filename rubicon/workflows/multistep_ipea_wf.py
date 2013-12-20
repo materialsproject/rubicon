@@ -66,7 +66,7 @@ class QChemFireWorkCreator():
         spec['task_type'] = task_type
         spec['charge'] = charge
         spec['spin_multiplicity'] = spin_multiplicity
-        task_name = state_name + ' ' + task_type
+        task_name = self.molname + ' ' + state_name + ' ' + task_type
         from rubicon.firetasks.multistep_qchem_task \
             import QChemGeomOptDBInsertionTask
         fw_geom = FireWork([QChemTask(),
@@ -90,7 +90,7 @@ class QChemFireWorkCreator():
         spec['task_type'] = task_type
         spec['charge'] = charge
         spec['spin_multiplicity'] = spin_multiplicity
-        task_name = state_name + ' ' + task_type
+        task_name = self.molname + ' ' + state_name + ' ' + task_type
         from rubicon.firetasks.multistep_qchem_task \
             import QChemFrequencyDBInsertionTask
         fw_freq = FireWork([QChemTask(),
@@ -129,7 +129,7 @@ class QChemFireWorkCreator():
         implicit_solvent['radii'] = 'uff'
         implicit_solvent['vdwscale'] = 1.1
         spec['implicit_solvent'] = implicit_solvent
-        task_name = state_name + ' ' + task_type
+        task_name = self.molname + ' ' + state_name + ' ' + task_type
         from rubicon.firetasks.multistep_qchem_task \
             import QChemSinglePointEnergyDBInsertionTask
         fw_freq = FireWork([QChemTask(),
