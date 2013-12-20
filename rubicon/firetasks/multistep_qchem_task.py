@@ -53,7 +53,7 @@ class QChemGeomOptDBInsertionTask(FireTaskBase, FWSerializable):
             d['snlgroup_id_initial'] = fw_spec['snlgroup_id']
             d['task_type'] = fw_spec['task_type']
             new_s = Molecule.from_dict(d["final_molecule"])
-            old_snl = EGStructureNL.from_dict(d['egsnl'])
+            old_snl = EGStructureNL.from_dict(d['snl_initial'])
             history = old_snl.history
             history.append(
                 {'name': 'Electrolyte Genome Project structure optimization',
@@ -227,7 +227,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
         mission = d['user_tags']['mission']
         additional_user_tags = {"img_freq_eli": img_freq_eli}
         priority = fw_spec['_priority']
-        old_snl = EGStructureNL.from_dict(d['egsnl'])
+        old_snl = EGStructureNL.from_dict(d['snl_initial'])
         history = old_snl.history
         history.append(
             {'name': 'Electrolyte Genome Project eliminate imaginary '
