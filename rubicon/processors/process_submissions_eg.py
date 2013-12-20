@@ -4,6 +4,7 @@ from fireworks.core.launchpad import LaunchPad
 from pymatgen.matproj.snl import StructureNL
 from rubicon.submission.submission_mongo_eg import SubmissionMongoAdapterEG
 from rubicon.utils.snl.egsnl import EGStructureNL
+from rubicon.workflows.multistep_ipea_wf import QChemFireWorkCreator
 from rubicon.workflows.snl_to_eg_wf import snl_to_eg_wf
 
 
@@ -132,7 +133,13 @@ class SubmissionProcessorEG():
                                       'task_id' in l.action.stored_data:
                             t_id = l.action.stored_data['task_id']
                             if 'task_type' in fw.spec:
-                                m_taskdict[fw.spec['task_type']] = t_id
+                                state_name = QChemFireWorkCreator\
+                                    .get_state_name(
+                                        fw.spec["charge"],
+                                        fw.spec["spin_multiplicity"])
+                                task_name = state_name + ' ' + \
+                                    fw.spec['task_type']
+                                m_taskdict[task_name] = t_id
                             break
 
         self.sma.update_state(submission_id, wf.state, details, m_taskdict)

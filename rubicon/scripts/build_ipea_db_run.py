@@ -40,12 +40,14 @@ def build_ipea_db():
         ea_vaccum = None
         ea_sol = None
         print j['submission_id']
-        if 'original Single Point Energy' in j['task_dict']:
-            neutral_tid = j['task_dict']['original Single Point Energy']
-        if 'cation Single Point Energy' in j['task_dict']:
-            cation_tid = j['task_dict']['cation Single Point Energy']
-        if 'anion Single Point Energy' in j['task_dict']:
-            anion_tid = j['task_dict']['anion Single Point Energy']
+        if 'singlet neutral single point energy' in j['task_dict']:
+            neutral_tid = j['task_dict'][
+                'singlet neutral single point energy']
+        if 'doublet cation single point energy' in j['task_dict']:
+            cation_tid = j['task_dict'][
+                'double cation single point energy']
+        if 'doublet anion single point energy' in j['task_dict']:
+            anion_tid = j['task_dict']['doublet anion single point energy']
 
         if neutral_tid:
             neutral_energy_dict = tasks_coll.find(
