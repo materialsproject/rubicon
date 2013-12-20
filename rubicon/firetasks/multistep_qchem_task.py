@@ -49,8 +49,8 @@ class QChemGeomOptDBInsertionTask(FireTaskBase, FWSerializable):
         snlgroup_id = None
         if assi_result:
             t_id, d = assi_result
-            d['egsnl'] = fw_spec['egsnl']
-            d['snlgroup_id'] = fw_spec['snlgroup_id']
+            d['snl_initial'] = fw_spec['egsnl']
+            d['snlgroup_id_initial'] = fw_spec['snlgroup_id']
             d['task_type'] = fw_spec['task_type']
             new_s = Molecule.from_dict(d["final_molecule"])
             old_snl = EGStructureNL.from_dict(d['egsnl'])
@@ -74,10 +74,10 @@ class QChemGeomOptDBInsertionTask(FireTaskBase, FWSerializable):
                                              snlgroup_guess=d['snlgroup_id'])
             d['snl_final'] = egsnl.to_dict
             d['snlgroup_id_final'] = snlgroup_id
-            d['snlgroup_changed'] = (d['snlgroup_id'] !=
+            d['snlgroup_changed'] = (d['snlgroup_id_initial'] !=
                                      d['snlgroup_id_final'])
             d['run_tags'] = fw_spec['run_tags']
-            d['solvent_model'] = fw_spec['solvent_model']
+            d['implicit_solvent'] = fw_spec['implicit_solvetn']
         if t_id:
             if d["state"] == "successful":
                 return FWAction(stored_data={'task_id': t_id},
@@ -125,12 +125,14 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
         d = None
         if assi_result:
             t_id, d = assi_result
+            d['snl_initial'] = fw_spec['egsnl']
             d['snl_final'] = fw_spec['egsnl']
+            d['snlgroup_id_initial'] = fw_spec['snlgroup_id']
             d['snlgroup_id_final'] = fw_spec['snlgroup_id']
-            d['snlgroup_changed'] = (d['snlgroup_id'] !=
+            d['snlgroup_changed'] = (d['snlgroup_id_initial'] !=
                                      d['snlgroup_id_final'])
             d['run_tags'] = fw_spec['run_tags']
-            d['solvent_model'] = fw_spec['solvent_model']
+            d['implicit_solvent'] = fw_spec['implicit_solvent']
         if t_id:
             if d["state"] == "successful":
                 if d['stationary_type'] == 'minimum':
@@ -225,7 +227,6 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
         mission = d['user_tags']['mission']
         additional_user_tags = {"img_freq_eli": img_freq_eli}
         priority = fw_spec['_priority']
-        d['egsnl'] = fw_spec['egsnl']
         old_snl = EGStructureNL.from_dict(d['egsnl'])
         history = old_snl.history
         history.append(
@@ -314,12 +315,13 @@ class QChemSinglePointEnergyDBInsertionTask(FireTaskBase, FWSerializable):
         d = None
         if assi_result:
             t_id, d = assi_result
+            d['snl_initial'] = fw_spec['egsnl']
             d['snl_final'] = fw_spec['egsnl']
             d['snlgroup_id_final'] = fw_spec['snlgroup_id']
             d['snlgroup_changed'] = (d['snlgroup_id'] !=
                                      d['snlgroup_id_final'])
             d['run_tags'] = fw_spec['run_tags']
-            d['solvent_model'] = fw_spec['solvent_model']
+            d['implicit_solvent'] = fw_spec['implicit_solvent']
         if t_id:
             if d["state"] == "successful":
                 return FWAction(stored_data={'task_id': t_id},
