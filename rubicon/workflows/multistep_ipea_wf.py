@@ -32,7 +32,7 @@ class QChemFireWorkCreator():
         spec["_trackers"] = [tracker_out, tracker_std, tracker_joberr,
                              tracker_jobout]
         spec['run_tags'] = dict()
-        spec['run_tags']['methods'] = "b3lyp/6-31+g*"
+        spec['run_tags']['methods'] = [self.bs.lower(), self.dft.lower()]
         if update_spec:
             spec.update(update_spec)
         self.base_spec = lambda: copy.deepcopy(spec)
@@ -50,9 +50,10 @@ class QChemFireWorkCreator():
         return spin_state[spin_multiplicity] + " " + charge_state[charge]
 
     def geom_fw(self, charge, spin_multiplicity, fw_id):
+        task_type = "geometry optimizaiton"
         state_name = self.get_state_name(charge, spin_multiplicity)
         title = self.molname + " " + state_name + " " + self.dft + " " + \
-                self.bs + " Geometry Optimization"
+                self.bs + " " + task_type
         qctask = QcTask(self.mol, charge=charge,
                         spin_multiplicity=spin_multiplicity,
                         jobtype="opt", title=title,
@@ -61,20 +62,22 @@ class QChemFireWorkCreator():
         qcinp = QcInput([qctask])
         spec = self.base_spec()
         spec["qcinp"] = qcinp.to_dict
-        spec['task_type'] = state_name + ' geometry optimization'
+        spec['task_type'] = task_type
         spec['charge'] = charge
         spec['spin_multiplicity'] = spin_multiplicity
+        task_name = state_name + ' ' + task_type
         from rubicon.firetasks.multistep_qchem_task \
             import QChemGeomOptDBInsertionTask
         fw_geom = FireWork([QChemTask(),
                             QChemGeomOptDBInsertionTask()],
-                           spec=spec, name=spec['task_type'], fw_id=fw_id)
+                           spec=spec, name=task_name, fw_id=fw_id)
         return fw_geom
 
     def freq_fw(self, charge, spin_multiplicity, fw_id):
+        task_type = "vibrational frequency"
         state_name = self.get_state_name(charge, spin_multiplicity)
         title = self.molname + state_name + " " + self.dft + " " + self.bs + \
-            " Vibrational Frequency Analysis"
+            " " + task_type
         qctask = QcTask(self.mol, charge=charge,
                         spin_multiplicity=spin_multiplicity,
                         jobtype="freq", title=title,
@@ -83,20 +86,22 @@ class QChemFireWorkCreator():
         qcinp = QcInput([qctask])
         spec = self.base_spec()
         spec["qcinp"] = qcinp.to_dict
-        spec['task_type'] = state_name + 'vibrational frequency'
+        spec['task_type'] = task_type
         spec['charge'] = charge
         spec['spin_multiplicity'] = spin_multiplicity
+        task_name = state_name + ' ' + task_type
         from rubicon.firetasks.multistep_qchem_task \
             import QChemFrequencyDBInsertionTask
         fw_freq = FireWork([QChemTask(),
                             QChemFrequencyDBInsertionTask()],
-                           spec=spec, name=spec['task_type'], fw_id=fw_id)
+                           spec=spec, name=task_name, fw_id=fw_id)
         return fw_freq
 
     def sp_fw(self, charge, spin_multiplicity, fw_id):
+        task_type = "single point energy"
         state_name = self.get_state_name(charge, spin_multiplicity)
         title = self.molname + " " + state_name + " " + self.dft + " " + \
-                self.bs + " Single Point Energy"
+                self.bs + " " + task_type
         title += "\n Gas Phase"
         qctask_vac = QcTask(self.mol, charge=charge,
                             spin_multiplicity=spin_multiplicity,
@@ -114,14 +119,15 @@ class QChemFireWorkCreator():
         qcinp = QcInput([qctask_vac, qctask_sol])
         spec = self.base_spec()
         spec["qcinp"] = qcinp.to_dict
-        spec['task_type'] = state_name + 'single point energy'
+        spec['task_type'] = state_name + ' ' + task_type
         spec['charge'] = charge
         spec['spin_multiplicity'] = spin_multiplicity
+        task_name = state_name + ' ' + task_type
         from rubicon.firetasks.multistep_qchem_task \
             import QChemSinglePointEnergyDBInsertionTask
         fw_freq = FireWork([QChemTask(),
                             QChemSinglePointEnergyDBInsertionTask()],
-                           spec=spec, name=spec['task_type'], fw_id=fw_id)
+                           spec=spec, name=task_name, fw_id=fw_id)
         return fw_freq
 
 
