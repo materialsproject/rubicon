@@ -34,7 +34,7 @@ class QChemFireWorkCreator():
         spec['run_tags'] = dict()
         spec['run_tags']['methods'] = "b3lyp/6-31+g*"
         if update_spec:
-            spec.update(self.update_spec)
+            spec.update(update_spec)
         self.base_spec = lambda: copy.deepcopy(spec)
 
     @staticmethod
