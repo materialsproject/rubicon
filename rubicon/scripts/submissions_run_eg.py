@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 from rubicon.processors.process_submissions_eg import SubmissionProcessorEG
 
 
-def go_submissions():
+def go_eg_submissions():
     m_description = 'This program is used to pull jobs from the Submissions ' \
                     'database, create FireWorks workflows from those ' \
                     'submissions, and then monitor all previous submissions ' \
@@ -20,4 +20,4 @@ def go_submissions():
     sp.run(args.sleep, args.infinite)
 
 if __name__ == '__main__':
-    go_submissions()
+    go_eg_submissions()
