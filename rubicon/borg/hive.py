@@ -97,44 +97,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
         """
         try:
             d = self.get_task_doc(path, fw_spec)
-
-            if fw_spec:
-                d['task_type'] = fw_spec['task_type']
-                d['run_tags'] = fw_spec['run_tags']
-                d['implicit_solvent'] = fw_spec['implicit_solvent']
-                d['user_tags'] = fw_spec["user_tags"]
-                d['snl_initial'] = fw_spec['egsnl']
-                d['snlgroup_id_initial'] = fw_spec['snlgroup_id']
-                d['inchi_initial'] = fw_spec['inchi']
-                if fw_spec['task_type'] == "geometry optimization":
-                    new_s = Molecule.from_dict(d["molecule_final"])
-                    old_snl = EGStructureNL.from_dict(d['snl_initial'])
-                    history = old_snl.history
-                    history.append(
-                        {'name': 'Electrolyte Genome Project structure optimization',
-                         'url': 'http://www.materialsproject.org',
-                         'description': {'task_type': d['task_type'],
-                                         'task_id': d['task_id']},
-                         'when': datetime.datetime.utcnow()})
-                    new_snl = EGStructureNL(new_s, old_snl.authors, old_snl.projects,
-                                            old_snl.references, old_snl.remarks,
-                                            old_snl.data, history)
-
-                    # enter new SNL into SNL db
-                    # get the SNL mongo adapter
-                    sma = EGSNLMongoAdapter.auto_load()
-
-                    # add snl
-                    egsnl, snlgroup_id = sma.add_snl(new_snl,
-                                                     snlgroup_guess=d['snlgroup_id'])
-                    d['snl_final'] = egsnl.to_dict
-                    d['snlgroup_id_final'] = snlgroup_id
-                else:
-                    d['snl_final'] = fw_spec['egsnl']
-                    d['snlgroup_id_final'] = fw_spec['snlgroup_id']
-                d['snlgroup_changed'] = (d['snlgroup_id_initial'] !=
-                                             d['snlgroup_id_final'])
-            tid = self._insert_doc(d)
+            tid = self._insert_doc(d, fw_spec)
             return tid, d
         except Exception as ex:
             import traceback
@@ -250,7 +213,46 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
 
         return clean_json(d)
 
-    def _insert_doc(self, d):
+    @staticmethod
+    def update_tags(fw_spec, d, task_id):
+        if fw_spec:
+                d['task_type'] = fw_spec['task_type']
+                d['run_tags'] = fw_spec['run_tags']
+                d['implicit_solvent'] = fw_spec['implicit_solvent']
+                d['user_tags'] = fw_spec["user_tags"]
+                d['snl_initial'] = fw_spec['egsnl']
+                d['snlgroup_id_initial'] = fw_spec['snlgroup_id']
+                d['inchi_initial'] = fw_spec['inchi']
+                if fw_spec['task_type'] == "geometry optimization":
+                    new_s = Molecule.from_dict(d["molecule_final"])
+                    old_snl = EGStructureNL.from_dict(d['snl_initial'])
+                    history = old_snl.history
+                    history.append(
+                        {'name': 'Electrolyte Genome Project structure optimization',
+                         'url': 'http://www.materialsproject.org',
+                         'description': {'task_type': d['task_type'],
+                                         'task_id': task_id},
+                         'when': datetime.datetime.utcnow()})
+                    new_snl = EGStructureNL(new_s, old_snl.authors, old_snl.projects,
+                                            old_snl.references, old_snl.remarks,
+                                            old_snl.data, history)
+
+                    # enter new SNL into SNL db
+                    # get the SNL mongo adapter
+                    sma = EGSNLMongoAdapter.auto_load()
+
+                    # add snl
+                    egsnl, snlgroup_id = sma.add_snl(new_snl,
+                                                     snlgroup_guess=d['snlgroup_id'])
+                    d['snl_final'] = egsnl.to_dict
+                    d['snlgroup_id_final'] = snlgroup_id
+                else:
+                    d['snl_final'] = fw_spec['egsnl']
+                    d['snlgroup_id_final'] = fw_spec['snlgroup_id']
+                d['snlgroup_changed'] = (d['snlgroup_id_initial'] !=
+                                             d['snlgroup_id_final'])
+
+    def _insert_doc(self, d, fw_spec=None):
         if not self.simulate:
             # Perform actual insertion into db. Because db connections cannot
             # be pickled, every insertion needs to create a new connection
@@ -279,7 +281,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
                     d["task_id"] = result["task_id"]
                     logger.info("Updating {} with taskid = {}"
                                 .format(d["path"], d["task_id"]))
-
+                self.update_tags(fw_spec, d, d["task_id"])
                 coll.update({"path": d["path"]}, {"$set": d}, upsert=True)
                 return d["task_id"]
             else:
