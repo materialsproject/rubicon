@@ -17,6 +17,7 @@ def snl_to_eg_wf(snl, parameters=None):
 
     f = Composition.from_formula(snl.structure.composition.reduced_formula).\
         alphabetical_formula
+    molname = parameters.get("nick_name", f)
 
     # add the SNL to the SNL DB and figure out duplicate group
     tasks = [AddEGSNLTask()]
@@ -28,10 +29,10 @@ def snl_to_eg_wf(snl, parameters=None):
         spec['force_snlgroup_id'] = parameters['snlgroup_id']
         del spec['snl']
     fws.append(FireWork(tasks, spec,
-                        name=get_slug(f + ' -- Add to SNL database'),
+                        name=get_slug(molname + ' -- Add to SNL database'),
                         fw_id=1))
 
-    ipea_fws, connections = multistep_ipea_fws(snl.structure, f, mission,
+    ipea_fws, connections = multistep_ipea_fws(snl.structure, molname, mission,
                                                DupeFinderEG, priority, 1)
     fws.extend(ipea_fws)
 
