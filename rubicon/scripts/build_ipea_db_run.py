@@ -45,7 +45,7 @@ def build_ipea_db():
                 'singlet neutral single point energy']
         if 'doublet cation single point energy' in j['task_dict']:
             cation_tid = j['task_dict'][
-                'double cation single point energy']
+                'doublet cation single point energy']
         if 'doublet anion single point energy' in j['task_dict']:
             anion_tid = j['task_dict']['doublet anion single point energy']
 
