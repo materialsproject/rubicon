@@ -41,54 +41,25 @@ class QChemGeomOptDBInsertionTask(FireTaskBase, FWSerializable):
             password=db_creds['admin_password'],
             collection=db_creds['collection'])
         assi_result = drone.assimilate(os.path.abspath(
-            os.path.join(os.getcwd(), "mol.qcout")))
+            os.path.join(os.getcwd(), "mol.qcout")), fw_spec=fw_spec)
 
         t_id = None
         d = None
-        egsnl = None
-        snlgroup_id = None
         if assi_result:
             t_id, d = assi_result
-            d['snl_initial'] = fw_spec['egsnl']
-            d['snlgroup_id_initial'] = fw_spec['snlgroup_id']
-            d['task_type'] = fw_spec['task_type']
-            new_s = Molecule.from_dict(d["final_molecule"])
-            old_snl = EGStructureNL.from_dict(d['snl_initial'])
-            history = old_snl.history
-            history.append(
-                {'name': 'Electrolyte Genome Project structure optimization',
-                 'url': 'http://www.materialsproject.org',
-                 'description': {'task_type': d['task_type'],
-                                 'task_id': d['task_id']},
-                 'when': datetime.datetime.utcnow()})
-            new_snl = EGStructureNL(new_s, old_snl.authors, old_snl.projects,
-                                    old_snl.references, old_snl.remarks,
-                                    old_snl.data, history)
-
-            # enter new SNL into SNL db
-            # get the SNL mongo adapter
-            sma = EGSNLMongoAdapter.auto_load()
-
-            # add snl
-            egsnl, snlgroup_id = sma.add_snl(new_snl,
-                                             snlgroup_guess=d['snlgroup_id'])
-            d['snl_final'] = egsnl.to_dict
-            d['snlgroup_id_final'] = snlgroup_id
-            d['snlgroup_changed'] = (d['snlgroup_id_initial'] !=
-                                     d['snlgroup_id_final'])
-            d['run_tags'] = fw_spec['run_tags']
-            d['implicit_solvent'] = fw_spec['implicit_solvetn']
         if t_id:
             if d["state"] == "successful":
                 return FWAction(stored_data={'task_id': t_id},
-                                update_spec={"mol": d["final_molecule"],
-                                             'egsnl': egsnl,
-                                             'snlgroup_id': snlgroup_id})
+                                update_spec={"mol": d["molecule_final"],
+                                             'egsnl': d["snl_final"],
+                                             'snlgroup_id':
+                                             d["snlgroup_id_final"]})
             else:
                 return FWAction(stored_data={'task_id': t_id},
-                                update_spec={"mol": d["final_molecule"],
-                                             'egsnl': egsnl,
-                                             'snlgroup_id': snlgroup_id},
+                                update_spec={"mol": d["molecule_final"],
+                                             'egsnl': d["snl_final"],
+                                             'snlgroup_id':
+                                             d["snlgroupid_final"]},
                                 defuse_children=True)
         else:
             return FWAction(defuse_children=True,
@@ -119,37 +90,29 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
             password=db_creds['admin_password'],
             collection=db_creds['collection'])
         assi_result = drone.assimilate(os.path.abspath(
-            os.path.join(os.getcwd(), "mol.qcout")))
+            os.path.join(os.getcwd(), "mol.qcout")), fw_spec=fw_spec)
 
         t_id = None
         d = None
         if assi_result:
             t_id, d = assi_result
-            d['snl_initial'] = fw_spec['egsnl']
-            d['snl_final'] = fw_spec['egsnl']
-            d['snlgroup_id_initial'] = fw_spec['snlgroup_id']
-            d['snlgroup_id_final'] = fw_spec['snlgroup_id']
-            d['snlgroup_changed'] = (d['snlgroup_id_initial'] !=
-                                     d['snlgroup_id_final'])
-            d['run_tags'] = fw_spec['run_tags']
-            d['implicit_solvent'] = fw_spec['implicit_solvent']
         if t_id:
             if d["state"] == "successful":
                 if d['stationary_type'] == 'minimum':
                     return FWAction(stored_data={'task_id': t_id},
-                                    update_spec={"mol": d["final_molecule"],
-                                                 'egsnl': fw_spec['egsnl'],
+                                    update_spec={"mol": d["molecule_final"],
+                                                 'egsnl': d["snl_final"],
                                                  'snlgroup_id':
-                                                 fw_spec['snlgroup_id']})
+                                                 d["snlgroup_id_final"]})
                 else:
                     return self.img_freq_action(fw_spec, d, t_id)
             else:
                 return FWAction(stored_data={'task_id': t_id},
                                 defuse_children=True,
-                                update_spec={"mol": d["final_molecule"],
-                                             'egsnl': fw_spec['egsnl'],
+                                update_spec={"mol": d["molecule_final"],
+                                             'egsnl': d["snl_final"],
                                              'snlgroup_id':
-                                             fw_spec['snlgroup_id']})
+                                             d["snlgroup_id_final"]})
         else:
             return FWAction(defuse_children=True,
                             update_spec={'egsnl': fw_spec['egsnl'],
@@ -188,7 +151,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
 
     @classmethod
     def perturb_molecule(cls, d):
-        old_mol = Molecule.from_dict(d['final_molecule'])
+        old_mol = Molecule.from_dict(d['molecule_final'])
         vib_mode = d['calculations']['freq']['frequencies'][0]["vib_mode"]
         max_dis = max([math.sqrt(sum([x ** 2 for x in mode]))
                        for mode in vib_mode])
@@ -218,7 +181,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
             logging.error("Failed to eliminate imaginary frequency")
             return FWAction(stored_data={'task_id': t_id},
                             defuse_children=True,
-                            update_spec={"mol": d["final_molecule"],
+                            update_spec={"mol": d["molecule_final"],
                                          'egsnl': fw_spec['egsnl'],
                                          'snlgroup_id': fw_spec['snlgroup_id']})
 
@@ -283,8 +246,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
             raise Exception("Unknown imaginary frequency fixing method")
 
         return FWAction(stored_data={'task_id': t_id}, detours=wf,
-                        update_spec={'egsnl': fw_spec['egsnl'],
-                                     'snlgroup_id': fw_spec['snlgroup_id']})
+                        update_spec=update_specs)
 
 
 class QChemSinglePointEnergyDBInsertionTask(FireTaskBase, FWSerializable):
@@ -309,33 +271,26 @@ class QChemSinglePointEnergyDBInsertionTask(FireTaskBase, FWSerializable):
             password=db_creds['admin_password'],
             collection=db_creds['collection'])
         assi_result = drone.assimilate(os.path.abspath(
-            os.path.join(os.getcwd(), "mol.qcout")))
+            os.path.join(os.getcwd(), "mol.qcout")), fw_spec=fw_spec)
 
         t_id = None
         d = None
         if assi_result:
             t_id, d = assi_result
-            d['snl_initial'] = fw_spec['egsnl']
-            d['snl_final'] = fw_spec['egsnl']
-            d['snlgroup_id_final'] = fw_spec['snlgroup_id']
-            d['snlgroup_changed'] = (d['snlgroup_id'] !=
-                                     d['snlgroup_id_final'])
-            d['run_tags'] = fw_spec['run_tags']
-            d['implicit_solvent'] = fw_spec['implicit_solvent']
         if t_id:
             if d["state"] == "successful":
                 return FWAction(stored_data={'task_id': t_id},
-                                update_spec={"mol": d["final_molecule"],
-                                             'egsnl': fw_spec['egsnl'],
+                                update_spec={"mol": d["molecule_final"],
+                                             'egsnl': d['snl_final'],
                                              'snlgroup_id':
-                                             fw_spec['snlgroup_id']})
+                                             d['snlgroup_id_final']})
             else:
                 return FWAction(stored_data={'task_id': t_id},
                                 defuse_children=True,
-                                update_spec={"mol": d["final_molecule"],
-                                             'egsnl': fw_spec['egsnl'],
+                                update_spec={"mol": d["molecule_final"],
+                                             'egsnl': d['snl_final'],
                                              'snlgroup_id':
-                                             fw_spec['snlgroup_id']})
+                                             d['snlgroup_id_final']})
         else:
             return FWAction(defuse_children=True,
                             update_spec={'egsnl': fw_spec['egsnl'],

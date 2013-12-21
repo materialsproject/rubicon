@@ -17,7 +17,6 @@ class QChemFireWorkCreator():
         self.mol = mol
         initial_inchi = self.get_inchi(mol)
         user_tags = {'mission': mission,
-                     "initial_inchi": initial_inchi,
                      "molname": molname}
         if additional_user_tags:
             user_tags.update(additional_user_tags)
@@ -34,6 +33,7 @@ class QChemFireWorkCreator():
         spec['run_tags'] = dict()
         spec['run_tags']['methods'] = [self.bs.lower(), self.dft.lower()]
         spec['implicit_solvent'] = {}
+        spec['inchi'] = initial_inchi
         if update_spec:
             spec.update(update_spec)
         self.base_spec = lambda: copy.deepcopy(spec)
@@ -51,7 +51,7 @@ class QChemFireWorkCreator():
         return spin_state[spin_multiplicity] + " " + charge_state[charge]
 
     def geom_fw(self, charge, spin_multiplicity, fw_id):
-        task_type = "geometry optimizaiton"
+        task_type = "geometry optimization"
         state_name = self.get_state_name(charge, spin_multiplicity)
         title = self.molname + " " + state_name + " " + self.dft + " " + \
             self.bs + " " + task_type

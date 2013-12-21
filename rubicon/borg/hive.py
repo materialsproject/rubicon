@@ -5,7 +5,10 @@ TODO: Modify module doc.
 """
 
 from __future__ import division
+from pymatgen import Molecule
 from pymatgen.io.qchemio import QcOutput
+from rubicon.utils.snl.egsnl import EGStructureNL
+from rubicon.utils.snl.egsnl_mongo import EGSNLMongoAdapter
 
 __author__ = "Shyue Ping Ong"
 __copyright__ = "Copyright 2012, The Materials Project"
@@ -83,7 +86,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
                 db.counter.insert({"_id": "mol_taskid", "c": 1})
             conn.close()
 
-    def assimilate(self, path):
+    def assimilate(self, path, fw_spec=None):
         """
         Parses nwchem runs. Then insert the result into the db. and return the
         mol_id or doc of the insertion.
@@ -93,7 +96,44 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
             purposes. Else, only the task_id of the inserted doc is returned.
         """
         try:
-            d = self.get_task_doc(path)
+            d = self.get_task_doc(path, fw_spec)
+
+            if fw_spec:
+                d['task_type'] = fw_spec['task_type']
+                d['run_tags'] = fw_spec['run_tags']
+                d['implicit_solvent'] = fw_spec['implicit_solvent']
+                d['user_tags'] = fw_spec["user_tags"]
+                d['snl_initial'] = fw_spec['egsnl']
+                d['snlgroup_id_initial'] = fw_spec['snlgroup_id']
+                d['inchi_initial'] = fw_spec['inchi']
+                if fw_spec['task_type'] == "geometry optimization":
+                    new_s = Molecule.from_dict(d["final_molecule"])
+                    old_snl = EGStructureNL.from_dict(d['snl_initial'])
+                    history = old_snl.history
+                    history.append(
+                        {'name': 'Electrolyte Genome Project structure optimization',
+                         'url': 'http://www.materialsproject.org',
+                         'description': {'task_type': d['task_type'],
+                                         'task_id': d['task_id']},
+                         'when': datetime.datetime.utcnow()})
+                    new_snl = EGStructureNL(new_s, old_snl.authors, old_snl.projects,
+                                            old_snl.references, old_snl.remarks,
+                                            old_snl.data, history)
+
+                    # enter new SNL into SNL db
+                    # get the SNL mongo adapter
+                    sma = EGSNLMongoAdapter.auto_load()
+
+                    # add snl
+                    egsnl, snlgroup_id = sma.add_snl(new_snl,
+                                                     snlgroup_guess=d['snlgroup_id'])
+                    d['snl_final'] = egsnl.to_dict
+                    d['snlgroup_id_final'] = snlgroup_id
+                else:
+                    d['snl_final'] = fw_spec['egsnl']
+                    d['snlgroup_id_final'] = fw_spec['snlgroup_id']
+                d['snlgroup_changed'] = (d['snlgroup_id_initial'] !=
+                                             d['snlgroup_id_final'])
             tid = self._insert_doc(d)
             return tid, d
         except Exception as ex:
@@ -101,27 +141,6 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
             print traceback.format_exc(ex)
             logger.error(traceback.format_exc(ex))
             return False
-
-    @classmethod
-    def get_fw_tags(cls, path):
-        """
-        Parse the useful tags from the FW.json file.
-        The useful tags can be set in the creation of FireWork
-        """
-        fwjsonfile = os.path.join(os.path.dirname(path), 'FW.json')
-        fw_tags = dict()
-        with open(fwjsonfile) as f:
-            d = json.load(f)
-        if 'user_tags' in d['spec'].keys():
-            fw_tags["user_tags"] = d['spec']['user_tags']
-        if 'name' in d:
-            if "user_tags" not in fw_tags:
-                fw_tags["user_tags"] = dict()
-            fw_tags["user_tags"]['fw_name'] = d['name']
-        if len(fw_tags) > 0:
-            return fw_tags
-        else:
-            return None
 
     @classmethod
     def modify_svg(cls, svg):
@@ -146,7 +165,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
         return new_svg
 
     @classmethod
-    def get_task_doc(cls, path):
+    def get_task_doc(cls, path, fw_spec=None):
         """
         Get the entire task doc for a path, including any post-processing.
         """
@@ -159,7 +178,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
         xyz = XYZ(mol)
         smiles = pbmol.write("smi").split()[0]
         can = pbmol.write("can").split()[0]
-        inchi = pbmol.write("inchi").strip()
+        inchi_final = pbmol.write("inchi").strip()
         svg = cls.modify_svg(pbmol.write("svg"))
         comp = mol.composition
         initial_mol = data[0]["molecules"][0]
@@ -198,8 +217,8 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
              "folder": os.path.basename(os.path.dirname(os.path.abspath(
                  path))),
              "calculations": data,
-             "initial_molecule": initial_mol.to_dict,
-             "final_molecule": mol.to_dict,
+             "molecule_initial": initial_mol.to_dict,
+             "molecule_final": mol.to_dict,
              "pointgroup": sch_symbol,
              "pretty_formula": comp.reduced_formula,
              "reduced_cell_formula_abc": comp.alphabetical_formula,
@@ -209,22 +228,19 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
              "composition": comp.to_dict,
              "elements": list(comp.to_dict.keys()),
              "nelements": len(comp),
-             "smiles": smiles, "can": can, "inchi": inchi, "svg": svg,
+             "smiles": smiles, "can": can,
+             "inchi_final": inchi_final,
+             "svg": svg,
              "xyz": str(xyz),
              "names": get_nih_names(smiles)}
 
         if stationary_type:
             d['stationary_type'] = stationary_type
-
-        fw_tags = cls.get_fw_tags(path)
-        user_tags = fw_tags.get("user_tags", None)
-        d.update(fw_tags)
-        if user_tags:
-            if "initial_inchi" in user_tags:
-                initial_inchi = user_tags['initial_inchi']
-                if initial_inchi != d['inchi']:
-                    d['state'] = 'rejected'
-                    d['reject_reason'] = 'structural change'
+        if fw_spec:
+            inchi_initial = fw_spec['inchi']
+            if inchi_initial != d['inchi_final']:
+                d['state'] = 'rejected'
+                d['reject_reason'] = 'structural change'
         if "state" not in d:
             for scf in data_dict.values():
                 if scf['has_error']:
