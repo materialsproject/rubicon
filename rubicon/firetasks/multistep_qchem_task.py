@@ -209,7 +209,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
         sma = EGSNLMongoAdapter.auto_load()
         egsnl, snlgroup_id = sma.add_snl(
             new_snl, snlgroup_guess=d['snlgroup_id_initial'])
-        update_specs = {'egsnl': egsnl,
+        update_specs = {'egsnl': egsnl.to_dict,
                         'snlgroup_id': fw_spec['snlgroup_id']}
 
 
