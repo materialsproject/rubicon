@@ -44,6 +44,5 @@ def snl_to_eg_wf(snl, parameters=None):
         wf_meta['submission_id'] = snl.data['_electrolytegenome'][
             'submission_id']
     return Workflow(fws, connections,
-                    name=Composition.from_formula(snl.structure.composition.
-                    reduced_formula).alphabetical_formula,
+                    name=molname,
                     metadata=wf_meta)
