@@ -231,8 +231,8 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
                         {'name': 'Electrolyte Genome Project structure optimization',
                          'url': 'http://www.materialsproject.org',
                          'description': {'task_type': d['task_type'],
-                                         'task_id': task_id},
-                         'when': datetime.datetime.utcnow()})
+                                         'task_id': task_id,
+                                         'when': datetime.datetime.utcnow()}})
                     new_snl = EGStructureNL(new_s, old_snl.authors, old_snl.projects,
                                             old_snl.references, old_snl.remarks,
                                             old_snl.data, history)
@@ -242,8 +242,8 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
                     sma = EGSNLMongoAdapter.auto_load()
 
                     # add snl
-                    egsnl, snlgroup_id = sma.add_snl(new_snl,
-                                                     snlgroup_guess=d['snlgroup_id'])
+                    egsnl, snlgroup_id = sma.add_snl(
+                        new_snl, snlgroup_guess=d['snlgroup_id_initial'])
                     d['snl_final'] = egsnl.to_dict
                     d['snlgroup_id_final'] = snlgroup_id
                 else:
