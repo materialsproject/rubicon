@@ -170,7 +170,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
 
     def img_freq_action(self, fw_spec, d, t_id):
         if "img_freq_eli" in d['user_tags']:
-            img_freq_eli = copy.deepcopy(d['user_tags'])
+            img_freq_eli = copy.deepcopy(d['user_tags']["img_freq_eli"])
             img_freq_eli['current_method_id'] += 1
         else:
             img_freq_eli = {"methods": ["dir_dis_opt", "den_dis_opt",
