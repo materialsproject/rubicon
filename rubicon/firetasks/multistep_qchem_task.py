@@ -59,7 +59,7 @@ class QChemGeomOptDBInsertionTask(FireTaskBase, FWSerializable):
                                 update_spec={"mol": d["molecule_final"],
                                              'egsnl': d["snl_final"],
                                              'snlgroup_id':
-                                             d["snlgroupid_final"]},
+                                             d["snlgroup_id_final"]},
                                 defuse_children=True)
         else:
             return FWAction(defuse_children=True,
