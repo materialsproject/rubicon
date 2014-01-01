@@ -2,6 +2,7 @@
 Build molecules collection
 Adapted from Dan Gunter and Wei Chen's vasp materials builder
 """
+import copy
 import logging
 import datetime
 from pymongo import ASCENDING
@@ -28,7 +29,7 @@ class TaskKeys:
     fields = (
         'task_id', 'snlgroup_id_final', 'inchi_final', 'task_type', 'elements',
         'can', 'smiles', 'charge', 'spin_multiplicity', 'implicit_solvent',
-        'user_tags', 'run_tags', 'snl_final', 'task_id',
+        'user_tags', 'run_tags', 'snl_final', 'task_id', "molecule_final"
         'nelements', 'reduced_cell_formula', 'pretty_formula', 'pointgroup',
         'calculations.scf.energies', 'calculations.scf_pcm.energies')
 
@@ -79,7 +80,64 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
     def build_molecule(self, taskdocs):
         """Transforms task document to molecules document.
         """
-        molecule = None
+        docs = dict()
+        for td in taskdocs:
+            if td["charge"] == 0:
+                docs["neutral"] = td
+            elif td["charge"] == 1:
+                docs["cation"] = td
+            elif td["charge"] == -1:
+                docs["anion"] = td
+        if len(docs) < 2 or ("neutral" not in docs):
+            return None
+        molecule = dict()
+        molecule["inchi"] = docs["neutral"]["inchi_final"]
+        molecule["can"] = docs["neutral"]["can"]
+        molecule["smiles"] = docs["neutral"]["smiles"]
+        molecule["elements"] = copy.deepcopy(docs["neutral"]["elements"])
+        molecule["nelements"] = docs["neutral"]["nelements"]
+        molecule["user_tags"] = copy.deepcopy(docs["neutral"]["user_tags"])
+        molecule["run_tags"] = copy.deepcopy(docs["neutral"]["run_tags"])
+        molecule["reduced_cell_formula"] = docs[
+            "neutral"]["reduced_cell_formula"]
+        molecule["implicit_solvent"] = copy.deepcopy(docs["neutral"][
+            "implicit_solvent"])
+        molecule["pretty_formula"] = docs["neutral"]["pretty_formula"]
+        molecule["pointgroup"] = docs["neutral"]["pointgroup"]
+
+        molecule["task_id"] = dict()
+        molecule["snlgroup_id_final"] = dict()
+        molecule["charge"] = dict()
+        molecule["spin_multiplicity"] = dict()
+        molecule["snl_final"] = dict()
+        molecule["molecule"] = dict()
+        for k in docs.keys():
+            molecule["task_id"][k] = docs[k]["task_id"]
+            molecule["snlgroup_id_final"][k] = docs[k]["snlgroup_id_final"]
+            molecule["charge"][k] = docs[k]["charge"]
+            molecule["spin_multiplicity"][k] = docs[k]["spin_multiplicity"]
+            molecule["snl_final"][k] = docs[k]["snl_final"]
+            molecule["molecule"][k] = docs[k]["molecule_final"]
+        if "cation" in docs:
+            molecule["IP"] = dict()
+            molecule["IP"]["vacuum"] = \
+                docs["cation"]["calculations"]["scf"]["energies"][-1][-1] \
+                - \
+                docs["neutral"]["calculations"]["scf"]["energies"][-1][-1]
+            molecule["IP"]["sol"] = \
+                docs["cation"]["calculations"]["scf_pcm"]["energies"][-1][-1] \
+                - \
+                docs["neutral"]["calculations"]["scf_pcm"]["energies"][-1][-1]
+        if "anion" in docs:
+            molecule["EA"] = dict()
+            molecule["EA"]["vacuum"] = \
+                docs["neutral"]["calculations"]["scf"]["energies"][-1][-1] \
+                - \
+                docs["anion"]["calculations"]["scf"]["energies"][-1][-1]
+            molecule["EA"]["sol"] = \
+                docs["neutral"]["calculations"]["scf_pcm"]["energies"][-1][-1] \
+                - \
+                docs["anion"]["calculations"]["scf_pcm"]["energies"][-1][-1]
         return molecule
 
     def _build_indexes(self):
