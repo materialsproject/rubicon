@@ -51,19 +51,19 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
     def run(self):
         """Run the builder.
         """
-        _log.info("Getting distinct snlgroup_id_final")
-        snlgroup_id_finals = self._c.tasks.distinct('snlgroup_id_final')
-        map(self.add_item, snlgroup_id_finals)
+        _log.info("Getting distinct INCHI")
+        inchi_finals = self._c.tasks.distinct('inchi_final')
+        map(self.add_item, inchi_finals)
         _log.info("Beginning analysis")
         states = self.run_parallel()
         self._build_indexes()
         return self.combine_status(states)
 
 
-    def process_item(self, snlgroup_id_finals):
+    def process_item(self, inchi_finals):
         """Create and add material for a given grouping identifer.
         """
-        query = {'state': 'successful', 'snlgroup_id_final': snlgroup_id_finals,
+        query = {'state': 'successful', 'inchi_final': inchi_finals,
                  'task_type': "single point energy"}
         docs = self._c.tasks.find(query, fields=TaskKeys.fields)
         if not docs:
