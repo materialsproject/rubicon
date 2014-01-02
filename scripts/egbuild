@@ -1,0 +1,4 @@
+import rubicon.scripts.egbuild as egbuild
+
+if __name__ == "__main__":
+    egbuild.main()
