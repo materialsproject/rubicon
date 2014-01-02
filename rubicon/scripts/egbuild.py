@@ -37,11 +37,11 @@ def get_settings(config_file):
     """Read settings from a configuration file.
     """
     try:
-        if config_file:
+        if os.path.exists(config_file):
             return json.load(open(config_file))
-        elif ["DB_LOC"] in os.environ:
+        elif "DB_LOC" in os.environ and os.path.exists(os.environ["DB_LOC"]):
             with open(os.path.join(os.environ["DB_LOC"],
-                                   "tasks_db.json")) as f:
+                                   config_file)) as f:
                 return json.load(f)
         else:
             raise ValueError("configuration file not found")
@@ -59,7 +59,7 @@ def main():
     # Setup args
     common = argparse.ArgumentParser(add_help=False)
     common.add_argument("-c", "--config", dest="config_file", type=str,
-                        metavar='FILE', default="db.json",
+                        metavar='FILE', default="tasks_db.json",
                         help="Configure database connection from FILE "
                              "(%(default)s)")
     common.add_argument("-p", "--prefix", dest="coll_prefix", type=str,
