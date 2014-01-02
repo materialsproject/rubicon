@@ -157,7 +157,7 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         """
         _log.info("Inserting Material from task_id i, ".
             format(i=str(doc['task_id'])))
-        self._c.materials.insert(doc)
+        self._c.molecules.insert(doc)
 
 
 
