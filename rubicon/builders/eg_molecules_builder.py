@@ -29,8 +29,9 @@ class TaskKeys:
     fields = (
         'task_id', 'snlgroup_id_final', 'inchi_final', 'task_type', 'elements',
         'can', 'smiles', 'charge', 'spin_multiplicity', 'implicit_solvent',
-        'user_tags', 'run_tags', 'snl_final', 'task_id', "molecule_final"
-        'nelements', 'reduced_cell_formula', 'pretty_formula', 'pointgroup',
+        'user_tags', 'run_tags', 'snl_final', 'task_id', "molecule_final",
+        'nelements', 'reduced_cell_formula_abc', 'pretty_formula',
+        'pointgroup',
         'calculations.scf.energies', 'calculations.scf_pcm.energies')
 
 
@@ -66,7 +67,7 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         """
         query = {'state': 'successful', 'inchi_final': inchi_finals,
                  'task_type': "single point energy"}
-        docs = self._c.tasks.find(query, fields=TaskKeys.fields)
+        docs = list(self._c.tasks.find(query, fields=TaskKeys.fields))
         if not docs:
             return 1
         doc = self.build_molecule(docs)
@@ -98,8 +99,8 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         molecule["nelements"] = docs["neutral"]["nelements"]
         molecule["user_tags"] = copy.deepcopy(docs["neutral"]["user_tags"])
         molecule["run_tags"] = copy.deepcopy(docs["neutral"]["run_tags"])
-        molecule["reduced_cell_formula"] = docs[
-            "neutral"]["reduced_cell_formula"]
+        molecule["reduced_cell_formula_abc"] = docs[
+            "neutral"]["reduced_cell_formula_abc"]
         molecule["implicit_solvent"] = copy.deepcopy(docs["neutral"][
             "implicit_solvent"])
         molecule["pretty_formula"] = docs["neutral"]["pretty_formula"]

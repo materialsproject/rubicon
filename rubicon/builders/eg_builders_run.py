@@ -19,9 +19,6 @@ def run(colls, args):
     """
     _log = logging.getLogger(_logname)
     ncores = args.num_cores
-    # set default collection to be the real name of the tasks collection
-    # (may not necessarily be 'tasks')
-    colls.database.set_collection(colls.get_collection_name('tasks'))
     kw = dict(ncores=ncores)
 
     _log.info("create_builders.start")
