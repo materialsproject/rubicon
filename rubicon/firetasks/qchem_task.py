@@ -41,8 +41,8 @@ class QChemTask(FireTaskBase, FWSerializable):
         if 'mol' in fw_spec:
             mol = Molecule.from_dict(fw_spec["mol"])
             for qj in qcinp.jobs:
-                if isinstance(qj, Molecule):
-                    qcinp.jobs[0].mol = copy.deepcopy(mol)
+                if isinstance(qj.mol, Molecule):
+                    qj.mol = copy.deepcopy(mol)
         mol = qcinp.jobs[0].mol
         qcinp.write_file("mol.qcinp")
         hopper_name_pattern = re.compile("nid\d+")
