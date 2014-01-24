@@ -164,7 +164,7 @@ class SNLGroup():
             return False
 
         if exact_match:
-            mm = MoleculeMatcher(tolerance=0.2,
+            mm = MoleculeMatcher(tolerance=0.01,
                                  mapper=InchiMolAtomMapper(angle_tolerance=5.0))
 
             if not mm.fit(cand_snl.structure, self.canonical_structure):
