@@ -9,6 +9,17 @@ from pymatgen.matproj.snl import StructureNL
 __author__ = 'xiaohuiqu'
 
 
+def get_bonds_from_obmol(obmol):
+    num_bonds = obmol.NumBonds()
+    bonds = []
+    for i in range(num_bonds):
+        bond = obmol.GetBond(i)
+        a1 = bond.GetBeginAtomIdx() - 1
+        a2 = bond.GetEndAtomIdx() - 1
+        bonds.append(sorted([a1, a2]))
+    bonds.sort()
+    return bonds
+
 def get_meta_from_structure(mol):
     '''
     set basis information for the molecule
@@ -24,6 +35,7 @@ def get_meta_from_structure(mol):
     bb = BabelMolAdaptor(mol)
     pbmol = bb.pybel_mol
     inchi = pbmol.write("inchi").strip()
+    bonds = get_bonds_from_obmol(bb._obmol)
     meta = {'nsites': len(mol),
             'elements': elsyms,
             'nelements': len(elsyms),
@@ -34,7 +46,8 @@ def get_meta_from_structure(mol):
             'anonymized_formula': comp.anonymized_formula,
             'chemsystem': '-'.join(elsyms),
             'is_valid': mol.is_valid(),
-            'inchi': inchi}
+            'inchi': inchi,
+            "known_bonds": bonds}
     return meta
 
 
