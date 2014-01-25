@@ -38,6 +38,7 @@ class QChemFireWorkCreator():
         spec['run_tags']['methods'] = [self.bs.lower(), self.dft.lower()]
         spec['implicit_solvent'] = {}
         spec['inchi'] = initial_inchi
+        spec['num_atoms'] = len(mol)
         if update_spec:
             spec.update(update_spec)
         self.base_spec = lambda: copy.deepcopy(spec)
