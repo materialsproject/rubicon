@@ -5,7 +5,10 @@ TODO: Modify module doc.
 """
 
 from __future__ import division
+from StdSuites.Macintosh_Connectivity_Clas import FireWire_addresses
+from fireworks.core.firework import FireWork
 from pymatgen import Molecule
+from pymatgen.analysis.molecule_structure_comparator import MoleculeStructureComparator
 from pymatgen.io.qchemio import QcOutput
 from rubicon.utils.snl.egsnl import EGStructureNL
 from rubicon.utils.snl.egsnl_mongo import EGSNLMongoAdapter
@@ -127,6 +130,24 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
         new_svg = '\n'.join(new_tokens)
         return new_svg
 
+    @staticmethod
+    def check_structure_change(mol1, mol2):
+        """
+        Check whether structure is changed:
+
+        Return:
+            True: structure changed, False: unchanged
+        """
+        with open("FW.json") as f:
+            fw = json.load(f)
+        if 'egsnl' not in fw['spec']:
+            raise ValueError("Can't find initial SNL")
+        if 'known_bonds' not in fw['spec']['egsnl']:
+            raise ValueError("Can't find known bonds information")
+        bonds = fw['spec']['egsnl']['known_bonds']
+        msc = MoleculeStructureComparator(priority_bonds=bonds)
+        return not msc.are_equal(mol1, mol2)
+
     @classmethod
     def get_task_doc(cls, path, fw_spec=None):
         """
@@ -202,8 +223,13 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
         if fw_spec:
             inchi_initial = fw_spec['inchi']
             if inchi_initial != d['inchi_final']:
-                d['state'] = 'rejected'
-                d['reject_reason'] = 'structural change'
+                d['inchi_changed'] = True
+            else:
+                d['inchi_changed'] = False
+        d['structure_changed'] = cls.check_structure_change(initial_mol, mol)
+        if d['structure_changed']:
+            d['state'] = 'rejected'
+            d['reject_reason'] = 'structural change'
         if "state" not in d:
             for scf in data_dict.values():
                 if scf['has_error']:
