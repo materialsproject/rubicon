@@ -128,11 +128,14 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
             mol=mol, molname=molname, mission=mission,
             additional_user_tags=additional_user_tags, priority=priority,
             update_spec=update_spec, inchi=inchi)
-        geom_fwid, freq_fwid = -1, -2
-        geom_fw = fw_creator.geom_fw(charge, spin_multiplicity, geom_fwid)
+        geom_fwid_cal, geom_fwid_db = -1, -2
+        freq_fwid_cal, freq_fwid_db = -3, -4
+        geom_fw = fw_creator.geom_fw(charge, spin_multiplicity, geom_fwid_cal,
+                                     geom_fwid_db)
         geom_fw.spec["run_tags"]["task_type_amend"] = "imaginary frequency " \
                                                       "elimination"
-        freq_fw = fw_creator.freq_fw(charge, spin_multiplicity, freq_fwid)
+        freq_fw = fw_creator.freq_fw(charge, spin_multiplicity, freq_fwid_cal,
+                                     freq_fwid_db)
         freq_fw.spec["run_tags"]["task_type_amend"] = "imaginary frequency " \
                                                       "elimination"
         if grid:
@@ -146,7 +149,9 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                 fw.spec["qcinp"] = qcinp.to_dict
                 fw.spec["run_tags"]["grid"] = grid
         wf = Workflow([geom_fw, freq_fw],
-                      links_dict={geom_fwid: freq_fwid})
+                      links_dict={geom_fwid_db: freq_fwid_cal,
+                                  geom_fwid_cal: geom_fwid_db,
+                                  freq_fwid_cal: freq_fwid_db})
         return wf
 
     @classmethod

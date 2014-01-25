@@ -55,7 +55,7 @@ class QChemFireWorkCreator():
         spin_state = {1: "singlet", 2: "doublet", 3: "triplet"}
         return spin_state[spin_multiplicity] + " " + charge_state[charge]
 
-    def geom_fw(self, charge, spin_multiplicity, fw_id):
+    def geom_fw(self, charge, spin_multiplicity, fw_id_cal, fw_id_db):
         task_type = "geometry optimization"
         state_name = self.get_state_name(charge, spin_multiplicity)
         title = self.molname + " " + state_name + " " + self.dft + " " + \
@@ -74,12 +74,19 @@ class QChemFireWorkCreator():
         task_name = self.molname + ' ' + state_name + ' ' + task_type
         from rubicon.firetasks.multistep_qchem_task \
             import QChemGeomOptDBInsertionTask
-        fw_geom = FireWork([QChemTask(),
-                            QChemGeomOptDBInsertionTask()],
-                           spec=spec, name=task_name, fw_id=fw_id)
-        return fw_geom
+        fw_geom_cal = FireWork([QChemTask()],
+                               spec=spec, name=task_name, fw_id=fw_id_cal)
+        spec_db = copy.deepcopy(spec)
+        del spec_db['_dupefinder']
+        spec_db['_allow_fizzled_parents'] = True
+        spec_db['task_type'] = task_type + ' DB Insertion'
+        task_name_db = task_name + " DB Insertion"
+        fw_geom_db = FireWork([QChemGeomOptDBInsertionTask()],
+                              spec=spec_db, name=task_name_db, fw_id=fw_id_db)
 
-    def freq_fw(self, charge, spin_multiplicity, fw_id):
+        return fw_geom_cal, fw_geom_db
+
+    def freq_fw(self, charge, spin_multiplicity, fw_id_cal, fw_id_db):
         task_type = "vibrational frequency"
         state_name = self.get_state_name(charge, spin_multiplicity)
         title = self.molname + " " + state_name + " " + self.dft + " " +\
@@ -98,12 +105,18 @@ class QChemFireWorkCreator():
         task_name = self.molname + ' ' + state_name + ' ' + task_type
         from rubicon.firetasks.multistep_qchem_task \
             import QChemFrequencyDBInsertionTask
-        fw_freq = FireWork([QChemTask(),
-                            QChemFrequencyDBInsertionTask()],
-                           spec=spec, name=task_name, fw_id=fw_id)
-        return fw_freq
+        fw_freq_cal = FireWork([QChemTask()],
+                           spec=spec, name=task_name, fw_id=fw_id_cal)
+        spec_db = copy.deepcopy(spec)
+        del spec_db['_dupefinder']
+        spec_db['_allow_fizzled_parents'] = True
+        spec_db['task_type'] = task_type + ' DB Insertion'
+        task_name_db = task_name + " DB Insertion"
+        fw_freq_db = FireWork([QChemFrequencyDBInsertionTask()],
+                              spec=spec_db, name=task_name_db, fw_id=fw_id_db)
+        return fw_freq_cal, fw_freq_db
 
-    def sp_fw(self, charge, spin_multiplicity, fw_id):
+    def sp_fw(self, charge, spin_multiplicity, fw_id_cal, fw_id_db):
         task_type = "single point energy"
         state_name = self.get_state_name(charge, spin_multiplicity)
         title = self.molname + " " + state_name + " " + self.dft + " " + \
@@ -143,10 +156,16 @@ class QChemFireWorkCreator():
         task_name = self.molname + ' ' + state_name + ' ' + task_type
         from rubicon.firetasks.multistep_qchem_task \
             import QChemSinglePointEnergyDBInsertionTask
-        fw_freq = FireWork([QChemTask(),
-                            QChemSinglePointEnergyDBInsertionTask()],
-                           spec=spec, name=task_name, fw_id=fw_id)
-        return fw_freq
+        fw_sp_cal = FireWork([QChemTask()],
+                           spec=spec, name=task_name, fw_id=fw_id_cal)
+        spec_db = copy.deepcopy(spec)
+        del spec_db['_dupefinder']
+        spec_db['_allow_fizzled_parents'] = True
+        spec_db['task_type'] = task_type + ' DB Insertion'
+        task_name_db = task_name + " DB Insertion"
+        fw_sp_db = FireWork([QChemSinglePointEnergyDBInsertionTask()],
+                              spec=spec_db, name=task_name_db, fw_id=fw_id_db)
+        return fw_sp_cal, fw_sp_db
 
 
 def multistep_ipea_fws(mol, name, mission, dupefinder=DupeFinderEG, priority=1,
@@ -168,36 +187,42 @@ def multistep_ipea_fws(mol, name, mission, dupefinder=DupeFinderEG, priority=1,
     charge = (-1, 0, 1)
     spin_multiplicity = (2, 1, 2)
     if len(mol) > 1:
-        fw_ids = range(fwid_base + 0, fwid_base + 3)
-        fws = (fw_creator.geom_fw(ch, spin, fwid)
-               for ch, spin, fwid in zip(charge, spin_multiplicity, fw_ids))
-        cg_fwid, ng_fwid, ag_fwid = fw_ids
+        fw_ids = zip(* [iter(range(fwid_base + 0, fwid_base + 6))] * 2)
+        fws = (fw_creator.geom_fw(ch, spin, fwid_cal, fwid_db)
+               for ch, spin, (fwid_cal, fwid_db)
+               in zip(charge, spin_multiplicity, fw_ids))
+        (cgi_cal, cgi_db), (ngi_cal, ngi_db), (agi_cal, agi_db) = fw_ids
         fireworks.extend(fws)
+        links_dict.update(dict(fw_ids))
 
-        fw_ids = range(fwid_base + 3, fwid_base + 3 + 3)
-        fws = (fw_creator.freq_fw(ch, spin, fwid)
-               for ch, spin, fwid in zip(charge, spin_multiplicity, fw_ids))
-        cf_fwid, nf_fwid, af_fwid = fw_ids
+        fw_ids = zip(* [iter(range(fwid_base + 6, fwid_base + 6 + 6))] * 2)
+        fws = (fw_creator.freq_fw(ch, spin, fwid_cal, fwid_db)
+               for ch, spin, (fwid_cal, fwid_db)
+               in zip(charge, spin_multiplicity, fw_ids))
+        (cfi_cal, cfi_db), (nfi_cal, nfi_db), (afi_cal, afi_db) = fw_ids
         fireworks.extend(fws)
-        links_dict.update({cg_fwid: cf_fwid, ng_fwid: nf_fwid,
-                           ag_fwid: af_fwid})
-    fw_ids = range(fwid_base + 6, fwid_base + 6 + 3)
-    fws = (fw_creator.sp_fw(ch, spin, fwid)
-           for ch, spin, fwid in zip(charge, spin_multiplicity, fw_ids))
-    csp_fwid, nsp_fwid, asp_fwid = fw_ids
+        links_dict.update(dict(fw_ids))
+        links_dict.update({cgi_db: cfi_cal, ngi_db: nfi_cal, agi_db: afi_cal})
+
+    fw_ids = zip(* [iter(range(fwid_base + 12, fwid_base + 12 + 6))] * 2)
+    fws = (fw_creator.sp_fw(ch, spin, fwid_cal, fwid_db)
+           for ch, spin, (fwid_cal, fwid_db)
+           in zip(charge, spin_multiplicity, fw_ids))
+    (cspi_cal, cspi_db), (nspi_cal, nspi_db), (aspi_cal, aspi_db) = fw_ids
+    links_dict.update((dict(fw_ids)))
     fireworks.extend(fws)
     if len(mol) > 1:
-        links_dict.update({cf_fwid: csp_fwid, nf_fwid: nsp_fwid,
-                           af_fwid: asp_fwid})
-        links_dict.update({nsp_fwid: [cg_fwid, ag_fwid]})
+        links_dict.update({cfi_db: cspi_cal, nfi_db: nspi_cal,
+                           afi_db: aspi_cal})
+        links_dict.update({nspi_db: [cgi_cal, agi_cal]})
         if parent_fwid:
             for pfw_id in parent_fwid:
-                links_dict[pfw_id] = ng_fwid
+                links_dict[pfw_id] = ngi_cal
     else:
-        links_dict.update({nsp_fwid: [csp_fwid, asp_fwid]})
+        links_dict.update({nspi_db: [cspi_cal, aspi_cal]})
         if parent_fwid:
             for pfw_id in parent_fwid:
-                links_dict[pfw_id] = nsp_fwid
+                links_dict[pfw_id] = nspi_cal
     return fireworks, links_dict
 
 
