@@ -106,7 +106,7 @@ class QChemFireWorkCreator():
         from rubicon.firetasks.multistep_qchem_task \
             import QChemFrequencyDBInsertionTask
         fw_freq_cal = FireWork([QChemTask()],
-                           spec=spec, name=task_name, fw_id=fw_id_cal)
+                               spec=spec, name=task_name, fw_id=fw_id_cal)
         spec_db = copy.deepcopy(spec)
         del spec_db['_dupefinder']
         spec_db['_allow_fizzled_parents'] = True
@@ -157,14 +157,14 @@ class QChemFireWorkCreator():
         from rubicon.firetasks.multistep_qchem_task \
             import QChemSinglePointEnergyDBInsertionTask
         fw_sp_cal = FireWork([QChemTask()],
-                           spec=spec, name=task_name, fw_id=fw_id_cal)
+                             spec=spec, name=task_name, fw_id=fw_id_cal)
         spec_db = copy.deepcopy(spec)
         del spec_db['_dupefinder']
         spec_db['_allow_fizzled_parents'] = True
         spec_db['task_type'] = task_type + ' DB Insertion'
         task_name_db = task_name + " DB Insertion"
         fw_sp_db = FireWork([QChemSinglePointEnergyDBInsertionTask()],
-                              spec=spec_db, name=task_name_db, fw_id=fw_id_db)
+                            spec=spec_db, name=task_name_db, fw_id=fw_id_db)
         return fw_sp_cal, fw_sp_db
 
 
@@ -182,8 +182,8 @@ def multistep_ipea_fws(mol, name, mission, dupefinder=DupeFinderEG, priority=1,
     fireworks = []
     links_dict = dict()
     # the task in the order of anion, neutral, cation
-    cg_fwid, ng_fwid, ag_fwid = (None, None, None)
-    cf_fwid, nf_fwid, af_fwid = (None, None, None)
+    cgi_cal, ngi_cal, agi_cal = (None, None, None)
+    cfi_db, nfi_db, afi_db = (None, None, None)
     charge = (-1, 0, 1)
     spin_multiplicity = (2, 1, 2)
     if len(mol) > 1:

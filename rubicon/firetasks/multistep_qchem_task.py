@@ -217,7 +217,6 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
         update_specs = {'egsnl': egsnl.to_dict,
                         'snlgroup_id': fw_spec['snlgroup_id']}
 
-
         method = img_freq_eli["methods"][img_freq_eli["current_method_id"]]
         charge = new_mol.charge
         spin_multiplicity = new_mol.spin_multiplicity
