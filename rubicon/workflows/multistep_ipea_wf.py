@@ -64,7 +64,7 @@ class QChemFireWorkCreator():
                         spin_multiplicity=spin_multiplicity,
                         jobtype="opt", title=title,
                         exchange=self.dft, basis_set=self.bs)
-        qctask.set_memory(total=28000, static=3000)
+        qctask.set_memory(total=1100)
         qcinp = QcInput([qctask])
         spec = self.base_spec()
         spec["qcinp"] = qcinp.to_dict
@@ -95,7 +95,7 @@ class QChemFireWorkCreator():
                         spin_multiplicity=spin_multiplicity,
                         jobtype="freq", title=title,
                         exchange=self.dft, basis_set=self.bs)
-        qctask.set_memory(total=28000, static=3000)
+        qctask.set_memory(total=1100)
         qcinp = QcInput([qctask])
         spec = self.base_spec()
         spec["qcinp"] = qcinp.to_dict
@@ -126,7 +126,7 @@ class QChemFireWorkCreator():
                             spin_multiplicity=spin_multiplicity,
                             jobtype="sp", title=title,
                             exchange=self.dft, basis_set=self.bs)
-        qctask_vac.set_memory(total=28000, static=3000)
+        qctask_vac.set_memory(total=1100)
         qctask_vac.set_dft_grid(128, 302)
         qctask_vac.set_integral_threshold(12)
         qctask_vac.set_scf_convergence_threshold(8)
