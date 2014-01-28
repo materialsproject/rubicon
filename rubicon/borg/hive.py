@@ -255,7 +255,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
                 d['snl_initial'] = fw_spec['egsnl']
                 d['snlgroup_id_initial'] = fw_spec['snlgroup_id']
                 d['inchi_initial'] = fw_spec['inchi']
-                if fw_spec['task_type'] == "geometry optimization":
+                if "geometry optimization" in d['task_type']:
                     new_s = Molecule.from_dict(d["molecule_final"])
                     old_snl = EGStructureNL.from_dict(d['snl_initial'])
                     history = old_snl.history
@@ -278,6 +278,8 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
                         new_snl, snlgroup_guess=d['snlgroup_id_initial'])
                     d['snl_final'] = egsnl.to_dict
                     d['snlgroup_id_final'] = snlgroup_id
+                    print "snl_groupid_initial", d['snlgroup_id_initial'], \
+                            "snl_groupid_final", d['snlgroup_id_final'],
                 else:
                     d['snl_final'] = fw_spec['egsnl']
                     d['snlgroup_id_final'] = fw_spec['snlgroup_id']
