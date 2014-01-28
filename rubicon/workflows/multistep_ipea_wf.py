@@ -27,7 +27,7 @@ class QChemFireWorkCreator():
         spec = dict()
         spec['user_tags'] = user_tags
         spec['_priority'] = priority
-        spec['_dupefinder'] = dupefinder if dupefinder else DupeFinderEG()
+        spec['_dupefinder'] = dupefinder.to_dict() if dupefinder else DupeFinderEG().to_dict()
         tracker_out = Tracker("mol.qcout", nlines=20)
         tracker_std = Tracker("mol.qclog", nlines=10)
         tracker_joberr = Tracker("FW_job.error", nlines=20)
