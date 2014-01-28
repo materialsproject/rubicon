@@ -10,7 +10,7 @@ __author__ = 'xiaohuiqu'
 
 class QChemFireWorkCreator():
     def __init__(self, mol, molname, mission, additional_user_tags=None,
-                 dupefinder=DupeFinderEG, priority=1, update_spec=None,
+                 dupefinder=None, priority=1, update_spec=None,
                  inchi=None):
         self.bs = '6-31+G*'
         self.dft = 'B3LYP'
@@ -27,7 +27,7 @@ class QChemFireWorkCreator():
         spec = dict()
         spec['user_tags'] = user_tags
         spec['_priority'] = priority
-        spec['_dupefinder'] = dupefinder().to_dict()
+        spec['_dupefinder'] = dupefinder if dupefinder else DupeFinderEG()
         tracker_out = Tracker("mol.qcout", nlines=20)
         tracker_std = Tracker("mol.qclog", nlines=10)
         tracker_joberr = Tracker("FW_job.error", nlines=20)
@@ -148,7 +148,7 @@ class QChemFireWorkCreator():
         return fw_freq
 
 
-def multistep_ipea_fws(mol, name, mission, dupefinder=DupeFinderEG, priority=1,
+def multistep_ipea_fws(mol, name, mission, dupefinder=None, priority=1,
                        parent_fwid=None):
     fw_creator = QChemFireWorkCreator(mol, name, mission, None, dupefinder,
                                       priority)
@@ -200,7 +200,7 @@ def multistep_ipea_fws(mol, name, mission, dupefinder=DupeFinderEG, priority=1,
     return fireworks, links_dict
 
 
-def mol_to_ipea_wf(mol, name, mission, dupefinder=DupeFinderEG, priority=1,
+def mol_to_ipea_wf(mol, name, mission, dupefinder=None, priority=1,
                    parent_fwid=None):
     fireworks, links_dict = multistep_ipea_fws(mol, name, mission, dupefinder,
                                                priority, parent_fwid)
