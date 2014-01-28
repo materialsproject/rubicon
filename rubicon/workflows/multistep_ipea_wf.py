@@ -1,4 +1,5 @@
 import copy
+import itertools
 from fireworks.core.firework import Workflow, FireWork, Tracker
 from pymatgen.io.babelio import BabelMolAdaptor
 from pymatgen.io.qchemio import QcInput, QcTask
@@ -192,7 +193,7 @@ def multistep_ipea_fws(mol, name, mission, dupefinder=DupeFinderEG, priority=1,
                for ch, spin, (fwid_cal, fwid_db)
                in zip(charge, spin_multiplicity, fw_ids))
         (cgi_cal, cgi_db), (ngi_cal, ngi_db), (agi_cal, agi_db) = fw_ids
-        fireworks.extend(fws)
+        fireworks.extend(itertools.chain.from_iterable(fws))
         links_dict.update(dict(fw_ids))
 
         fw_ids = zip(* [iter(range(fwid_base + 6, fwid_base + 6 + 6))] * 2)
@@ -200,7 +201,7 @@ def multistep_ipea_fws(mol, name, mission, dupefinder=DupeFinderEG, priority=1,
                for ch, spin, (fwid_cal, fwid_db)
                in zip(charge, spin_multiplicity, fw_ids))
         (cfi_cal, cfi_db), (nfi_cal, nfi_db), (afi_cal, afi_db) = fw_ids
-        fireworks.extend(fws)
+        fireworks.extend(itertools.chain.from_iterable(fws))
         links_dict.update(dict(fw_ids))
         links_dict.update({cgi_db: cfi_cal, ngi_db: nfi_cal, agi_db: afi_cal})
 
@@ -210,7 +211,7 @@ def multistep_ipea_fws(mol, name, mission, dupefinder=DupeFinderEG, priority=1,
            in zip(charge, spin_multiplicity, fw_ids))
     (cspi_cal, cspi_db), (nspi_cal, nspi_db), (aspi_cal, aspi_db) = fw_ids
     links_dict.update((dict(fw_ids)))
-    fireworks.extend(fws)
+    fireworks.extend(itertools.chain.from_iterable(fws))
     if len(mol) > 1:
         links_dict.update({cfi_db: cspi_cal, nfi_db: nspi_cal,
                            afi_db: aspi_cal})

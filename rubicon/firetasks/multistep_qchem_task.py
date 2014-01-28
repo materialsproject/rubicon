@@ -130,16 +130,16 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
             update_spec=update_spec, inchi=inchi)
         geom_fwid_cal, geom_fwid_db = -1, -2
         freq_fwid_cal, freq_fwid_db = -3, -4
-        geom_fw = fw_creator.geom_fw(charge, spin_multiplicity, geom_fwid_cal,
-                                     geom_fwid_db)
-        geom_fw.spec["run_tags"]["task_type_amend"] = "imaginary frequency " \
-                                                      "elimination"
-        freq_fw = fw_creator.freq_fw(charge, spin_multiplicity, freq_fwid_cal,
-                                     freq_fwid_db)
-        freq_fw.spec["run_tags"]["task_type_amend"] = "imaginary frequency " \
-                                                      "elimination"
+        geom_fw_cal, geom_fw_db = fw_creator.geom_fw(charge, spin_multiplicity,
+            geom_fwid_cal, geom_fwid_db)
+        geom_fw_cal.spec["run_tags"]["task_type_amend"] = "imaginary " \
+            "frequency elimination"
+        freq_fw_cal, freq_fw_db = fw_creator.freq_fw(charge, spin_multiplicity,
+            freq_fwid_cal, freq_fwid_db)
+        freq_fw_cal.spec["run_tags"]["task_type_amend"] = "imaginary " \
+            "frequency elimination"
         if grid:
-            for fw in [geom_fw, freq_fw]:
+            for fw in [geom_fw_cal, geom_fw_db, freq_fw_cal, freq_fw_db]:
                 qcinp = QcInput.from_dict(fw.spec["qcinp"])
                 for j in qcinp.jobs:
                     j.set_dft_grid(*grid)
@@ -148,7 +148,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                         j.set_geom_max_iterations(100)
                 fw.spec["qcinp"] = qcinp.to_dict
                 fw.spec["run_tags"]["grid"] = grid
-        wf = Workflow([geom_fw, freq_fw],
+        wf = Workflow([geom_fw_cal, geom_fw_db, freq_fw_cal, freq_fw_db],
                       links_dict={geom_fwid_db: freq_fwid_cal,
                                   geom_fwid_cal: geom_fwid_db,
                                   freq_fwid_cal: freq_fwid_db})

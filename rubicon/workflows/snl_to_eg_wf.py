@@ -37,7 +37,7 @@ def snl_to_eg_wf(snl, parameters=None):
     fws.extend(ipea_fws)
 
     wf_meta = get_meta_from_structure(snl.structure)
-    wf_meta['run_version'] = 'Oct 29, 2013'
+    wf_meta['run_version'] = 'Jan 27, 2014'
 
     if '_electrolytegenome' in snl.data and \
             'submission_id' in snl.data['_electrolytegenome']:
