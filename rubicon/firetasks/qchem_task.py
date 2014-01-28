@@ -77,7 +77,6 @@ class QChemTask(FireTaskBase, FWSerializable):
         stored_data = {'error_list': list(all_errors)}
         update_spec = {'prev_qchem_dir': os.getcwd(),
                        'prev_task_type': fw_spec['task_type'],
-                       'prev_fw_id': fw_spec['fw_id'],
                        'egsnl': fw_spec['egsnl'],
                        'snlgroup_id': fw_spec['snlgroup_id'],
                        'run_tags': fw_spec['run_tags']}
