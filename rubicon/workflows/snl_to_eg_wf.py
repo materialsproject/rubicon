@@ -33,7 +33,7 @@ def snl_to_eg_wf(snl, parameters=None):
                         fw_id=1))
 
     ipea_fws, connections = multistep_ipea_fws(snl.structure, molname, mission,
-                                               DupeFinderEG, priority, 1)
+                                               DupeFinderEG(), priority, 1)
     fws.extend(ipea_fws)
 
     wf_meta = get_meta_from_structure(snl.structure)
