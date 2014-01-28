@@ -81,6 +81,7 @@ class QChemFireWorkCreator():
         del spec_db['_dupefinder']
         spec_db['_allow_fizzled_parents'] = True
         spec_db['task_type'] = task_type + ' DB Insertion'
+        del spec_db["_trackers"][:2]
         task_name_db = task_name + " DB Insertion"
         fw_geom_db = FireWork([QChemGeomOptDBInsertionTask()],
                               spec=spec_db, name=task_name_db, fw_id=fw_id_db)
@@ -112,6 +113,7 @@ class QChemFireWorkCreator():
         del spec_db['_dupefinder']
         spec_db['_allow_fizzled_parents'] = True
         spec_db['task_type'] = task_type + ' DB Insertion'
+        del spec_db["_trackers"][:2]
         task_name_db = task_name + " DB Insertion"
         fw_freq_db = FireWork([QChemFrequencyDBInsertionTask()],
                               spec=spec_db, name=task_name_db, fw_id=fw_id_db)
@@ -163,6 +165,7 @@ class QChemFireWorkCreator():
         del spec_db['_dupefinder']
         spec_db['_allow_fizzled_parents'] = True
         spec_db['task_type'] = task_type + ' DB Insertion'
+        del spec_db["_trackers"][:2]
         task_name_db = task_name + " DB Insertion"
         fw_sp_db = FireWork([QChemSinglePointEnergyDBInsertionTask()],
                             spec=spec_db, name=task_name_db, fw_id=fw_id_db)
