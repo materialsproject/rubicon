@@ -243,6 +243,12 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
     def update_tags(fw_spec, d, task_id):
         if fw_spec:
                 d['task_type'] = fw_spec['task_type']
+                if '_fizzled_parents' in fw_spec and not 'prev_task_type' in \
+                        fw_spec:
+                    d['task_type'] = fw_spec['_fizzled_parents'][0][
+                        'task_type']
+                else:
+                    d['task_type'] = fw_spec['prev_task_type']
                 d['run_tags'] = fw_spec['run_tags']
                 d['implicit_solvent'] = fw_spec['implicit_solvent']
                 d['user_tags'] = fw_spec["user_tags"]
