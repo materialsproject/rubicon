@@ -67,35 +67,25 @@ class QChemTask(FireTaskBase, FWSerializable):
                        qclog_file="mol.qclog")
         handler = QChemErrorHandler()
         c = Custodian(handlers=[handler], jobs=[job], max_errors=50)
-        c.run()
+        custodian_out = c.run()
+
+        all_errors = set()
+        for run in custodian_out:
+            for correction in run['corrections']:
+                all_errors.update(correction['errors'])
+
+        stored_data = {'error_list': list(all_errors)}
+        update_spec = {'prev_qchem_dir': os.getcwd(),
+                       'prev_task_type': fw_spec['task_type'],
+                       'prev_fw_id': fw_spec['fw_id'],
+                       'egsnl': fw_spec['egsnl'],
+                       'snlgroup_id': fw_spec['snlgroup_id'],
+                       'run_tags': fw_spec['run_tags']}
+        if 'mol' in fw_spec:
+            update_spec['mol'] = fw_spec['mol']
+
+        return FWAction(stored_data=stored_data, update_spec=update_spec)
 
 
-class QCDBInsertionTask(FireTaskBase, FWSerializable):
-    _fw_name = "QChem DB Insertion Task"
 
-    def run_task(self, fw_spec):
-        # get the directory containing the db file
-        db_dir = os.environ['DB_LOC']
-        db_path = os.path.join(db_dir, 'molecules_db.json')
 
-        logging.basicConfig(level=logging.INFO)
-        logger = logging.getLogger('QChemDrone')
-        logger.setLevel(logging.INFO)
-        sh = logging.StreamHandler(stream=sys.stdout)
-        sh.setLevel(getattr(logging, 'INFO'))
-        logger.addHandler(sh)
-
-        with open(db_path) as f:
-            db_creds = json.load(f)
-            drone = DeltaSCFQChemToDbTaskDrone(
-                host=db_creds['host'], port=db_creds['port'],
-                database=db_creds['database'], user=db_creds['admin_user'],
-                password=db_creds['admin_password'],
-                collection=db_creds['collection'])
-            assi_result = drone.assimilate(os.path.abspath(
-                os.path.join(os.getcwd(), "mol.qcout")))
-        t_id = None
-        if assi_result:
-            t_id, d = assi_result
-        if t_id:
-            return FWAction(stored_data={'task_id': t_id})

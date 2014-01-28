@@ -23,6 +23,12 @@ class QChemGeomOptDBInsertionTask(FireTaskBase, FWSerializable):
     _fw_name = "QChem Geometry Optimization DB Insertion Task"
 
     def run_task(self, fw_spec):
+        if '_fizzled_parents' in fw_spec and not 'prev_qchem_dir' in fw_spec:
+            prev_dir = fw_spec['_fizzled_parents'][0]['launches'][0][
+                'launch_dir']
+        else:
+            prev_dir = fw_spec['prev_qchem_dir']
+
         db_dir = os.environ['DB_LOC']
         db_path = os.path.join(db_dir, 'tasks_db.json')
 
@@ -41,7 +47,7 @@ class QChemGeomOptDBInsertionTask(FireTaskBase, FWSerializable):
             password=db_creds['admin_password'],
             collection=db_creds['collection'])
         assi_result = drone.assimilate(os.path.abspath(
-            os.path.join(os.getcwd(), "mol.qcout")), fw_spec=fw_spec)
+            os.path.join(prev_dir, "mol.qcout")), fw_spec=fw_spec)
 
         t_id = None
         d = None
@@ -72,6 +78,12 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
     molecule_perturb_scale = 0.3
 
     def run_task(self, fw_spec):
+        if '_fizzled_parents' in fw_spec and not 'prev_qchem_dir' in fw_spec:
+            prev_dir = fw_spec['_fizzled_parents'][0]['launches'][0][
+                'launch_dir']
+        else:
+            prev_dir = fw_spec['prev_qchem_dir']
+
         db_dir = os.environ['DB_LOC']
         db_path = os.path.join(db_dir, 'tasks_db.json')
 
@@ -90,7 +102,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
             password=db_creds['admin_password'],
             collection=db_creds['collection'])
         assi_result = drone.assimilate(os.path.abspath(
-            os.path.join(os.getcwd(), "mol.qcout")), fw_spec=fw_spec)
+            os.path.join(prev_dir, "mol.qcout")), fw_spec=fw_spec)
 
         t_id = None
         d = None
@@ -258,6 +270,12 @@ class QChemSinglePointEnergyDBInsertionTask(FireTaskBase, FWSerializable):
     _fw_name = "NWChem Single Point Energy DB Insertion Task"
 
     def run_task(self, fw_spec):
+        if '_fizzled_parents' in fw_spec and not 'prev_qchem_dir' in fw_spec:
+            prev_dir = fw_spec['_fizzled_parents'][0]['launches'][0][
+                'launch_dir']
+        else:
+            prev_dir = fw_spec['prev_qchem_dir']
+
         db_dir = os.environ['DB_LOC']
         db_path = os.path.join(db_dir, 'tasks_db.json')
 
@@ -276,7 +294,7 @@ class QChemSinglePointEnergyDBInsertionTask(FireTaskBase, FWSerializable):
             password=db_creds['admin_password'],
             collection=db_creds['collection'])
         assi_result = drone.assimilate(os.path.abspath(
-            os.path.join(os.getcwd(), "mol.qcout")), fw_spec=fw_spec)
+            os.path.join(prev_dir, "mol.qcout")), fw_spec=fw_spec)
 
         t_id = None
         d = None
