@@ -5,8 +5,6 @@ TODO: Modify module doc.
 """
 
 from __future__ import division
-from StdSuites.Macintosh_Connectivity_Clas import FireWire_addresses
-from fireworks.core.firework import FireWork
 from pymatgen import Molecule
 from pymatgen.analysis.molecule_structure_comparator import MoleculeStructureComparator
 from pymatgen.io.qchemio import QcOutput
