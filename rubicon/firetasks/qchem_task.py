@@ -1,5 +1,4 @@
 import copy
-import json
 import logging
 import re
 import shlex
@@ -10,12 +9,12 @@ import sys
 from custodian.qchem.handlers import QChemErrorHandler
 from custodian.qchem.jobs import QchemJob
 from fireworks.core.firework import FireTaskBase, FWAction
+from fireworks.core.fw_config import FWData
 from fireworks.utilities.fw_serializers import FWSerializable
 
 from custodian.custodian import Custodian
 from pymatgen.core.structure import Molecule
 from pymatgen.io.qchemio import QcInput
-from rubicon.borg.hive import DeltaSCFQChemToDbTaskDrone
 
 __author__ = 'Anubhav Jain'
 __copyright__ = 'Copyright 2013, The Materials Project'
@@ -47,9 +46,14 @@ class QChemTask(FireTaskBase, FWSerializable):
         qcinp.write_file("mol.qcinp")
         hopper_name_pattern = re.compile("nid\d+")
         carver_name_pattern = re.compile("c[0-9]{4}-ib")
+        fw_data = FWData()
         if hopper_name_pattern.match(socket.gethostname()):
         # hopper compute nodes
-            qc_exe = shlex.split("qchem -np {}".format(min(24, len(mol))))
+            if (not fw_data.MULTIPROCESSING) or (fw_data.SUB_NPROCS is None):
+                qc_exe = shlex.split("qchem -np {}".format(min(24, len(mol))))
+            else:
+                qc_exe = shlex.split("qchem -np {}".format(
+                    min(fw_data.SUB_NPROCS, len(mol))))
         elif carver_name_pattern.match(socket.gethostname()):
         # mendel compute nodes
             qc_exe = shlex.split("qchem -np {}".format(min(8, len(mol))))
@@ -84,7 +88,3 @@ class QChemTask(FireTaskBase, FWSerializable):
             update_spec['mol'] = fw_spec['mol']
 
         return FWAction(stored_data=stored_data, update_spec=update_spec)
-
-
-
-
