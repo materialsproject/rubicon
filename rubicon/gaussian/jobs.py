@@ -5,6 +5,7 @@ This module implements basic kinds of jobs for Gaussian runs.
 """
 
 from __future__ import division
+from monty.io import zopen
 
 __author__ = "Shyue Ping Ong"
 __version__ = "0.1"
@@ -18,7 +19,6 @@ import subprocess
 import os
 import shutil
 
-from pymatgen.util.io_utils import zopen
 from pymatgen.serializers.json_coders import MSONable
 
 from custodian.custodian import Job
