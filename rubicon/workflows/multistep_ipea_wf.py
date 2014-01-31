@@ -11,16 +11,12 @@ __author__ = 'xiaohuiqu'
 
 class QChemFireWorkCreator():
     def __init__(self, mol, molname, mission, additional_user_tags=None,
-                 dupefinder=None, priority=1, update_spec=None,
-                 inchi=None):
+                 dupefinder=None, priority=1, update_spec=None):
         self.bs = '6-31+G*'
         self.dft = 'B3LYP'
         self.molname = molname
         self.mol = mol
-        if inchi:
-            initial_inchi = inchi
-        else:
-            initial_inchi = self.get_inchi(mol)
+        initial_inchi = self.get_inchi(mol)
         user_tags = {'mission': mission,
                      "molname": molname}
         if additional_user_tags:

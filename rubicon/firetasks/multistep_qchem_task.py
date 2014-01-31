@@ -139,7 +139,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
         fw_creator = QChemFireWorkCreator(
             mol=mol, molname=molname, mission=mission,
             additional_user_tags=additional_user_tags, priority=priority,
-            update_spec=update_spec, inchi=inchi)
+            update_spec=update_spec)
         geom_fwid_cal, geom_fwid_db = -1, -2
         freq_fwid_cal, freq_fwid_db = -3, -4
         geom_fw_cal, geom_fw_db = fw_creator.geom_fw(charge, spin_multiplicity,
