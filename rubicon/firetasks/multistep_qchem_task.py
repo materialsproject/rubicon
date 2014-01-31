@@ -133,7 +133,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
     @staticmethod
     def spawn_opt_freq_wf(mol, molname, mission, additional_user_tags,
                           priority, update_spec, charge,
-                          spin_multiplicity, grid, inchi):
+                          spin_multiplicity, grid):
         from rubicon.workflows.multistep_ipea_wf \
             import QChemFireWorkCreator
         fw_creator = QChemFireWorkCreator(
@@ -232,7 +232,6 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
         method = img_freq_eli["methods"][img_freq_eli["current_method_id"]]
         charge = new_mol.charge
         spin_multiplicity = new_mol.spin_multiplicity
-        inchi = d['inchi_initial']
         if method == "dir_dis_opt":
             logging.info("Eliminate Imaginary Frequency By Perturbing the "
                          "Structure of Molecule")
@@ -240,7 +239,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                                         additional_user_tags, priority,
                                         update_specs, charge,
                                         spin_multiplicity,
-                                        grid=None, inchi=inchi)
+                                        grid=None)
         elif method == "den_dis_opt":
             logging.info("Eliminate Imaginary Frequency By Perturbing the "
                          "Structure of Molecule, and increase the grid "
@@ -249,7 +248,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                                         additional_user_tags, priority,
                                         update_specs, charge,
                                         spin_multiplicity,
-                                        grid=(128, 302), inchi=inchi)
+                                        grid=(128, 302))
         elif method == "alt_den_dis_opt":
             logging.info("Eliminate Imaginary Frequency By Perturbing the "
                          "Structure of Molecule, and increase the grid "
@@ -258,7 +257,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                                         additional_user_tags, priority,
                                         update_specs, charge,
                                         spin_multiplicity,
-                                        grid=(90, 590), inchi=inchi)
+                                        grid=(90, 590))
         else:
             raise Exception("Unknown imaginary frequency fixing method")
 
