@@ -55,22 +55,32 @@ class QChemGeomOptDBInsertionTask(FireTaskBase, FWSerializable):
             t_id, d = assi_result
         if t_id:
             if d["state"] == "successful":
-                return FWAction(stored_data={'task_id': t_id},
-                                update_spec={"mol": d["molecule_final"],
-                                             'egsnl': d["snl_final"],
-                                             'snlgroup_id':
-                                             d["snlgroup_id_final"]})
+                return FWAction(
+                    stored_data={'task_id': t_id},
+                    update_spec={
+                        'mol': d["molecule_final"],
+                        'egsnl': d["snl_final"],
+                        'snlgroup_id': d["snlgroup_id_final"],
+                        'snlgroup_id_root': fw_spec["snlgroup_id_root"]})
             else:
-                return FWAction(stored_data={'task_id': t_id},
-                                update_spec={"mol": d["molecule_final"],
-                                             'egsnl': d["snl_final"],
-                                             'snlgroup_id':
-                                             d["snlgroup_id_final"]},
-                                defuse_children=True)
+                if d['state'] == 'rejected' and \
+                        d['reject_reason'] == 'structural change':
+                    snlgroup_id_root = d['snlgroup_id_final']
+                else:
+                    snlgroup_id_root = fw_spec['snlgroup_id_root']
+                return FWAction(
+                    stored_data={'task_id': t_id},
+                    update_spec={'mol': d["molecule_final"],
+                                 'egsnl': d["snl_final"],
+                                 'snlgroup_id': d["snlgroup_id_final"],
+                                 'snlgroup_id_root': snlgroup_id_root},
+                    defuse_children=True)
         else:
-            return FWAction(defuse_children=True,
-                            update_spec={'egsnl': fw_spec['egsnl'],
-                                         'snlgroup_id': fw_spec['snlgroup_id']})
+            return FWAction(
+                defuse_children=True,
+                update_spec={'egsnl': fw_spec['egsnl'],
+                             'snlgroup_id': fw_spec['snlgroup_id'],
+                             'snlgroup_id_root': fw_spec["snlgroup_id_root"]})
 
 
 class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
@@ -111,24 +121,31 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
         if t_id:
             if d["state"] == "successful":
                 if d['stationary_type'] == 'minimum':
-                    return FWAction(stored_data={'task_id': t_id},
-                                    update_spec={"mol": d["molecule_final"],
-                                                 'egsnl': d["snl_final"],
-                                                 'snlgroup_id':
-                                                 d["snlgroup_id_final"]})
+                    return FWAction(
+                        stored_data={'task_id': t_id},
+                        update_spec={
+                            'mol': d["molecule_final"],
+                            'egsnl': d["snl_final"],
+                            'snlgroup_id': d["snlgroup_id_final"],
+                            'snlgroup_id_root': fw_spec["snlgroup_id_root"]})
                 else:
                     return self.img_freq_action(fw_spec, d, t_id)
             else:
-                return FWAction(stored_data={'task_id': t_id},
-                                defuse_children=True,
-                                update_spec={"mol": d["molecule_final"],
-                                             'egsnl': d["snl_final"],
-                                             'snlgroup_id':
-                                             d["snlgroup_id_final"]})
+                return FWAction(
+                    stored_data={'task_id': t_id},
+                    defuse_children=True,
+                    update_spec={
+                        'mol': d["molecule_final"],
+                        'egsnl': d["snl_final"],
+                        'snlgroup_id': d["snlgroup_id_final"],
+                        'snlgroup_id_root': fw_spec["snlgroup_id_root"]})
+
         else:
-            return FWAction(defuse_children=True,
-                            update_spec={'egsnl': fw_spec['egsnl'],
-                                         'snlgroup_id': fw_spec['snlgroup_id']})
+            return FWAction(
+                defuse_children=True,
+                update_spec={'egsnl': fw_spec['egsnl'],
+                             'snlgroup_id': fw_spec['snlgroup_id'],
+                             'snlgroup_id_root': fw_spec["snlgroup_id_root"]})
 
     @staticmethod
     def spawn_opt_freq_wf(mol, molname, mission, additional_user_tags,
@@ -196,11 +213,13 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
 
         if img_freq_eli['current_method_id'] >= len(img_freq_eli['methods']):
             logging.error("Failed to eliminate imaginary frequency")
-            return FWAction(stored_data={'task_id': t_id},
-                            defuse_children=True,
-                            update_spec={"mol": d["molecule_final"],
-                                         'egsnl': fw_spec['egsnl'],
-                                         'snlgroup_id': fw_spec['snlgroup_id']})
+            return FWAction(
+                stored_data={'task_id': t_id},
+                defuse_children=True,
+                update_spec={'mol': d["molecule_final"],
+                             'egsnl': fw_spec['egsnl'],
+                             'snlgroup_id': fw_spec['snlgroup_id'],
+                             'snlgroup_id_root': fw_spec["snlgroup_id_root"]})
 
         new_mol = self.perturb_molecule(d)
         molname = d['user_tags']['molname']
@@ -227,7 +246,8 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
         egsnl, snlgroup_id = sma.add_snl(
             new_snl, snlgroup_guess=d['snlgroup_id_initial'])
         update_specs = {'egsnl': egsnl.to_dict,
-                        'snlgroup_id': fw_spec['snlgroup_id']}
+                        'snlgroup_id': fw_spec['snlgroup_id'],
+                        'snlgroup_id_root': fw_spec['snlgroup_id_root']}
 
         method = img_freq_eli["methods"][img_freq_eli["current_method_id"]]
         charge = new_mol.charge
@@ -301,20 +321,24 @@ class QChemSinglePointEnergyDBInsertionTask(FireTaskBase, FWSerializable):
             t_id, d = assi_result
         if t_id:
             if d["state"] == "successful":
-                return FWAction(stored_data={'task_id': t_id},
-                                update_spec={"mol": d["molecule_final"],
-                                             'egsnl': d['snl_final'],
-                                             'snlgroup_id':
-                                             d['snlgroup_id_final']})
+                return FWAction(
+                    stored_data={'task_id': t_id},
+                    update_spec={
+                        'mol': d["molecule_final"],
+                        'egsnl': d['snl_final'],
+                        'snlgroup_id': d['snlgroup_id_final'],
+                        'snlgroup_id_root': fw_spec["snlgroup_id_root"]})
             else:
-                return FWAction(stored_data={'task_id': t_id},
-                                defuse_children=True,
-                                update_spec={"mol": d["molecule_final"],
-                                             'egsnl': d['snl_final'],
-                                             'snlgroup_id':
-                                             d['snlgroup_id_final']})
+                return FWAction(
+                    stored_data={'task_id': t_id},
+                    defuse_children=True,
+                    update_spec={'mol': d["molecule_final"],
+                                 'egsnl': d['snl_final'],
+                                 'snlgroup_id': d['snlgroup_id_final'],
+                                 'snlgroup_id_root': fw_spec["snlgroup_id_root"]})
         else:
-            return FWAction(defuse_children=True,
-                            update_spec={'egsnl': fw_spec['egsnl'],
-                                         'snlgroup_id':
-                                         fw_spec['snlgroup_id']})
+            return FWAction(
+                defuse_children=True,
+                update_spec={'egsnl': fw_spec['egsnl'],
+                             'snlgroup_id': fw_spec['snlgroup_id'],
+                             'snlgroup_id_root': fw_spec["snlgroup_id_root"]})

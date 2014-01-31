@@ -16,13 +16,15 @@ class AddEGSNLTask(FireTaskBase, FWSerializable):
         # actually want to add
         if 'force_egsnl' in fw_spec and 'force_snlgroup_id' in fw_spec:
             print 'USING FORCED EGSNL'
-            return FWAction(update_spec={'egsnl': fw_spec['force_egsnl'],
-                                         'snlgroup_id':
-                                         fw_spec['force_snlgroup_id']})
+            return FWAction(update_spec={
+                'egsnl': fw_spec['force_egsnl'],
+                'snlgroup_id': fw_spec['force_snlgroup_id'],
+                'snlgroup_id_root': fw_spec['force_snlgroup_id']})
 
         sma = EGSNLMongoAdapter.auto_load()
         snl = StructureNL.from_dict(fw_spec['snl'])
         egsnl, snlgroup_id = sma.add_snl(snl)
 
         return FWAction(update_spec={'egsnl': egsnl.to_dict,
-                                     'snlgroup_id': snlgroup_id})
+                                     'snlgroup_id': snlgroup_id,
+                                     'snlgroup_id_root': snlgroup_id})
