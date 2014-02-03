@@ -9,6 +9,7 @@ import datetime
 from fireworks.core.firework import FireTaskBase, FWAction, Workflow
 from fireworks.utilities.fw_serializers import FWSerializable
 from pymatgen import Molecule
+from pymatgen.analysis.molecule_structure_comparator import MoleculeStructureComparator
 from pymatgen.io.qchemio import QcInput
 
 from rubicon.borg.hive import DeltaSCFQChemToDbTaskDrone
@@ -190,8 +191,24 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                                   freq_fwid_cal: freq_fwid_db})
         return wf
 
+    @staticmethod
+    def _check_structure_change(mol1, mol2, fw_spec):
+        """
+        Check whether structure is changed:
+
+        Return:
+            True: structure changed, False: unchanged
+        """
+        if 'egsnl' not in fw_spec['spec']:
+            raise ValueError("Can't find initial SNL")
+        if 'known_bonds' not in fw_spec['spec']['egsnl']:
+            raise ValueError("Can't find known bonds information")
+        bonds = fw_spec['spec']['egsnl']['known_bonds']
+        msc = MoleculeStructureComparator(priority_bonds=bonds)
+        return not msc.are_equal(mol1, mol2)
+
     @classmethod
-    def perturb_molecule(cls, d):
+    def perturb_molecule(cls, d, reversed_direction=False):
         old_mol = Molecule.from_dict(d['molecule_final'])
         vib_mode = d['calculations']['freq']['frequencies'][0]["vib_mode"]
         max_dis = max([math.sqrt(sum([x ** 2 for x in mode]))
@@ -199,7 +216,10 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
         scale = cls.molecule_perturb_scale / max_dis
         normalized_mode = [[x * scale for x in mode]
                            for mode in vib_mode]
-        new_coords = [[c+v for c, v in zip(site.coords, mode)]
+        direction = 1.0
+        if reversed_direction:
+            direction = -1.0
+        new_coords = [[c+v*direction for c, v in zip(site.coords, mode)]
                       for site, mode in zip(old_mol.sites, normalized_mode)]
         species = [site.specie.symbol
                    for site in old_mol.sites]
@@ -231,6 +251,24 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                                               "elimination failed"})
 
         new_mol = self.perturb_molecule(d)
+        old_mol = Molecule.from_dict(d['molecule_final'])
+        structure_changed = self._check_structure_change(
+            old_mol, new_mol, fw_spec)
+        if structure_changed:
+            self.perturb_molecule(d, reversed_direction=True)
+            structure_changed = self._check_structure_change(
+                old_mol, new_mol, fw_spec)
+        if structure_changed:
+            return FWAction(
+                stored_data={'task_id': t_id},
+                defuse_children=True,
+                update_spec={
+                    'mol': d["molecule_final"],
+                    'egsnl': fw_spec['egsnl'],
+                    'snlgroup_id': fw_spec['snlgroup_id'],
+                    'snlgroup_id_root': fw_spec["snlgroup_id_root"],
+                    'defuse_reason': "structural change in imaginary "
+                                     "frequency elimination"})
         molname = d['user_tags']['molname']
         mission = d['user_tags']['mission']
         additional_user_tags = {"img_freq_eli": img_freq_eli}

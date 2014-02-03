@@ -129,7 +129,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
         return new_svg
 
     @staticmethod
-    def check_structure_change(mol1, mol2):
+    def _check_structure_change(mol1, mol2):
         """
         Check whether structure is changed:
 
@@ -224,7 +224,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
                 d['inchi_changed'] = True
             else:
                 d['inchi_changed'] = False
-        d['structure_changed'] = cls.check_structure_change(initial_mol, mol)
+        d['structure_changed'] = cls._check_structure_change(initial_mol, mol)
         if d['structure_changed']:
             d['state'] = 'rejected'
             d['reject_reason'] = 'structural change'
