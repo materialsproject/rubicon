@@ -229,9 +229,12 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
             d['state'] = 'rejected'
             d['reject_reason'] = 'structural change'
         if "state" not in d:
-            for scf in data_dict.values():
-                if scf['has_error']:
-                    d["state"] = "error"
+            for v in data_dict.values():
+                if v['has_error']:
+                    d['state'] = "error"
+                    errors = d.get("errors", [])
+                    errors += v["errors"]
+                    d["errors"] = errors
         if "state" not in d:
             d["state"] = "successful"
 

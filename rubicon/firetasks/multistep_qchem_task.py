@@ -66,21 +66,25 @@ class QChemGeomOptDBInsertionTask(FireTaskBase, FWSerializable):
                 if d['state'] == 'rejected' and \
                         d['reject_reason'] == 'structural change':
                     snlgroup_id_root = d['snlgroup_id_final']
+                    defuse_reason = 'structural change'
                 else:
                     snlgroup_id_root = fw_spec['snlgroup_id_root']
+                    defuse_reason = d.get("errors", "unknown")
                 return FWAction(
                     stored_data={'task_id': t_id},
                     update_spec={'mol': d["molecule_final"],
                                  'egsnl': d["snl_final"],
                                  'snlgroup_id': d["snlgroup_id_final"],
-                                 'snlgroup_id_root': snlgroup_id_root},
+                                 'snlgroup_id_root': snlgroup_id_root,
+                                 'defuse_reason': defuse_reason},
                     defuse_children=True)
         else:
             return FWAction(
                 defuse_children=True,
                 update_spec={'egsnl': fw_spec['egsnl'],
                              'snlgroup_id': fw_spec['snlgroup_id'],
-                             'snlgroup_id_root': fw_spec["snlgroup_id_root"]})
+                             'snlgroup_id_root': fw_spec["snlgroup_id_root"],
+                             'defuse_reason': 'parsing failed'})
 
 
 class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
@@ -131,6 +135,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                 else:
                     return self.img_freq_action(fw_spec, d, t_id)
             else:
+                defuse_reason = d.get("errors", "unknown")
                 return FWAction(
                     stored_data={'task_id': t_id},
                     defuse_children=True,
@@ -138,14 +143,16 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                         'mol': d["molecule_final"],
                         'egsnl': d["snl_final"],
                         'snlgroup_id': d["snlgroup_id_final"],
-                        'snlgroup_id_root': fw_spec["snlgroup_id_root"]})
+                        'snlgroup_id_root': fw_spec["snlgroup_id_root"],
+                        'defuse_reason': defuse_reason})
 
         else:
             return FWAction(
                 defuse_children=True,
                 update_spec={'egsnl': fw_spec['egsnl'],
                              'snlgroup_id': fw_spec['snlgroup_id'],
-                             'snlgroup_id_root': fw_spec["snlgroup_id_root"]})
+                             'snlgroup_id_root': fw_spec["snlgroup_id_root"],
+                             'defuse_reason': 'parsing failed'})
 
     @staticmethod
     def spawn_opt_freq_wf(mol, molname, mission, additional_user_tags,
@@ -219,7 +226,9 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                 update_spec={'mol': d["molecule_final"],
                              'egsnl': fw_spec['egsnl'],
                              'snlgroup_id': fw_spec['snlgroup_id'],
-                             'snlgroup_id_root': fw_spec["snlgroup_id_root"]})
+                             'snlgroup_id_root': fw_spec["snlgroup_id_root"],
+                             'defuse_reason': "imaginary frequency "
+                                              "elimination failed"})
 
         new_mol = self.perturb_molecule(d)
         molname = d['user_tags']['molname']
@@ -332,13 +341,16 @@ class QChemSinglePointEnergyDBInsertionTask(FireTaskBase, FWSerializable):
                 return FWAction(
                     stored_data={'task_id': t_id},
                     defuse_children=True,
-                    update_spec={'mol': d["molecule_final"],
-                                 'egsnl': d['snl_final'],
-                                 'snlgroup_id': d['snlgroup_id_final'],
-                                 'snlgroup_id_root': fw_spec["snlgroup_id_root"]})
+                    update_spec={
+                        'mol': d["molecule_final"],
+                        'egsnl': d['snl_final'],
+                        'snlgroup_id': d['snlgroup_id_final'],
+                        'snlgroup_id_root': fw_spec["snlgroup_id_root"],
+                        'defuse_reason': 'SCF failed'})
         else:
             return FWAction(
                 defuse_children=True,
                 update_spec={'egsnl': fw_spec['egsnl'],
                              'snlgroup_id': fw_spec['snlgroup_id'],
-                             'snlgroup_id_root': fw_spec["snlgroup_id_root"]})
+                             'snlgroup_id_root': fw_spec["snlgroup_id_root"],
+                             'defuse_reason': 'parsing failed'})
