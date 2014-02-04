@@ -32,7 +32,8 @@ class TaskKeys:
         'user_tags', 'run_tags', 'snl_final', 'task_id', "molecule_final",
         'nelements', 'reduced_cell_formula_abc', 'pretty_formula',
         'pointgroup', 'inchi_root',
-        'calculations.scf.energies', 'calculations.scf_pcm.energies')
+        'calculations.scf.energies', 'calculations.scf_pcm.energies',
+        'formula', 'task_id_deprecated', 'svg', 'xyz')
 
 
 class MoleculesBuilder(eg_shared.ParallelBuilder):
@@ -114,11 +115,13 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         molecule["molecule"] = dict()
         for k in docs.keys():
             molecule["task_id"][k] = docs[k]["task_id"]
+            molecule["task_id_deprecated"][k] = docs[k]["task_id_deprecated"]
             molecule["snlgroup_id_final"][k] = docs[k]["snlgroup_id_final"]
             molecule["charge"][k] = docs[k]["charge"]
             molecule["spin_multiplicity"][k] = docs[k]["spin_multiplicity"]
             molecule["snl_final"][k] = docs[k]["snl_final"]
             molecule["molecule"][k] = docs[k]["molecule_final"]
+            molecule["xyz"][k] = docs[k]["xyz"]
         if "cation" in docs:
             molecule["IP"] = dict()
             molecule["IP"]["vacuum"] = \
@@ -139,6 +142,7 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
                 docs["neutral"]["calculations"]["scf_pcm"]["energies"][-1][-1] \
                 - \
                 docs["anion"]["calculations"]["scf_pcm"]["energies"][-1][-1]
+        molecule["svg"] = docs["neutral"]["svg"]
         return molecule
 
     def _build_indexes(self):
