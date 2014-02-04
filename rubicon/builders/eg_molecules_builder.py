@@ -40,6 +40,12 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
     """Build derived 'molecules' collection.
     """
 
+    # absolute electrode potentials of some metals/molecules
+    ref_potentials = {
+        'hydrogen': 4.44,
+        'magnesium': 2.07,
+        'lithium': 1.40}
+
     def __init__(self, collections, **kwargs):
         """Create new molecules builder.
 
@@ -142,6 +148,23 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
                 docs["neutral"]["calculations"]["scf_pcm"]["energies"][-1][-1] \
                 - \
                 docs["anion"]["calculations"]["scf_pcm"]["energies"][-1][-1]
+        molecule['electrode_potentials'] = dict()
+        if 'IP' in molecule:
+            molecule['electrode_potentials']['cation_reduction'] \
+                = {'vacuum': dict(), 'sol': dict()}
+            for phase in molecule['IP'].keys:
+                for electrode in self.ref_potentials.keys():
+                    molecule['electrode_potentials']['cation_reduction'][phase][
+                        electrode] \
+                        = molecule['IP'][phase] - self.ref_potentials[electrode]
+        if 'EA' in molecule:
+            molecule['electrode_potentials']['reduction'] = {'vacuum': dict(),
+                                                             'sol': dict()}
+            for phase in molecule['EA'].keys:
+                for electrode in self.ref_potentials.keys():
+                    molecule['electrode_potentials']['reduction'][phase][
+                        electrode] \
+                        = molecule['EA'][phase] - self.ref_potentials[electrode]
         molecule["svg"] = docs["neutral"]["svg"]
         return molecule
 
