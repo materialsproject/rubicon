@@ -83,7 +83,8 @@ class QChemTask(FireTaskBase, FWSerializable):
                        'prev_task_type': fw_spec['task_type'],
                        'egsnl': fw_spec['egsnl'],
                        'snlgroup_id': fw_spec['snlgroup_id'],
-                       'run_tags': fw_spec['run_tags']}
+                       'run_tags': fw_spec['run_tags'],
+                       'inchi_root': fw_spec['inchi_root']}
         if 'mol' in fw_spec:
             update_spec['mol'] = fw_spec['mol']
 
