@@ -255,7 +255,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
                 d['user_tags'] = fw_spec["user_tags"]
                 d['snl_initial'] = fw_spec['egsnl']
                 d['snlgroup_id_initial'] = fw_spec['snlgroup_id']
-                d['snlgroup_id_root'] = fw_spec['snlgroup_id_root']
+                d['inchi_root'] = fw_spec['inchi_root']
                 d['inchi_initial'] = fw_spec['inchi']
                 if "geometry optimization" in d['task_type']:
                     new_s = Molecule.from_dict(d["molecule_final"])
