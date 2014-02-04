@@ -31,7 +31,7 @@ class TaskKeys:
         'can', 'smiles', 'charge', 'spin_multiplicity', 'implicit_solvent',
         'user_tags', 'run_tags', 'snl_final', 'task_id', "molecule_final",
         'nelements', 'reduced_cell_formula_abc', 'pretty_formula',
-        'pointgroup', 'inchi_root'
+        'pointgroup', 'inchi_root',
         'calculations.scf.energies', 'calculations.scf_pcm.energies')
 
 
