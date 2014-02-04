@@ -31,7 +31,7 @@ class TaskKeys:
         'can', 'smiles', 'charge', 'spin_multiplicity', 'implicit_solvent',
         'user_tags', 'run_tags', 'snl_final', 'task_id', "molecule_final",
         'nelements', 'reduced_cell_formula_abc', 'pretty_formula',
-        'pointgroup',
+        'pointgroup', 'inchi_root'
         'calculations.scf.energies', 'calculations.scf_pcm.energies')
 
 
@@ -53,19 +53,19 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
     def run(self):
         """Run the builder.
         """
-        _log.info("Getting distinct INCHI")
-        inchi_finals = self._c.tasks.distinct('inchi_final')
-        map(self.add_item, inchi_finals)
+        _log.info("Getting distinct root INCHIs")
+        inchi_root = self._c.tasks.distinct('inchi_root')
+        map(self.add_item, inchi_root)
         _log.info("Beginning analysis")
         states = self.run_parallel()
         self._build_indexes()
         return self.combine_status(states)
 
 
-    def process_item(self, inchi_finals):
+    def process_item(self, inchi_root):
         """Create and add material for a given grouping identifer.
         """
-        query = {'state': 'successful', 'inchi_final': inchi_finals,
+        query = {'state': 'successful', 'inchi_root': inchi_root,
                  'task_type': "single point energy"}
         docs = list(self._c.tasks.find(query, fields=TaskKeys.fields))
         if not docs:
