@@ -264,6 +264,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                 defuse_children=True,
                 update_spec={
                     'mol': d["molecule_final"],
+                    'perturbed_mol': new_mol.to_dict,
                     'egsnl': fw_spec['egsnl'],
                     'snlgroup_id': fw_spec['snlgroup_id'],
                     'snlgroup_id_root': fw_spec["snlgroup_id_root"],
@@ -292,7 +293,8 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
         sma = EGSNLMongoAdapter.auto_load()
         egsnl, snlgroup_id = sma.add_snl(
             new_snl, snlgroup_guess=d['snlgroup_id_initial'])
-        update_specs = {'egsnl': egsnl.to_dict,
+        update_specs = {'mol': new_mol.to_dict,
+                        'egsnl': egsnl.to_dict,
                         'snlgroup_id': fw_spec['snlgroup_id'],
                         'snlgroup_id_root': fw_spec['snlgroup_id_root']}
 
