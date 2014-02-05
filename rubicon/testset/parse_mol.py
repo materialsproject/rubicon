@@ -32,14 +32,18 @@ session = requests.Session()
 
 
 def get_nih_names(smiles):
-    smi = re.sub("#", "%23", smiles)
-    response = session.get(
-        "http://cactus.nci.nih.gov/chemical/structure/{}/names".format(smi))
-    if response.status_code == 200:
-        names = response.text.split("\n")
-        return [n.strip() for n in names if n.strip() != ""]
-    else:
-        print "{} not found.\n".format(smiles)
+    # noinspection PyBroadException
+    try:
+        smi = re.sub("#", "%23", smiles)
+        response = session.get(
+            "http://cactus.nci.nih.gov/chemical/structure/{}/names".format(smi))
+        if response.status_code == 200:
+            names = response.text.split("\n")
+            return [n.strip() for n in names if n.strip() != ""]
+        else:
+            print "{} not found.\n".format(smiles)
+            return []
+    except:
         return []
 
 
@@ -89,7 +93,6 @@ def insert_g3testset(coll):
 
 
 def insert_solvents(coll):
-
     names = """THF
     monoglyme
     Dimethylacetamide
@@ -111,7 +114,9 @@ def insert_solvents(coll):
     Butyldiglyme"""
 
     for n in names.split("\n"):
-        response = requests.get("http://cactus.nci.nih.gov/chemical/structure/{}/file?format=xyz".format(n))
+        response = requests.get(
+            "http://cactus.nci.nih.gov/chemical/structure/{}/file?format=xyz".format(
+                n))
         if response.status_code == 200:
             xyz = XYZ.from_string(response.text)
             clean_mol = xyz.molecule
@@ -143,6 +148,7 @@ def insert_solvents(coll):
                         {"$set": d}, upsert=True)
         else:
             print "{} not found.\n".format(n)
+
 
 def insert_elements(coll):
     print "adding missing elements."
@@ -188,6 +194,7 @@ def insert_elements(coll):
 
 if __name__ == "__main__":
     from pymatpro.db.mongo.query_engine_mongo import MongoQueryEngine
+
     qe = MongoQueryEngine()
     db = qe.db
     coll = db["molecules"]
