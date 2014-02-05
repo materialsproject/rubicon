@@ -99,7 +99,7 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         if len(docs) < 2 or ("neutral" not in docs):
             return None
         molecule = dict()
-        molecule["inchi"] = docs["neutral"]["inchi_final"]
+        molecule["inchi_root"] = docs["neutral"]["inchi_root"]
         molecule["can"] = docs["neutral"]["can"]
         molecule["smiles"] = docs["neutral"]["smiles"]
         molecule["elements"] = copy.deepcopy(docs["neutral"]["elements"])
@@ -121,6 +121,7 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         molecule["snl_final"] = dict()
         molecule["molecule"] = dict()
         molecule["xyz"] = dict()
+        molecule["inchi"] = dict()
         for k in docs.keys():
             molecule["task_id"][k] = docs[k]["task_id"]
             molecule["task_id_deprecated"][k] = docs[k]["task_id_deprecated"]
@@ -130,6 +131,7 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
             molecule["snl_final"][k] = docs[k]["snl_final"]
             molecule["molecule"][k] = docs[k]["molecule_final"]
             molecule["xyz"][k] = docs[k]["xyz"]
+            molecule["inchi"][k] =docs[k]["inchi_final"]
         if "cation" in docs:
             molecule["IP"] = dict()
             molecule["IP"]["vacuum"] = \
@@ -154,7 +156,7 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         if 'IP' in molecule:
             molecule['electrode_potentials']['cation_reduction'] \
                 = {'vacuum': dict(), 'sol': dict()}
-            for phase in molecule['IP'].keys:
+            for phase in molecule['IP'].keys():
                 for electrode in self.ref_potentials.keys():
                     molecule['electrode_potentials']['cation_reduction'][phase][
                         electrode] \
@@ -162,7 +164,7 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         if 'EA' in molecule:
             molecule['electrode_potentials']['reduction'] = {'vacuum': dict(),
                                                              'sol': dict()}
-            for phase in molecule['EA'].keys:
+            for phase in molecule['EA'].keys():
                 for electrode in self.ref_potentials.keys():
                     molecule['electrode_potentials']['reduction'][phase][
                         electrode] \
