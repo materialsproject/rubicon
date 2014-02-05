@@ -169,6 +169,9 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
                     molecule['electrode_potentials']['reduction'][phase][
                         electrode] \
                         = molecule['EA'][phase] - self.ref_potentials[electrode]
+        molecule['solvation_energy'] = docs["neutral"]["calculations"]["scf"][
+            "energies"][-1][-1] - \
+            docs["neutral"]["calculations"]["scf_pcm"]["energies"][-1][-1]
         molecule["svg"] = docs["neutral"]["svg"]
         return molecule
 
