@@ -114,11 +114,13 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         molecule["pointgroup"] = docs["neutral"]["pointgroup"]
 
         molecule["task_id"] = dict()
+        molecule["task_id_deprecated"] = dict()
         molecule["snlgroup_id_final"] = dict()
         molecule["charge"] = dict()
         molecule["spin_multiplicity"] = dict()
         molecule["snl_final"] = dict()
         molecule["molecule"] = dict()
+        molecule["xyz"] = dict()
         for k in docs.keys():
             molecule["task_id"][k] = docs[k]["task_id"]
             molecule["task_id_deprecated"][k] = docs[k]["task_id_deprecated"]
