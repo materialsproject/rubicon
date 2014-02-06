@@ -24,7 +24,8 @@ class QChemFireWorkCreator():
         spec = dict()
         spec['user_tags'] = user_tags
         spec['_priority'] = priority
-        spec['_dupefinder'] = dupefinder.to_dict() if dupefinder else DupeFinderEG().to_dict()
+        spec['_dupefinder'] = dupefinder.to_dict() if dupefinder \
+            else DupeFinderEG().to_dict()
         tracker_out = Tracker("mol.qcout", nlines=20)
         tracker_std = Tracker("mol.qclog", nlines=10)
         tracker_joberr = Tracker("FW_job.error", nlines=20)
@@ -170,6 +171,9 @@ class QChemFireWorkCreator():
 
 def multistep_ipea_fws(mol, name, mission, dupefinder=None, priority=1,
                        parent_fwid=None):
+    skip_freq = False
+    if len(mol) > 50:
+        skip_freq = True
     fw_creator = QChemFireWorkCreator(mol, name, mission, None, dupefinder,
                                       priority)
     fwid_base = 1
@@ -184,6 +188,7 @@ def multistep_ipea_fws(mol, name, mission, dupefinder=None, priority=1,
     # the task in the order of anion, neutral, cation
     cgi_cal, ngi_cal, agi_cal = (None, None, None)
     cfi_db, nfi_db, afi_db = (None, None, None)
+    cgi_db, ngi_db, agi_db = (None, None, None)
     charge = (-1, 0, 1)
     spin_multiplicity = (2, 1, 2)
     if len(mol) > 1:
@@ -195,14 +200,17 @@ def multistep_ipea_fws(mol, name, mission, dupefinder=None, priority=1,
         fireworks.extend(itertools.chain.from_iterable(fws))
         links_dict.update(dict(fw_ids))
 
-        fw_ids = zip(* [iter(range(fwid_base + 6, fwid_base + 6 + 6))] * 2)
-        fws = (fw_creator.freq_fw(ch, spin, fwid_cal, fwid_db)
-               for ch, spin, (fwid_cal, fwid_db)
-               in zip(charge, spin_multiplicity, fw_ids))
-        (cfi_cal, cfi_db), (nfi_cal, nfi_db), (afi_cal, afi_db) = fw_ids
-        fireworks.extend(itertools.chain.from_iterable(fws))
-        links_dict.update(dict(fw_ids))
-        links_dict.update({cgi_db: cfi_cal, ngi_db: nfi_cal, agi_db: afi_cal})
+        if not skip_freq:
+            fw_ids = zip(* [iter(range(fwid_base + 6, fwid_base + 6 + 6))] * 2)
+            fws = (fw_creator.freq_fw(ch, spin, fwid_cal, fwid_db)
+                   for ch, spin, (fwid_cal, fwid_db)
+                   in zip(charge, spin_multiplicity, fw_ids))
+            (cfi_cal, cfi_db), (nfi_cal, nfi_db), (afi_cal, afi_db) = fw_ids
+            fireworks.extend(itertools.chain.from_iterable(fws))
+            links_dict.update(dict(fw_ids))
+            links_dict.update({cgi_db: cfi_cal,
+                               ngi_db: nfi_cal,
+                               agi_db: afi_cal})
 
     fw_ids = zip(* [iter(range(fwid_base + 12, fwid_base + 12 + 6))] * 2)
     fws = (fw_creator.sp_fw(ch, spin, fwid_cal, fwid_db)
@@ -212,8 +220,12 @@ def multistep_ipea_fws(mol, name, mission, dupefinder=None, priority=1,
     links_dict.update((dict(fw_ids)))
     fireworks.extend(itertools.chain.from_iterable(fws))
     if len(mol) > 1:
-        links_dict.update({cfi_db: cspi_cal, nfi_db: nspi_cal,
-                           afi_db: aspi_cal})
+        if skip_freq:
+            links_dict.update({cgi_db: cspi_cal, ngi_db: nspi_cal,
+                               agi_db: aspi_cal})
+        else:
+            links_dict.update({cfi_db: cspi_cal, nfi_db: nspi_cal,
+                               afi_db: aspi_cal})
         links_dict.update({nspi_db: [cgi_cal, agi_cal]})
         if parent_fwid:
             for pfw_id in parent_fwid:
