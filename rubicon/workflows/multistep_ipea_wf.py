@@ -137,7 +137,7 @@ class QChemFireWorkCreator():
                             exchange=self.dft, basis_set=self.bs)
         qctask_sol.use_pcm()
         qctask_sol.set_scf_initial_guess(guess="read")
-        qctask_sol.set_memory(total=28000, static=3000)
+        qctask_sol.set_memory(total=1100)
         qctask_sol.set_dft_grid(128, 302)
         qctask_sol.set_integral_threshold(12)
         qctask_sol.set_scf_convergence_threshold(8)
