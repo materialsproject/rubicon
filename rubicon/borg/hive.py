@@ -96,15 +96,9 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
             If in simulate_mode, the entire doc is returned for debugging
             purposes. Else, only the task_id of the inserted doc is returned.
         """
-        try:
-            d = self.get_task_doc(path, fw_spec)
-            tid = self._insert_doc(d, fw_spec)
-            return tid, d
-        except Exception as ex:
-            import traceback
-            print traceback.format_exc(ex)
-            logger.error(traceback.format_exc(ex))
-            return False
+        d = self.get_task_doc(path, fw_spec)
+        tid = self._insert_doc(d, fw_spec)
+        return tid, d
 
     @classmethod
     def modify_svg(cls, svg):
@@ -325,7 +319,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
             d["task_id"] = 0
             logger.info("Simulated insert into database for {} with task_id {}"
                         .format(d["path"], d["task_id"]))
-            return d
+            return 0
 
     def get_valid_paths(self, path):
         """

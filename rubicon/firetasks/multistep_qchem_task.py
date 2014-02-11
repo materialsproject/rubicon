@@ -47,45 +47,33 @@ class QChemGeomOptDBInsertionTask(FireTaskBase, FWSerializable):
             database=db_creds['database'], user=db_creds['admin_user'],
             password=db_creds['admin_password'],
             collection=db_creds['collection'])
-        assi_result = drone.assimilate(os.path.abspath(
+        t_id, d = drone.assimilate(os.path.abspath(
             os.path.join(prev_dir, "mol.qcout")), fw_spec=fw_spec)
 
-        t_id = None
-        d = None
-        if assi_result:
-            t_id, d = assi_result
-        if t_id:
-            if d["state"] == "successful":
-                return FWAction(
-                    stored_data={'task_id': t_id},
-                    update_spec={
-                        'mol': d["molecule_final"],
-                        'egsnl': d["snl_final"],
-                        'snlgroup_id': d["snlgroup_id_final"],
-                        'inchi_root': fw_spec["inchi_root"]})
-            else:
-                if d['state'] == 'rejected' and \
-                        d['reject_reason'] == 'structural change':
-                    inchi_root = d['snlgroup_id_final']
-                    defuse_reason = 'structural change'
-                else:
-                    inchi_root = fw_spec['inchi_root']
-                    defuse_reason = d.get("errors", "unknown")
-                return FWAction(
-                    stored_data={'task_id': t_id},
-                    update_spec={'mol': d["molecule_final"],
-                                 'egsnl': d["snl_final"],
-                                 'snlgroup_id': d["snlgroup_id_final"],
-                                 'inchi_root': inchi_root,
-                                 'defuse_reason': defuse_reason},
-                    defuse_children=True)
-        else:
+        if d["state"] == "successful":
             return FWAction(
-                defuse_children=True,
-                update_spec={'egsnl': fw_spec['egsnl'],
-                             'snlgroup_id': fw_spec['snlgroup_id'],
-                             'inchi_root': fw_spec["inchi_root"],
-                             'defuse_reason': 'parsing failed'})
+                stored_data={'task_id': t_id},
+                update_spec={
+                    'mol': d["molecule_final"],
+                    'egsnl': d["snl_final"],
+                    'snlgroup_id': d["snlgroup_id_final"],
+                    'inchi_root': fw_spec["inchi_root"]})
+        else:
+            if d['state'] == 'rejected' and \
+                    d['reject_reason'] == 'structural change':
+                inchi_root = d['snlgroup_id_final']
+                defuse_reason = 'structural change'
+            else:
+                inchi_root = fw_spec['inchi_root']
+                defuse_reason = d.get("errors", "unknown")
+            return FWAction(
+                stored_data={'task_id': t_id},
+                update_spec={'mol': d["molecule_final"],
+                             'egsnl': d["snl_final"],
+                             'snlgroup_id': d["snlgroup_id_final"],
+                             'inchi_root': inchi_root,
+                             'defuse_reason': defuse_reason},
+                defuse_children=True)
 
 
 class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
@@ -116,44 +104,31 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
             database=db_creds['database'], user=db_creds['admin_user'],
             password=db_creds['admin_password'],
             collection=db_creds['collection'])
-        assi_result = drone.assimilate(os.path.abspath(
+        t_id, d = drone.assimilate(os.path.abspath(
             os.path.join(prev_dir, "mol.qcout")), fw_spec=fw_spec)
 
-        t_id = None
-        d = None
-        if assi_result:
-            t_id, d = assi_result
-        if t_id:
-            if d["state"] == "successful":
-                if d['stationary_type'] == 'minimum':
-                    return FWAction(
-                        stored_data={'task_id': t_id},
-                        update_spec={
-                            'mol': d["molecule_final"],
-                            'egsnl': d["snl_final"],
-                            'snlgroup_id': d["snlgroup_id_final"],
-                            'inchi_root': fw_spec["inchi_root"]})
-                else:
-                    return self.img_freq_action(fw_spec, d, t_id)
-            else:
-                defuse_reason = d.get("errors", "unknown")
+        if d["state"] == "successful":
+            if d['stationary_type'] == 'minimum':
                 return FWAction(
                     stored_data={'task_id': t_id},
-                    defuse_children=True,
                     update_spec={
                         'mol': d["molecule_final"],
                         'egsnl': d["snl_final"],
                         'snlgroup_id': d["snlgroup_id_final"],
-                        'inchi_root': fw_spec["inchi_root"],
-                        'defuse_reason': defuse_reason})
-
+                        'inchi_root': fw_spec["inchi_root"]})
+            else:
+                return self.img_freq_action(fw_spec, d, t_id)
         else:
+            defuse_reason = d.get("errors", "unknown")
             return FWAction(
+                stored_data={'task_id': t_id},
                 defuse_children=True,
-                update_spec={'egsnl': fw_spec['egsnl'],
-                             'snlgroup_id': fw_spec['snlgroup_id'],
-                             'inchi_root': fw_spec["inchi_root"],
-                             'defuse_reason': 'parsing failed'})
+                update_spec={
+                    'mol': d["molecule_final"],
+                    'egsnl': d["snl_final"],
+                    'snlgroup_id': d["snlgroup_id_final"],
+                    'inchi_root': fw_spec["inchi_root"],
+                    'defuse_reason': defuse_reason})
 
     @staticmethod
     def spawn_opt_freq_wf(mol, molname, mission, additional_user_tags,
@@ -361,36 +336,24 @@ class QChemSinglePointEnergyDBInsertionTask(FireTaskBase, FWSerializable):
             database=db_creds['database'], user=db_creds['admin_user'],
             password=db_creds['admin_password'],
             collection=db_creds['collection'])
-        assi_result = drone.assimilate(os.path.abspath(
+        t_id, d = drone.assimilate(os.path.abspath(
             os.path.join(prev_dir, "mol.qcout")), fw_spec=fw_spec)
 
-        t_id = None
-        d = None
-        if assi_result:
-            t_id, d = assi_result
-        if t_id:
-            if d["state"] == "successful":
-                return FWAction(
-                    stored_data={'task_id': t_id},
-                    update_spec={
-                        'mol': d["molecule_final"],
-                        'egsnl': d['snl_final'],
-                        'snlgroup_id': d['snlgroup_id_final'],
-                        'inchi_root': fw_spec["inchi_root"]})
-            else:
-                return FWAction(
-                    stored_data={'task_id': t_id},
-                    defuse_children=True,
-                    update_spec={
-                        'mol': d["molecule_final"],
-                        'egsnl': d['snl_final'],
-                        'snlgroup_id': d['snlgroup_id_final'],
-                        'inchi_root': fw_spec["inchi_root"],
-                        'defuse_reason': 'SCF failed'})
+        if d["state"] == "successful":
+            return FWAction(
+                stored_data={'task_id': t_id},
+                update_spec={
+                    'mol': d["molecule_final"],
+                    'egsnl': d['snl_final'],
+                    'snlgroup_id': d['snlgroup_id_final'],
+                    'inchi_root': fw_spec["inchi_root"]})
         else:
             return FWAction(
+                stored_data={'task_id': t_id},
                 defuse_children=True,
-                update_spec={'egsnl': fw_spec['egsnl'],
-                             'snlgroup_id': fw_spec['snlgroup_id'],
-                             'inchi_root': fw_spec["inchi_root"],
-                             'defuse_reason': 'parsing failed'})
+                update_spec={
+                    'mol': d["molecule_final"],
+                    'egsnl': d['snl_final'],
+                    'snlgroup_id': d['snlgroup_id_final'],
+                    'inchi_root': fw_spec["inchi_root"],
+                    'defuse_reason': 'SCF failed'})
