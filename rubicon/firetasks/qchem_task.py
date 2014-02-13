@@ -68,8 +68,10 @@ class QChemTask(FireTaskBase, FWSerializable):
         logger.addHandler(sh)
 
         job = QchemJob(qc_exe, input_file="mol.qcinp", output_file="mol.qcout",
-                       qclog_file="mol.qclog")
-        handler = QChemErrorHandler()
+                       qclog_file="mol.qclog",
+                       alt_cmd={"half_cpus": shlex.split("qchem -np 12"),
+                                "openmp": shlex.split("qchem -nt 24")})
+        handler = QChemErrorHandler(qchem_job=job)
         c = Custodian(handlers=[handler], jobs=[job], max_errors=50)
         custodian_out = c.run()
 
