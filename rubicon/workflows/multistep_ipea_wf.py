@@ -125,7 +125,8 @@ class QChemFireWorkCreator():
         qctask_vac = QcTask(self.mol, charge=charge,
                             spin_multiplicity=spin_multiplicity,
                             jobtype="sp", title=title,
-                            exchange=self.dft, basis_set=self.bs)
+                            exchange=self.dft, basis_set=self.bs,
+                            rem_params={"CHELPG": True})
         qctask_vac.set_memory(total=1100)
         qctask_vac.set_dft_grid(128, 302)
         qctask_vac.set_integral_threshold(12)
@@ -134,7 +135,8 @@ class QChemFireWorkCreator():
         qctask_sol = QcTask(self.mol, charge=charge,
                             spin_multiplicity=spin_multiplicity,
                             jobtype="sp", title=title,
-                            exchange=self.dft, basis_set=self.bs)
+                            exchange=self.dft, basis_set=self.bs,
+                            rem_params={"CHELPG": True})
         qctask_sol.use_pcm()
         qctask_sol.set_scf_initial_guess(guess="read")
         qctask_sol.set_memory(total=1100)
