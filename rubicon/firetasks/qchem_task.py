@@ -67,9 +67,13 @@ class QChemTask(FireTaskBase, FWSerializable):
         sh.setLevel(getattr(logging, 'INFO'))
         logger.addHandler(sh)
 
+        half_nodes_cmd = "aprun -n 12 -N 12 -S 3 " \
+                         "/global/project/projectdirs/jcesr/" \
+                         "qchem/qc41/exe/qcprog.exe"
+
         job = QchemJob(qc_exe, input_file="mol.qcinp", output_file="mol.qcout",
                        qclog_file="mol.qclog",
-                       alt_cmd={"half_cpus": shlex.split("qchem -np 12"),
+                       alt_cmd={"half_cpus": shlex.split(half_nodes_cmd),
                                 "openmp": shlex.split("qchem -seq -nt 24")})
         handler = QChemErrorHandler(qchem_job=job)
         c = Custodian(handlers=[handler], jobs=[job], max_errors=50)
