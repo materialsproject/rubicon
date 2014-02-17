@@ -47,13 +47,18 @@ class QChemTask(FireTaskBase, FWSerializable):
         hopper_name_pattern = re.compile("nid\d+")
         carver_name_pattern = re.compile("c[0-9]{4}-ib")
         fw_data = FWData()
+        half_cpus_cmd = shlex.split("qchem -np 12")
         if hopper_name_pattern.match(socket.gethostname()):
         # hopper compute nodes
             if (not fw_data.MULTIPROCESSING) or (fw_data.SUB_NPROCS is None):
                 qc_exe = shlex.split("qchem -np {}".format(min(24, len(mol))))
+                half_cpus_cmd = shlex.split("qchem -np {}".format(
+                    min(12, len(mol))))
             else:
                 qc_exe = shlex.split("qchem -np {}".format(
                     min(fw_data.SUB_NPROCS, len(mol))))
+                half_cpus_cmd = shlex.split("qchem -np {}".format(
+                    min(fw_data.SUB_NPROCS/2, len(mol))))
         elif carver_name_pattern.match(socket.gethostname()):
         # mendel compute nodes
             qc_exe = shlex.split("qchem -np {}".format(min(8, len(mol))))
@@ -69,7 +74,7 @@ class QChemTask(FireTaskBase, FWSerializable):
 
         job = QchemJob(qc_exe, input_file="mol.qcinp", output_file="mol.qcout",
                        qclog_file="mol.qclog",
-                       alt_cmd={"half_cpus": shlex.split("qchem -np 12"),
+                       alt_cmd={"half_cpus": half_cpus_cmd,
                                 "openmp": shlex.split("qchem -seq -nt 24")})
         handler = QChemErrorHandler(qchem_job=job)
         c = Custodian(handlers=[handler], jobs=[job], max_errors=50)
