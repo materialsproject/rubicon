@@ -11,11 +11,12 @@ __author__ = 'xiaohuiqu'
 
 class QChemFireWorkCreator():
     def __init__(self, mol, molname, mission, additional_user_tags=None,
-                 dupefinder=None, priority=1, update_spec=None):
+                 dupefinder=None, priority=1, update_spec=None, large=False):
         self.bs = '6-31+G*'
         self.dft = 'B3LYP'
         self.molname = molname
         self.mol = mol
+        self.large = large
         initial_inchi = self.get_inchi(mol)
         user_tags = {'mission': mission,
                      "molname": molname}
@@ -58,10 +59,27 @@ class QChemFireWorkCreator():
         state_name = self.get_state_name(charge, spin_multiplicity)
         title = self.molname + " " + state_name + " " + self.dft + " " + \
             self.bs + " " + task_type
-        qctask = QcTask(self.mol, charge=charge,
-                        spin_multiplicity=spin_multiplicity,
-                        jobtype="opt", title=title,
-                        exchange=self.dft, basis_set=self.bs)
+        if self.large:
+            qctask = QcTask(self.mol, charge=charge,
+                            spin_multiplicity=spin_multiplicity,
+                            jobtype="opt", title=title,
+                            exchange='pbe', correlation='pbe',
+                            basis_set=self.bs,
+                            rem_params={"DFT_D": "EMPIRICAL_GRIMME3",
+                                        "DFT_D3_S6": 1000,
+                                        "DFT_D3_RS6": 1217,
+                                        "DFT_D3_S8": 722,
+                                        "DFT_D3_3BODY": False})
+            qctask.set_geom_max_iterations(200)
+            qctask.set_scf_algorithm_and_iterations(iterations=100)
+            qctask.scale_geom_opt_threshold(gradient=1.0,
+                                            displacement=10.0,
+                                            energy=10.0)
+        else:
+            qctask = QcTask(self.mol, charge=charge,
+                            spin_multiplicity=spin_multiplicity,
+                            jobtype="opt", title=title,
+                            exchange=self.dft, basis_set=self.bs)
         qctask.set_memory(total=1100)
         qcinp = QcInput([qctask])
         spec = self.base_spec()
@@ -90,10 +108,23 @@ class QChemFireWorkCreator():
         state_name = self.get_state_name(charge, spin_multiplicity)
         title = self.molname + " " + state_name + " " + self.dft + " " +\
             self.bs + " " + task_type
-        qctask = QcTask(self.mol, charge=charge,
-                        spin_multiplicity=spin_multiplicity,
-                        jobtype="freq", title=title,
-                        exchange=self.dft, basis_set=self.bs)
+        if self.large:
+            qctask = QcTask(self.mol, charge=charge,
+                            spin_multiplicity=spin_multiplicity,
+                            jobtype="freq", title=title,
+                            exchange='pbe', correlation='pbe',
+                            basis_set=self.bs,
+                            rem_params={"DFT_D": "EMPIRICAL_GRIMME3",
+                                        "DFT_D3_S6": 1000,
+                                        "DFT_D3_RS6": 1217,
+                                        "DFT_D3_S8": 722,
+                                        "DFT_D3_3BODY": False})
+            qctask.set_scf_algorithm_and_iterations(iterations=100)
+        else:
+            qctask = QcTask(self.mol, charge=charge,
+                            spin_multiplicity=spin_multiplicity,
+                            jobtype="freq", title=title,
+                            exchange=self.dft, basis_set=self.bs)
         qctask.set_memory(total=1100)
         qcinp = QcInput([qctask])
         spec = self.base_spec()
@@ -122,21 +153,49 @@ class QChemFireWorkCreator():
         title = self.molname + " " + state_name + " " + self.dft + " " + \
             self.bs + " " + task_type
         title += "\n Gas Phase"
-        qctask_vac = QcTask(self.mol, charge=charge,
-                            spin_multiplicity=spin_multiplicity,
-                            jobtype="sp", title=title,
-                            exchange=self.dft, basis_set=self.bs,
-                            rem_params={"CHELPG": True})
+        if self.large:
+            qctask_vac = QcTask(self.mol, charge=charge,
+                                spin_multiplicity=spin_multiplicity,
+                                jobtype="sp", title=title,
+                                exchange='pbe', correlation='pbe',
+                                basis_set=self.bs,
+                                rem_params={"DFT_D": "EMPIRICAL_GRIMME3",
+                                            "DFT_D3_S6": 1000,
+                                            "DFT_D3_RS6": 1217,
+                                            "DFT_D3_S8": 722,
+                                            "DFT_D3_3BODY": False,
+                                            "CHELPG": True})
+            qctask_vac.set_scf_algorithm_and_iterations(iterations=100)
+        else:
+            qctask_vac = QcTask(self.mol, charge=charge,
+                                spin_multiplicity=spin_multiplicity,
+                                jobtype="sp", title=title,
+                                exchange=self.dft, basis_set=self.bs,
+                                rem_params={"CHELPG": True})
         qctask_vac.set_memory(total=1100)
         qctask_vac.set_dft_grid(128, 302)
         qctask_vac.set_integral_threshold(12)
         qctask_vac.set_scf_convergence_threshold(8)
         title = " Solution Phase"
-        qctask_sol = QcTask(self.mol, charge=charge,
-                            spin_multiplicity=spin_multiplicity,
-                            jobtype="sp", title=title,
-                            exchange=self.dft, basis_set=self.bs,
-                            rem_params={"CHELPG": True})
+        if self.large:
+            qctask_sol = QcTask(self.mol, charge=charge,
+                                spin_multiplicity=spin_multiplicity,
+                                jobtype="sp", title=title,
+                                exchange='pbe', correlation='pbe',
+                                basis_set=self.bs,
+                                rem_params={"DFT_D": "EMPIRICAL_GRIMME3",
+                                            "DFT_D3_S6": 1000,
+                                            "DFT_D3_RS6": 1217,
+                                            "DFT_D3_S8": 722,
+                                            "DFT_D3_3BODY": False,
+                                            "CHELPG": True})
+            qctask_sol.set_scf_algorithm_and_iterations(iterations=100)
+        else:
+            qctask_sol = QcTask(self.mol, charge=charge,
+                                spin_multiplicity=spin_multiplicity,
+                                jobtype="sp", title=title,
+                                exchange=self.dft, basis_set=self.bs,
+                                rem_params={"CHELPG": True})
         qctask_sol.use_pcm()
         qctask_sol.set_scf_initial_guess(guess="read")
         qctask_sol.set_memory(total=1100)
@@ -173,11 +232,12 @@ class QChemFireWorkCreator():
 
 def multistep_ipea_fws(mol, name, mission, dupefinder=None, priority=1,
                        parent_fwid=None):
-    skip_freq = False
+    large = False
     if len(mol) > 50:
-        skip_freq = True
-    fw_creator = QChemFireWorkCreator(mol, name, mission, None, dupefinder,
-                                      priority)
+        large = True
+    fw_creator = QChemFireWorkCreator(mol=mol, molname=name, mission=mission,
+                                      dupefinder=dupefinder,
+                                      priority=priority, large=large)
     fwid_base = 1
     if parent_fwid:
         if not (isinstance(parent_fwid, int) or isinstance(parent_fwid, list)):
@@ -202,7 +262,7 @@ def multistep_ipea_fws(mol, name, mission, dupefinder=None, priority=1,
         fireworks.extend(itertools.chain.from_iterable(fws))
         links_dict.update(dict(fw_ids))
 
-        if not skip_freq:
+        if not large:
             fw_ids = zip(* [iter(range(fwid_base + 6, fwid_base + 6 + 6))] * 2)
             fws = (fw_creator.freq_fw(ch, spin, fwid_cal, fwid_db)
                    for ch, spin, (fwid_cal, fwid_db)
@@ -222,7 +282,7 @@ def multistep_ipea_fws(mol, name, mission, dupefinder=None, priority=1,
     links_dict.update((dict(fw_ids)))
     fireworks.extend(itertools.chain.from_iterable(fws))
     if len(mol) > 1:
-        if skip_freq:
+        if large:
             links_dict.update({cgi_db: cspi_cal, ngi_db: nspi_cal,
                                agi_db: aspi_cal})
         else:
