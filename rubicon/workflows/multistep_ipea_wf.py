@@ -60,6 +60,8 @@ class QChemFireWorkCreator():
         title = self.molname + " " + state_name + " " + self.dft + " " + \
             self.bs + " " + task_type
         if self.large:
+            title = self.molname + " " + state_name + " PBE-D3/6-31+G* " + \
+                    task_type
             qctask = QcTask(self.mol, charge=charge,
                             spin_multiplicity=spin_multiplicity,
                             jobtype="opt", title=title,
@@ -109,6 +111,8 @@ class QChemFireWorkCreator():
         title = self.molname + " " + state_name + " " + self.dft + " " +\
             self.bs + " " + task_type
         if self.large:
+            title = self.molname + " " + state_name + " PBE-D3/6-31+G* " + \
+                    task_type
             qctask = QcTask(self.mol, charge=charge,
                             spin_multiplicity=spin_multiplicity,
                             jobtype="freq", title=title,
