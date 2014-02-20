@@ -84,7 +84,7 @@ class QChemFireWorkCreator():
                             exchange=self.dft, basis_set=self.bs)
         qctask.set_memory(total=1100)
         if self.large:
-            qctask.set_memory(total=28000, static=3000)
+            qctask.set_memory(total=2200, static=100)
         qcinp = QcInput([qctask])
         spec = self.base_spec()
         spec["qcinp"] = qcinp.to_dict
@@ -133,7 +133,7 @@ class QChemFireWorkCreator():
                             exchange=self.dft, basis_set=self.bs)
         qctask.set_memory(total=1100)
         if self.large:
-            qctask.set_memory(total=28000, static=3000)
+            qctask.set_memory(total=2200, static=100)
         qcinp = QcInput([qctask])
         spec = self.base_spec()
         spec["qcinp"] = qcinp.to_dict
@@ -172,7 +172,7 @@ class QChemFireWorkCreator():
         qctask_vac.set_scf_convergence_threshold(8)
         if self.large:
             qctask_vac.set_scf_algorithm_and_iterations(iterations=100)
-            qctask_vac.set_memory(total=28000, static=3000)
+            qctask_vac.set_memory(total=2200, static=100)
         title = " Solution Phase"
         qctask_sol = QcTask(self.mol, charge=charge,
                             spin_multiplicity=spin_multiplicity,
@@ -187,7 +187,7 @@ class QChemFireWorkCreator():
         qctask_sol.set_scf_convergence_threshold(8)
         if self.large:
             qctask_sol.set_scf_algorithm_and_iterations(iterations=100)
-            qctask_sol.set_memory(total=28000, static=3000)
+            qctask_sol.set_memory(total=2200, static=100)
         qcinp = QcInput([qctask_vac, qctask_sol])
         spec = self.base_spec()
         spec["qcinp"] = qcinp.to_dict

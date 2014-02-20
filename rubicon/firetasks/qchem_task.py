@@ -79,8 +79,7 @@ class QChemTask(FireTaskBase, FWSerializable):
         if fw_spec['num_atoms'] > 50:
             scf_max_cycles = 300
             geom_max_cycles = 500
-            qc_exe = shlex.split('qchem -seq -nt 24')
-            alt_cmd = None
+            qc_exe = half_cpus_cmd
         job = QchemJob(qc_exe, input_file="mol.qcinp", output_file="mol.qcout",
                        qclog_file="mol.qclog",
                        alt_cmd=alt_cmd)
