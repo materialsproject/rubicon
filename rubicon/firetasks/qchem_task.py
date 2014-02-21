@@ -43,13 +43,14 @@ class QChemTask(FireTaskBase, FWSerializable):
                 if isinstance(qj.mol, Molecule):
                     qj.mol = copy.deepcopy(mol)
         mol = qcinp.jobs[0].mol
-        qcinp.write_file("mol.qcinp")
-        hopper_name_pattern = re.compile("nid\d+")
+
         carver_name_pattern = re.compile("c[0-9]{4}-ib")
         fw_data = FWData()
         half_cpus_cmd = shlex.split("qchem -np 12")
-        if hopper_name_pattern.match(socket.gethostname()):
-        # hopper compute nodes
+        if "PBS_JOBID" in os.environ and \
+                ("hopque" in os.environ["PBS_JOBID"] or
+                         "edique" in os.environ["PBS_JOBID"]):
+        # hopper or edison compute nodes
             if (not fw_data.MULTIPROCESSING) or (fw_data.SUB_NPROCS is None):
                 qc_exe = shlex.split("qchem -np {}".format(min(24, len(mol))))
                 half_cpus_cmd = shlex.split("qchem -np {}".format(
@@ -79,7 +80,19 @@ class QChemTask(FireTaskBase, FWSerializable):
         if fw_spec['num_atoms'] > 50:
             scf_max_cycles = 300
             geom_max_cycles = 500
-            qc_exe = half_cpus_cmd
+            if "PBS_JOBID" in os.environ and \
+                    "hopque" in os.environ["PBS_JOBID"]:
+                # on Hopper use half core for large molecule
+                qc_exe = half_cpus_cmd
+        if "PBS_JOBID" in os.environ and \
+                "edique" in os.environ["PBS_JOBID"]:
+                # the memory on Edison is larger
+            for j in qcinp.jobs:
+                if "total_mem" in j.params["rem"] and \
+                        j.params["total_mem"] < 2500:
+                    j.set_memory(total=2500, static=100)
+
+        qcinp.write_file("mol.qcinp")
         job = QchemJob(qc_exe, input_file="mol.qcinp", output_file="mol.qcout",
                        qclog_file="mol.qclog",
                        alt_cmd=alt_cmd)
