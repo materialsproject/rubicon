@@ -80,11 +80,6 @@ class QChemTask(FireTaskBase, FWSerializable):
         if fw_spec['num_atoms'] > 50:
             scf_max_cycles = 300
             geom_max_cycles = 500
-            if "PBS_JOBID" in os.environ and \
-                    "hopque" in os.environ["PBS_JOBID"]:
-                # on Hopper use half core for large molecule
-                qc_exe = half_cpus_cmd
-            alt_cmd = None
 
         qcinp.write_file("mol.qcinp")
         job = QchemJob(qc_exe, input_file="mol.qcinp", output_file="mol.qcout",
