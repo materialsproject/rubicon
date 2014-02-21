@@ -5,6 +5,8 @@ TODO: Modify module doc.
 """
 
 from __future__ import division
+from monty.io import zopen
+from monty.os.path import zpath
 from pymatgen import Molecule
 from pymatgen.analysis.molecule_structure_comparator import MoleculeStructureComparator
 from pymatgen.io.qchemio import QcOutput
@@ -130,7 +132,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
         Return:
             True: structure changed, False: unchanged
         """
-        with open("FW.json") as f:
+        with zopen(zpath("FW.json")) as f:
             fw = json.load(f)
         if 'egsnl' not in fw['spec']:
             raise ValueError("Can't find initial SNL")

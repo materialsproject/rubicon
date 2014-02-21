@@ -95,8 +95,7 @@ class QChemTask(FireTaskBase, FWSerializable):
 
         qcinp.write_file("mol.qcinp")
         job = QchemJob(qc_exe, input_file="mol.qcinp", output_file="mol.qcout",
-                       qclog_file="mol.qclog",
-                       alt_cmd=alt_cmd)
+                       qclog_file="mol.qclog", alt_cmd=alt_cmd, gzipped=True)
         handler = QChemErrorHandler(qchem_job=job,
                                     scf_max_cycles=scf_max_cycles,
                                     geom_max_cycles=geom_max_cycles)
