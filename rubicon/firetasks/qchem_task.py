@@ -90,7 +90,7 @@ class QChemTask(FireTaskBase, FWSerializable):
                 # the memory on Edison is larger
             for j in qcinp.jobs:
                 if "mem_total" in j.params["rem"] and \
-                        j.params["mem_total"] < 2500:
+                        j.params['rem']["mem_total"] < 2500:
                     j.set_memory(total=2500, static=100)
 
         qcinp.write_file("mol.qcinp")
