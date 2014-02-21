@@ -82,9 +82,6 @@ class QChemFireWorkCreator():
                             spin_multiplicity=spin_multiplicity,
                             jobtype="opt", title=title,
                             exchange=self.dft, basis_set=self.bs)
-        qctask.set_memory(total=1100)
-        if self.large:
-            qctask.set_memory(total=2200, static=100)
         qcinp = QcInput([qctask])
         spec = self.base_spec()
         spec["qcinp"] = qcinp.to_dict
@@ -131,9 +128,6 @@ class QChemFireWorkCreator():
                             spin_multiplicity=spin_multiplicity,
                             jobtype="freq", title=title,
                             exchange=self.dft, basis_set=self.bs)
-        qctask.set_memory(total=1100)
-        if self.large:
-            qctask.set_memory(total=2200, static=100)
         qcinp = QcInput([qctask])
         spec = self.base_spec()
         spec["qcinp"] = qcinp.to_dict
@@ -166,13 +160,11 @@ class QChemFireWorkCreator():
                             jobtype="sp", title=title,
                             exchange=self.dft, basis_set=self.bs,
                             rem_params={"CHELPG": True})
-        qctask_vac.set_memory(total=1100)
         qctask_vac.set_dft_grid(128, 302)
         qctask_vac.set_integral_threshold(12)
         qctask_vac.set_scf_convergence_threshold(8)
         if self.large:
             qctask_vac.set_scf_algorithm_and_iterations(iterations=100)
-            qctask_vac.set_memory(total=2200, static=100)
         title = " Solution Phase"
         qctask_sol = QcTask(self.mol, charge=charge,
                             spin_multiplicity=spin_multiplicity,
@@ -181,13 +173,11 @@ class QChemFireWorkCreator():
                             rem_params={"CHELPG": True})
         qctask_sol.use_pcm()
         qctask_sol.set_scf_initial_guess(guess="read")
-        qctask_sol.set_memory(total=1100)
         qctask_sol.set_dft_grid(128, 302)
         qctask_sol.set_integral_threshold(12)
         qctask_sol.set_scf_convergence_threshold(8)
         if self.large:
             qctask_sol.set_scf_algorithm_and_iterations(iterations=100)
-            qctask_sol.set_memory(total=2200, static=100)
         qcinp = QcInput([qctask_vac, qctask_sol])
         spec = self.base_spec()
         spec["qcinp"] = qcinp.to_dict

@@ -85,13 +85,6 @@ class QChemTask(FireTaskBase, FWSerializable):
                 # on Hopper use half core for large molecule
                 qc_exe = half_cpus_cmd
             alt_cmd = None
-        if "PBS_JOBID" in os.environ and \
-                "edique" in os.environ["PBS_JOBID"]:
-                # the memory on Edison is larger
-            for j in qcinp.jobs:
-                if "mem_total" in j.params["rem"] and \
-                        j.params['rem']["mem_total"] < 2500:
-                    j.set_memory(total=2500, static=100)
 
         qcinp.write_file("mol.qcinp")
         job = QchemJob(qc_exe, input_file="mol.qcinp", output_file="mol.qcout",
