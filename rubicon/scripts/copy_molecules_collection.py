@@ -61,10 +61,11 @@ def copy_collections():
             molname = mol_web["user_tags"]["molname"]
         else:
             molname = mol_web["inchi"]
-        mol_doc = coll_dest.find_one({"inchi": mol_web["inchi"]})
+        mol_doc = coll_dest.find_one({"inchi_root": mol_web["inchi_root"]})
         if mol_doc:
             logging.info("Updating molecule \"{}\"".format(molname))
-            coll_dest.update({"inchi": mol_web["inchi"]}, mol_web, upsert=True)
+            coll_dest.update({"inchi_root": mol_web["inchi_root"]}, mol_web,
+                             upsert=True)
         else:
             logging.info("INSERT molecule \"{}\"".format(molname))
             coll_dest.insert(mol_web)
