@@ -54,3 +54,6 @@ def copy_collections():
     for mol_db in molecules:
         mol_web = transform_molecule_doc(mol_db)
         coll_dest.insert(mol_web)
+
+if __name__ == '__main__':
+    copy_collections()
