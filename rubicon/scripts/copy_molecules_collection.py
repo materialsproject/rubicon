@@ -6,7 +6,7 @@ import sys
 
 
 def get_molecules_collection(db_dir):
-    db_path = os.path.join(db_dir, 'tasks_db.json')
+    db_path = os.path.join(db_dir, 'molecules_db.json')
     with open(db_path) as f:
         db_creds = json.load(f)
     conn = MongoClient(db_creds['host'], db_creds['port'])
