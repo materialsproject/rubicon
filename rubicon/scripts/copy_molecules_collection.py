@@ -28,6 +28,7 @@ def transform_molecule_doc(mol1):
     mol2["reduced_cell_formula_abc"] = mol1["reduced_cell_formula_abc"]
     mol2["implicit_solvent"] = mol1["implicit_solvent"]
     mol2["pretty_formula"] = mol1["pretty_formula"]
+    mol2["formula"] = mol1["formula"]
     mol2["pointgroup"] = mol1["pointgroup"]
 
     mol2["task_id"] = mol1["task_id"]["neutral"]

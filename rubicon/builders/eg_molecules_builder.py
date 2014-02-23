@@ -111,6 +111,7 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         molecule["implicit_solvent"] = copy.deepcopy(docs["neutral"][
             "implicit_solvent"])
         molecule["pretty_formula"] = docs["neutral"]["pretty_formula"]
+        molecule["formula"] = docs["neutral"]["formula"]
         molecule["pointgroup"] = docs["neutral"]["pointgroup"]
 
         molecule["task_id"] = dict()
