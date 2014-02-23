@@ -1,6 +1,8 @@
 import json
+import logging
 import os
 from pymongo import MongoClient
+import sys
 
 
 def get_molecules_collection(db_dir):
@@ -53,7 +55,23 @@ def copy_collections():
     molecules = coll_src.find()
     for mol_db in molecules:
         mol_web = transform_molecule_doc(mol_db)
-        coll_dest.insert(mol_web)
+        if "molname" in mol_web["user_tags"]:
+            molname = mol_web["user_tags"]["molname"]
+        else:
+            molname = mol_web["inchi"]
+        mol_doc = coll_dest.find_one({"inchi": mol_web["inchi"]})
+        if mol_doc:
+            logging.info("INSERT molecule \"{}\"".format(molname))
+            coll_dest.update({"inchi": mol_web["inchi"]}, mol_web, upsert=True)
+        else:
+            logging.info("INSERT molecule \"{}\"".format(molname))
+            coll_dest.insert(mol_web)
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger('CopyMolecules')
+    logger.setLevel(logging.INFO)
+    sh = logging.StreamHandler(stream=sys.stdout)
+    sh.setLevel(getattr(logging, 'INFO'))
+    logger.addHandler(sh)
     copy_collections()
