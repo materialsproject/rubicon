@@ -30,18 +30,20 @@ def transform_molecule_doc(mol1):
     mol2["pretty_formula"] = mol1["pretty_formula"]
     mol2["pointgroup"] = mol1["pointgroup"]
 
-    mol2["task_id"] = mol1["neutral"]["task_id"]
-    mol2["task_id_deprecated"] = mol1["neutral"]["task_id_deprecated"]
-    mol2["snlgroup_id_final"] = mol1["neutral"]["snlgroup_id_final"]
-    mol2["charge"] = mol1["neutral"]["charge"]
-    mol2["spin_multiplicity"] = mol1["neutral"]["spin_multiplicity"]
-    mol2["snl_final"] = mol1["neutral"]["snl_final"]
-    mol2["molecule"] = mol1["neutral"]["molecule"]
-    mol2["xyz"] = mol1["neutral"]["xyz"]
-    mol2["inchi"] = mol1["neutral"]["inchi"]
+    mol2["task_id"] = mol1["task_id"]["neutral"]
+    mol2["task_id_deprecated"] = mol1["task_id_deprecated"]["neutral"]
+    mol2["snlgroup_id_final"] = mol1["snlgroup_id_final"]["neutral"]
+    mol2["charge"] = mol1["charge"]["neutral"]
+    mol2["spin_multiplicity"] = mol1["spin_multiplicity"]["neutral"]
+    mol2["snl_final"] = mol1["snl_final"]["neutral"]
+    mol2["molecule"] = mol1["molecule"]["neutral"]
+    mol2["xyz"] = mol1["xyz"]["neutral"]
+    mol2["inchi"] = mol1["inchi"]["neutral"]
 
-    mol2["IE"] = mol1["IP"]["sol"]
-    mol2["EA"] = mol1["EA"]["sol"]
+    if "IP" in mol1:
+        mol2["IE"] = mol1["IP"]["sol"]
+    if "EA" in mol1:
+        mol2["EA"] = mol1["EA"]["sol"]
 
     mol2['solvation_energy'] = mol1["solvation_energy"]
     mol2["svg"] = mol1["svg"]
@@ -61,7 +63,7 @@ def copy_collections():
             molname = mol_web["inchi"]
         mol_doc = coll_dest.find_one({"inchi": mol_web["inchi"]})
         if mol_doc:
-            logging.info("INSERT molecule \"{}\"".format(molname))
+            logging.info("Updating molecule \"{}\"".format(molname))
             coll_dest.update({"inchi": mol_web["inchi"]}, mol_web, upsert=True)
         else:
             logging.info("INSERT molecule \"{}\"".format(molname))
