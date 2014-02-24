@@ -72,8 +72,7 @@ class QChemGeomOptDBInsertionTask(FireTaskBase, FWSerializable):
                              'egsnl': d["snl_final"],
                              'snlgroup_id': d["snlgroup_id_final"],
                              'inchi_root': inchi_root,
-                             'defuse_reason': defuse_reason,
-                             'offending_fw_id': fw_spec['fw_id']},
+                             'defuse_reason': defuse_reason},
                 defuse_children=True)
 
 
@@ -129,8 +128,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                     'egsnl': d["snl_final"],
                     'snlgroup_id': d["snlgroup_id_final"],
                     'inchi_root': fw_spec["inchi_root"],
-                    'defuse_reason': defuse_reason,
-                    'offending_fw_id': fw_spec['fw_id']})
+                    'defuse_reason': defuse_reason})
 
     @staticmethod
     def spawn_opt_freq_wf(mol, molname, mission, additional_user_tags,
@@ -225,8 +223,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                              'snlgroup_id': fw_spec['snlgroup_id'],
                              'inchi_root': fw_spec["inchi_root"],
                              'defuse_reason': "imaginary frequency "
-                                              "elimination failed",
-                             'offending_fw_id': fw_spec['fw_id']})
+                                              "elimination failed"})
 
         new_mol = self.perturb_molecule(d)
         old_mol = Molecule.from_dict(d['molecule_final'])
@@ -247,8 +244,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                     'snlgroup_id': fw_spec['snlgroup_id'],
                     'inchi_root': fw_spec["inchi_root"],
                     'defuse_reason': "structural change in imaginary "
-                                     "frequency elimination",
-                    'offending_fw_id': fw_spec['fw_id']})
+                                     "frequency elimination"})
         molname = d['user_tags']['molname']
         mission = d['user_tags']['mission']
         additional_user_tags = {"img_freq_eli": img_freq_eli}
@@ -360,5 +356,4 @@ class QChemSinglePointEnergyDBInsertionTask(FireTaskBase, FWSerializable):
                     'egsnl': d['snl_final'],
                     'snlgroup_id': d['snlgroup_id_final'],
                     'inchi_root': fw_spec["inchi_root"],
-                    'defuse_reason': 'SCF failed',
-                    'offending_fw_id': fw_spec['fw_id']})
+                    'defuse_reason': 'SCF failed'})
