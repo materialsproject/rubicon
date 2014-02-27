@@ -6,24 +6,38 @@ from pymatgen import Molecule
 from pymatgen.io.babelio import BabelMolAdaptor
 import pybel as pb
 from subprocess import Popen, PIPE
-import os
+
 
 class PackmolRunner(object):
     """
     Create MD simulation box using packmol.
     """
 
-    def __init__(self,mols,param_list):
+    def __init__(self, mols, param_list):
+        """
+        Create PackMolRunner
+        :param mols: [Molecule] - list of Molecules to pack
+        :param param_list: [{}, {}] - array of parameters containing dicts for each Structure
+        """
         self.mols = mols
         self.param_list = param_list
 
-    def _format_packmol_str(self,v):
-        if isinstance(v,list): 
-            return ' '.join(str(x) for x in v)
+    def _format_packmol_str(self, some_obj):
+        """
+        Internal method to format packmol strings
+        :param some_obj: Some object to turn into String
+        :return:
+        """
+        if isinstance(some_obj,list):
+            return ' '.join(str(x) for x in some_obj)
         else:
-            return v
+            return some_obj
 
     def run(self):
+        """
+        Runs packmol
+        :return: a Molecule object
+        """
 
         scratch = tempfile.gettempdir()
         with ScratchDir(scratch) as d:
