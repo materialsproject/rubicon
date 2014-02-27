@@ -45,9 +45,10 @@ class PackmolRunner(object):
                 for k, v in self.param_list[idx].iteritems():
                     output.write('  {} {}\n'.format(k, self._list2str(v)))
                 output.write('end structure\n')
-
+            print o_filename
             proc = Popen(['./packmol'],stdin=output,stdout=PIPE)
             (stdout, stderr) = proc.communicate()
+            print stdout
             print proc.returncode, 'IS THE RETURNCODE'
 
 
