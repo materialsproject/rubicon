@@ -42,6 +42,8 @@ class PackmolRunner(object):
         infile=open('pack.inp','r')
 #        proc = Popen(['./packmol','< pack.inp'],stdin=infile,stdout=None)
         proc = Popen(['./packmol'],stdin=infile,stdout=PIPE)
+        (stdout, stderr) = proc.communicate()
+        print proc.returncode, 'IS THE RETURNCODE'
 
 
     def pdb2mol(self):
@@ -63,7 +65,7 @@ if __name__ == '__main__':
     pmr.mols2pdb()
     pmr.generate_packmol_inp()
     pmr.run_packmol()
-#    pmr.pdb2mol()
+    pmr.pdb2mol()
 
 
 
