@@ -47,17 +47,17 @@ class PackmolRunner(object):
                 pm = pb.Molecule(a.openbabel_mol)
                 pm.write("pdb", filename='{}.pdb'.format(idx), overwrite=True)
 
-            with open('pack.inp', 'w') as input:
+            with open('pack.inp', 'w') as inp:
                 # create packmol control file
-                input.write('tolerance 2.0\n')
-                input.write('filetype pdb\n')
-                input.write('output box.pdb\n')
+                inp.write('tolerance 2.0\n')
+                inp.write('filetype pdb\n')
+                inp.write('output box.pdb\n')
                 for idx, mol in enumerate(self.mols):
-                    input.write('\n')
-                    input.write('structure {}.pdb\n'.format(idx))
+                    inp.write('\n')
+                    inp.write('structure {}.pdb\n'.format(idx))
                     for k, v in self.param_list[idx].iteritems():
-                        input.write('  {} {}\n'.format(k, self._format_packmol_str(v)))
-                    input.write('end structure\n')
+                        inp.write('  {} {}\n'.format(k, self._format_packmol_str(v)))
+                    inp.write('end structure\n')
 
             proc = Popen(['./packmol'], stdin=open('pack.inp', 'r'),stdout=PIPE)
             (stdout, stderr) = proc.communicate()
