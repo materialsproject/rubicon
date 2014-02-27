@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import tempfile
+from monty.io import ScratchDir
 
 from pymatgen import Molecule
 from pymatgen.io.babelio import BabelMolAdaptor
@@ -16,7 +17,7 @@ class PackmolRunner(object):
         self.mols = mols
         self.param_list = param_list
 
-    def _list2str(self,v):
+    def _format_packmol_str(self,v):
         if isinstance(v,list): 
             return ' '.join(str(x) for x in v)
         else:
@@ -24,46 +25,34 @@ class PackmolRunner(object):
 
     def run(self):
 
-        mol_filenames = []
-
-        # convert mols to pdb files
-        for mol in self.mols:
-            a = BabelMolAdaptor(mol)
-            pm = pb.Molecule(a.openbabel_mol)
-            fd, filename = tempfile.mkstemp(suffix=".pdb")
-            mol_filenames.append(filename)
-            pm.write("pdb", filename=filename, overwrite=True)
-
-        id, i_filename = tempfile.mkstemp(suffix=".inp")
-        with open(i_filename, 'w') as input:
-            # create packmol control file
-            input.write('tolerance 2.0\n')
-            input.write('filetype pdb\n')
-            input.write('output box.pdb\n')
+        scratch = tempfile.gettempdir()
+        with ScratchDir(scratch) as d:
+            # convert mols to pdb files
             for idx, mol in enumerate(self.mols):
-                input.write('\n')
-                input.write('structure {}\n'.format(mol_filenames[idx]))
-                for k, v in self.param_list[idx].iteritems():
-                    input.write('  {} {}\n'.format(k, self._list2str(v)))
-                input.write('end structure\n')
+                a = BabelMolAdaptor(mol)
+                pm = pb.Molecule(a.openbabel_mol)
+                pm.write("pdb", filename='{}.pdb'.format(idx), overwrite=True)
 
-        proc = Popen(['./packmol'],stdin=open(i_filename, 'r'),stdout=PIPE)
-        (stdout, stderr) = proc.communicate()
+            with open('pack.inp', 'w') as input:
+                # create packmol control file
+                input.write('tolerance 2.0\n')
+                input.write('filetype pdb\n')
+                input.write('output box.pdb\n')
+                for idx, mol in enumerate(self.mols):
+                    input.write('\n')
+                    input.write('structure {}.pdb\n'.format(idx))
+                    for k, v in self.param_list[idx].iteritems():
+                        input.write('  {} {}\n'.format(k, self._format_packmol_str(v)))
+                    input.write('end structure\n')
+
+            proc = Popen(['./packmol'], stdin=open('pack.inp', 'r'),stdout=PIPE)
+            (stdout, stderr) = proc.communicate()
 
         print stdout
         print proc.returncode, 'IS THE RETURNCODE'
-
-
         a = BabelMolAdaptor.from_file("box.pdb", "pdb")
-
-        # clean files - do this better later
-        for f in mol_filenames:
-            os.remove(f)
-
-        os.remove(i_filename)
-        os.remove('box.pdb')
-
         return a.pymatgen_mol
+
 
 if __name__ == '__main__':
     coords = [[0.000000, 0.000000, 0.000000],
@@ -74,5 +63,4 @@ if __name__ == '__main__':
     mol = Molecule(["C", "H", "H", "H", "H"], coords) 
     pmr = PackmolRunner([mol, mol], [{"number":4,"inside box":[0.,0.,0.,40.,40.,40.]}, {"number":5,"inside box":[0.,0.,0.,40.,40.,40.]}])
     s = pmr.run()
-
     print s
