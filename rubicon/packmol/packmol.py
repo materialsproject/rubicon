@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import tempfile
 
 from pymatgen import Molecule
 from pymatgen.io.babelio import BabelMolAdaptor
@@ -14,38 +15,40 @@ class PackmolRunner(object):
         self.mols = mols
         self.param_list = param_list
 
-    def _mols2pdb(self):
-        for idx, mol in enumerate(self.mols):
-            a = BabelMolAdaptor(mol)
-            pm = pb.Molecule(a.openbabel_mol)
-            pm.write("pdb",filename="{}.pdb".format(idx),overwrite=True)
-        
     def _list2str(self,v):
         if isinstance(v,list): 
             return ' '.join(str(x) for x in v)
         else:
             return v
 
-    def _generate_packmol_inp(self):
-        output=open('pack.inp','w')
-        output.write('tolerance 2.0\n')
-        output.write('filetype pdb\n')
-        output.write('output box.pdb\n')
-        for idx,mol in enumerate(self.mols):
-            output.write('\n')
-            output.write('structure {}.pdb\n'.format(idx))
-            for k, v in self.param_list[idx].iteritems():
-                output.write('  {} {}\n'.format(k, self._list2str(v)))
-            output.write('end structure\n')
-
     def run(self):
-        self._mols2pdb()
-        self._generate_packmol_inp()
-        infile=open('pack.inp','r')
-#        proc = Popen(['./packmol','< pack.inp'],stdin=infile,stdout=None)
-        proc = Popen(['./packmol'],stdin=infile,stdout=PIPE)
-        (stdout, stderr) = proc.communicate()
-        print proc.returncode, 'IS THE RETURNCODE'
+
+        mol_filenames = []
+
+        # convert mols to pdb files
+        for mol in self.mols:
+            a = BabelMolAdaptor(mol)
+            pm = pb.Molecule(a.openbabel_mol)
+            fd, filename = tempfile.mkstemp(suffix="pdb")
+            mol_filenames.append(filename)
+            pm.write("pdb", filename=filename, overwrite=True)
+
+        od, o_filename = tempfile.mkstemp(suffix="pdb")
+        with open(o_filename, 'w') as output:
+            # create packmol control file
+            output.write('tolerance 2.0\n')
+            output.write('filetype pdb\n')
+            output.write('output box.pdb\n')
+            for idx,mol in enumerate(self.mols):
+                output.write('\n')
+                output.write('structure {}\n'.format(mol_filenames[idx]))
+                for k, v in self.param_list[idx].iteritems():
+                    output.write('  {} {}\n'.format(k, self._list2str(v)))
+                output.write('end structure\n')
+
+            proc = Popen(['./packmol'],stdin=output,stdout=PIPE)
+            (stdout, stderr) = proc.communicate()
+            print proc.returncode, 'IS THE RETURNCODE'
 
 
     def pdb2mol(self):
