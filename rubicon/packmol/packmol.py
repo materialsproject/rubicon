@@ -14,19 +14,19 @@ class PackmolRunner(object):
         self.mols = mols
         self.param_list = param_list
 
-    def mols2pdb(self):
+    def _mols2pdb(self):
         for idx, mol in enumerate(self.mols):
             a = BabelMolAdaptor(mol)
             pm = pb.Molecule(a.openbabel_mol)
             pm.write("pdb",filename="{}.pdb".format(idx),overwrite=True)
         
-    def list2str(self,v):
+    def _list2str(self,v):
         if isinstance(v,list): 
             return ' '.join(str(x) for x in v)
         else:
             return v
 
-    def generate_packmol_inp(self):
+    def _generate_packmol_inp(self):
         output=open('pack.inp','w')
         output.write('tolerance 2.0\n')
         output.write('filetype pdb\n')
@@ -35,10 +35,12 @@ class PackmolRunner(object):
             output.write('\n')
             output.write('structure {}.pdb\n'.format(idx))
             for k, v in self.param_list[idx].iteritems():
-                output.write('  {} {}\n'.format(k, self.list2str(v)))
+                output.write('  {} {}\n'.format(k, self._list2str(v)))
             output.write('end structure\n')
 
-    def run_packmol(self):
+    def run(self):
+        self._mols2pdb()
+        self._generate_packmol_inp()
         infile=open('pack.inp','r')
 #        proc = Popen(['./packmol','< pack.inp'],stdin=infile,stdout=None)
         proc = Popen(['./packmol'],stdin=infile,stdout=PIPE)
@@ -62,11 +64,4 @@ if __name__ == '__main__':
            [-0.513360, 0.889165, -0.363000]]
     mol = Molecule(["C", "H", "H", "H", "H"], coords) 
     pmr = PackmolRunner([mol, mol], [{"number":4,"inside box":[0.,0.,0.,40.,40.,40.]}, {"number":5,"inside box":[0.,0.,0.,40.,40.,40.]}])
-    pmr.mols2pdb()
-    pmr.generate_packmol_inp()
-    pmr.run_packmol()
-    pmr.pdb2mol()
-
-
-
-
+    pmr.run()
