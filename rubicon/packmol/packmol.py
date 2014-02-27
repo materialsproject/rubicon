@@ -5,6 +5,7 @@ from pymatgen import Molecule
 from pymatgen.io.babelio import BabelMolAdaptor
 import pybel as pb
 from subprocess import Popen, PIPE
+import os
 
 class PackmolRunner(object):
     """
@@ -48,17 +49,21 @@ class PackmolRunner(object):
 
         proc = Popen(['./packmol'],stdin=open(i_filename, 'r'),stdout=PIPE)
         (stdout, stderr) = proc.communicate()
+
         print stdout
         print proc.returncode, 'IS THE RETURNCODE'
 
 
-    def pdb2mol(self):
         a = BabelMolAdaptor.from_file("box.pdb", "pdb")
+
+        # clean files - do this better later
+        for f in mol_filenames:
+            os.remove(f)
+
+        os.remove(i_filename)
+        os.remove('box.pdb')
+
         return a.pymatgen_mol
-
-    def cleanfiles(self):
-        pass
-
 
 if __name__ == '__main__':
     coords = [[0.000000, 0.000000, 0.000000],
@@ -68,4 +73,6 @@ if __name__ == '__main__':
            [-0.513360, 0.889165, -0.363000]]
     mol = Molecule(["C", "H", "H", "H", "H"], coords) 
     pmr = PackmolRunner([mol, mol], [{"number":4,"inside box":[0.,0.,0.,40.,40.,40.]}, {"number":5,"inside box":[0.,0.,0.,40.,40.,40.]}])
-    pmr.run()
+    s = pmr.run()
+
+    print s
