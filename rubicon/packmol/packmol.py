@@ -48,8 +48,6 @@ class PackmolRunner(object):
             proc = Popen(['./packmol'], stdin=open('pack.inp', 'r'),stdout=PIPE)
             (stdout, stderr) = proc.communicate()
 
-        print stdout
-        print proc.returncode, 'IS THE RETURNCODE'
         a = BabelMolAdaptor.from_file("box.pdb", "pdb")
         return a.pymatgen_mol
 
