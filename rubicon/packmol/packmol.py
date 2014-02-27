@@ -29,24 +29,24 @@ class PackmolRunner(object):
         for mol in self.mols:
             a = BabelMolAdaptor(mol)
             pm = pb.Molecule(a.openbabel_mol)
-            fd, filename = tempfile.mkstemp(suffix="pdb")
+            fd, filename = tempfile.mkstemp(suffix=".pdb")
             mol_filenames.append(filename)
             pm.write("pdb", filename=filename, overwrite=True)
 
-        od, o_filename = tempfile.mkstemp(suffix="pdb")
-        with open(o_filename, 'w') as output:
+        id, i_filename = tempfile.mkstemp(suffix=".inp")
+        with open(i_filename, 'w') as input:
             # create packmol control file
-            output.write('tolerance 2.0\n')
-            output.write('filetype pdb\n')
-            output.write('output box.pdb\n')
-            for idx,mol in enumerate(self.mols):
-                output.write('\n')
-                output.write('structure {}\n'.format(mol_filenames[idx]))
+            input.write('tolerance 2.0\n')
+            input.write('filetype pdb\n')
+            input.write('output box.pdb\n')
+            for idx, mol in enumerate(self.mols):
+                input.write('\n')
+                input.write('structure {}\n'.format(mol_filenames[idx]))
                 for k, v in self.param_list[idx].iteritems():
-                    output.write('  {} {}\n'.format(k, self._list2str(v)))
-                output.write('end structure\n')
-            print o_filename
-            proc = Popen(['./packmol'],stdin=output,stdout=PIPE)
+                    input.write('  {} {}\n'.format(k, self._list2str(v)))
+                input.write('end structure\n')
+
+            proc = Popen(['./packmol'],stdin=open(i_filename, 'r'),stdout=PIPE)
             (stdout, stderr) = proc.communicate()
             print stdout
             print proc.returncode, 'IS THE RETURNCODE'
