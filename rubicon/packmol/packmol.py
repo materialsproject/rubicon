@@ -46,10 +46,10 @@ class PackmolRunner(object):
                     input.write('  {} {}\n'.format(k, self._list2str(v)))
                 input.write('end structure\n')
 
-            proc = Popen(['./packmol'],stdin=open(i_filename, 'r'),stdout=PIPE)
-            (stdout, stderr) = proc.communicate()
-            print stdout
-            print proc.returncode, 'IS THE RETURNCODE'
+        proc = Popen(['./packmol'],stdin=open(i_filename, 'r'),stdout=PIPE)
+        (stdout, stderr) = proc.communicate()
+        print stdout
+        print proc.returncode, 'IS THE RETURNCODE'
 
 
     def pdb2mol(self):
