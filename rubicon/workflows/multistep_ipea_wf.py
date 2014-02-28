@@ -160,10 +160,11 @@ class QChemFireWorkCreator():
                             jobtype="sp", title=title,
                             exchange=self.dft, basis_set=self.bs,
                             rem_params={"CHELPG": True})
-        qctask_vac.set_dft_grid(128, 302)
-        qctask_vac.set_integral_threshold(12)
-        qctask_vac.set_scf_convergence_threshold(8)
-        if self.large:
+        if not self.large:
+            qctask_vac.set_dft_grid(128, 302)
+            qctask_vac.set_integral_threshold(12)
+            qctask_vac.set_scf_convergence_threshold(8)
+        else:
             qctask_vac.set_scf_algorithm_and_iterations(iterations=100)
         title = " Solution Phase"
         qctask_sol = QcTask(self.mol, charge=charge,
@@ -171,12 +172,16 @@ class QChemFireWorkCreator():
                             jobtype="sp", title=title,
                             exchange=self.dft, basis_set=self.bs,
                             rem_params={"CHELPG": True})
-        qctask_sol.use_pcm()
         qctask_sol.set_scf_initial_guess(guess="read")
-        qctask_sol.set_dft_grid(128, 302)
-        qctask_sol.set_integral_threshold(12)
-        qctask_sol.set_scf_convergence_threshold(8)
+        if not self.large:
+            qctask_sol.use_pcm(solvent_params={"Dielectric": 78.3553})
+            qctask_sol.set_dft_grid(128, 302)
+            qctask_sol.set_integral_threshold(12)
+            qctask_sol.set_scf_convergence_threshold(8)
         if self.large:
+            qctask_sol.use_pcm(pcm_params={"HPoints": 194,
+                                           "HeavyPoints": 194},
+                               solvent_params={"Dielectric": 78.3553})
             qctask_sol.set_scf_algorithm_and_iterations(iterations=100)
         qcinp = QcInput([qctask_vac, qctask_sol])
         spec = self.base_spec()
