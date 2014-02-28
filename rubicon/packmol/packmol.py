@@ -5,6 +5,7 @@ from monty.io import ScratchDir
 from pymatgen import Molecule
 from pymatgen.io.babelio import BabelMolAdaptor
 import pybel as pb
+import os
 from subprocess import Popen, PIPE
 
 
@@ -33,6 +34,14 @@ class PackmolRunner(object):
         else:
             return some_obj
 
+    def _get_auto_boxsize(self, mol):
+        """
+        TODO: Put docs here!!
+        :param mol:
+        :raise NotImplementedError:
+        """
+        raise NotImplementedError('Auto box size is not implemented yet!')
+
     def run(self):
         """
         Runs packmol
@@ -41,28 +50,35 @@ class PackmolRunner(object):
 
         scratch = tempfile.gettempdir()
         with ScratchDir(scratch) as d:
+            print d
             # convert mols to pdb files
             for idx, mol in enumerate(self.mols):
                 a = BabelMolAdaptor(mol)
                 pm = pb.Molecule(a.openbabel_mol)
-                pm.write("pdb", filename='{}.pdb'.format(idx), overwrite=True)
+                pm.write("pdb", filename=os.path.join(d, '{}.pdb'.format(idx)), overwrite=True)
 
-            with open('pack.inp', 'w') as inp:
+            with open(os.path.join(d, 'pack.inp'), 'w') as inp:
                 # create packmol control file
                 inp.write('tolerance 2.0\n')
                 inp.write('filetype pdb\n')
-                inp.write('output box.pdb\n')
+                inp.write('output {}\n'.format(os.path.join(d, "box.pdb")))
                 for idx, mol in enumerate(self.mols):
                     inp.write('\n')
-                    inp.write('structure {}.pdb\n'.format(idx))
+                    inp.write('structure {}.pdb\n'.format(os.path.join(d, str(idx))))
+
+                    # TODO: also check if user specified outside box, etc.
+                    # Do not use auto mode if user specified any type of box
+                    if 'inside box' not in self.param_list[idx]:
+                        self._get_auto_boxsize(self.mols[idx])
+
                     for k, v in self.param_list[idx].iteritems():
                         inp.write('  {} {}\n'.format(k, self._format_packmol_str(v)))
                     inp.write('end structure\n')
 
-            proc = Popen(['./packmol'], stdin=open('pack.inp', 'r'),stdout=PIPE)
+            proc = Popen(['./packmol'], stdin=open(os.path.join(d, 'pack.inp'), 'r'),stdout=PIPE)
             (stdout, stderr) = proc.communicate()
 
-        a = BabelMolAdaptor.from_file("box.pdb", "pdb")
+        a = BabelMolAdaptor.from_file(os.path.join(d, "box.pdb"), "pdb")
         return a.pymatgen_mol
 
 
@@ -73,6 +89,6 @@ if __name__ == '__main__':
            [-0.513360, -0.889165, -0.363000],
            [-0.513360, 0.889165, -0.363000]]
     mol = Molecule(["C", "H", "H", "H", "H"], coords) 
-    pmr = PackmolRunner([mol, mol], [{"number":4,"inside box":[0.,0.,0.,40.,40.,40.]}, {"number":5,"inside box":[0.,0.,0.,40.,40.,40.]}])
+    pmr = PackmolRunner([mol, mol], [{"number":4,"inside box":[0.,0.,0.,40.,40.,40.]}, {"number":5, "inside box":[0.,0.,0.,40.,40.,40.]}])
     s = pmr.run()
     print s
