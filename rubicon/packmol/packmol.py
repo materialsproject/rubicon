@@ -50,7 +50,6 @@ class PackmolRunner(object):
 
         scratch = tempfile.gettempdir()
         with ScratchDir(scratch) as d:
-            print d
             # convert mols to pdb files
             for idx, mol in enumerate(self.mols):
                 a = BabelMolAdaptor(mol)
