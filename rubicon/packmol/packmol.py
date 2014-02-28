@@ -78,8 +78,8 @@ class PackmolRunner(object):
             proc = Popen(['./packmol'], stdin=open(os.path.join(d, 'pack.inp'), 'r'),stdout=PIPE)
             (stdout, stderr) = proc.communicate()
 
-        a = BabelMolAdaptor.from_file(os.path.join(d, "box.pdb"), "pdb")
-        return a.pymatgen_mol
+            a = BabelMolAdaptor.from_file(os.path.join(d, "box.pdb"), "pdb")
+            return a.pymatgen_mol
 
 
 if __name__ == '__main__':
