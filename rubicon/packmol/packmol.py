@@ -34,13 +34,24 @@ class PackmolRunner(object):
         else:
             return some_obj
 
-    def _get_auto_boxsize(self, mol):
+    def _get_auto_boxsize(self, idx):
         """
         TODO: Put docs here!!
-        :param mol:
+        :param idx:
         :raise NotImplementedError:
         """
-        raise NotImplementedError('Auto box size is not implemented yet!')
+
+        mol=self.mols[idx]
+        print mol[0]
+#        print self.mols[idx][0]
+        lx=max(mol[i].coords[0] for i,atom in enumerate(mol))-min(mol[i].coords[0] for i,atom in enumerate(mol))
+        ly=max(mol[i].coords[1] for i,atom in enumerate(mol))-min(mol[i].coords[1] for i,atom in enumerate(mol))
+        lz=max(mol[i].coords[2] for i,atom in enumerate(mol))-min(mol[i].coords[2] for i,atom in enumerate(mol))
+        length=max(lx,ly,lz)+2.0
+        length=length*int(self.param_list[idx]['number'])
+        self.param_list[idx]['inside box']='0. 0. 0. {} {} {}'.format(length,length,length)
+        print self.param_list[idx]['inside box']
+#        raise NotImplementedError('Auto box size is not implemented yet!')
 
     def run(self):
         """
@@ -49,7 +60,8 @@ class PackmolRunner(object):
         """
 
         scratch = tempfile.gettempdir()
-        with ScratchDir(scratch) as d:
+        with ScratchDir(scratch,copy_to_current_on_exit=True) as d:
+#        with ScratchDir(scratch) as d:
             # convert mols to pdb files
             for idx, mol in enumerate(self.mols):
                 a = BabelMolAdaptor(mol)
@@ -68,7 +80,7 @@ class PackmolRunner(object):
                     # TODO: also check if user specified outside box, etc.
                     # Do not use auto mode if user specified any type of box
                     if 'inside box' not in self.param_list[idx]:
-                        self._get_auto_boxsize(self.mols[idx])
+                        self._get_auto_boxsize(idx)
 
                     for k, v in self.param_list[idx].iteritems():
                         inp.write('  {} {}\n'.format(k, self._format_packmol_str(v)))
@@ -88,6 +100,7 @@ if __name__ == '__main__':
            [-0.513360, -0.889165, -0.363000],
            [-0.513360, 0.889165, -0.363000]]
     mol = Molecule(["C", "H", "H", "H", "H"], coords) 
-    pmr = PackmolRunner([mol, mol], [{"number":4,"inside box":[0.,0.,0.,40.,40.,40.]}, {"number":5, "inside box":[0.,0.,0.,40.,40.,40.]}])
+#    pmr = PackmolRunner([mol, mol], [{"number":4,"inside box":[0.,0.,0.,40.,40.,40.]}, {"number":5, "inside box":[0.,0.,0.,40.,40.,40.]}])
+    pmr = PackmolRunner([mol, mol], [{"number":4,"inside box":[0.,0.,0.,40.,40.,40.]}, {"number":5}])
     s = pmr.run()
     print s
