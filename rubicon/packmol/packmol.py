@@ -7,6 +7,7 @@ from pymatgen.io.babelio import BabelMolAdaptor
 import pybel as pb
 import os
 from subprocess import Popen, PIPE
+import numpy as np
 
 
 class PackmolRunner(object):
@@ -42,15 +43,16 @@ class PackmolRunner(object):
         """
 
         mol=self.mols[idx]
-        print mol[0]
+#        print mol[0]
 #        print self.mols[idx][0]
-        lx=max(mol[i].coords[0] for i,atom in enumerate(mol))-min(mol[i].coords[0] for i,atom in enumerate(mol))
-        ly=max(mol[i].coords[1] for i,atom in enumerate(mol))-min(mol[i].coords[1] for i,atom in enumerate(mol))
-        lz=max(mol[i].coords[2] for i,atom in enumerate(mol))-min(mol[i].coords[2] for i,atom in enumerate(mol))
+#        lx=max(mol[i].coords[0] for i,atom in enumerate(mol))-min(mol[i].coords[0] for i,atom in enumerate(mol))
+#        ly=max(mol[i].coords[1] for i,atom in enumerate(mol))-min(mol[i].coords[1] for i,atom in enumerate(mol))
+#        lz=max(mol[i].coords[2] for i,atom in enumerate(mol))-min(mol[i].coords[2] for i,atom in enumerate(mol))
+        lx,ly,lz= np.max(mol.cart_coords,0)-np.min(mol.cart_coords,0)
         length=max(lx,ly,lz)+2.0
         length=length*int(self.param_list[idx]['number'])
         self.param_list[idx]['inside box']='0. 0. 0. {} {} {}'.format(length,length,length)
-        print self.param_list[idx]['inside box']
+#        print self.param_list[idx]['inside box']
 #        raise NotImplementedError('Auto box size is not implemented yet!')
 
     def run(self):
@@ -95,7 +97,7 @@ class PackmolRunner(object):
 
 if __name__ == '__main__':
     coords = [[0.000000, 0.000000, 0.000000],
-           [0.000000, 0.000000, 1.089000],
+           [0.000000, 0.000000,  1.089000],
            [1.026719, 0.000000, -0.363000],
            [-0.513360, -0.889165, -0.363000],
            [-0.513360, 0.889165, -0.363000]]
