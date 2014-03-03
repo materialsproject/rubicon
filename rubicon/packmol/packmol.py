@@ -101,7 +101,7 @@ class PackmolRunner(object):
                         inp.write('  {} {}\n'.format(k, self._format_packmol_str(v)))
                     inp.write('end structure\n')
 
-            proc = Popen(['./packmol'], stdin=open(os.path.join(d, 'pack.inp'), 'r'),stdout=PIPE)
+            proc = Popen(['packmol'], stdin=open(os.path.join(d, 'pack.inp'), 'r'),stdout=PIPE)
             (stdout, stderr) = proc.communicate()
 
             a = BabelMolAdaptor.from_file(os.path.join(d, "box.pdb"), "pdb")
