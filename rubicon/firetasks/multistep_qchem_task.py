@@ -9,10 +9,12 @@ import datetime
 from fireworks.core.firework import FireTaskBase, FWAction, Workflow
 from fireworks.utilities.fw_serializers import FWSerializable
 from pymatgen import Molecule
-from pymatgen.analysis.molecule_structure_comparator import MoleculeStructureComparator
+from pymatgen.analysis.molecule_structure_comparator import \
+    MoleculeStructureComparator
 from pymatgen.io.qchemio import QcInput
 
 from rubicon.borg.hive import DeltaSCFQChemToDbTaskDrone
+from rubicon.utils.eg_wf_utils import get_eg_file_loc
 from rubicon.utils.snl.egsnl import EGStructureNL
 from rubicon.utils.snl.egsnl_mongo import EGSNLMongoAdapter
 
@@ -47,8 +49,9 @@ class QChemGeomOptDBInsertionTask(FireTaskBase, FWSerializable):
             database=db_creds['database'], user=db_creds['admin_user'],
             password=db_creds['admin_password'],
             collection=db_creds['collection'])
-        t_id, d = drone.assimilate(os.path.abspath(
-            os.path.join(prev_dir, "mol.qcout")), fw_spec=fw_spec)
+        qcout_path = get_eg_file_loc(os.path.abspath(os.path.join(
+            prev_dir, "mol.qcout")))
+        t_id, d = drone.assimilate(qcout_path, fw_spec=fw_spec)
 
         if d["state"] == "successful":
             return FWAction(
@@ -104,8 +107,9 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
             database=db_creds['database'], user=db_creds['admin_user'],
             password=db_creds['admin_password'],
             collection=db_creds['collection'])
-        t_id, d = drone.assimilate(os.path.abspath(
-            os.path.join(prev_dir, "mol.qcout")), fw_spec=fw_spec)
+        qcout_path = get_eg_file_loc(os.path.abspath(os.path.join(
+            prev_dir, "mol.qcout")))
+        t_id, d = drone.assimilate(qcout_path, fw_spec=fw_spec)
 
         if d["state"] == "successful":
             if d['stationary_type'] == 'minimum':
@@ -142,12 +146,12 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
             update_spec=update_spec)
         geom_fwid_cal, geom_fwid_db = -1, -2
         freq_fwid_cal, freq_fwid_db = -3, -4
-        geom_fw_cal, geom_fw_db = fw_creator.geom_fw(charge, spin_multiplicity,
-            geom_fwid_cal, geom_fwid_db)
+        geom_fw_cal, geom_fw_db = fw_creator.geom_fw(
+            charge, spin_multiplicity, geom_fwid_cal, geom_fwid_db)
         geom_fw_cal.spec["run_tags"]["task_type_amend"] = "imaginary " \
             "frequency elimination"
-        freq_fw_cal, freq_fw_db = fw_creator.freq_fw(charge, spin_multiplicity,
-            freq_fwid_cal, freq_fwid_db)
+        freq_fw_cal, freq_fw_db = fw_creator.freq_fw(
+            charge, spin_multiplicity, freq_fwid_cal, freq_fwid_db)
         freq_fw_cal.spec["run_tags"]["task_type_amend"] = "imaginary " \
             "frequency elimination"
         if grid:
@@ -336,8 +340,9 @@ class QChemSinglePointEnergyDBInsertionTask(FireTaskBase, FWSerializable):
             database=db_creds['database'], user=db_creds['admin_user'],
             password=db_creds['admin_password'],
             collection=db_creds['collection'])
-        t_id, d = drone.assimilate(os.path.abspath(
-            os.path.join(prev_dir, "mol.qcout")), fw_spec=fw_spec)
+        qcout_path = get_eg_file_loc(os.path.abspath(os.path.join(
+            prev_dir, "mol.qcout")))
+        t_id, d = drone.assimilate(qcout_path, fw_spec=fw_spec)
 
         if d["state"] == "successful":
             return FWAction(

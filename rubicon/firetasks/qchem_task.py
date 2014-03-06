@@ -15,6 +15,8 @@ from fireworks.utilities.fw_serializers import FWSerializable
 from custodian.custodian import Custodian
 from pymatgen.core.structure import Molecule
 from pymatgen.io.qchemio import QcInput
+from rubicon.utils.eg_wf_utils import move_to_eg_garden
+from rubicon.workflows.wf_settings import MOVE_TO_EG_GARDEN
 
 __author__ = 'Anubhav Jain'
 __copyright__ = 'Copyright 2013, The Materials Project'
@@ -49,7 +51,7 @@ class QChemTask(FireTaskBase, FWSerializable):
         half_cpus_cmd = shlex.split("qchem -np 12")
         if "PBS_JOBID" in os.environ and \
                 ("hopque" in os.environ["PBS_JOBID"] or
-                         "edique" in os.environ["PBS_JOBID"]):
+                    "edique" in os.environ["PBS_JOBID"]):
         # hopper or edison compute nodes
             if (not fw_data.MULTIPROCESSING) or (fw_data.SUB_NPROCS is None):
                 qc_exe = shlex.split("qchem -np {}".format(min(24, len(mol))))
@@ -95,8 +97,12 @@ class QChemTask(FireTaskBase, FWSerializable):
             for correction in run['corrections']:
                 all_errors.update(correction['errors'])
 
+        prev_qchem_dir = os.getcwd()
+        if MOVE_TO_EG_GARDEN:
+            prev_qchem_dir = move_to_eg_garden(prev_qchem_dir)
+
         stored_data = {'error_list': list(all_errors)}
-        update_spec = {'prev_qchem_dir': os.getcwd(),
+        update_spec = {'prev_qchem_dir': prev_qchem_dir,
                        'prev_task_type': fw_spec['task_type'],
                        'egsnl': fw_spec['egsnl'],
                        'snlgroup_id': fw_spec['snlgroup_id'],

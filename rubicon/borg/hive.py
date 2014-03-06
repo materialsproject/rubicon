@@ -8,8 +8,10 @@ from __future__ import division
 from monty.io import zopen
 from monty.os.path import zpath
 from pymatgen import Molecule
-from pymatgen.analysis.molecule_structure_comparator import MoleculeStructureComparator
+from pymatgen.analysis.molecule_structure_comparator import \
+    MoleculeStructureComparator
 from pymatgen.io.qchemio import QcOutput
+from pymatgen.symmetry.pointgroup import PointGroupAnalyzer
 from rubicon.utils.snl.egsnl import EGStructureNL
 from rubicon.utils.snl.egsnl_mongo import EGSNLMongoAdapter
 
@@ -125,14 +127,16 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
         return new_svg
 
     @staticmethod
-    def _check_structure_change(mol1, mol2):
+    def _check_structure_change(mol1, mol2, qcout_path):
         """
         Check whether structure is changed:
 
         Return:
             True: structure changed, False: unchanged
         """
-        with zopen(zpath("FW.json")) as f:
+        dirname = os.path.dirname(qcout_path)
+        fw_spec_path = os.path.join(dirname, "FW.json")
+        with zopen(zpath(fw_spec_path)) as f:
             fw = json.load(f)
         if 'egsnl' not in fw['spec']:
             raise ValueError("Can't find initial SNL")
@@ -163,7 +167,6 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
         charge = mol.charge
         spin_mult = mol.spin_multiplicity
         data_dict = {}
-        from pymatgen.symmetry.pointgroup import PointGroupAnalyzer
 
         pga = PointGroupAnalyzer(mol)
         sch_symbol = pga.sch_symbol
@@ -220,7 +223,8 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
                 d['inchi_changed'] = True
             else:
                 d['inchi_changed'] = False
-        d['structure_changed'] = cls._check_structure_change(initial_mol, mol)
+        d['structure_changed'] = cls._check_structure_change(
+            initial_mol, mol, path)
         if d['structure_changed']:
             d['state'] = 'rejected'
             d['reject_reason'] = 'structural change'
@@ -258,12 +262,14 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
                     old_snl = EGStructureNL.from_dict(d['snl_initial'])
                     history = old_snl.history
                     history.append(
-                        {'name': 'Electrolyte Genome Project structure optimization',
+                        {'name': 'Electrolyte Genome Project structure '
+                                 'optimization',
                          'url': 'http://www.materialsproject.org',
                          'description': {'task_type': d['task_type'],
                                          'task_id': task_id,
                                          'when': datetime.datetime.utcnow()}})
-                    new_snl = EGStructureNL(new_s, old_snl.authors, old_snl.projects,
+                    new_snl = EGStructureNL(new_s, old_snl.authors,
+                                            old_snl.projects,
                                             old_snl.references, old_snl.remarks,
                                             old_snl.data, history)
 
@@ -280,7 +286,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
                     d['snl_final'] = fw_spec['egsnl']
                     d['snlgroup_id_final'] = fw_spec['snlgroup_id']
                 d['snlgroup_changed'] = (d['snlgroup_id_initial'] !=
-                                             d['snlgroup_id_final'])
+                                         d['snlgroup_id_final'])
 
     def _insert_doc(self, d, fw_spec=None):
         if not self.simulate:
