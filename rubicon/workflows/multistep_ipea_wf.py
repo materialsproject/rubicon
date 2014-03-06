@@ -170,8 +170,7 @@ class QChemFireWorkCreator():
         qctask_sol = QcTask(self.mol, charge=charge,
                             spin_multiplicity=spin_multiplicity,
                             jobtype="sp", title=title,
-                            exchange=self.dft, basis_set=self.bs,
-                            rem_params={"CHELPG": True})
+                            exchange=self.dft, basis_set=self.bs)
         qctask_sol.set_scf_initial_guess(guess="read")
         if not self.large:
             qctask_sol.use_pcm(solvent_params={"Dielectric": 78.3553})
