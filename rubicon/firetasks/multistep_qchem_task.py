@@ -14,7 +14,8 @@ from pymatgen.analysis.molecule_structure_comparator import \
 from pymatgen.io.qchemio import QcInput
 
 from rubicon.borg.hive import DeltaSCFQChemToDbTaskDrone
-from rubicon.utils.eg_wf_utils import get_eg_file_loc
+from rubicon.utils.eg_wf_utils import get_eg_file_loc, \
+    get_defuse_causing_qchem_fwid
 from rubicon.utils.snl.egsnl import EGStructureNL
 from rubicon.utils.snl.egsnl_mongo import EGSNLMongoAdapter
 
@@ -69,13 +70,15 @@ class QChemGeomOptDBInsertionTask(FireTaskBase, FWSerializable):
             else:
                 inchi_root = fw_spec['inchi_root']
                 defuse_reason = d.get("errors", "unknown")
+            offending_fwid = get_defuse_causing_qchem_fwid(qcout_path)
             return FWAction(
                 stored_data={'task_id': t_id},
                 update_spec={'mol': d["molecule_final"],
                              'egsnl': d["snl_final"],
                              'snlgroup_id': d["snlgroup_id_final"],
                              'inchi_root': inchi_root,
-                             'defuse_reason': defuse_reason},
+                             'defuse_reason': defuse_reason,
+                             'offending_fwid': offending_fwid},
                 defuse_children=True)
 
 
@@ -121,9 +124,10 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                         'snlgroup_id': d["snlgroup_id_final"],
                         'inchi_root': fw_spec["inchi_root"]})
             else:
-                return self.img_freq_action(fw_spec, d, t_id)
+                return self.img_freq_action(fw_spec, d, t_id, qcout_path)
         else:
             defuse_reason = d.get("errors", "unknown")
+            offending_fwid = get_defuse_causing_qchem_fwid(qcout_path)
             return FWAction(
                 stored_data={'task_id': t_id},
                 defuse_children=True,
@@ -132,7 +136,8 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                     'egsnl': d["snl_final"],
                     'snlgroup_id': d["snlgroup_id_final"],
                     'inchi_root': fw_spec["inchi_root"],
-                    'defuse_reason': defuse_reason})
+                    'defuse_reason': defuse_reason,
+                    'offending_fwid': offending_fwid})
 
     @staticmethod
     def spawn_opt_freq_wf(mol, molname, mission, additional_user_tags,
@@ -208,7 +213,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                            spin_multiplicity=spin_multiplicity)
         return new_mol
 
-    def img_freq_action(self, fw_spec, d, t_id):
+    def img_freq_action(self, fw_spec, d, t_id, qcout_path):
         if "img_freq_eli" in d['user_tags']:
             img_freq_eli = copy.deepcopy(d['user_tags']["img_freq_eli"])
             img_freq_eli['current_method_id'] += 1
@@ -219,6 +224,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
 
         if img_freq_eli['current_method_id'] >= len(img_freq_eli['methods']):
             logging.error("Failed to eliminate imaginary frequency")
+            offending_fwid = get_defuse_causing_qchem_fwid(qcout_path)
             return FWAction(
                 stored_data={'task_id': t_id},
                 defuse_children=True,
@@ -227,7 +233,8 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                              'snlgroup_id': fw_spec['snlgroup_id'],
                              'inchi_root': fw_spec["inchi_root"],
                              'defuse_reason': "imaginary frequency "
-                                              "elimination failed"})
+                                              "elimination failed",
+                             'offending_fwid': offending_fwid})
 
         new_mol = self.perturb_molecule(d)
         old_mol = Molecule.from_dict(d['molecule_final'])
@@ -238,6 +245,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
             structure_changed = self._check_structure_change(
                 old_mol, new_mol, fw_spec)
         if structure_changed:
+            offending_fwid = get_defuse_causing_qchem_fwid(qcout_path)
             return FWAction(
                 stored_data={'task_id': t_id},
                 defuse_children=True,
@@ -248,7 +256,8 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                     'snlgroup_id': fw_spec['snlgroup_id'],
                     'inchi_root': fw_spec["inchi_root"],
                     'defuse_reason': "structural change in imaginary "
-                                     "frequency elimination"})
+                                     "frequency elimination",
+                    'offending_fwid': offending_fwid})
         molname = d['user_tags']['molname']
         mission = d['user_tags']['mission']
         additional_user_tags = {"img_freq_eli": img_freq_eli}
@@ -353,6 +362,7 @@ class QChemSinglePointEnergyDBInsertionTask(FireTaskBase, FWSerializable):
                     'snlgroup_id': d['snlgroup_id_final'],
                     'inchi_root': fw_spec["inchi_root"]})
         else:
+            offending_fwid = get_defuse_causing_qchem_fwid(qcout_path)
             return FWAction(
                 stored_data={'task_id': t_id},
                 defuse_children=True,
@@ -361,4 +371,5 @@ class QChemSinglePointEnergyDBInsertionTask(FireTaskBase, FWSerializable):
                     'egsnl': d['snl_final'],
                     'snlgroup_id': d['snlgroup_id_final'],
                     'inchi_root': fw_spec["inchi_root"],
-                    'defuse_reason': 'SCF failed'})
+                    'defuse_reason': 'SCF failed',
+                    'offending_fwid': offending_fwid})

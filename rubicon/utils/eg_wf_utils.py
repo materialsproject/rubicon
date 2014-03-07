@@ -1,3 +1,4 @@
+import json
 import os
 import shutil
 from rubicon.workflows.wf_settings import EG_RUN_LOCS
@@ -66,3 +67,12 @@ def move_to_eg_garden(m_dir):
                          .format(dest_dir))
     shutil.move(m_dir, dest_dir)
     return dest_dir
+
+
+def get_defuse_causing_qchem_fwid(qcout_path):
+    dirname = os.path.dirname(qcout_path)
+    fw_spec_path = os.path.join(dirname, "FW.json")
+    with zopen(zpath(fw_spec_path)) as f:
+        fw_dict = json.load(f)
+    fw_id = fw_dict["fw_id"]
+    return fw_id
