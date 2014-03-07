@@ -4,7 +4,6 @@ from pymatgen.io.babelio import BabelMolAdaptor
 from pymatgen.matproj.snl import StructureNL
 from rubicon.utils.snl.egsnl_mongo import EGSNLMongoAdapter
 
-
 class AddEGSNLTask(FireTaskBase, FWSerializable):
     """
     Add a new SNL into the SNL database, and build duplicate groups

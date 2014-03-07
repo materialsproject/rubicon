@@ -15,6 +15,8 @@ from fireworks.utilities.fw_serializers import FWSerializable
 from custodian.custodian import Custodian
 from pymatgen.core.structure import Molecule
 from pymatgen.io.qchemio import QcInput
+from rubicon.utils.eg_wf_utils import move_to_eg_garden
+from rubicon.workflows.wf_settings import MOVE_TO_EG_GARDEN
 
 __author__ = 'Anubhav Jain'
 __copyright__ = 'Copyright 2013, The Materials Project'
@@ -43,17 +45,23 @@ class QChemTask(FireTaskBase, FWSerializable):
                 if isinstance(qj.mol, Molecule):
                     qj.mol = copy.deepcopy(mol)
         mol = qcinp.jobs[0].mol
-        qcinp.write_file("mol.qcinp")
-        hopper_name_pattern = re.compile("nid\d+")
+
         carver_name_pattern = re.compile("c[0-9]{4}-ib")
         fw_data = FWData()
-        if hopper_name_pattern.match(socket.gethostname()):
-        # hopper compute nodes
+        half_cpus_cmd = shlex.split("qchem -np 12")
+        if "PBS_JOBID" in os.environ and \
+                ("hopque" in os.environ["PBS_JOBID"] or
+                    "edique" in os.environ["PBS_JOBID"]):
+        # hopper or edison compute nodes
             if (not fw_data.MULTIPROCESSING) or (fw_data.SUB_NPROCS is None):
                 qc_exe = shlex.split("qchem -np {}".format(min(24, len(mol))))
+                half_cpus_cmd = shlex.split("qchem -np {}".format(
+                    min(12, len(mol))))
             else:
                 qc_exe = shlex.split("qchem -np {}".format(
                     min(fw_data.SUB_NPROCS, len(mol))))
+                half_cpus_cmd = shlex.split("qchem -np {}".format(
+                    min(fw_data.SUB_NPROCS/2, len(mol))))
         elif carver_name_pattern.match(socket.gethostname()):
         # mendel compute nodes
             qc_exe = shlex.split("qchem -np {}".format(min(8, len(mol))))
@@ -67,9 +75,20 @@ class QChemTask(FireTaskBase, FWSerializable):
         sh.setLevel(getattr(logging, 'INFO'))
         logger.addHandler(sh)
 
+        scf_max_cycles = 200
+        geom_max_cycles = 200
+        alt_cmd = {"half_cpus": half_cpus_cmd,
+                   "openmp": shlex.split("qchem -seq -nt 24")}
+        if fw_spec['num_atoms'] > 50:
+            scf_max_cycles = 300
+            geom_max_cycles = 500
+
+        qcinp.write_file("mol.qcinp")
         job = QchemJob(qc_exe, input_file="mol.qcinp", output_file="mol.qcout",
-                       qclog_file="mol.qclog")
-        handler = QChemErrorHandler()
+                       qclog_file="mol.qclog", alt_cmd=alt_cmd, gzipped=True)
+        handler = QChemErrorHandler(qchem_job=job,
+                                    scf_max_cycles=scf_max_cycles,
+                                    geom_max_cycles=geom_max_cycles)
         c = Custodian(handlers=[handler], jobs=[job], max_errors=50)
         custodian_out = c.run()
 
@@ -78,8 +97,12 @@ class QChemTask(FireTaskBase, FWSerializable):
             for correction in run['corrections']:
                 all_errors.update(correction['errors'])
 
+        prev_qchem_dir = os.getcwd()
+        if MOVE_TO_EG_GARDEN:
+            prev_qchem_dir = move_to_eg_garden(prev_qchem_dir)
+
         stored_data = {'error_list': list(all_errors)}
-        update_spec = {'prev_qchem_dir': os.getcwd(),
+        update_spec = {'prev_qchem_dir': prev_qchem_dir,
                        'prev_task_type': fw_spec['task_type'],
                        'egsnl': fw_spec['egsnl'],
                        'snlgroup_id': fw_spec['snlgroup_id'],

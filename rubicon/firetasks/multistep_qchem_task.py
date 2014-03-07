@@ -9,10 +9,13 @@ import datetime
 from fireworks.core.firework import FireTaskBase, FWAction, Workflow
 from fireworks.utilities.fw_serializers import FWSerializable
 from pymatgen import Molecule
-from pymatgen.analysis.molecule_structure_comparator import MoleculeStructureComparator
+from pymatgen.analysis.molecule_structure_comparator import \
+    MoleculeStructureComparator
 from pymatgen.io.qchemio import QcInput
 
 from rubicon.borg.hive import DeltaSCFQChemToDbTaskDrone
+from rubicon.utils.eg_wf_utils import get_eg_file_loc, \
+    get_defuse_causing_qchem_fwid
 from rubicon.utils.snl.egsnl import EGStructureNL
 from rubicon.utils.snl.egsnl_mongo import EGSNLMongoAdapter
 
@@ -47,45 +50,36 @@ class QChemGeomOptDBInsertionTask(FireTaskBase, FWSerializable):
             database=db_creds['database'], user=db_creds['admin_user'],
             password=db_creds['admin_password'],
             collection=db_creds['collection'])
-        assi_result = drone.assimilate(os.path.abspath(
-            os.path.join(prev_dir, "mol.qcout")), fw_spec=fw_spec)
+        qcout_path = get_eg_file_loc(os.path.abspath(os.path.join(
+            prev_dir, "mol.qcout")))
+        t_id, d = drone.assimilate(qcout_path, fw_spec=fw_spec)
 
-        t_id = None
-        d = None
-        if assi_result:
-            t_id, d = assi_result
-        if t_id:
-            if d["state"] == "successful":
-                return FWAction(
-                    stored_data={'task_id': t_id},
-                    update_spec={
-                        'mol': d["molecule_final"],
-                        'egsnl': d["snl_final"],
-                        'snlgroup_id': d["snlgroup_id_final"],
-                        'inchi_root': fw_spec["inchi_root"]})
-            else:
-                if d['state'] == 'rejected' and \
-                        d['reject_reason'] == 'structural change':
-                    inchi_root = d['snlgroup_id_final']
-                    defuse_reason = 'structural change'
-                else:
-                    inchi_root = fw_spec['inchi_root']
-                    defuse_reason = d.get("errors", "unknown")
-                return FWAction(
-                    stored_data={'task_id': t_id},
-                    update_spec={'mol': d["molecule_final"],
-                                 'egsnl': d["snl_final"],
-                                 'snlgroup_id': d["snlgroup_id_final"],
-                                 'inchi_root': inchi_root,
-                                 'defuse_reason': defuse_reason},
-                    defuse_children=True)
-        else:
+        if d["state"] == "successful":
             return FWAction(
-                defuse_children=True,
-                update_spec={'egsnl': fw_spec['egsnl'],
-                             'snlgroup_id': fw_spec['snlgroup_id'],
-                             'inchi_root': fw_spec["inchi_root"],
-                             'defuse_reason': 'parsing failed'})
+                stored_data={'task_id': t_id},
+                update_spec={
+                    'mol': d["molecule_final"],
+                    'egsnl': d["snl_final"],
+                    'snlgroup_id': d["snlgroup_id_final"],
+                    'inchi_root': fw_spec["inchi_root"]})
+        else:
+            if d['state'] == 'rejected' and \
+                    d['reject_reason'] == 'structural change':
+                inchi_root = d['snlgroup_id_final']
+                defuse_reason = 'structural change'
+            else:
+                inchi_root = fw_spec['inchi_root']
+                defuse_reason = d.get("errors", "unknown")
+            offending_fwid = get_defuse_causing_qchem_fwid(qcout_path)
+            return FWAction(
+                stored_data={'task_id': t_id},
+                update_spec={'mol': d["molecule_final"],
+                             'egsnl': d["snl_final"],
+                             'snlgroup_id': d["snlgroup_id_final"],
+                             'inchi_root': inchi_root,
+                             'defuse_reason': defuse_reason,
+                             'offending_fwid': offending_fwid},
+                defuse_children=True)
 
 
 class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
@@ -116,44 +110,34 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
             database=db_creds['database'], user=db_creds['admin_user'],
             password=db_creds['admin_password'],
             collection=db_creds['collection'])
-        assi_result = drone.assimilate(os.path.abspath(
-            os.path.join(prev_dir, "mol.qcout")), fw_spec=fw_spec)
+        qcout_path = get_eg_file_loc(os.path.abspath(os.path.join(
+            prev_dir, "mol.qcout")))
+        t_id, d = drone.assimilate(qcout_path, fw_spec=fw_spec)
 
-        t_id = None
-        d = None
-        if assi_result:
-            t_id, d = assi_result
-        if t_id:
-            if d["state"] == "successful":
-                if d['stationary_type'] == 'minimum':
-                    return FWAction(
-                        stored_data={'task_id': t_id},
-                        update_spec={
-                            'mol': d["molecule_final"],
-                            'egsnl': d["snl_final"],
-                            'snlgroup_id': d["snlgroup_id_final"],
-                            'inchi_root': fw_spec["inchi_root"]})
-                else:
-                    return self.img_freq_action(fw_spec, d, t_id)
-            else:
-                defuse_reason = d.get("errors", "unknown")
+        if d["state"] == "successful":
+            if d['stationary_type'] == 'minimum':
                 return FWAction(
                     stored_data={'task_id': t_id},
-                    defuse_children=True,
                     update_spec={
                         'mol': d["molecule_final"],
                         'egsnl': d["snl_final"],
                         'snlgroup_id': d["snlgroup_id_final"],
-                        'inchi_root': fw_spec["inchi_root"],
-                        'defuse_reason': defuse_reason})
-
+                        'inchi_root': fw_spec["inchi_root"]})
+            else:
+                return self.img_freq_action(fw_spec, d, t_id, qcout_path)
         else:
+            defuse_reason = d.get("errors", "unknown")
+            offending_fwid = get_defuse_causing_qchem_fwid(qcout_path)
             return FWAction(
+                stored_data={'task_id': t_id},
                 defuse_children=True,
-                update_spec={'egsnl': fw_spec['egsnl'],
-                             'snlgroup_id': fw_spec['snlgroup_id'],
-                             'inchi_root': fw_spec["inchi_root"],
-                             'defuse_reason': 'parsing failed'})
+                update_spec={
+                    'mol': d["molecule_final"],
+                    'egsnl': d["snl_final"],
+                    'snlgroup_id': d["snlgroup_id_final"],
+                    'inchi_root': fw_spec["inchi_root"],
+                    'defuse_reason': defuse_reason,
+                    'offending_fwid': offending_fwid})
 
     @staticmethod
     def spawn_opt_freq_wf(mol, molname, mission, additional_user_tags,
@@ -167,12 +151,12 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
             update_spec=update_spec)
         geom_fwid_cal, geom_fwid_db = -1, -2
         freq_fwid_cal, freq_fwid_db = -3, -4
-        geom_fw_cal, geom_fw_db = fw_creator.geom_fw(charge, spin_multiplicity,
-            geom_fwid_cal, geom_fwid_db)
+        geom_fw_cal, geom_fw_db = fw_creator.geom_fw(
+            charge, spin_multiplicity, geom_fwid_cal, geom_fwid_db)
         geom_fw_cal.spec["run_tags"]["task_type_amend"] = "imaginary " \
             "frequency elimination"
-        freq_fw_cal, freq_fw_db = fw_creator.freq_fw(charge, spin_multiplicity,
-            freq_fwid_cal, freq_fwid_db)
+        freq_fw_cal, freq_fw_db = fw_creator.freq_fw(
+            charge, spin_multiplicity, freq_fwid_cal, freq_fwid_db)
         freq_fw_cal.spec["run_tags"]["task_type_amend"] = "imaginary " \
             "frequency elimination"
         if grid:
@@ -229,7 +213,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                            spin_multiplicity=spin_multiplicity)
         return new_mol
 
-    def img_freq_action(self, fw_spec, d, t_id):
+    def img_freq_action(self, fw_spec, d, t_id, qcout_path):
         if "img_freq_eli" in d['user_tags']:
             img_freq_eli = copy.deepcopy(d['user_tags']["img_freq_eli"])
             img_freq_eli['current_method_id'] += 1
@@ -240,6 +224,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
 
         if img_freq_eli['current_method_id'] >= len(img_freq_eli['methods']):
             logging.error("Failed to eliminate imaginary frequency")
+            offending_fwid = get_defuse_causing_qchem_fwid(qcout_path)
             return FWAction(
                 stored_data={'task_id': t_id},
                 defuse_children=True,
@@ -248,7 +233,8 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                              'snlgroup_id': fw_spec['snlgroup_id'],
                              'inchi_root': fw_spec["inchi_root"],
                              'defuse_reason': "imaginary frequency "
-                                              "elimination failed"})
+                                              "elimination failed",
+                             'offending_fwid': offending_fwid})
 
         new_mol = self.perturb_molecule(d)
         old_mol = Molecule.from_dict(d['molecule_final'])
@@ -259,6 +245,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
             structure_changed = self._check_structure_change(
                 old_mol, new_mol, fw_spec)
         if structure_changed:
+            offending_fwid = get_defuse_causing_qchem_fwid(qcout_path)
             return FWAction(
                 stored_data={'task_id': t_id},
                 defuse_children=True,
@@ -269,7 +256,8 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                     'snlgroup_id': fw_spec['snlgroup_id'],
                     'inchi_root': fw_spec["inchi_root"],
                     'defuse_reason': "structural change in imaginary "
-                                     "frequency elimination"})
+                                     "frequency elimination",
+                    'offending_fwid': offending_fwid})
         molname = d['user_tags']['molname']
         mission = d['user_tags']['mission']
         additional_user_tags = {"img_freq_eli": img_freq_eli}
@@ -361,36 +349,27 @@ class QChemSinglePointEnergyDBInsertionTask(FireTaskBase, FWSerializable):
             database=db_creds['database'], user=db_creds['admin_user'],
             password=db_creds['admin_password'],
             collection=db_creds['collection'])
-        assi_result = drone.assimilate(os.path.abspath(
-            os.path.join(prev_dir, "mol.qcout")), fw_spec=fw_spec)
+        qcout_path = get_eg_file_loc(os.path.abspath(os.path.join(
+            prev_dir, "mol.qcout")))
+        t_id, d = drone.assimilate(qcout_path, fw_spec=fw_spec)
 
-        t_id = None
-        d = None
-        if assi_result:
-            t_id, d = assi_result
-        if t_id:
-            if d["state"] == "successful":
-                return FWAction(
-                    stored_data={'task_id': t_id},
-                    update_spec={
-                        'mol': d["molecule_final"],
-                        'egsnl': d['snl_final'],
-                        'snlgroup_id': d['snlgroup_id_final'],
-                        'inchi_root': fw_spec["inchi_root"]})
-            else:
-                return FWAction(
-                    stored_data={'task_id': t_id},
-                    defuse_children=True,
-                    update_spec={
-                        'mol': d["molecule_final"],
-                        'egsnl': d['snl_final'],
-                        'snlgroup_id': d['snlgroup_id_final'],
-                        'inchi_root': fw_spec["inchi_root"],
-                        'defuse_reason': 'SCF failed'})
-        else:
+        if d["state"] == "successful":
             return FWAction(
+                stored_data={'task_id': t_id},
+                update_spec={
+                    'mol': d["molecule_final"],
+                    'egsnl': d['snl_final'],
+                    'snlgroup_id': d['snlgroup_id_final'],
+                    'inchi_root': fw_spec["inchi_root"]})
+        else:
+            offending_fwid = get_defuse_causing_qchem_fwid(qcout_path)
+            return FWAction(
+                stored_data={'task_id': t_id},
                 defuse_children=True,
-                update_spec={'egsnl': fw_spec['egsnl'],
-                             'snlgroup_id': fw_spec['snlgroup_id'],
-                             'inchi_root': fw_spec["inchi_root"],
-                             'defuse_reason': 'parsing failed'})
+                update_spec={
+                    'mol': d["molecule_final"],
+                    'egsnl': d['snl_final'],
+                    'snlgroup_id': d['snlgroup_id_final'],
+                    'inchi_root': fw_spec["inchi_root"],
+                    'defuse_reason': 'SCF failed',
+                    'offending_fwid': offending_fwid})

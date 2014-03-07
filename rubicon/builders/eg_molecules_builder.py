@@ -111,6 +111,7 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         molecule["implicit_solvent"] = copy.deepcopy(docs["neutral"][
             "implicit_solvent"])
         molecule["pretty_formula"] = docs["neutral"]["pretty_formula"]
+        molecule["formula"] = docs["neutral"]["formula"]
         molecule["pointgroup"] = docs["neutral"]["pointgroup"]
 
         molecule["task_id"] = dict()
@@ -154,13 +155,14 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
                 docs["anion"]["calculations"]["scf_pcm"]["energies"][-1][-1]
         molecule['electrode_potentials'] = dict()
         if 'IP' in molecule:
-            molecule['electrode_potentials']['cation_reduction'] \
+            molecule['electrode_potentials']['oxidation'] \
                 = {'vacuum': dict(), 'sol': dict()}
             for phase in molecule['IP'].keys():
                 for electrode in self.ref_potentials.keys():
-                    molecule['electrode_potentials']['cation_reduction'][phase][
+                    molecule['electrode_potentials']['oxidation'][phase][
                         electrode] \
-                        = molecule['IP'][phase] - self.ref_potentials[electrode]
+                        = -(molecule['IP'][phase] -
+                            self.ref_potentials[electrode])
         if 'EA' in molecule:
             molecule['electrode_potentials']['reduction'] = {'vacuum': dict(),
                                                              'sol': dict()}
