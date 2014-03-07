@@ -1,5 +1,6 @@
 import glob
 from topology import AC, TopBond, TopAngle, TopDihedral, TopImDihedral, TopBondFF, TopAngleFF
+from lamppsio import LMPInput
 
 __author__ = 'navnidhirajput'
 
@@ -67,11 +68,11 @@ for mol in mols:
 
     bd = TopBond()
     bd.get_bonds('mol.rtf')
-    #print "BONDS", bd.bonds
+    print "Top BONDS", bd.bonds
 
     an = TopAngle()
     an.get_angles('mol.rtf')
-    #print "ANGLES",an.angles
+    print "Top ANGLES",an.angles
 
     dh = TopDihedral()
     dh.get_dihedrals('mol.rtf')
@@ -85,29 +86,42 @@ for mol in mols:
     my_gff.read_forcefield_para('mol.prm')
     print "gaff_bonds",my_gff.bonds
     print "gaff_angles",my_gff.angles
-    print "gaff_dihedrals",my_gff.dihedrals
+    #print "gaff_dihedrals",my_gff.dihedrals
     #d1 = my_gff1.to_dict
     #print d1
 
 
     atom_gaff = AC()
     atom_gaff.read_atomType('ANTECHAMBER_AC.AC')
+    print "Atom Gaff",atom_gaff.atom_gaff
+
 
     my_gff_lib = GFF_library()
     my_gff_lib.append_gff()
 
-    my_gff2 = GFF()
-    my_gff2.read_forcefield_para('mol.prm')
-
     my_topbondff = TopBondFF()
-    my_topbondff.get_FF_bonds(my_gff2.bonds, bd.bonds, atom_gaff.atom_gaff)
+    my_topbondff.get_FF_bonds(my_gff.bonds, bd.bonds, atom_gaff.atom_gaff)
     print "bond_label:bond_type,bond_parameter",my_topbondff.topbondFF
 
     my_topangleff = TopAngleFF()
-    my_topangleff.get_FF_angles(my_gff2.angles, an.angles, atom_gaff.atom_gaff)
+    my_topangleff.get_FF_angles(my_gff.angles, an.angles, atom_gaff.atom_gaff)
 
-    my_ant.clean_files()
+    #my_ant.clean_files()
     gff_list.append(gff)
+
+    my_lampps=LMPInput()
+    my_lampps.set_bond_types(my_gff.bonds)
+    my_lampps.set_angle_types(my_gff.angles)
+    my_lampps.set_dihedral_types(my_gff.dihedrals)
+    my_lampps.set_improper_types(my_gff.imdihedrals)
+    print atom_gaff.num_types,my_lampps.bonds,my_lampps.angles,my_lampps.dihedrals,my_lampps.imdihedrals
+
+
+
+"""
+making lampps input file
+"""
+
 
 
 

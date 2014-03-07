@@ -39,7 +39,7 @@ class AC():
                     self.gaff_name=token[-1]
                     self.atom_gaff[self.atom_name]=self.gaff_name
             self.atom_gaff.update(self.atom_gaff)
-
+        self.num_types = len(set(self.atom_gaff.values()))
 
 
 
@@ -158,6 +158,7 @@ class TopBondFF():
         for keys, values in bonds.iteritems():
                 self.gaff_info=[keys,values]
 
+
         for item in top_bond:
             d1=item[0]+'-'+ item[1]
             a1=atom_gaff[item[0]]
@@ -166,7 +167,7 @@ class TopBondFF():
                 self.topbondFF[d1]=(a1+'-'+a2,bonds[a1+'-'+a2])
             else:
                 self.topbondFF[d1]=(a2+'-'+a1,bonds[a2+'-'+a1])
-       
+
 
 
 
