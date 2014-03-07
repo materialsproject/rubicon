@@ -1,13 +1,16 @@
 import json
 import os
 import shutil
+from monty.io import zopen
+from monty.os.path import zpath
 from rubicon.workflows.wf_settings import EG_RUN_LOCS
 
 __author__ = 'xiaohuiqu'
 
 
 def get_eg_block_part(m_dir):
-    grandpa_dir, parent_dir = os.path.split(m_dir)[-2:]
+    parent_dir = os.path.basename(m_dir)
+    grandpa_dir = os.path.basename(os.path.dirname(m_dir))
     return grandpa_dir, parent_dir
 
 
@@ -48,7 +51,7 @@ def move_to_eg_garden(m_dir):
     garden_part = os.path.abspath(os.environ["GARDEN_LOC"])
     if os.path.exists(m_dir) or os.path.exists(m_dir + ".gz"):
         if not os.path.isdir(m_dir):
-            m_dir = m_dir
+            m_dir = os.path.dirname(m_dir)
     else:
         raise ValueError("The folder \"{}\" doesn't exist".format(m_dir))
     grandpa_dir, parent_dir = get_eg_block_part(m_dir)
