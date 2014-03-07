@@ -1,3 +1,4 @@
+inspyred
 numpy>=1.7.0
 pymatgen>=2.6
 fireworks>=0.1
