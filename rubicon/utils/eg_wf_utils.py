@@ -21,9 +21,11 @@ def get_eg_dir_loc(m_dir):
     all_locs = []
     if "GARDEN_LOC" in os.environ:
         all_locs.append(os.environ["GARDEN_LOC"])
-    for scr in ["GSCRATCH", "SCRATCH", "SCRATCH2"]:
+    for scr_key in ["GSCRATCH", "SCRATCH", "SCRATCH2"]:
         for loc in EG_RUN_LOCS:
-            all_locs.append(os.path.join(scr, loc))
+            if scr_key in os.environ:
+                scr = os.environ[scr_key]
+                all_locs.append(os.path.join(scr, loc))
 
     grandpa_dir, parent_dir = get_eg_block_part(m_dir)
 
