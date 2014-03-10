@@ -1,14 +1,17 @@
 from random import Random
 from time import time
 import inspyred
+from pymatgen.analysis.molecule_structure_comparator import CovalentRadius
+import openbabel as ob
 
 
 class HardSphereIonPlacer():
-    def __init__(self, molecule, cation, anion, prng=None):
+    def __init__(self, molecule, cation, anion, prng=None, radius_scale=2.0):
         lower_bound = [-100.0, -50.0]
         upper_bound = [100.0, 50.0]
         self.bounder = inspyred.ec.Bounder(lower_bound, upper_bound)
         self.prng = prng if prng else Random()
+        self.radius_scale = radius_scale
         self.seed = time()
         self.prng.seed(self.seed)
         self.final_pop = None
@@ -21,6 +24,22 @@ class HardSphereIonPlacer():
         self.anion = anion
 
 
+    @staticmethod
+    def normalize_molecule(mol, radius_scale):
+        mol.Center()
+        coords = []
+        radius = []
+        ref_radius = CovalentRadius.radius
+        num_atoms = mol.NumAtoms()
+        element_table = ob.OBElementTable()
+        for i in range(1, num_atoms + 1):
+            a = mol.GetAtom(i)
+            atomic_num = a.GetAtomicNum()
+            symbol = element_table.GetSymbol(atomic_num)
+            rad = ref_radius[symbol] * radius_scale
+            radius.append(rad)
+            coords.append([a.GetX(), a.GetY(), a.GetZ()])
+        return coords, radius
 
 
 
