@@ -4,7 +4,7 @@ import inspyred
 
 
 class HardSphereIonPlacer():
-    def __init__(self, prng=None):
+    def __init__(self, molecule, cation, anion, prng=None):
         lower_bound = [-100.0, -50.0]
         upper_bound = [100.0, 50.0]
         self.bounder = inspyred.ec.Bounder(lower_bound, upper_bound)
@@ -16,6 +16,13 @@ class HardSphereIonPlacer():
         self.ea = inspyred.swarm.PSO(self.prng)
         self.ea.terminator = inspyred.ec.terminators.evaluation_termination
         self.ea.topology = inspyred.swarm.topologies.ring_topology
+        self.molecule = molecule
+        self.cation = cation
+        self.anion = anion
+
+
+
+
 
     @staticmethod
     def generate_conformers(random, args):
