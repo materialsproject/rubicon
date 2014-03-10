@@ -1,15 +1,20 @@
+import copy
 from random import Random
 from time import time
 import inspyred
+import math
 from pymatgen.analysis.molecule_structure_comparator import CovalentRadius
 import openbabel as ob
+from pymatgen.core.structure import Molecule
 
 
 class HardSphereIonPlacer():
-    def __init__(self, molecule, cation, anion, prng=None, radius_scale=2.0):
-        lower_bound = [-100.0, -50.0]
-        upper_bound = [100.0, 50.0]
-        self.bounder = inspyred.ec.Bounder(lower_bound, upper_bound)
+    overlap_energy = 1.0E4
+    angstrom2au = 1.0/0.52917721092
+
+    def __init__(self, molecule, molecule_charges, cation,
+                 cation_charges, anion, anion_charges,
+                 num_cation=1, num_anion=1, prng=None, radius_scale=2.0):
         self.prng = prng if prng else Random()
         self.radius_scale = radius_scale
         self.seed = time()
@@ -22,13 +27,59 @@ class HardSphereIonPlacer():
         self.molecule = molecule
         self.cation = cation
         self.anion = anion
+        self.num_cation = num_cation
+        self.num_anion = num_anion
+        self.mol_charges = molecule_charges
+        self.cation_charges = cation_charges
+        self.anion_charges = anion_charges
+        self.mol_coords, self.mol_radius, self.mol_elements =\
+            self.normalize_molecule(self.molecule, self.radius_scale)
+        cation_coords, self.cation_radius, self.cation_elements = \
+            self.normalize_molecule(self.cation, self.radius_scale)
+        anion_coords, self.anion_radius, self.anion_elements = \
+            self.normalize_molecule(self.anion, self.radius_scale)
+        self.bounder = None
+        self.set_bounder()
+        self.best_pymatgen_mol = None
+
+
+    def set_bounder(self):
+        lower_bound = []
+        upper_bound = []
+        cation_num_atoms = self.cation.NumAtoms()
+        anion_num_atoms = self.anion.NumAtoms()
+        mol_radius = max([math.sqrt(sum([x**2 for x in c]))
+                          for c in self.mol_coords])
+        cation_coords = self.get_mol_coords(self.cation)
+        cation_radius = max([math.sqrt(sum([x**2 for x in c]))
+                             for c in cation_coords])
+        anion_coords = self.get_mol_coords(self.anion)
+        anion_radius = max([math.sqrt(sum([x**2 for x in c]))
+                             for c in anion_coords])
+        max_length = 2 * (mol_radius + cation_radius * self.num_cation +
+                          anion_radius * self.num_anion)
+        x_min = max_length + 5.0 * (self.num_cation + self.num_anion)
+        for i in range(self.num_cation):
+            lower_bound.extend([-x_min] * 3)
+            upper_bound.extend([x_min] * 3)
+            if cation_num_atoms > 1:
+                lower_bound.extend([0.0, -math.pi])
+                upper_bound.extend([math.pi, math.pi])
+        for i in range(self.num_anion):
+            lower_bound.extend([-x_min] * 3)
+            upper_bound.extend([x_min] * 3)
+            if anion_num_atoms > 1:
+                lower_bound.extend([0.0, -math.pi])
+                upper_bound.extend([math.pi, math.pi])
+        self.bounder = inspyred.ec.Bounder(lower_bound, upper_bound)
+        return self.bounder
 
 
     @staticmethod
     def normalize_molecule(mol, radius_scale):
         mol.Center()
-        coords = []
         radius = []
+        species = []
         ref_radius = CovalentRadius.radius
         num_atoms = mol.NumAtoms()
         element_table = ob.OBElementTable()
@@ -36,11 +87,98 @@ class HardSphereIonPlacer():
             a = mol.GetAtom(i)
             atomic_num = a.GetAtomicNum()
             symbol = element_table.GetSymbol(atomic_num)
+            species.append(species)
             rad = ref_radius[symbol] * radius_scale
             radius.append(rad)
-            coords.append([a.GetX(), a.GetY(), a.GetZ()])
-        return coords, radius
+        coords = HardSphereIonPlacer.get_mol_coords(mol)
+        return coords, radius, species
 
+    @staticmethod
+    def get_mol_coords(mol):
+        coords = []
+        num_atoms = mol.NumAtoms()
+        for i in range(1, num_atoms + 1):
+            a = mol.GetAtom(i)
+            coords.append([a.GetX() * HardSphereIonPlacer.angstrom2au,
+                           a.GetY() * HardSphereIonPlacer.angstrom2au,
+                           a.GetZ() * HardSphereIonPlacer.angstrom2au])
+        return coords
+
+    @staticmethod
+    def rotate(mol, theta, phi):
+        m_theta = [[1.0, 0.0, 0.0],
+                   [0.0, math.cos(theta), -math.sin(theta)],
+                   [0.0, math.sin(theta), math.cos(theta)]]
+        mol.Rotate(m_theta)
+        m_phi = [[math.cos(phi), 0.0, math.sin(phi)],
+                 [0.0, 1.0, 0.0],
+                 [-math.sin(phi), 0.0, math.cos(phi)]]
+        mol.Rotate(m_phi)
+        return mol
+
+
+    def decode_solution(self, x):
+        cation_coords = []
+        anion_coords = []
+        cation_num_atoms = self.cation.NumAtoms()
+        anion_num_atoms = self.anion.NumAtoms()
+        xi = 0
+        for i in range(self.num_cation):
+            cc = ob.OBMol(self.cation)
+            tx, ty, tz = x[xi: xi+3]
+            xi += 3
+            cc.Translate(ob.vector3(tx, ty, tz))
+            if cation_num_atoms > 1:
+                theta = x[xi]
+                xi += 1
+                phi = x[xi]
+                xi += 1
+                self.rotate(cc, theta, phi)
+            cation_coords.append(self.get_mol_coords(cc))
+        for i in range(self.num_anion):
+            ac = ob.OBMol(self.anion)
+            tx, ty, tz = x[xi: xi+3]
+            xi += 3
+            ac.Translate(ob.vector3(tx, ty, tz))
+            if anion_num_atoms > 1:
+                theta = x[xi]
+                xi += 1
+                phi = x[xi]
+                xi += 1
+                HardSphereIonPlacer.rotate(ac, theta, phi)
+            anion_coords.append(HardSphereIonPlacer.get_mol_coords(ac))
+        return cation_coords, anion_coords
+
+
+    @staticmethod
+    def pair_energy(coords1, charges1, radius1, coords2, charges2,
+                    radius2):
+        energy = 0.0
+        for coord1, charge1, rad1, coord2, charge2, rad2 in zip(
+            coords1, charges1, radius1, coords2, charges2, radius2):
+            distance = math.sqrt(sum([(x1-x2)**2 for x1, x2
+                                      in zip(coord1, coord2)]))
+            if distance <= rad1 + rad2:
+                energy += HardSphereIonPlacer.overlap_energy
+            electrostatic_energy = charge1 * charges2 / distance
+            energy += electrostatic_energy
+        return energy
+
+    def calc_energy(self, cation_coords, anion_coords):
+        energy = 0.0
+        for frag_coords in cation_coords:
+            energy += self.pair_energy(self.mol_coords, self.mol_charges,
+                                       self.mol_radius, frag_coords,
+                                       self.cation_charges, self.cation_radius)
+        for frag_coords in anion_coords:
+            energy += self.pair_energy(self.mol_coords, self.mol_charges,
+                                       self.mol_radius, frag_coords,
+                                       self.anion_charges, self.anion_radius)
+        for cc, ac in zip(cation_coords, anion_coords):
+            energy += self.pair_energy(cc, self.cation_charges,
+                                       self.cation_radius, ac,
+                                       self.anion_charges, self.anion_radius)
+        return energy
 
 
     @staticmethod
@@ -50,13 +188,14 @@ class HardSphereIonPlacer():
         upper_bound = args['_ec'].bounder.upper_bound
         return [random.uniform(l, u) for l, u in zip(lower_bound, upper_bound)]
 
-    @staticmethod
-    def evaluate_conformers(candidates, args):
+
+    def evaluate_conformers(self, candidates, args):
         # evaluator
         fitness = []
         for c in candidates:
-            fit = (c[0] - 1.5)**2 + (c[1] + 35)**2
-            fitness.append(fit)
+            cation_coords, anion_coords = self.decode_solution(c)
+            energy = self.calc_energy(cation_coords, anion_coords)
+            fitness.append(energy)
         return fitness
 
     def place(self):
@@ -69,6 +208,19 @@ class HardSphereIonPlacer():
                                         neighborhood_size=5)
         self.best = max(self.final_pop)
         # max means best, not necessarily smallest
+        best_cation_coords, best_anion_coords = self.decode_solution(self.best)
+        species = []
+        coords = []
+        species.extend(self.mol_elements)
+        coords.extend(self.mol_coords)
+        for c in best_cation_coords:
+            species.extend(self.cation_elements)
+            coords.extend(c)
+        for c in best_anion_coords:
+            species.extend(self.anion_elements)
+            coords.extend(c)
+        self.best_pymatgen_mol = Molecule(species, coords)
+        return self.best_pymatgen_mol
 
 
 if __name__ == '__main__':
