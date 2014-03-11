@@ -127,25 +127,25 @@ class HardSphereIonPlacer():
             cc = ob.OBMol(self.cation)
             tx, ty, tz = x[xi: xi+3]
             xi += 3
-            cc.Translate(ob.vector3(tx, ty, tz))
             if cation_num_atoms > 1:
                 theta = x[xi]
                 xi += 1
                 phi = x[xi]
                 xi += 1
                 self.rotate(cc, theta, phi)
+            cc.Translate(ob.vector3(tx, ty, tz))
             cation_coords.append(self.get_mol_coords(cc))
         for i in range(self.num_anion):
             ac = ob.OBMol(self.anion)
             tx, ty, tz = x[xi: xi+3]
             xi += 3
-            ac.Translate(ob.vector3(tx, ty, tz))
             if anion_num_atoms > 1:
                 theta = x[xi]
                 xi += 1
                 phi = x[xi]
                 xi += 1
                 HardSphereIonPlacer.rotate(ac, theta, phi)
+            ac.Translate(ob.vector3(tx, ty, tz))
             anion_coords.append(HardSphereIonPlacer.get_mol_coords(ac))
         return cation_coords, anion_coords
 
