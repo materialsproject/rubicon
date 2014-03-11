@@ -42,12 +42,13 @@ class AC():
         self.num_types = len(set(self.atom_gaff.values()))
 
 
-
-class TopBond():
+class TopMol():
 
     def __init__(self):
-        #self.bonds = set()
         self.bonds = []
+        self.angles = []
+        self.dihedrals = []
+        self.imdihedrals = []
 
 
     def get_bonds(self,filename):
@@ -67,13 +68,6 @@ class TopBond():
                     self.bonds.append([self.atom1, self.atom2])
 
 
-
-
-class TopAngle():
-
-    def __init__(self):
-        self.angles = []
-
     def get_angles(self,filename):
         with open(filename) as f:
             angle_section = False
@@ -90,12 +84,6 @@ class TopAngle():
                     self.atom3=token[3]
                     self.angles.append([self.atom1,self.atom2,self.atom3])
 
-
-
-class TopDihedral():
-
-    def __init__(self):
-        self.dihedrals = []
 
     def get_dihedrals(self,filename):
         with open(filename) as f:
@@ -115,13 +103,6 @@ class TopDihedral():
                     self.dihedrals.append([self.atom1,self.atom2,self.atom3,self.atom4])
 
 
-
-
-class TopImDihedral():
-
-    def __init__(self):
-        self.imdihedrals = []
-
     def get_imdihedrals(self,filename):
         with open(filename) as f:
             imdihedral_section = False
@@ -140,66 +121,7 @@ class TopImDihedral():
                     self.imdihedrals.append([self.atom1,self.atom2,self.atom3,
                                              self.atom4])
 
-class TopBondFF():
 
-    """
-    takes topology and FF parameters of bonds
-
-    """
-    def __init__(self):
-        self.topbondFF=dict()
-
-
-    def get_FF_bonds(self,bonds,top_bond,atom_gaff):
-
-        self.gaff_info=[]
-        #print bonds['ca-ca'][0]
-
-        for keys, values in bonds.iteritems():
-                self.gaff_info=[keys,values]
-
-
-        for item in top_bond:
-            d1=item[0]+'-'+ item[1]
-            a1=atom_gaff[item[0]]
-            a2=atom_gaff[item[1]]
-            if a1+'-'+a2 in bonds:
-                self.topbondFF[d1]=(a1+'-'+a2,bonds[a1+'-'+a2])
-            else:
-                self.topbondFF[d1]=(a2+'-'+a1,bonds[a2+'-'+a1])
-
-
-
-
-class TopAngleFF():
-
-    """
-    takes topology and FF parameters of Angles
-
-    """
-    def __init__(self):
-        self.topangleFF=dict()
-
-
-    def get_FF_angles(self,angles,top_angle,atom_gaff):
-
-        self.gaff_info=[]
-        #print bonds['ca-ca'][0]
-
-        for keys, values in angles.iteritems():
-                self.gaff_info=[keys,values]
-        #print self.gaff_info
-
-        for item in top_angle:
-            d1=item[0]+'-'+ item[1]+'-'+item[2]
-            a1=atom_gaff[item[0]]
-            a2=atom_gaff[item[1]]
-            a3=atom_gaff[item[2]]
-            if a1+'-'+a2+'-'+a3 in angles:
-                self.topangleFF[d1]=(a1+'-'+a2+'-'+a3,angles[a1+'-'+a2+'-'+a3])
-
-            elif a1+'-'+a2+'-'+a3:
-                self.topangleFF[d1]=(a1+'-'+a2+'-'+a3,angles[a1+'-'+a2+'-'+a3])
 
 
 

@@ -57,8 +57,24 @@ class Antechamber():
 
         command=('antechamber -i ' +filename +' -fi pdb -o ' +filename[:-4]+
              " -fo charmm")
+
         return_cmd=subprocess.call(shlex.split(command))
         self.molname = filename.split('.')[0]
+
+        return return_cmd
+
+    def run_parmchk(self,filename=None):
+        """
+        run parmchk using ANTECHAMBER_AC.AC file
+
+        Args:
+            filename = pdb file of the molecule
+        """
+
+        command_parmchk=('parmchk -i '+filename +' -f ac -o mol.frcmod')
+
+        return_cmd=subprocess.call(shlex.split(command_parmchk))
+        #self.molname = filename.split('.')[0]
 
         return return_cmd
 
@@ -91,6 +107,110 @@ class Antechamber():
             os.remove(filename)
         for filename in glob.glob('*.pdb'):
             os.remove(filename)
+        for filename in glob.glob('*.frcmod'):
+            os.remove(filename)
+
+
+class TopMolFF():
+
+    """
+    takes topology and FF parameters of bonds
+
+    """
+    def __init__(self):
+        self.topbondFF=dict()
+        self.topangleFF=dict()
+        self.topdihedralFF=dict()
+        self.topimdihedralFF=dict()
+
+
+    def get_FF_bonds(self,bonds,top_bond,atom_gaff):
+
+        self.gaff_info=[]
+        #print bonds['ca-ca'][0]
+
+        for keys, values in bonds.iteritems():
+                self.gaff_info=[keys,values]
+
+
+        for item in top_bond:
+            d1=item[0]+'-'+ item[1]
+            a1=atom_gaff[item[0]]
+            a2=atom_gaff[item[1]]
+            if a1+'-'+a2 in bonds:
+                self.topbondFF[d1]=(a1+'-'+a2,bonds[a1+'-'+a2])
+            else:
+                self.topbondFF[d1]=(a2+'-'+a1,bonds[a2+'-'+a1])
+                self.num_bond_types = len(set(self.topbondFF.keys()))
+
+
+    def get_FF_angles(self,angles,top_angle,atom_gaff):
+
+        self.gaff_info=[]
+        #print bonds['ca-ca'][0]
+
+        for keys, values in angles.iteritems():
+                self.gaff_info=[keys,values]
+        #print self.gaff_info
+
+        for item in top_angle:
+            d1=item[0]+'-'+ item[1]+'-'+item[2]
+            a1=atom_gaff[item[0]]
+            a2=atom_gaff[item[1]]
+            a3=atom_gaff[item[2]]
+            if a1+'-'+a2+'-'+a3 in angles:
+                self.topangleFF[d1]=(a1+'-'+a2+'-'+a3,angles[a1+'-'+a2+'-'+a3])
+
+            elif reversed(a1 +'-'+a2+'-'+a3):
+                self.topangleFF[d1]=(a1+'-'+a2+'-'+a3,angles[a1+'-'+a2+'-'+a3])
+            self.num_ang_types = len(set(self.topangleFF.keys()))
+
+
+    def get_FF_dihedrals(self,dihedrals,top_dihedral,atom_gaff):
+
+        self.gaff_info=[]
+        #print bonds['ca-ca'][0]
+
+        for keys, values in dihedrals.iteritems():
+                self.gaff_info=[keys,values]
+        #print self.gaff_info
+
+        for item in top_dihedral:
+            d1=item[0]+'-'+ item[1]+'-'+item[2]+ '-'+item[3]
+            a1=atom_gaff[item[0]]
+            a2=atom_gaff[item[1]]
+            a3=atom_gaff[item[2]]
+            a4=atom_gaff[item[3]]
+            if 'X-'+a2+'-'+a3+'-'+'X' in dihedrals:
+                self.topdihedralFF[d1]=('X-'+a2+'-'+a3+'-'+'X',dihedrals['X-'+a2+'-'+a3+'-'+'X'])
+
+            elif reversed(a1+'-'+a2+'-'+a3+'-'+ a4):
+                self.topdihedralFF[d1]=('X-'+a2+'-'+a3+'-'+'X',dihedrals['X-'+a2+'-'+a3+'-'+'X'])
+            self.num_dih_types = len(set(self.topdihedralFF.keys()))
+
+
+    def get_FF_imdihedrals(self,imdihedrals,top_imdihedral,atom_gaff):
+
+        self.gaff_info=[]
+        #print bonds['ca-ca'][0]
+
+        for keys, values in imdihedrals.iteritems():
+                self.gaff_info=[keys,values]
+        #print self.gaff_info
+
+        for item in top_imdihedral:
+            d1=item[0]+'-'+ item[1]+'-'+item[2]+ '-'+item[3]
+            a1=atom_gaff[item[0]]
+            a2=atom_gaff[item[1]]
+            a3=atom_gaff[item[2]]
+            a4=atom_gaff[item[3]]
+            if a1+'-'+a2+'-'+a3+'-'+ a4 in imdihedrals:
+                self.topimdihedralFF[d1]=(a1+'-'+a2+'-'+a3+'-'+ a4,imdihedrals[a1+'-'+a2+'-'+a3+'-'+ a4])
+
+            elif reversed(a1+'-'+a2+'-'+a3+'-'+ a4):
+                self.topimdihedralFF[d1]=(a1+'-'+a2+'-'+a3+'-'+ a4,imdihedrals[a1+'-'+a2+'-'+a3+'-'+ a4])
+            self.num_imdih_types = len(set(self.topimdihedralFF.keys()))
+
 
 
 

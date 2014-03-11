@@ -113,7 +113,7 @@ class GFF(MSONable):
                     dihedrals[dihedral_type]=(dihedral_k_distance,dihedral_angle)
 
 
-                if line.startswith('IMPHI'):
+                if line.startswith('IMPROPER'):
                     imdihedral_section = True
                     continue
                 if imdihedral_section:
@@ -121,10 +121,10 @@ class GFF(MSONable):
                         imdihedral_section = False
                         continue
                     token = line.split()
-                    imdihedral_type=token[0]+'-'+token[1]+'-'+token[2]+'-'+token[3]
-                    imdihedral_distance=float(token[4])
-                    imdihedral_func_type=float(token[5])
-                    imdihedral_angle=float(token[6])
+                    imdihedral_type=token[0]
+                    imdihedral_distance=float(token[1])
+                    imdihedral_func_type=float(token[3])
+                    imdihedral_angle=float(token[2])
                     imdihedrals[imdihedral_type]=(imdihedral_distance,imdihedral_angle)
 
 
