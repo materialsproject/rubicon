@@ -106,13 +106,13 @@ class HardSphereIonPlacer():
 
     @staticmethod
     def rotate(mol, theta, phi):
-        m_theta = [[1.0, 0.0, 0.0],
-                   [0.0, math.cos(theta), -math.sin(theta)],
-                   [0.0, math.sin(theta), math.cos(theta)]]
+        m_theta = ob.double_array([1.0, 0.0, 0.0,
+                                   0.0, math.cos(theta), -math.sin(theta),
+                                   0.0, math.sin(theta), math.cos(theta)])
         mol.Rotate(m_theta)
-        m_phi = [[math.cos(phi), 0.0, math.sin(phi)],
-                 [0.0, 1.0, 0.0],
-                 [-math.sin(phi), 0.0, math.cos(phi)]]
+        m_phi = ob.double_array([math.cos(phi), 0.0, math.sin(phi),
+                                 0.0, 1.0, 0.0,
+                                 -math.sin(phi), 0.0, math.cos(phi)])
         mol.Rotate(m_phi)
         return mol
 

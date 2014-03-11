@@ -1,6 +1,7 @@
 import os
 from unittest import TestCase
 import unittest
+import math
 import openbabel as ob
 from rubicon.utils.ion_arranger.ion_arranger import HardSphereIonPlacer
 
@@ -12,12 +13,20 @@ test_dir = os.path.join(os.path.dirname(__file__),
 
 
 class TestHardSphereIonPlacer(TestCase):
-    def test_normalize_molecule(self):
+    def setUp(self):
         obconv = ob.OBConversion()
         obconv.SetInFormat("xyz")
         mol_file = os.path.join(test_dir, "2AcetoxyQ.xyz")
         obmol = ob.OBMol()
         obconv.ReadFile(obmol, mol_file)
+        self.obmol_template = obmol
+
+    def get_copy_of_mol(self):
+        obmol = ob.OBMol(self.obmol_template)
+        return obmol
+
+    def test_normalize_molecule(self):
+        obmol = self.get_copy_of_mol()
         coords, radius, elements = HardSphereIonPlacer.normalize_molecule(
             obmol, 2.0)
         x, y, z = 0.0, 0.0, 0.0
@@ -53,6 +62,55 @@ class TestHardSphereIonPlacer(TestCase):
         ref_elements = ['C', 'C', 'C', 'C', 'C', 'C', 'H', 'H', 'H', 'H', 'C',
                         'C', 'N', 'N', 'H', 'C', 'O', 'C', 'H', 'H', 'H']
         self.assertEqual(elements, ref_elements)
+
+    def test_rotate(self):
+        obmol1 = self.get_copy_of_mol()
+        HardSphereIonPlacer.rotate(obmol1, math.pi/2, math.pi/4)
+        coords1 = HardSphereIonPlacer.get_mol_coords(obmol1)
+        ref_coords1 =[[-4.85126, -2e-05, 4.66393], [-5.02525, 3e-05, 2.06331],
+                     [-2.79667, 3e-05, 0.57618], [-0.38313, -3e-05, 1.80275],
+                     [-0.26084, -6e-05, 4.484], [-2.45876, -5e-05, 5.88096],
+                     [-6.55957, -2e-05, 5.80377], [-6.83453, 6e-05, 1.09466],
+                     [1.59057, -9e-05, 5.37015], [-2.37122, -8e-05, 7.93257],
+                     [1.56594, 5e-05, -2.05695], [-0.84624, 0.0001, -3.27297],
+                     [1.79164, -5e-05, 0.42929], [-2.97964, 9e-05, -1.99908],
+                     [-0.94345, 9e-05, -5.32344], [3.94032, -7e-05, -3.63362],
+                     [3.7771, -0.00026, -5.93828],
+                     [6.45259, 0.00016, -2.27695], [6.61359, 1.65819, -1.0465],
+                     [6.61345, -1.65704, -1.04543],
+                     [7.9702, -0.00028, -3.67476]]
+        for c1, c2, in zip(coords1, ref_coords1):
+            for x1, x2 in zip(c1, c2):
+                self.assertAlmostEqual(x1, x2, 3)
+        obmol2 = self.get_copy_of_mol()
+        HardSphereIonPlacer.rotate(obmol2, math.pi/3, -math.pi * 0.6)
+        coords2 = HardSphereIonPlacer.get_mol_coords(obmol2)
+        ref_coords2 = [[2.18824, -0.06625, -6.3635],
+                       [3.27396, -1.04718, -4.20654],
+                       [2.03023, -0.78504, -1.84804],
+                       [-0.34917, 0.50189, -1.73864],
+                       [-1.42281, 1.49306, -3.99007],
+                       [-0.17082, 1.20988, -6.25605],
+                       [3.14166, -0.26724, -8.17131],
+                       [5.07553, -2.0293, -4.24618],
+                       [-3.2281, 2.4609, -3.85898],
+                       [-0.98752, 1.96617, -7.98169],
+                       [-0.50564, -0.17355, 2.52932],
+                       [1.86882, -1.45628, 2.41148],
+                       [-1.59118, 0.78518, 0.49589],
+                       [3.11391, -1.76017, 0.28273],
+                       [2.69282, -2.2156, 4.13146],
+                       [-1.83362, 0.10838, 5.03542],
+                       [-0.86434, -0.76431, 6.94251],
+                       [-4.33929, 1.47645, 5.08046],
+                       [-4.12755, 3.4043, 4.35413],
+                       [-5.70431, 0.53356, 3.8409],
+                       [-5.04632, 1.51843, 7.01833]]
+        for c1, c2, in zip(coords2, ref_coords2):
+            for x1, x2 in zip(c1, c2):
+                self.assertAlmostEqual(x1, x2, 3)
+
+
 
 
 
