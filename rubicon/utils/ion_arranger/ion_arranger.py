@@ -209,7 +209,8 @@ class HardSphereIonPlacer():
                                         neighborhood_size=5)
         self.best = max(self.final_pop)
         # max means best, not necessarily smallest
-        best_cation_coords, best_anion_coords = self.decode_solution(self.best)
+        best_cation_coords, best_anion_coords = self.decode_solution(
+            self.best.candidate)
         species = []
         coords = []
         species.extend(self.mol_elements)
