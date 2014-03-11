@@ -154,14 +154,15 @@ class HardSphereIonPlacer():
     def pair_energy(coords1, charges1, radius1, coords2, charges2,
                     radius2):
         energy = 0.0
-        for coord1, charge1, rad1, coord2, charge2, rad2 in zip(
-            coords1, charges1, radius1, coords2, charges2, radius2):
-            distance = math.sqrt(sum([(x1-x2)**2 for x1, x2
-                                      in zip(coord1, coord2)]))
-            if distance <= rad1 + rad2:
-                energy += HardSphereIonPlacer.overlap_energy
-            electrostatic_energy = charge1 * charges2 / distance
-            energy += electrostatic_energy
+
+        for coord1, charge1, rad1 in zip(coords1, charges1, radius1):
+            for coord2, charge2, rad2 in zip(coords2, charges2, radius2):
+                distance = math.sqrt(sum([(x1-x2)**2 for x1, x2
+                                          in zip(coord1, coord2)]))
+                if distance <= rad1 + rad2:
+                    energy += HardSphereIonPlacer.overlap_energy
+                electrostatic_energy = charge1 * charge2 / distance
+                energy += electrostatic_energy
         return energy
 
     def calc_energy(self, cation_coords, anion_coords):

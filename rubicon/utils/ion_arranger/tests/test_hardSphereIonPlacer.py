@@ -110,6 +110,23 @@ class TestHardSphereIonPlacer(TestCase):
             for x1, x2 in zip(c1, c2):
                 self.assertAlmostEqual(x1, x2, 3)
 
+    def test_pair_energy(self):
+        coords1 = [[1.0, 0.0, 0.0]]
+        charges1 = [1.0]
+        radius1 = [0.4]
+        coords2 = [[0.0, 0.0, 0.0]]
+        charges2 = [-1.0]
+        radius2 = [0.4]
+        energy = HardSphereIonPlacer.pair_energy(coords1, charges1, radius1,
+                                                 coords2, charges2, radius2)
+        self.assertEqual(energy, -1.0)
+        radius1, radius2 = [0.8], [0.8]
+        energy = HardSphereIonPlacer.pair_energy(coords1, charges1, radius1,
+                                                 coords2, charges2, radius2)
+        self.assertGreater(energy, 1000.0)
+
+
+
 
 
 
