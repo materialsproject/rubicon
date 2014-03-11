@@ -8,7 +8,7 @@ __author__ = 'xiaohuiqu'
 
 
 test_dir = os.path.join(os.path.dirname(__file__),
-                        "../../..//workflows/test_mols")
+                        "../../../../test_files")
 
 
 class TestHardSphereIonPlacer(TestCase):
@@ -18,7 +18,8 @@ class TestHardSphereIonPlacer(TestCase):
         mol_file = os.path.join(test_dir, "2AcetoxyQ.xyz")
         obmol = ob.OBMol()
         obconv.ReadFile(obmol, mol_file)
-        coords, radius = HardSphereIonPlacer.normalize_molecule(obmol, 2.0)
+        coords, radius, elements = HardSphereIonPlacer.normalize_molecule(
+            obmol, 2.0)
         x, y, z = 0.0, 0.0, 0.0
         for c in coords:
             x += c[0]
@@ -27,17 +28,20 @@ class TestHardSphereIonPlacer(TestCase):
         self.assertAlmostEqual(x, 0.0, 5)
         self.assertAlmostEqual(y, 0.0, 5)
         self.assertAlmostEqual(z, 0.0, 5)
-        ref_coords = [[-3.45658, -0.31668, 3e-05], [-2.54857, -1.35489, 1e-05],
-                      [-1.15821, -1.07745, 0.0], [-0.71406, 0.28462, 3e-05],
-                      [-1.67159, 1.33366, 5e-05], [-3.01674, 1.03396, 5e-05],
-                      [-4.52231, -0.52939, 3e-05], [-2.86312, -2.39435, -1e-05],
-                      [-1.3104, 2.35802, 7e-05], [-3.75166, 1.8344, 6e-05],
-                      [1.45949, -0.43031, -1e-05], [1.01191, -1.78792, -3e-05],
-                      [0.61363, 0.58446, 4e-05], [-0.26305, -2.10954, -3e-05],
-                      [1.74278, -2.59155, -3e-05], [2.93791, -0.13181, 5e-05],
-                      [3.73921, -1.05526, 0.00015], [3.37032, 1.31588, -7e-05],
-                      [2.97015, 1.83654, -0.87746], [2.9697, 1.83689, 0.87689],
-                      [4.46122, 1.36071, 0.00017]]
+        ref_coords = [[-6.53199, -0.59843, 5e-05], [-4.81611, -2.56038, 1e-05],
+                      [-2.1887, -2.03609, 0.0], [-1.34938, 0.53786, 6e-05],
+                      [-3.15885, 2.52026, 0.0001], [-5.70081, 1.9539, 9e-05],
+                      [-8.54594, -1.0004, 6e-05], [-5.41052, -4.52467, -2e-05],
+                      [-2.4763, 4.45601, 0.00013],
+                      [-7.08962, 3.46651, 0.00012],
+                      [2.75804, -0.81316, -2e-05], [1.91223, -3.37868, -6e-05],
+                      [1.15959, 1.10448, 8e-05], [-0.4971, -3.98645, -5e-05],
+                      [3.29338, -4.89733, -5e-05], [5.55185, -0.24909, 0.0001],
+                      [7.06607, -1.99415, 0.00029],
+                      [6.36898, 2.48666, -0.00013],
+                      [5.61277, 3.47056, -1.65816],
+                      [5.61191, 3.47122, 1.65707],
+                      [8.43049, 2.57137, 0.00032]]
         for c1, c2, in zip(coords, ref_coords):
             for x1, x2 in zip(c1, c2):
                 self.assertAlmostEqual(x1, x2, 3)
@@ -46,6 +50,7 @@ class TestHardSphereIonPlacer(TestCase):
                       0.62, 0.62, 0.62]
         for r1, r2 in zip(radius, ref_radius):
             self.assertAlmostEqual(r1, r2)
+        print elements
 
 
 
