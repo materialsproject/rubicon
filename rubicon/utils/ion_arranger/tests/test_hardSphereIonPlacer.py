@@ -50,8 +50,9 @@ class TestHardSphereIonPlacer(TestCase):
                       0.62, 0.62, 0.62]
         for r1, r2 in zip(radius, ref_radius):
             self.assertAlmostEqual(r1, r2)
-        print elements
-
+        ref_elements = ['C', 'C', 'C', 'C', 'C', 'C', 'H', 'H', 'H', 'H', 'C',
+                        'C', 'N', 'N', 'H', 'C', 'O', 'C', 'H', 'H', 'H']
+        self.assertEqual(elements, ref_elements)
 
 
 

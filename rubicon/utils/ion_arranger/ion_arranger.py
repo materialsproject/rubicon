@@ -87,7 +87,7 @@ class HardSphereIonPlacer():
             a = mol.GetAtom(i)
             atomic_num = a.GetAtomicNum()
             symbol = element_table.GetSymbol(atomic_num)
-            species.append(species)
+            species.append(symbol)
             rad = ref_radius[symbol] * radius_scale
             radius.append(rad)
         coords = HardSphereIonPlacer.get_mol_coords(mol)
