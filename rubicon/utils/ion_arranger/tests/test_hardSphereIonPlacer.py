@@ -3,6 +3,9 @@ from unittest import TestCase
 import unittest
 import math
 import openbabel as ob
+from pymatgen.core.structure import Molecule
+from pymatgen.io.babelio import BabelMolAdaptor
+from pymatgen.io.qchemio import QcOutput
 from rubicon.utils.ion_arranger.ion_arranger import HardSphereIonPlacer
 
 __author__ = 'xiaohuiqu'
@@ -20,6 +23,30 @@ class TestHardSphereIonPlacer(TestCase):
         obmol = ob.OBMol()
         obconv.ReadFile(obmol, mol_file)
         self.obmol_template = obmol
+        pymagen_sodium = Molecule(species=['Na'],
+                                  coords=[[999.0, 999.0, 999.0]],
+                                  charge=1)
+        sodium_obmol = BabelMolAdaptor(pymagen_sodium)._obmol
+        pymagen_chloride = Molecule(species=['Cl'],
+                                    coords=[[-200.0, -200.0, -200.0]],
+                                    charge=-1)
+        chloride_obmol = BabelMolAdaptor(pymagen_chloride)._obmol
+        acetoxyq_anion_qcout = QcOutput(
+            os.path.join(test_dir, "acetoxyq_anion.out"))
+        pymatgen_acetoxyq = acetoxyq_anion_qcout.data[0]["molecules"][-1]
+        acetoxyq_obmol = BabelMolAdaptor(pymatgen_acetoxyq)._obmol
+        acetoxyq_charges = acetoxyq_anion_qcout.data[0]["charges"]['chelpg']
+        self.acetoxyq_NaCl_placer = HardSphereIonPlacer(
+            acetoxyq_obmol, acetoxyq_charges, sodium_obmol, [1.0],
+            chloride_obmol, [-1.0])
+        tfsi_qcout = QcOutput(os.path.join(test_dir, "tfsi.qcout"))
+        pymatgen_tfsi = tfsi_qcout.data[0]["molecules"][-1]
+        tfsi_obmol = BabelMolAdaptor(pymatgen_tfsi)._obmol
+        tfsi_charges = tfsi_qcout.data[0]["charges"]['chelpg']
+        self.acetoxyq_NaTFSI_placer = HardSphereIonPlacer(
+            acetoxyq_obmol, acetoxyq_charges, sodium_obmol, [1.0],
+            tfsi_obmol, [-1.0])
+
 
     def get_copy_of_mol(self):
         obmol = ob.OBMol(self.obmol_template)
@@ -139,10 +166,26 @@ class TestHardSphereIonPlacer(TestCase):
         self.assertGreater(energy, 1000.0)
 
 
+    def test_set_bound(self):
+        ref_NaCl_upper_bound = [27.62783, 27.62783, 27.62783, 27.62783,
+                                27.62783, 27.62783]
+        ref_NaCl_lower_bound = [-27.62783, -27.62783, -27.62783, -27.62783,
+                                -27.62783, -27.62783]
+        for x1, x2 in zip(self.acetoxyq_NaCl_placer.bounder.upper_bound,
+                          ref_NaCl_upper_bound):
+            self.assertAlmostEqual(x1, x2, 3)
+        for x1, x2 in zip(self.acetoxyq_NaCl_placer.bounder.lower_bound,
+                          ref_NaCl_lower_bound):
+            self.assertAlmostEqual(x1, x2, 3)
+        ref_NaTFSI_upper_bound = [41.62831, 41.62831, 41.62831, 41.62831,
+                                  41.62831, 41.62831, 3.14159, 3.14159]
+        ref_NaTFSI_lower_bound = [-41.62831, -41.62831, -41.62831, -41.62831,
+                                  -41.62831, -41.62831, 0.0, -3.14159]
+        for x1, x2 in zip(self.acetoxyq_NaTFSI_placer.bounder.upper_bound,
+                          ref_NaTFSI_upper_bound):
+            self.assertAlmostEqual(x1, x2, 3)
+        for x1, x2 in zip(self.acetoxyq_NaTFSI_placer.bounder.lower_bound,
+                          ref_NaTFSI_lower_bound):
+            self.assertAlmostEqual(x1, x2, 3)
 
 
-
-
-
-if __name__ == '__main__':
-    unittest.main()
