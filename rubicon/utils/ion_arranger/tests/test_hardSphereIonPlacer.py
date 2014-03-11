@@ -109,6 +109,19 @@ class TestHardSphereIonPlacer(TestCase):
         for c1, c2, in zip(coords2, ref_coords2):
             for x1, x2 in zip(c1, c2):
                 self.assertAlmostEqual(x1, x2, 3)
+        obmol3 = self.get_copy_of_mol()
+        obmol4 = self.get_copy_of_mol()
+        obconv = ob.OBConversion()
+        obconv.SetOutFormat("xyz")
+        xyz3 = obconv.WriteString(obmol3)
+        xyz4 = obconv.WriteString(obmol4)
+        self.assertEqual(xyz3, xyz4)
+        HardSphereIonPlacer.rotate(obmol4, math.pi/3, math.pi/4)
+        xyz3 = obconv.WriteString(obmol3)
+        xyz4 = obconv.WriteString(obmol4)
+        self.assertNotEqual(xyz3, xyz4)
+
+
 
     def test_pair_energy(self):
         coords1 = [[1.0, 0.0, 0.0]]
