@@ -11,14 +11,24 @@ from pymatgen.core.structure import Molecule
 class HardSphereIonPlacer():
     overlap_energy = 1.0E4
     angstrom2au = 1.0/0.52917721092
-    gravity = 0.1
+    gravity = 0.001
+    metals = ['Li', 'Be', 'Na', 'Mg', 'Al', 'K', 'Ca', 'Sc', 'Ti', 'V',
+              'Cr', 'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Rb', 'Sr',
+              'Y', 'Zr', 'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd', 'Ag', 'Cd',
+              'In', 'Sn', 'Sb', 'Cs', 'Ba', 'La', 'Ce', 'Pr', 'Nd', 'Pm',
+              'Sm', 'Eu', 'Gd', 'Tb', 'Dy', 'Ho', 'Er', 'Tm', 'Yb', 'Lu',
+              'Hf', 'Ta', 'W', 'Re',  'Os', 'Ir', 'Pt', 'Au', 'Hg', 'Tl',
+              'Pb']
 
     def __init__(self, molecule, molecule_charges, cation,
                  cation_charges, anion, anion_charges,
-                 num_cation=1, num_anion=1, prng=None, radius_scale=2.0,
+                 num_cation=1, num_anion=1, prng=None,
+                 covalent_radius_scale=2.0,
+                 metal_radius_scale=0.5,
                  seed=None):
         self.prng = prng if prng else Random()
-        self.radius_scale = radius_scale
+        self.covalent_radius_scale = covalent_radius_scale
+        self.metal_radius_scale = metal_radius_scale
         self.seed = seed if seed else time()
         self.prng.seed(self.seed)
         self.final_pop = None
@@ -35,11 +45,14 @@ class HardSphereIonPlacer():
         self.cation_charges = cation_charges
         self.anion_charges = anion_charges
         self.mol_coords, self.mol_radius, self.mol_elements =\
-            self.normalize_molecule(self.molecule, self.radius_scale)
+            self.normalize_molecule(
+                self.molecule, self.covalent_radius_scale, self.metal_radius_scale)
         cation_coords, self.cation_radius, self.cation_elements = \
-            self.normalize_molecule(self.cation, self.radius_scale)
+            self.normalize_molecule(
+                self.cation, self.covalent_radius_scale, self.metal_radius_scale)
         anion_coords, self.anion_radius, self.anion_elements = \
-            self.normalize_molecule(self.anion, self.radius_scale)
+            self.normalize_molecule(
+                self.anion, self.covalent_radius_scale, self.metal_radius_scale)
         if len(self.mol_coords) != len(self.mol_charges):
             raise ValueError("The charge length and number of atoms in the"
                              "molecule are inconsitent")
@@ -52,6 +65,7 @@ class HardSphereIonPlacer():
         self.bounder = None
         self.set_bounder()
         self.best_pymatgen_mol = None
+        self.playing_time = None
 
 
     def set_bounder(self):
@@ -87,7 +101,7 @@ class HardSphereIonPlacer():
 
 
     @staticmethod
-    def normalize_molecule(mol, radius_scale):
+    def normalize_molecule(mol, covalent_radius_scale, metal_radius_scale):
         mol.Center()
         radius = []
         species = []
@@ -99,7 +113,11 @@ class HardSphereIonPlacer():
             atomic_num = a.GetAtomicNum()
             symbol = element_table.GetSymbol(atomic_num)
             species.append(symbol)
-            rad = ref_radius[symbol] * radius_scale
+            if symbol in HardSphereIonPlacer.metals:
+                scale = metal_radius_scale
+            else:
+                scale = covalent_radius_scale
+            rad = ref_radius[symbol] * HardSphereIonPlacer.angstrom2au * scale
             radius.append(rad)
         coords = HardSphereIonPlacer.get_mol_coords(mol)
         return coords, radius, species
@@ -237,6 +255,7 @@ class HardSphereIonPlacer():
         return fitness
 
     def place(self, max_evaluations=30000, pop_size=100, neighborhood_size=5):
+        t1 = time()
         self.final_pop = self.ea.evolve(generator=self.generate_conformers,
                                         evaluator=self.evaluate_conformers,
                                         pop_size=pop_size,
@@ -260,6 +279,8 @@ class HardSphereIonPlacer():
             coords_au.extend(c)
         coords_ang = [[x/self.angstrom2au for x in c] for c in coords_au]
         self.best_pymatgen_mol = Molecule(species, coords_ang)
+        t2 = time()
+        self.playing_time = t2 - t1
         return self.best_pymatgen_mol
 
 

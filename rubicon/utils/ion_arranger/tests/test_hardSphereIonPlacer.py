@@ -46,7 +46,7 @@ class TestHardSphereIonPlacer(TestCase):
         tfsi_charges = tfsi_qcout.data[0]["charges"]['chelpg']
         self.acetoxyq_NaTFSI_placer = HardSphereIonPlacer(
             acetoxyq_obmol, acetoxyq_charges, sodium_obmol, [1.0],
-            tfsi_obmol, tfsi_charges, seed=0.1)
+            tfsi_obmol, tfsi_charges)
 
 
     def get_copy_of_mol(self):
@@ -56,7 +56,7 @@ class TestHardSphereIonPlacer(TestCase):
     def test_normalize_molecule(self):
         obmol = self.get_copy_of_mol()
         coords, radius, elements = HardSphereIonPlacer.normalize_molecule(
-            obmol, 2.0)
+            obmol, 2.0, 0.9)
         x, y, z = 0.0, 0.0, 0.0
         for c in coords:
             x += c[0]
@@ -82,11 +82,12 @@ class TestHardSphereIonPlacer(TestCase):
         for c1, c2, in zip(coords, ref_coords):
             for x1, x2 in zip(c1, c2):
                 self.assertAlmostEqual(x1, x2, 3)
-        ref_radius = [1.46, 1.46, 1.46, 1.46, 1.46, 1.46, 0.62, 0.62, 0.62,
-                      0.62, 1.46, 1.46, 1.42, 1.42, 0.62, 1.46, 1.32, 1.46,
-                      0.62, 0.62, 0.62]
+        ref_radius = [2.759, 2.759, 2.759, 2.759, 2.759, 2.759, 1.17163,
+                      1.17163, 1.17163, 1.17163, 2.759, 2.759, 2.68341,
+                      2.68341, 1.17163, 2.759, 2.49444, 2.759, 1.17163,
+                      1.17163, 1.17163]
         for r1, r2 in zip(radius, ref_radius):
-            self.assertAlmostEqual(r1, r2)
+            self.assertAlmostEqual(r1, r2, 3)
         ref_elements = ['C', 'C', 'C', 'C', 'C', 'C', 'H', 'H', 'H', 'H', 'C',
                         'C', 'N', 'N', 'H', 'C', 'O', 'C', 'H', 'H', 'H']
         self.assertEqual(elements, ref_elements)
@@ -201,7 +202,7 @@ class TestHardSphereIonPlacer(TestCase):
             .decode_solution(c)
         energy =self.acetoxyq_NaCl_placer.calc_energy(cation_coords,
                                                       anion_coords)
-        self.assertAlmostEqual(energy, 5.580046283046379, 5)
+        self.assertAlmostEqual(energy, -0.12330098044441913, 5)
         c = [0.0] * 8
         cation_coords, anion_coords = self.acetoxyq_NaTFSI_placer.\
             decode_solution(c)
@@ -213,7 +214,7 @@ class TestHardSphereIonPlacer(TestCase):
             decode_solution(c)
         energy = self.acetoxyq_NaTFSI_placer.calc_energy(cation_coords,
                                                          anion_coords)
-        self.assertAlmostEqual(energy, 5.614500630417192)
+        self.assertAlmostEqual(energy, -0.046013805864322584)
 
 
     def test_gravitational_energy(self):
@@ -224,8 +225,8 @@ class TestHardSphereIonPlacer(TestCase):
             cation_coords[0], self.acetoxyq_NaCl_placer.cation_radius)
         anion_g_energy = self.acetoxyq_NaCl_placer.gravitational_energy(
             anion_coords[0], self.acetoxyq_NaCl_placer.anion_radius)
-        self.assertAlmostEqual(cation_g_energy, 2.53256899848, 3)
-        self.assertAlmostEqual(anion_g_energy, 0.773955429133, 3)
+        self.assertAlmostEqual(cation_g_energy, 0.026525587104203413, 3)
+        self.assertAlmostEqual(anion_g_energy, 0.005372882799983831, 3)
         c = [-20.0, 0.0, 0.0, 10.0, 0.0, 0.0, 1.0, 2.0]
         cation_coords, anion_coords = self.acetoxyq_NaTFSI_placer\
             .decode_solution(c)
@@ -233,15 +234,13 @@ class TestHardSphereIonPlacer(TestCase):
             cation_coords[0], self.acetoxyq_NaTFSI_placer.cation_radius)
         anion_g_energy = self.acetoxyq_NaTFSI_placer.gravitational_energy(
             anion_coords[0], self.acetoxyq_NaTFSI_placer.anion_radius)
-        self.assertAlmostEqual(cation_g_energy, 2.55364047876, 3)
-        self.assertAlmostEqual(anion_g_energy, 0.46903535426166765, 3)
+        self.assertAlmostEqual(cation_g_energy, 0.026730174838683875, 3)
+        self.assertAlmostEqual(anion_g_energy, 0.0031244355633821674, 3)
 
 
     def test_place(self):
         self.acetoxyq_NaTFSI_placer.place(max_evaluations=10000)
-        print "Seed:", self.acetoxyq_NaTFSI_placer.seed
-        print self.acetoxyq_NaTFSI_placer.best
-        print self.acetoxyq_NaTFSI_placer.best_pymatgen_mol
+        print self.acetoxyq_NaTFSI_placer.playing_time, "seconds consumed"
         write_mol(self.acetoxyq_NaTFSI_placer.best_pymatgen_mol, "nacl.xyz")
 
 
