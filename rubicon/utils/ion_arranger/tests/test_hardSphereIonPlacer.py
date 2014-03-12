@@ -46,7 +46,7 @@ class TestHardSphereIonPlacer(TestCase):
         tfsi_charges = tfsi_qcout.data[0]["charges"]['chelpg']
         self.acetoxyq_NaTFSI_placer = HardSphereIonPlacer(
             acetoxyq_obmol, acetoxyq_charges, sodium_obmol, [1.0],
-            tfsi_obmol, [-1.0], seed=0.1)
+            tfsi_obmol, tfsi_charges, seed=0.1)
 
 
     def get_copy_of_mol(self):
@@ -213,7 +213,7 @@ class TestHardSphereIonPlacer(TestCase):
             decode_solution(c)
         energy = self.acetoxyq_NaTFSI_placer.calc_energy(cation_coords,
                                                          anion_coords)
-        self.assertAlmostEqual(energy, 5.629403772688559)
+        self.assertAlmostEqual(energy, 5.614500630417192)
 
 
     def test_gravitational_energy(self):
@@ -237,8 +237,8 @@ class TestHardSphereIonPlacer(TestCase):
         self.assertAlmostEqual(anion_g_energy, 0.46903535426166765, 3)
 
 
-    def tt_place(self):
-        self.acetoxyq_NaTFSI_placer.place()
+    def test_place(self):
+        self.acetoxyq_NaTFSI_placer.place(max_evaluations=10000)
         print "Seed:", self.acetoxyq_NaTFSI_placer.seed
         print self.acetoxyq_NaTFSI_placer.best
         print self.acetoxyq_NaTFSI_placer.best_pymatgen_mol

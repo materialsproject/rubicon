@@ -40,6 +40,15 @@ class HardSphereIonPlacer():
             self.normalize_molecule(self.cation, self.radius_scale)
         anion_coords, self.anion_radius, self.anion_elements = \
             self.normalize_molecule(self.anion, self.radius_scale)
+        if len(self.mol_coords) != len(self.mol_charges):
+            raise ValueError("The charge length and number of atoms in the"
+                             "molecule are inconsitent")
+        if len(cation_coords) != len(self.cation_charges):
+            raise ValueError("The charge length and number of atoms in the"
+                             "cation are inconsitent")
+        if len(anion_coords) != len(self.anion_charges):
+            raise ValueError("The charge length and number of atoms in the"
+                             "anion are inconsitent")
         self.bounder = None
         self.set_bounder()
         self.best_pymatgen_mol = None
@@ -156,7 +165,6 @@ class HardSphereIonPlacer():
     def pair_energy(coords1, charges1, radius1, coords2, charges2,
                     radius2):
         energy = 0.0
-
         for coord1, charge1, rad1 in zip(coords1, charges1, radius1):
             for coord2, charge2, rad2 in zip(coords2, charges2, radius2):
                 distance = math.sqrt(sum([(x1-x2)**2 for x1, x2
@@ -198,12 +206,16 @@ class HardSphereIonPlacer():
             energy += self.pair_energy(
                 self.mol_coords, self.mol_charges, self.mol_radius,
                 frag_coords, self.anion_charges, self.anion_radius)
+            pe = self.pair_energy(
+                self.mol_coords, self.mol_charges, self.mol_radius,
+                frag_coords, self.anion_charges, self.anion_radius)
+
             energy += self.gravitational_energy(frag_coords, self.anion_radius)
         for cc in cation_coords:
             for ac in anion_coords:
                 energy += self.pair_energy(
                     cc, self.cation_charges, self.cation_radius,
-                    ac, self.anion_charges,self.anion_radius)
+                    ac, self.anion_charges, self.anion_radius)
         return energy
 
 
@@ -224,14 +236,14 @@ class HardSphereIonPlacer():
             fitness.append(energy)
         return fitness
 
-    def place(self):
+    def place(self, max_evaluations=30000, pop_size=100, neighborhood_size=5):
         self.final_pop = self.ea.evolve(generator=self.generate_conformers,
                                         evaluator=self.evaluate_conformers,
-                                        pop_size=100,
+                                        pop_size=pop_size,
                                         bounder=self.bounder,
                                         maximize=False,
-                                        max_evaluations=30000,
-                                        neighborhood_size=5)
+                                        max_evaluations=max_evaluations,
+                                        neighborhood_size=neighborhood_size)
         self.best = max(self.final_pop)
         # max means best, not necessarily smallest
         best_cation_coords, best_anion_coords = self.decode_solution(
