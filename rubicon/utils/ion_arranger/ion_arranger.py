@@ -161,6 +161,7 @@ class HardSphereIonPlacer():
                                           in zip(coord1, coord2)]))
                 if distance <= rad1 + rad2:
                     energy += HardSphereIonPlacer.overlap_energy
+                    continue
                 electrostatic_energy = charge1 * charge2 / distance
                 energy += electrostatic_energy
         return energy

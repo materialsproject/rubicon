@@ -188,4 +188,31 @@ class TestHardSphereIonPlacer(TestCase):
                           ref_NaTFSI_lower_bound):
             self.assertAlmostEqual(x1, x2, 3)
 
+    def test_calc_energy(self):
+        c = [0.0] * 6
+        cation_coords, anion_coords = self.acetoxyq_NaCl_placer\
+            .decode_solution(c)
+        energy = self.acetoxyq_NaCl_placer.calc_energy(cation_coords,
+                                                       anion_coords)
+        self.assertGreater(energy, 1000.0)
+        c = [20.0, 0.0, 0.0, 23.0, 0.0, 0.0]
+        cation_coords, anion_coords = self.acetoxyq_NaCl_placer\
+            .decode_solution(c)
+        energy =self.acetoxyq_NaCl_placer.calc_energy(cation_coords,
+                                                      anion_coords)
+        self.assertAlmostEqual(energy, -0.179731988791, 5)
+        c = [0.0] * 8
+        cation_coords, anion_coords = self.acetoxyq_NaTFSI_placer.\
+            decode_solution(c)
+        energy = self.acetoxyq_NaTFSI_placer.calc_energy(cation_coords,
+                                                         anion_coords)
+        self.assertGreater(energy, 1000.0)
+        c = [25.0, 1.0, 0.0, 20.0, 0.0, 0.0, 1.0, -2.0]
+        cation_coords, anion_coords = self.acetoxyq_NaTFSI_placer.\
+            decode_solution(c)
+        energy = self.acetoxyq_NaTFSI_placer.calc_energy(cation_coords,
+                                                         anion_coords)
+        self.assertAlmostEqual(energy, -0.0877560906642)
+
+
 
