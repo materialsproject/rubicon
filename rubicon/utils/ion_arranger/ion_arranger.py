@@ -6,6 +6,9 @@ import math
 from pymatgen.analysis.molecule_structure_comparator import CovalentRadius
 import openbabel as ob
 from pymatgen.core.structure import Molecule
+from pymatgen.io.babelio import BabelMolAdaptor
+from pymatgen.io.qchemio import QcOutput
+from pymatgen.io.smartio import write_mol
 
 
 class HardSphereIonPlacer():
@@ -285,6 +288,57 @@ class HardSphereIonPlacer():
 
 
 if __name__ == '__main__':
-    placer = HardSphereIonPlacer()
-    placer.place()
-    print('Best Solution: \n{0}'.format(str(placer.best)))
+    def gcd(a, b):
+        if b == 0:
+                return a
+        else:
+                return gcd(b, a % b)
+
+    def lcm(a, b):
+            return a * b / gcd(a, b)
+    import argparse
+    parser = argparse.ArgumentParser(
+        description="Place salt around a molecule")
+    parser.add_argument("-m", "--molecule", dest="molecule", type=str,
+                        required=True,
+                        help="the QChem output file name of molecule")
+    parser.add_argument("-c", "--cation", dest="cation", type=str,
+                        required=True,
+                        help="the QChem output file name of cation")
+    parser.add_argument("-a", "--anion", dest="anion", type=str,
+                        required=True,
+                        help="the QChem output file name of anion")
+    parser.add_argument("-o", "--outputfile", dest="outputfile", type=str,
+                        required=True,
+                        help="the file name of the aligned conformer")
+    parser.add_argument("-n", "--num_iter", dest="num_iter", type=int,
+                        default=30000,
+                        help="maximum number of evaluations")
+    parser.add_argument("-s", "--size", dest="size", type=int, default=100,
+                        help="population size")
+    options = parser.parse_args()
+    qcout_molecule = QcOutput(options.molecule)
+    qcout_cation = QcOutput(options.cation)
+    qcout_anion = QcOutput(options.anion)
+    total_charge_cation = qcout_cation.data[0]["molecules"][-1].charge
+    total_charge_anion = qcout_anion.data[0]["molecules"][-1].charge
+    num_lcm = lcm(total_charge_cation, -total_charge_anion)
+    num_cation = num_lcm/total_charge_cation
+    num_anion = num_lcm/-total_charge_anion
+    charges_molecule = qcout_molecule.data[0]["charges"]["chelpg"]
+    charges_cation = qcout_cation.data[0]["charges"]["chelpg"]
+    charges_anion = qcout_anion.data[0]["charges"]["chelpg"]
+    pymatgen_mol_molecule = qcout_molecule.data[0]["molecules"][-1]
+    pymatgen_mol_cation = qcout_cation.data[0]["molecules"][-1]
+    pymatgen_mol_anion = qcout_anion.data[0]["molecules"][-1]
+    obmol_molecule = BabelMolAdaptor(pymatgen_mol_molecule)._obmol
+    obmol_cation = BabelMolAdaptor(pymatgen_mol_cation)._obmol
+    obmol_anion = BabelMolAdaptor(pymatgen_mol_anion)._obmol
+    placer = HardSphereIonPlacer(
+        obmol_molecule, charges_molecule, obmol_cation, charges_cation,
+        obmol_anion, charges_anion, num_cation, num_anion)
+    placer.place(max_evaluations=options.num_iter,
+                 pop_size=options.size)
+    print 'It took {:.1f} seconds to place the salt'.format(placer
+                                                            .playing_time)
+    write_mol(placer.best_pymatgen_mol, options.outputfile)
