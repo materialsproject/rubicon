@@ -11,13 +11,15 @@ from pymatgen.core.structure import Molecule
 class HardSphereIonPlacer():
     overlap_energy = 1.0E4
     angstrom2au = 1.0/0.52917721092
+    gravity = 0.1
 
     def __init__(self, molecule, molecule_charges, cation,
                  cation_charges, anion, anion_charges,
-                 num_cation=1, num_anion=1, prng=None, radius_scale=2.0):
+                 num_cation=1, num_anion=1, prng=None, radius_scale=2.0,
+                 seed=None):
         self.prng = prng if prng else Random()
         self.radius_scale = radius_scale
-        self.seed = time()
+        self.seed = seed if seed else time()
         self.prng.seed(self.seed)
         self.final_pop = None
         self.best = None
@@ -166,20 +168,42 @@ class HardSphereIonPlacer():
                 energy += electrostatic_energy
         return energy
 
+    def gravitational_energy(self, ion_coords, ion_radius):
+        grav_distance = 10000.0
+        for mol_coord, mol_rad in zip(self.mol_coords, self.mol_radius):
+            for ion_coord, ion_rad in zip(ion_coords, ion_radius):
+                distance = math.sqrt(sum([(x1-x2)**2 for x1, x2
+                                          in zip(mol_coord, ion_coord)]))
+                if distance > mol_rad + ion_rad:
+                    gd = distance - (mol_rad + ion_rad)
+                    if gd < grav_distance:
+                        grav_distance = gd
+                else:
+                    return 0.0
+        if grav_distance > 9999.0:
+            return 0.0
+        else:
+            return self.gravity * grav_distance
+
+
+
     def calc_energy(self, cation_coords, anion_coords):
         energy = 0.0
         for frag_coords in cation_coords:
-            energy += self.pair_energy(self.mol_coords, self.mol_charges,
-                                       self.mol_radius, frag_coords,
-                                       self.cation_charges, self.cation_radius)
+            energy += self.pair_energy(
+                self.mol_coords, self.mol_charges, self.mol_radius,
+                frag_coords, self.cation_charges, self.cation_radius)
+            energy += self.gravitational_energy(frag_coords, self.cation_radius)
         for frag_coords in anion_coords:
-            energy += self.pair_energy(self.mol_coords, self.mol_charges,
-                                       self.mol_radius, frag_coords,
-                                       self.anion_charges, self.anion_radius)
-        for cc, ac in zip(cation_coords, anion_coords):
-            energy += self.pair_energy(cc, self.cation_charges,
-                                       self.cation_radius, ac,
-                                       self.anion_charges, self.anion_radius)
+            energy += self.pair_energy(
+                self.mol_coords, self.mol_charges, self.mol_radius,
+                frag_coords, self.anion_charges, self.anion_radius)
+            energy += self.gravitational_energy(frag_coords, self.anion_radius)
+        for cc in cation_coords:
+            for ac in anion_coords:
+                energy += self.pair_energy(
+                    cc, self.cation_charges, self.cation_radius,
+                    ac, self.anion_charges,self.anion_radius)
         return energy
 
 

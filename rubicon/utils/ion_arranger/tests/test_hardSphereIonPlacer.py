@@ -46,7 +46,7 @@ class TestHardSphereIonPlacer(TestCase):
         tfsi_charges = tfsi_qcout.data[0]["charges"]['chelpg']
         self.acetoxyq_NaTFSI_placer = HardSphereIonPlacer(
             acetoxyq_obmol, acetoxyq_charges, sodium_obmol, [1.0],
-            tfsi_obmol, [-1.0])
+            tfsi_obmol, [-1.0], seed=0.1)
 
 
     def get_copy_of_mol(self):
@@ -201,7 +201,7 @@ class TestHardSphereIonPlacer(TestCase):
             .decode_solution(c)
         energy =self.acetoxyq_NaCl_placer.calc_energy(cation_coords,
                                                       anion_coords)
-        self.assertAlmostEqual(energy, -0.179731988791, 5)
+        self.assertAlmostEqual(energy, 5.580046283046379, 5)
         c = [0.0] * 8
         cation_coords, anion_coords = self.acetoxyq_NaTFSI_placer.\
             decode_solution(c)
@@ -213,11 +213,33 @@ class TestHardSphereIonPlacer(TestCase):
             decode_solution(c)
         energy = self.acetoxyq_NaTFSI_placer.calc_energy(cation_coords,
                                                          anion_coords)
-        self.assertAlmostEqual(energy, -0.0877560906642)
+        self.assertAlmostEqual(energy, 5.629403772688559)
 
 
-    def test_place(self):
+    def test_gravitational_energy(self):
+        c = [20.0, 0.0, 0.0, 10.0, 0.0, 0.0]
+        cation_coords, anion_coords = self.acetoxyq_NaCl_placer\
+            .decode_solution(c)
+        cation_g_energy = self.acetoxyq_NaCl_placer.gravitational_energy(
+            cation_coords[0], self.acetoxyq_NaCl_placer.cation_radius)
+        anion_g_energy = self.acetoxyq_NaCl_placer.gravitational_energy(
+            anion_coords[0], self.acetoxyq_NaCl_placer.anion_radius)
+        self.assertAlmostEqual(cation_g_energy, 2.53256899848, 3)
+        self.assertAlmostEqual(anion_g_energy, 0.773955429133, 3)
+        c = [-20.0, 0.0, 0.0, 10.0, 0.0, 0.0, 1.0, 2.0]
+        cation_coords, anion_coords = self.acetoxyq_NaTFSI_placer\
+            .decode_solution(c)
+        cation_g_energy = self.acetoxyq_NaTFSI_placer.gravitational_energy(
+            cation_coords[0], self.acetoxyq_NaTFSI_placer.cation_radius)
+        anion_g_energy = self.acetoxyq_NaTFSI_placer.gravitational_energy(
+            anion_coords[0], self.acetoxyq_NaTFSI_placer.anion_radius)
+        self.assertAlmostEqual(cation_g_energy, 2.55364047876, 3)
+        self.assertAlmostEqual(anion_g_energy, 0.46903535426166765, 3)
+
+
+    def tt_place(self):
         self.acetoxyq_NaTFSI_placer.place()
+        print "Seed:", self.acetoxyq_NaTFSI_placer.seed
         print self.acetoxyq_NaTFSI_placer.best
         print self.acetoxyq_NaTFSI_placer.best_pymatgen_mol
         write_mol(self.acetoxyq_NaTFSI_placer.best_pymatgen_mol, "nacl.xyz")
