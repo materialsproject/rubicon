@@ -3,12 +3,14 @@ from random import Random
 from time import time
 import inspyred
 import math
+import itertools
 from pymatgen.analysis.molecule_structure_comparator import CovalentRadius
 import openbabel as ob
 from pymatgen.core.structure import Molecule
 from pymatgen.io.babelio import BabelMolAdaptor
 from pymatgen.io.qchemio import QcOutput
 from pymatgen.io.smartio import write_mol
+import numpy as np
 
 
 class HardSphereIonPlacer():
@@ -138,14 +140,15 @@ class HardSphereIonPlacer():
 
     @staticmethod
     def rotate(mol, theta, phi):
-        m_theta = ob.double_array([1.0, 0.0, 0.0,
-                                   0.0, math.cos(theta), -math.sin(theta),
-                                   0.0, math.sin(theta), math.cos(theta)])
-        mol.Rotate(m_theta)
-        m_phi = ob.double_array([math.cos(phi), 0.0, math.sin(phi),
-                                 0.0, 1.0, 0.0,
-                                 -math.sin(phi), 0.0, math.cos(phi)])
-        mol.Rotate(m_phi)
+        m_theta = np.array([[1.0, 0.0, 0.0],
+                            [0.0, math.cos(theta), -math.sin(theta)],
+                            [0.0, math.sin(theta), math.cos(theta)]])
+        m_phi = np.array([[math.cos(phi), 0.0, math.sin(phi)],
+                          [0.0, 1.0, 0.0],
+                          [-math.sin(phi), 0.0, math.cos(phi)]])
+        m = np.dot(m_phi, m_theta)
+        m_list = list(itertools.chain(*m))
+        mol.Rotate(ob.double_array(m_list))
         return mol
 
 

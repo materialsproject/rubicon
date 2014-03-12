@@ -238,10 +238,5 @@ class TestHardSphereIonPlacer(TestCase):
         self.assertAlmostEqual(anion_g_energy, 0.0031244355633821674, 3)
 
 
-    def test_place(self):
-        self.acetoxyq_NaTFSI_placer.place(max_evaluations=10000)
-        print self.acetoxyq_NaTFSI_placer.playing_time, "seconds consumed"
-        write_mol(self.acetoxyq_NaTFSI_placer.best_pymatgen_mol, "nacl.xyz")
-
 
 
