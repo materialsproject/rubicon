@@ -6,6 +6,7 @@ import openbabel as ob
 from pymatgen.core.structure import Molecule
 from pymatgen.io.babelio import BabelMolAdaptor
 from pymatgen.io.qchemio import QcOutput
+from pymatgen.io.smartio import write_mol
 from rubicon.utils.ion_arranger.ion_arranger import HardSphereIonPlacer
 
 __author__ = 'xiaohuiqu'
@@ -213,6 +214,13 @@ class TestHardSphereIonPlacer(TestCase):
         energy = self.acetoxyq_NaTFSI_placer.calc_energy(cation_coords,
                                                          anion_coords)
         self.assertAlmostEqual(energy, -0.0877560906642)
+
+
+    def test_place(self):
+        self.acetoxyq_NaTFSI_placer.place()
+        print self.acetoxyq_NaTFSI_placer.best
+        print self.acetoxyq_NaTFSI_placer.best_pymatgen_mol
+        write_mol(self.acetoxyq_NaTFSI_placer.best_pymatgen_mol, "nacl.xyz")
 
 
 

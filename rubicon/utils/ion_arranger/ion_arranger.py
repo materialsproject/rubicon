@@ -213,16 +213,17 @@ class HardSphereIonPlacer():
         best_cation_coords, best_anion_coords = self.decode_solution(
             self.best.candidate)
         species = []
-        coords = []
+        coords_au = []
         species.extend(self.mol_elements)
-        coords.extend(self.mol_coords)
+        coords_au.extend(self.mol_coords)
         for c in best_cation_coords:
             species.extend(self.cation_elements)
-            coords.extend(c)
+            coords_au.extend(c)
         for c in best_anion_coords:
             species.extend(self.anion_elements)
-            coords.extend(c)
-        self.best_pymatgen_mol = Molecule(species, coords)
+            coords_au.extend(c)
+        coords_ang = [[x/self.angstrom2au for x in c] for c in coords_au]
+        self.best_pymatgen_mol = Molecule(species, coords_ang)
         return self.best_pymatgen_mol
 
 
