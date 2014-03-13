@@ -281,7 +281,7 @@ class HardSphereIonPlacer():
         return self.best_pymatgen_mol
 
 
-if __name__ == '__main__':
+def main():
     def gcd(a, b):
         if b == 0:
                 return a
@@ -317,8 +317,8 @@ if __name__ == '__main__':
     total_charge_cation = qcout_cation.data[0]["molecules"][-1].charge
     total_charge_anion = qcout_anion.data[0]["molecules"][-1].charge
     num_lcm = lcm(total_charge_cation, -total_charge_anion)
-    num_cation_t = num_lcm/total_charge_cation
-    num_anion_t = num_lcm/-total_charge_anion
+    num_cation = num_lcm/total_charge_cation
+    num_anion = num_lcm/-total_charge_anion
     charges_molecule = qcout_molecule.data[0]["charges"]["chelpg"]
     charges_cation = qcout_cation.data[0]["charges"]["chelpg"]
     charges_anion = qcout_anion.data[0]["charges"]["chelpg"]
@@ -333,9 +333,12 @@ if __name__ == '__main__':
     obmol_anion = BabelMolAdaptor(pymatgen_mol_anion)._obmol
     placer = HardSphereIonPlacer(
         obmol_molecule, charges_molecule, obmol_cation, charges_cation,
-        obmol_anion, charges_anion, num_cation_t, num_anion_t)
+        obmol_anion, charges_anion, num_cation, num_anion)
     placer.place(max_evaluations=options.num_iter,
                  pop_size=options.size)
     print 'It took {:.1f} seconds to place the salt'.format(placer
                                                             .playing_time)
     write_mol(placer.best_pymatgen_mol, options.outputfile)
+
+if __name__ == '__main__':
+    main()
