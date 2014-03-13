@@ -43,8 +43,8 @@ class LMPInput():
     #def set_atom_types(self,atom_types):
     #    self.atoms=len(atom_types)
 
-    def set_bond(self):
-        pass
+    def set_bond(self,bond):
+        self.bonds=len(bond)
 
     def set_bond_types(self,bond_types):
         self.bonds=len(bond_types)
@@ -67,8 +67,15 @@ class LMPInput():
     def set_improper_types(self,imdihedral_types):
         self.imdihedrals=len(imdihedral_types)
 
-    def set_masses(self):
-        pass
+    def set_masses(self, gff_masses):
+        lines=[]
+        if gff_masses is not None:
+            lines.append('Masses')
+            lines.append(gff_masses.values())
+            print lines
+
+
+
 
 
     def set_dimension(self):

@@ -32,6 +32,10 @@ class Antechamber():
         molecule: The input molecule. Default is None
         """
         self.molecule=molecule
+        self.topbondFF=dict()
+        self.topangleFF=dict()
+        self.topdihedralFF=dict()
+        self.topimdihedralFF=dict()
 
 
     def convert_to_pdb(self,molecule,filename):
@@ -109,19 +113,6 @@ class Antechamber():
             os.remove(filename)
         for filename in glob.glob('*.frcmod'):
             os.remove(filename)
-
-
-class TopMolFF():
-
-    """
-    takes topology and FF parameters of bonds
-
-    """
-    def __init__(self):
-        self.topbondFF=dict()
-        self.topangleFF=dict()
-        self.topdihedralFF=dict()
-        self.topimdihedralFF=dict()
 
 
     def get_FF_bonds(self,bonds,top_bond,atom_gaff):

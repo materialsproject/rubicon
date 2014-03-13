@@ -4,7 +4,7 @@ from lamppsio import LMPInput
 
 __author__ = 'navnidhirajput'
 
-from Antechamber_wrapper import Antechamber, TopMolFF
+from Antechamber_wrapper import Antechamber
 from pymatgen.core.structure import Molecule
 from GFF import GFF, GFF_library
 
@@ -61,26 +61,24 @@ for mol in mols:
     my_ant.run_antechamber('mol.pdb')
     my_ant.run_parmchk('ANTECHAMBER_AC.AC')
     gff = my_ant.parse_output()
-    ac = AC()
 
+    ac = AC()
     ac.read_atomIndex('ANTECHAMBER_AC.AC')
     ac.read_atomType('ANTECHAMBER_AC.AC')
     #print "atom_name:gaff_atom_type",ac.atom_gaff
 
-    tp = TopMol()
-    tp.get_bonds('mol.rtf')
-    tp.get_angles('mol.rtf')
-    tp.get_dihedrals('mol.rtf')
-    tp.get_imdihedrals('mol.rtf')
-    print "Top BONDS", tp.bonds
-    print "Top ANGLES",tp.angles
-    print "DIHEDRALS",tp.dihedrals
-    print "IMPH",tp.imdihedrals
+    tp = TopMol.from_file('mol.rtf')
+    #print "Top BONDS", tp.bonds
+    #print "Top ANGLES",tp.angles
+    #print "DIHEDRALS",tp.dihedrals
+    #print "IMPH",tp.imdihedrals
 
 
     my_gff = GFF()
     my_gff.read_forcefield_para('mol.prm')
     my_gff.read_forcefield_para('mol.frcmod')
+    my_gff.read_mass('mol.prm')
+
     #print "gaff_bonds",my_gff.bonds
     #print "gaff_angles",my_gff.angles
     #print "gaff_dihedrals",my_gff.dihedrals
@@ -97,18 +95,18 @@ for mol in mols:
     my_gff_lib = GFF_library()
     my_gff_lib.append_gff()
 
-    my_topmolff = TopMolFF()
-    my_topmolff.get_FF_bonds(my_gff.bonds, tp.bonds, atom_gaff.atom_gaff)
-    my_topmolff.get_FF_angles(my_gff.angles, tp.angles, atom_gaff.atom_gaff)
-    my_topmolff.get_FF_dihedrals(my_gff.dihedrals, tp.dihedrals, atom_gaff.atom_gaff)
-    my_topmolff.get_FF_imdihedrals(my_gff.imdihedrals, tp.imdihedrals, atom_gaff.atom_gaff)
-    print "bond_label:bond_type,bond_parameter",my_topmolff.topbondFF
-    print "angle_label:angle_type,angle_parameter",my_topmolff.topangleFF
-    print "number of angles",my_topmolff.num_ang_types
-    print "dihedral_label:dihedral_type,dihedral_parameter",my_topmolff.topdihedralFF
-    print "number of dihedrals",my_topmolff.num_dih_types
-    print "dihedral_label:dihedral_type,dihedral_parameter",my_topmolff.topimdihedralFF
-    print "number of dihedrals",my_topmolff.num_imdih_types
+    my_ant.get_FF_bonds(my_gff.bonds, tp.bonds, atom_gaff.atom_gaff)
+    my_ant.get_FF_angles(my_gff.angles, tp.angles, atom_gaff.atom_gaff)
+    my_ant.get_FF_dihedrals(my_gff.dihedrals, tp.dihedrals, atom_gaff.atom_gaff)
+    my_ant.get_FF_imdihedrals(my_gff.imdihedrals, tp.imdihedrals, atom_gaff.atom_gaff)
+    #print "bond_label:bond_type,bond_parameter",my_ant.topbondFF,
+    #print "angle_label:angle_type,angle_parameter",my_ant.topangleFF
+    print my_ant.num_bond_types
+    #print "number of angles",my_ant.num_ang_types
+    #print "dihedral_label:dihedral_type,dihedral_parameter",my_ant.topdihedralFF
+    #print "number of dihedrals",my_ant.num_dih_types
+    #print "dihedral_label:dihedral_type,dihedral_parameter",my_ant.topimdihedralFF
+    #print "number of dihedrals",my_ant.num_imdih_types
 
 
     my_ant.clean_files()
@@ -119,13 +117,15 @@ for mol in mols:
     my_lampps.set_angle_types(my_gff.angles)
     my_lampps.set_dihedral_types(my_gff.dihedrals)
     my_lampps.set_improper_types(my_gff.imdihedrals)
-    #print atom_gaff.num_types,my_lampps.bonds,my_lampps.angles,my_lampps.dihedrals,my_lampps.imdihedrals
+    my_lampps.set_bond(tp.bonds)
+    #print "Lampps input file",atom_gaff.num_types,my_lampps.bonds,my_lampps.angles,my_lampps.dihedrals,my_lampps.imdihedrals
+    print my_lampps.bonds
+    print 'masses',my_gff.masses
+    print my_lampps.set_masses(my_gff.masses)
 
 
 
-"""
-making lampps input file
-"""
+
 
 
 

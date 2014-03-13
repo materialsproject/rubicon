@@ -44,82 +44,100 @@ class AC():
 
 class TopMol():
 
-    def __init__(self):
-        self.bonds = []
-        self.angles = []
-        self.dihedrals = []
-        self.imdihedrals = []
+    def __init__(self,bonds,angles,dihedrals,imdihedrals):
+        #self.bonds = []
+        #self.angles = []
+        #self.dihedrals = []
+        #self.imdihedrals = []
+        self.bonds=bonds
+        self.angles=angles
+        self.dihedrals=dihedrals
+        self.imdihedrals= imdihedrals
 
+    @classmethod
+    def get_bonds(cls,lines):
+        bond_section = False
+        bonds=[]
 
-    def get_bonds(self,filename):
-        with open(filename) as f:
-            bond_section = False
+        for line in lines:
+            if len(line.strip())==0:
+                bond_section = False
+                continue
 
-            for line in f.readlines():
-                if len(line.strip())==0:
-                    bond_section = False
-                    continue
+            token = line.split()
+            if token[0]=='BOND':
+                atom1=token[1]
+                atom2=token[2]
+                bonds.append([atom1, atom2])
+        return bonds
 
-                token = line.split()
-                if token[0]=='BOND':
-                    self.atom1=token[1]
-                    self.atom2=token[2]
-                    #self.bonds.add(tuple([self.atom1, self.atom2]))
-                    self.bonds.append([self.atom1, self.atom2])
+    @classmethod
+    def get_angles(self,lines):
+        angle_section = False
+        angles=[]
 
+        for line in lines:
+            if len(line.strip())==0:
+                angle_section = False
+                continue
 
-    def get_angles(self,filename):
-        with open(filename) as f:
-            angle_section = False
+            token = line.split()
+            if token[0]=='ANGL':
+                atom1=token[1]
+                atom2=token[2]
+                atom3=token[3]
+                angles.append([atom1,atom2,atom3])
+        return angles
 
-            for line in f.readlines():
-                if len(line.strip())==0:
-                    angle_section = False
-                    continue
+    @classmethod
+    def get_dihedrals(self,lines):
 
-                token = line.split()
-                if token[0]=='ANGL':
-                    self.atom1=token[1]
-                    self.atom2=token[2]
-                    self.atom3=token[3]
-                    self.angles.append([self.atom1,self.atom2,self.atom3])
+        dihedral_section = False
+        dihedrals=[]
 
+        for line in lines:
+            if len(line.strip())==0:
+                dihedral_section = False
+                continue
 
-    def get_dihedrals(self,filename):
-        with open(filename) as f:
-            dihedral_section = False
+            token = line.split()
+            if token[0]=='DIHE':
+                atom1=token[1]
+                atom2=token[2]
+                atom3=token[3]
+                atom4=token[4]
+                dihedrals.append([atom1,atom2,atom3,atom4])
+        return dihedrals
 
-            for line in f.readlines():
-                if len(line.strip())==0:
-                    dihedral_section = False
-                    continue
+    @classmethod
+    def get_imdihedrals(self,lines):
+        imdihedral_section = False
+        imdihedrals=[]
+        for line in lines:
+            if len(line.strip())==0:
+                imdihedral_section = False
+                continue
 
-                token = line.split()
-                if token[0]=='DIHE':
-                    self.atom1=token[1]
-                    self.atom2=token[2]
-                    self.atom3=token[3]
-                    self.atom4=token[4]
-                    self.dihedrals.append([self.atom1,self.atom2,self.atom3,self.atom4])
+            token = line.split()
+            if token[0]=='IMPH':
+                atom1=token[1]
+                atom2=token[2]
+                atom3=token[3]
+                atom4=token[4]
+                imdihedrals.append([atom1,atom2,atom3,atom4])
+        return imdihedrals
 
-
-    def get_imdihedrals(self,filename):
-        with open(filename) as f:
-            imdihedral_section = False
-
-            for line in f.readlines():
-                if len(line.strip())==0:
-                    imdihedral_section = False
-                    continue
-
-                token = line.split()
-                if token[0]=='IMPH':
-                    self.atom1=token[1]
-                    self.atom2=token[2]
-                    self.atom3=token[3]
-                    self.atom4=token[4]
-                    self.imdihedrals.append([self.atom1,self.atom2,self.atom3,
-                                             self.atom4])
+    @classmethod
+    def from_file(cls,filename):
+        with open(filename) as f :
+            lines=f.readlines()
+            #print lines
+            bonds=cls.get_bonds(lines)
+            angles=cls.get_angles(lines)
+            dihedrals=cls.get_dihedrals(lines)
+            imdihedrals=cls.get_imdihedrals(lines)
+            topology=TopMol(bonds,angles,dihedrals,imdihedrals)
+        return topology
 
 
 
