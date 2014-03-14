@@ -61,10 +61,6 @@ class TopMol():
             lines=f.readlines()
             for line in lines:
                 if len(line.strip())==0:
-                    bond_section = False
-                    angle_section = False
-                    dihedral_section = False
-                    imdihedral_section = False
                     continue
                 token = line.split()
                 if token[0]=='BOND':
