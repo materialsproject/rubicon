@@ -1,0 +1,5 @@
+__author__ = 'xiaohuiqu'
+import rubicon.utils.ion_arranger.ion_arranger as ion_arranger
+
+if __name__ == '__main__':
+    ion_arranger.main()
