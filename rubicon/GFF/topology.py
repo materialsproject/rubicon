@@ -52,74 +52,31 @@ class TopMol():
         self.imdihedrals= imdihedrals
 
     @classmethod
-    def get_bonds(cls,lines):
-        bond_section = False
-        bonds=[]
-
-        for line in lines:
-            if len(line.strip())==0:
-                bond_section = False
-                continue
-
-            token = line.split()
-            if token[0]=='BOND':
-                bonds.append(token[1:3])
-        print bonds
-        return bonds
-
-    @classmethod
-    def get_angles(self,lines):
-        angle_section = False
-        angles=[]
-
-        for line in lines:
-            if len(line.strip())==0:
-                angle_section = False
-                continue
-
-            token = line.split()
-            if token[0]=='ANGL':
-                angles.append(token[1:4])
-        print angles
-        return angles
-
-    @classmethod
-    def get_dihedrals(self,lines):
-        dihedral_section = False
-        dihedrals=[]
-        for line in lines:
-            if len(line.strip())==0:
-                dihedral_section = False
-                continue
-            token = line.split()
-            if token[0]=='DIHE':
-                dihedrals.append(token[1:5])
-        return dihedrals
-
-    @classmethod
-    def get_imdihedrals(self,lines):
-        imdihedral_section = False
-        imdihedrals=[]
-        for line in lines:
-            if len(line.strip())==0:
-                imdihedral_section = False
-                continue
-            token = line.split()
-            if token[0]=='IMPH':
-                imdihedrals.append(token[1:5])
-        return imdihedrals
-
-    @classmethod
     def from_file(cls,filename):
+        bonds=[]
+        angles=[]
+        dihedrals=[]
+        imdihedrals=[]
         with open(filename) as f :
             lines=f.readlines()
-            #print lines
-            bonds=cls.get_bonds(lines)
-            angles=cls.get_angles(lines)
-            dihedrals=cls.get_dihedrals(lines)
-            imdihedrals=cls.get_imdihedrals(lines)
-            topology=TopMol(bonds,angles,dihedrals,imdihedrals)
-        return topology
+            for line in lines:
+                if len(line.strip())==0:
+                    bond_section = False
+                    angle_section = False
+                    dihedral_section = False
+                    imdihedral_section = False
+                    continue
+                token = line.split()
+                if token[0]=='BOND':
+                    bonds.append(token[1:3])
+                elif token[0]=='ANGL':
+                    angles.append(token[1:4])
+                elif token[0]=='DIHE':
+                    dihedrals.append(token[1:5])
+                elif token[0]=='IMPH':
+                    imdihedrals.append(token[1:5])
+                    topology=TopMol(bonds,angles,dihedrals,imdihedrals)
+            return topology
 
 
 

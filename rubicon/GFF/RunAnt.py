@@ -110,7 +110,7 @@ for mol in mols:
     #print "number of dihedrals",my_ant.num_imdih_types
 
 
-    #my_ant.clean_files()
+    my_ant.clean_files()
     gff_list.append(gff)
 
     my_lampps=LMPInput()
@@ -119,11 +119,11 @@ for mol in mols:
     my_lampps.set_dihedral_types(my_gff.dihedrals)
     my_lampps.set_improper_types(my_gff.imdihedrals)
     my_lampps.set_bond(tp.bonds)
-    #print "Lampps input file",atom_gaff.num_types,my_lampps.bonds,my_lampps.angles,my_lampps.dihedrals,my_lampps.imdihedrals
-    #print my_lampps.bonds
-    #print 'masses',my_gff.masses
-    #print my_lampps.set_masses(atom_gaff.atom_gaff,my_gff.masses)
-    #print my_lampps.set_pair_coeff(atom_gaff.atom_gaff,my_gff.vdws)
+    print "Lampps input file",atom_gaff.num_types,my_lampps.bonds,my_lampps.angles,my_lampps.dihedrals,my_lampps.imdihedrals
+    print my_lampps.bonds
+    print 'masses',my_gff.masses
+    print my_lampps.set_masses(atom_gaff.atom_gaff,my_gff.masses)
+    print my_lampps.set_pair_coeff(atom_gaff.atom_gaff,my_gff.vdws)
 
 
 
