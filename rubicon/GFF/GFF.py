@@ -148,6 +148,7 @@ class GFF(MSONable):
             self.angles.update(angles)
             self.dihedrals.update(dihedrals)
             self.imdihedrals.update(imdihedrals)
+            self.vdws.update(vdws)
 
 
 

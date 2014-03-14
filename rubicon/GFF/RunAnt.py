@@ -65,6 +65,7 @@ for mol in mols:
     ac = AC()
     ac.read_atomIndex('ANTECHAMBER_AC.AC')
     ac.read_atomType('ANTECHAMBER_AC.AC')
+    #print "num types ",ac.num_types
     #print "atom_name:gaff_atom_type",ac.atom_gaff
 
     tp = TopMol.from_file('mol.rtf')
@@ -100,8 +101,8 @@ for mol in mols:
     my_ant.get_FF_dihedrals(my_gff.dihedrals, tp.dihedrals, atom_gaff.atom_gaff)
     my_ant.get_FF_imdihedrals(my_gff.imdihedrals, tp.imdihedrals, atom_gaff.atom_gaff)
     #print "bond_label:bond_type,bond_parameter",my_ant.topbondFF,
-    #print "angle_label:angle_type,angle_parameter",my_ant.topangleFF
-    print my_ant.num_bond_types
+    print "angle_label:angle_type,angle_parameter",my_ant.topangleFF
+    #print my_ant.num_bond_types
     #print "number of angles",my_ant.num_ang_types
     #print "dihedral_label:dihedral_type,dihedral_parameter",my_ant.topdihedralFF
     #print "number of dihedrals",my_ant.num_dih_types
@@ -109,7 +110,7 @@ for mol in mols:
     #print "number of dihedrals",my_ant.num_imdih_types
 
 
-    my_ant.clean_files()
+    #my_ant.clean_files()
     gff_list.append(gff)
 
     my_lampps=LMPInput()
@@ -119,9 +120,10 @@ for mol in mols:
     my_lampps.set_improper_types(my_gff.imdihedrals)
     my_lampps.set_bond(tp.bonds)
     #print "Lampps input file",atom_gaff.num_types,my_lampps.bonds,my_lampps.angles,my_lampps.dihedrals,my_lampps.imdihedrals
-    print my_lampps.bonds
-    print 'masses',my_gff.masses
-    print my_lampps.set_masses(my_gff.masses)
+    #print my_lampps.bonds
+    #print 'masses',my_gff.masses
+    #print my_lampps.set_masses(atom_gaff.atom_gaff,my_gff.masses)
+    #print my_lampps.set_pair_coeff(atom_gaff.atom_gaff,my_gff.vdws)
 
 
 

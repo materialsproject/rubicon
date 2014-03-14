@@ -22,9 +22,9 @@ class AC():
             for line in f.readlines():
                 token = line.split()
                 if token[0]=='ATOM':
-                    self.index=int(token[1])
-                    self.atom_name=token[2]
-                    self.atom_index[self.atom_name]=self.index
+                    index=int(token[1])
+                    atom_name=token[2]
+                    self.atom_index[atom_name]=index
             self.atom_index.update(self.atom_index)
 
 
@@ -35,20 +35,17 @@ class AC():
             for line in f.readlines():
                 token = line.split()
                 if token[0]=='ATOM':
-                    self.atom_name=token[2]
-                    self.gaff_name=token[-1]
-                    self.atom_gaff[self.atom_name]=self.gaff_name
+                    atom_name=token[2]
+                    gaff_name=token[-1]
+                    self.atom_gaff[atom_name]=gaff_name
             self.atom_gaff.update(self.atom_gaff)
         self.num_types = len(set(self.atom_gaff.values()))
+
 
 
 class TopMol():
 
     def __init__(self,bonds,angles,dihedrals,imdihedrals):
-        #self.bonds = []
-        #self.angles = []
-        #self.dihedrals = []
-        #self.imdihedrals = []
         self.bonds=bonds
         self.angles=angles
         self.dihedrals=dihedrals
@@ -66,9 +63,8 @@ class TopMol():
 
             token = line.split()
             if token[0]=='BOND':
-                atom1=token[1]
-                atom2=token[2]
-                bonds.append([atom1, atom2])
+                bonds.append(token[1:3])
+        print bonds
         return bonds
 
     @classmethod
@@ -83,30 +79,21 @@ class TopMol():
 
             token = line.split()
             if token[0]=='ANGL':
-                atom1=token[1]
-                atom2=token[2]
-                atom3=token[3]
-                angles.append([atom1,atom2,atom3])
+                angles.append(token[1:4])
+        print angles
         return angles
 
     @classmethod
     def get_dihedrals(self,lines):
-
         dihedral_section = False
         dihedrals=[]
-
         for line in lines:
             if len(line.strip())==0:
                 dihedral_section = False
                 continue
-
             token = line.split()
             if token[0]=='DIHE':
-                atom1=token[1]
-                atom2=token[2]
-                atom3=token[3]
-                atom4=token[4]
-                dihedrals.append([atom1,atom2,atom3,atom4])
+                dihedrals.append(token[1:5])
         return dihedrals
 
     @classmethod
@@ -117,14 +104,9 @@ class TopMol():
             if len(line.strip())==0:
                 imdihedral_section = False
                 continue
-
             token = line.split()
             if token[0]=='IMPH':
-                atom1=token[1]
-                atom2=token[2]
-                atom3=token[3]
-                atom4=token[4]
-                imdihedrals.append([atom1,atom2,atom3,atom4])
+                imdihedrals.append(token[1:5])
         return imdihedrals
 
     @classmethod

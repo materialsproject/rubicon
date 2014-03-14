@@ -67,12 +67,33 @@ class LMPInput():
     def set_improper_types(self,imdihedral_types):
         self.imdihedrals=len(imdihedral_types)
 
-    def set_masses(self, gff_masses):
+    def set_masses(self, atom_gaff ,gff_masses):
+
         lines=[]
         if gff_masses is not None:
             lines.append('Masses')
-            lines.append(gff_masses.values())
-            print lines
+            for i, v in enumerate(gff_masses.values()):
+                lines.append('{} {}'.format(i+1, v))
+            print '\n'.join(lines)
+
+
+    def set_pair_coeff(self, atom_gaff ,gff_vdw):
+
+        lines=[]
+        if gff_vdw is not None:
+            lines.append('Pair Coeffs')
+            for i, v in enumerate(gff_vdw.values()):
+                lines.append('{} {} {}'.format(i+1, v[0],v[1]))
+            print '\n'.join(lines)
+
+    def set_pair_coeff(self, atom_gaff ,gff_vdw):
+
+        lines=[]
+        if gff_vdw is not None:
+            lines.append('Pair Coeffs')
+            for i, v in enumerate(gff_vdw.values()):
+                lines.append('{} {} {}'.format(i+1, v[0],v[1]))
+            print '\n'.join(lines)
 
 
 
