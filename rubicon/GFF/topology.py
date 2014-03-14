@@ -8,8 +8,6 @@ class AC():
     """
     load topology data from antechamber(.rtf) file
     """
-
-
     def __init__(self):
 
         self.atom_index=dict()

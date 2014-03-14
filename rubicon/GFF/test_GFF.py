@@ -1,6 +1,6 @@
 __author__ = 'navnidhirajput'
 
-from GFF import GFF
+from gff import GFF
 import os
 from pymatgen.core.structure import Molecule
 

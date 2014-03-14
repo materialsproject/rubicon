@@ -1,6 +1,6 @@
 from unittest import TestCase
 import unittest
-from GFF import GFF
+from gff import GFF
 
 __author__ = 'navnidhirajput'
 

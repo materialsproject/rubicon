@@ -13,7 +13,7 @@ import copy
 from pymatgen.core.structure import Molecule
 from pymatgen import write_mol
 import shlex
-from GFF import GFF
+from gff import GFF
 import glob
 
 
@@ -78,8 +78,6 @@ class Antechamber():
         command_parmchk=('parmchk -i '+filename +' -f ac -o mol.frcmod')
 
         return_cmd=subprocess.call(shlex.split(command_parmchk))
-        #self.molname = filename.split('.')[0]
-
         return return_cmd
 
 
@@ -118,16 +116,11 @@ class Antechamber():
     def get_FF_bonds(self,bonds,top_bond,atom_gaff):
 
         self.gaff_info=[]
-        #print bonds['ca-ca'][0]
-
         for keys, values in bonds.iteritems():
                 self.gaff_info=[keys,values]
-
-
         for item in top_bond:
             d1=item[0]+'-'+ item[1]
-            a1=atom_gaff[item[0]]
-            a2=atom_gaff[item[1]]
+            a1,a2 = atom_gaff[item[0]],atom_gaff[item[1]]
             if a1+'-'+a2 in bonds:
                 self.topbondFF[d1]=(a1+'-'+a2,bonds[a1+'-'+a2])
             else:
@@ -138,17 +131,11 @@ class Antechamber():
     def get_FF_angles(self,angles,top_angle,atom_gaff):
 
         self.gaff_info=[]
-        #print bonds['ca-ca'][0]
-
         for keys, values in angles.iteritems():
                 self.gaff_info=[keys,values]
-        #print self.gaff_info
-
         for item in top_angle:
             d1=item[0]+'-'+ item[1]+'-'+item[2]
-            a1=atom_gaff[item[0]]
-            a2=atom_gaff[item[1]]
-            a3=atom_gaff[item[2]]
+            a1,a2,a3 = atom_gaff[item[0]],atom_gaff[item[1]],atom_gaff[item[2]]
             if a1+'-'+a2+'-'+a3 in angles:
                 self.topangleFF[d1]=(a1+'-'+a2+'-'+a3,angles[a1+'-'+a2+'-'+a3])
 
@@ -160,18 +147,11 @@ class Antechamber():
     def get_FF_dihedrals(self,dihedrals,top_dihedral,atom_gaff):
 
         self.gaff_info=[]
-        #print bonds['ca-ca'][0]
-
         for keys, values in dihedrals.iteritems():
                 self.gaff_info=[keys,values]
-        #print self.gaff_info
-
         for item in top_dihedral:
             d1=item[0]+'-'+ item[1]+'-'+item[2]+ '-'+item[3]
-            a1=atom_gaff[item[0]]
-            a2=atom_gaff[item[1]]
-            a3=atom_gaff[item[2]]
-            a4=atom_gaff[item[3]]
+            a1,a2,a3,a4 = atom_gaff[item[0]],atom_gaff[item[1]],atom_gaff[item[2]],atom_gaff[item[3]]
             if 'X-'+a2+'-'+a3+'-'+'X' in dihedrals:
                 self.topdihedralFF[d1]=('X-'+a2+'-'+a3+'-'+'X',dihedrals['X-'+a2+'-'+a3+'-'+'X'])
 
@@ -183,18 +163,11 @@ class Antechamber():
     def get_FF_imdihedrals(self,imdihedrals,top_imdihedral,atom_gaff):
 
         self.gaff_info=[]
-        #print bonds['ca-ca'][0]
-
         for keys, values in imdihedrals.iteritems():
                 self.gaff_info=[keys,values]
-        #print self.gaff_info
-
         for item in top_imdihedral:
             d1=item[0]+'-'+ item[1]+'-'+item[2]+ '-'+item[3]
-            a1=atom_gaff[item[0]]
-            a2=atom_gaff[item[1]]
-            a3=atom_gaff[item[2]]
-            a4=atom_gaff[item[3]]
+            a1,a2,a3,a4 = atom_gaff[item[0]],atom_gaff[item[1]],atom_gaff[item[2]],atom_gaff[item[3]]
             if a1+'-'+a2+'-'+a3+'-'+ a4 in imdihedrals:
                 self.topimdihedralFF[d1]=(a1+'-'+a2+'-'+a3+'-'+ a4,imdihedrals[a1+'-'+a2+'-'+a3+'-'+ a4])
 
