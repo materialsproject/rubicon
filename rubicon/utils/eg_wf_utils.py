@@ -1,8 +1,10 @@
 import json
+import logging
 import os
 import shutil
 from monty.io import zopen
 from monty.os.path import zpath
+import sys
 from rubicon.workflows.wf_settings import EG_RUN_LOCS
 
 __author__ = 'xiaohuiqu'
@@ -48,7 +50,10 @@ def get_eg_file_loc(m_file):
 
 
 def move_to_eg_garden(m_dir):
+    logger = logging.getLogger('MV_TO_GARDEN')
+    logger.setLevel(logging.INFO)
     if "GARDEN_LOC" not in os.environ:
+        logger.info("GARDEN_LOC not available, nothing will be moved")
         return m_dir
     garden_part = os.path.abspath(os.environ["GARDEN_LOC"])
     if os.path.exists(m_dir) or os.path.exists(m_dir + ".gz"):
@@ -70,7 +75,9 @@ def move_to_eg_garden(m_dir):
     if os.path.exists(dest_dir):
         raise ValueError("A same name folder \"{}\" already exists in garden"
                          .format(dest_dir))
+    logger.info("Trying to move folder {} to {}".format(m_dir, dest_dir))
     shutil.move(m_dir, dest_dir)
+    logger.info("move to garden successfully completed")
     return dest_dir
 
 
