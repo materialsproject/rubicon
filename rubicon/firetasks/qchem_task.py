@@ -75,7 +75,6 @@ class QChemTask(FireTaskBase, FWSerializable):
         sh.setLevel(getattr(logging, 'INFO'))
         qchem_logger.addHandler(sh)
 
-
         scf_max_cycles = 200
         geom_max_cycles = 200
         alt_cmd = {"half_cpus": half_cpus_cmd,

@@ -2,10 +2,12 @@ import json
 import logging
 import os
 import shutil
+
 from monty.io import zopen
 from monty.os.path import zpath
-import sys
+
 from rubicon.workflows.wf_settings import EG_RUN_LOCS
+
 
 __author__ = 'xiaohuiqu'
 
