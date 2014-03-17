@@ -51,11 +51,6 @@ def get_eg_file_loc(m_file):
 
 def move_to_eg_garden(m_dir):
     logger = logging.getLogger('MV_TO_GARDEN')
-    logger.setLevel(logging.INFO)
-    logger.setLevel(logging.INFO)
-    sh = logging.StreamHandler(stream=sys.stdout)
-    sh.setLevel(getattr(logging, 'INFO'))
-    logger.addHandler(sh)
     if "GARDEN_LOC" not in os.environ:
         logger.info("GARDEN_LOC not available, nothing will be moved")
         return m_dir

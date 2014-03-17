@@ -69,11 +69,12 @@ class QChemTask(FireTaskBase, FWSerializable):
             qc_exe = ["qchem"]
 
         logging.basicConfig(level=logging.INFO)
-        logger = logging.getLogger('QChemDrone')
-        logger.setLevel(logging.INFO)
+        qchem_logger = logging.getLogger('QChemDrone')
+        qchem_logger.setLevel(logging.INFO)
         sh = logging.StreamHandler(stream=sys.stdout)
         sh.setLevel(getattr(logging, 'INFO'))
-        logger.addHandler(sh)
+        qchem_logger.addHandler(sh)
+
 
         scf_max_cycles = 200
         geom_max_cycles = 200
