@@ -43,57 +43,84 @@ class LMPInput():
     #def set_atom_types(self,atom_types):
     #    self.atoms=len(atom_types)
 
-    def set_bond(self,bond):
-        self.bonds=len(bond)
 
-    def set_bond_types(self,bond_types):
-        self.bonds=len(bond_types)
 
-    def set_angle(self):
-        pass
-
-    def set_angle_types(self,angle_types):
-        self.angles=len(angle_types)
-
-    def set_dihedral(self):
-        pass
-
-    def set_dihedral_types(self,dihedral_types):
-        self.dihedrals=len(dihedral_types)
-
-    def set_improper(self):
-        pass
-
-    def set_improper_types(self,imdihedral_types):
-        self.imdihedrals=len(imdihedral_types)
-
-    def set_masses(self, atom_gaff ,gff_masses):
+    def set_coeff(self,gff,top):
 
         lines=[]
-        if gff_masses is not None:
-            lines.append('Masses')
-            for i, v in enumerate(gff_masses.values()):
-                lines.append('{} {}'.format(i+1, v))
-            print '\n'.join(lines)
+        if gff is not None:
+            lines.append('LAMMPS Data File')
+            lines.append(' \n')
+            lines.append("{} {}".format(len(gff.bonds),"atom type"))
+            lines.append("{} {}".format(len(gff.bonds),"bond type"))
+            lines.append("{} {}".format(len(gff.angles),"angle type"))
+            lines.append("{} {}".format(len(gff.dihedrals),"dihedral type"))
+            lines.append("{} {}".format(len(gff.imdihedrals),"improper dihedral type"))
+            lines.append('\n')
+
+            lines.append("{} {}".format(len(top.bonds),"atoms"))
+            lines.append("{} {}".format(len(top.angles),"bonds"))
+            lines.append("{} {}".format(len(top.dihedrals),"angles"))
+            lines.append("{} {}".format(len(top.imdihedrals),"dihedrals"))
+            lines.append('\n')
+
+            if gff.masses is not None:
+                lines.append('Masses')
+                lines.append('\n')
+                for i, v in enumerate(gff.masses.values()):
+                    lines.append('{} {}'.format(i+1, v))
+                lines.append('\n')
+
+            if gff.vdws:
+                lines.append('Pair Coeffs')
+                lines.append('\n')
+                for i, v in enumerate(gff.vdws.values()):
+                    lines.append('{} {} {}'.format(i+1, v[0],v[1]))
+                lines.append('\n')
 
 
-    def set_pair_coeff(self, atom_gaff ,gff_vdw):
+            if gff.bonds is not None:
+                lines.append('Bond Coeffs')
+                lines.append('\n')
+                for i, v in enumerate(gff.bonds.values()):
+                    lines.append('{} {} {}'.format(i+1, v[0],v[1]))
+                lines.append('\n')
+
+
+            if gff.angles is not None:
+                lines.append('Angle Coeffs')
+                lines.append('\n')
+                for i, v in enumerate(gff.angles.values()):
+                    lines.append('{} {} {}'.format(i+1, v[0],v[1]))
+                lines.append('\n')
+
+
+            if gff.dihedrals is not None:
+                lines.append('Dihedral Coeffs')
+                lines.append('\n')
+                for i, v in enumerate(gff.dihedrals.values()):
+                    lines.append('{} {} {}'.format(i+1, v[0],v[1]))
+                lines.append('\n')
+
+            if gff.imdihedrals is not None:
+                lines.append('Imp Dihedral Coeffs')
+                lines.append('\n')
+                for i, v in enumerate(gff.imdihedrals.values()):
+                    lines.append('{} {} {}'.format(i+1, v[0],v[1]))
+                lines.append('\n')
+
+        return '\n'.join(lines)
+
+
+    def set_atom(self,coord,charge):
 
         lines=[]
-        if gff_vdw is not None:
-            lines.append('Pair Coeffs')
-            for i, v in enumerate(gff_vdw.values()):
-                lines.append('{} {} {}'.format(i+1, v[0],v[1]))
-            print '\n'.join(lines)
+        lines.append('Atoms')
 
-    def set_pair_coeff(self, atom_gaff ,gff_vdw):
 
-        lines=[]
-        if gff_vdw is not None:
-            lines.append('Pair Coeffs')
-            for i, v in enumerate(gff_vdw.values()):
-                lines.append('{} {} {}'.format(i+1, v[0],v[1]))
-            print '\n'.join(lines)
+
+        return '\n'.join(lines)
+
 
 
 

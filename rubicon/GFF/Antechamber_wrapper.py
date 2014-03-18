@@ -15,6 +15,8 @@ from pymatgen import write_mol
 import shlex
 from gff import GFF
 import glob
+from monty.io import ScratchDir
+import tempfile
 
 
 
@@ -23,7 +25,6 @@ class Antechamber():
     A wrapper for Antechamber software
 
     """
-
 
 
     def __init__(self,molecule=None):
@@ -39,17 +40,11 @@ class Antechamber():
 
 
     def convert_to_pdb(self,molecule,filename):
-
         """
         generate pdb file for a given molecule
         """
-
         write_mol(molecule,filename)
         self.filename=filename
-
-
-
-
 
     def run_antechamber(self,filename=None):
         """
@@ -58,11 +53,14 @@ class Antechamber():
         Args:
             filename = pdb file of the molecule
         """
+        #scratch = tempfile.gettempdir()
+        #with ScratchDir(scratch,copy_from_current_on_enter=True) as d:
 
+            #os.chdir(d)
         command=('antechamber -i ' +filename +' -fi pdb -o ' +filename[:-4]+
-             " -fo charmm")
-
+                 " -fo charmm")
         return_cmd=subprocess.call(shlex.split(command))
+
         self.molname = filename.split('.')[0]
 
         return return_cmd
@@ -95,6 +93,10 @@ class Antechamber():
 
 
     def clean_files(self):
+
+        """
+        clean Antechamber files
+        """
         for filename in glob.glob('*.AC'):
             os.remove(filename)
         for filename in glob.glob('*.AC0'):
@@ -138,9 +140,8 @@ class Antechamber():
             a1,a2,a3 = atom_gaff[item[0]],atom_gaff[item[1]],atom_gaff[item[2]]
             if a1+'-'+a2+'-'+a3 in angles:
                 self.topangleFF[d1]=(a1+'-'+a2+'-'+a3,angles[a1+'-'+a2+'-'+a3])
-
-            elif reversed(a1 +'-'+a2+'-'+a3):
-                self.topangleFF[d1]=(a1+'-'+a2+'-'+a3,angles[a1+'-'+a2+'-'+a3])
+            elif '-'.join(list(reversed([a1, a2, a3]))) in angles:
+                self.topangleFF[d1]=(a1+'-'+a2+'-'+a3, angles['-'.join(list(reversed([a1, a2, a3])))])
             self.num_ang_types = len(set(self.topangleFF.keys()))
 
 
@@ -155,8 +156,8 @@ class Antechamber():
             if 'X-'+a2+'-'+a3+'-'+'X' in dihedrals:
                 self.topdihedralFF[d1]=('X-'+a2+'-'+a3+'-'+'X',dihedrals['X-'+a2+'-'+a3+'-'+'X'])
 
-            elif reversed(a1+'-'+a2+'-'+a3+'-'+ a4):
-                self.topdihedralFF[d1]=('X-'+a2+'-'+a3+'-'+'X',dihedrals['X-'+a2+'-'+a3+'-'+'X'])
+            elif '-'.join(list(reversed([a1, a2, a3, a4]))) in dihedrals:
+                self.topdihedralFF[d1]=('X-'+a2+'-'+a3+'-'+'X',dihedrals['-'.join(list(reversed([a1, a2, a3, a4])))])
             self.num_dih_types = len(set(self.topdihedralFF.keys()))
 
 
@@ -171,8 +172,9 @@ class Antechamber():
             if a1+'-'+a2+'-'+a3+'-'+ a4 in imdihedrals:
                 self.topimdihedralFF[d1]=(a1+'-'+a2+'-'+a3+'-'+ a4,imdihedrals[a1+'-'+a2+'-'+a3+'-'+ a4])
 
-            elif reversed(a1+'-'+a2+'-'+a3+'-'+ a4):
-                self.topimdihedralFF[d1]=(a1+'-'+a2+'-'+a3+'-'+ a4,imdihedrals[a1+'-'+a2+'-'+a3+'-'+ a4])
+
+            elif '-'.join(list(reversed([a1, a2, a3, a4]))) in imdihedrals:
+                self.topimdihedralFF[d1]=(a1+'-'+a2+'-'+a3+'-'+ a4,imdihedrals['-'.join(list(reversed([a1, a2, a3, a4])))])
             self.num_imdih_types = len(set(self.topimdihedralFF.keys()))
 
 

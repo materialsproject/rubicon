@@ -36,6 +36,37 @@ coords1 = [[2.439852592, -0.695560517, -0.059660824],
            [0.37592053, 3.218997493, -0.180146967],
            [2.059832605, 3.263215412, -0.415601215]]
 
+coords2 = [[2.077,   2.130,   2.542],
+           [1.426,   1.495,   3.152],
+           [1.978,   1.858,   1.482],
+           [1.661,   3.499,   2.704],
+           [2.759,   4.301,   2.804],
+           [2.732,   5.496,   2.818],
+           [3.891,   3.546,   2.886],
+           [3.535,   2.156,   3.014],
+           [3.647,   1.864,   4.067],
+           [4.213,   1.566,   2.389]]
+
+coords3=[[0.723,  -0.058,  -0.021],
+           [-0.075,  -0.188,   1.070],
+           [0.133,   0.343,  -1.175],
+           [1.904,  -0.273,   0.028],
+           [-1.355,  -0.871,   0.967],
+           [-1.018,   1.209,  -1.154],
+           [-1.459,  -1.850,   2.121],
+           [-1.416,  -1.386,  -0.000],
+           [-2.153,  -0.118,   1.01814],
+           [-0.884,   1.902,  -1.991],
+           [-1.074,   1.771,  -0.214],
+           [-1.938,   0.631,  -1.304],
+           [-0.670,  -2.610,   2.061],
+           [-2.436,  -2.352,   2.089],
+           [-1.368,  -1.327,   3.082]]
+
+etc = Molecule(["C", "H", "H", "O", "C", "O", "O","C","H", "H"], coords2)
+
+emc = Molecule(["C", "O", "O", "O", "C", "C","C","H", "H","H", "H","H", "H","H", "H"], coords3)
+
 mol1 = Molecule(["C", "H", "H", "H", "H"], coords)
 
 mol2 = Molecule(
@@ -45,7 +76,7 @@ mol2 = Molecule(
 
 
 
-mols = [mol2]
+mols = [etc]
 
 """
 
@@ -68,8 +99,9 @@ for mol in mols:
     #print "num types ",ac.num_types
     #print "atom_name:gaff_atom_type",ac.atom_gaff
 
-    tp = TopMol.from_file('mol.rtf')
-    #print "Top BONDS", tp.bonds
+    top = TopMol.from_file('mol.rtf')
+    
+    #print "Top BONDS", tp.bonds,tp
     #print "Top ANGLES",tp.angles
     #print "DIHEDRALS",tp.dihedrals
     #print "IMPH",tp.imdihedrals
@@ -96,12 +128,13 @@ for mol in mols:
     my_gff_lib = GFF_library()
     my_gff_lib.append_gff()
 
-    my_ant.get_FF_bonds(my_gff.bonds, tp.bonds, atom_gaff.atom_gaff)
-    my_ant.get_FF_angles(my_gff.angles, tp.angles, atom_gaff.atom_gaff)
-    my_ant.get_FF_dihedrals(my_gff.dihedrals, tp.dihedrals, atom_gaff.atom_gaff)
-    my_ant.get_FF_imdihedrals(my_gff.imdihedrals, tp.imdihedrals, atom_gaff.atom_gaff)
+#    my_ant.get_FF(my_gff, top, atom_gaff.atom_gaff)
+    my_ant.get_FF_bonds(my_gff.bonds, top.bonds, atom_gaff.atom_gaff)
+    my_ant.get_FF_angles(my_gff.angles, top.angles, atom_gaff.atom_gaff)
+    my_ant.get_FF_dihedrals(my_gff.dihedrals, top.dihedrals, atom_gaff.atom_gaff)
+    my_ant.get_FF_imdihedrals(my_gff.imdihedrals, top.imdihedrals, atom_gaff.atom_gaff)
     #print "bond_label:bond_type,bond_parameter",my_ant.topbondFF,
-    print "angle_label:angle_type,angle_parameter",my_ant.topangleFF
+    #print "angle_label:angle_type,angle_parameter",my_ant.topangleFF
     #print my_ant.num_bond_types
     #print "number of angles",my_ant.num_ang_types
     #print "dihedral_label:dihedral_type,dihedral_parameter",my_ant.topdihedralFF
@@ -114,16 +147,12 @@ for mol in mols:
     gff_list.append(gff)
 
     my_lampps=LMPInput()
-    my_lampps.set_bond_types(my_gff.bonds)
-    my_lampps.set_angle_types(my_gff.angles)
-    my_lampps.set_dihedral_types(my_gff.dihedrals)
-    my_lampps.set_improper_types(my_gff.imdihedrals)
-    my_lampps.set_bond(tp.bonds)
-    print "Lampps input file",atom_gaff.num_types,my_lampps.bonds,my_lampps.angles,my_lampps.dihedrals,my_lampps.imdihedrals
-    print my_lampps.bonds
-    print 'masses',my_gff.masses
-    print my_lampps.set_masses(atom_gaff.atom_gaff,my_gff.masses)
-    print my_lampps.set_pair_coeff(atom_gaff.atom_gaff,my_gff.vdws)
+
+    #my_lampps.set_bond(tp.bonds)
+    #print "Lampps input file",atom_gaff.num_types,my_lampps.bonds,my_lampps.angles,my_lampps.dihedrals,my_lampps.imdihedrals
+    #print my_lampps.bonds
+    print my_lampps.set_coeff(my_gff,top)
+    #print my_lampps.set_atom()
 
 
 

@@ -120,12 +120,14 @@ class GFF(MSONable):
                     if len(line.strip())==0:
                         imdihedral_section = False
                         continue
-                    token = line.split()
-                    imdihedral_type=token[0]
-                    imdihedral_distance=float(token[1])
-                    imdihedral_func_type=float(token[3])
-                    imdihedral_angle=float(token[2])
+
+
+                    imdihedral_type=line[0:11]
+                    imdihedral_distance=float(line[18:28])
+                    imdihedral_angle=float(line[29:41])
                     imdihedrals[imdihedral_type]=(imdihedral_distance,imdihedral_angle)
+
+
 
 
                 if line.startswith('NONBONDED'):
