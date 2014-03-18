@@ -1,5 +1,7 @@
 import copy
 import itertools
+import json
+import os
 from fireworks.core.firework import Workflow, FireWork, Tracker
 from pymatgen.io.babelio import BabelMolAdaptor
 from pymatgen.io.qchemio import QcInput, QcTask
@@ -61,7 +63,7 @@ class QChemFireWorkCreator():
             self.bs + " " + task_type
         if self.large:
             title = self.molname + " " + state_name + " PBE-D3/6-31+G* " + \
-                    task_type
+                task_type
             qctask = QcTask(self.mol, charge=charge,
                             spin_multiplicity=spin_multiplicity,
                             jobtype="opt", title=title,
@@ -111,7 +113,7 @@ class QChemFireWorkCreator():
             self.bs + " " + task_type
         if self.large:
             title = self.molname + " " + state_name + " PBE-D3/6-31+G* " + \
-                    task_type
+                task_type
             qctask = QcTask(self.mol, charge=charge,
                             spin_multiplicity=spin_multiplicity,
                             jobtype="freq", title=title,
@@ -149,7 +151,9 @@ class QChemFireWorkCreator():
                               spec=spec_db, name=task_name_db, fw_id=fw_id_db)
         return fw_freq_cal, fw_freq_db
 
-    def sp_fw(self, charge, spin_multiplicity, fw_id_cal, fw_id_db):
+    def sp_fw(self, charge, spin_multiplicity, fw_id_cal, fw_id_db,
+              solvent_method="ief-pcm", solvent="diglym"):
+        spec = self.base_spec()
         task_type = "single point energy"
         state_name = self.get_state_name(charge, spin_multiplicity)
         title = self.molname + " " + state_name + " " + self.dft + " " + \
@@ -166,33 +170,68 @@ class QChemFireWorkCreator():
             qctask_vac.set_scf_convergence_threshold(8)
         else:
             qctask_vac.set_scf_algorithm_and_iterations(iterations=100)
+
         title = " Solution Phase"
         qctask_sol = QcTask(self.mol, charge=charge,
                             spin_multiplicity=spin_multiplicity,
                             jobtype="sp", title=title,
                             exchange=self.dft, basis_set=self.bs)
         qctask_sol.set_scf_initial_guess(guess="read")
+        implicit_solvent = dict()
+        if solvent_method.lower() in ['cpcm', 'ief-pcm']:
+            if solvent_method.lower() == 'ief-pcm':
+                solvent_theory = 'ssvpe'
+            else:
+                solvent_theory = 'cpcm'
+            qctask_sol.use_pcm(solvent_params={"Dielectric": 78.3553},
+                               pcm_params={'Theory': solvent_theory})
+            implicit_solvent['model'] = solvent_method.lower()
+            implicit_solvent['dielectric_constant'] = 78.3553
+            implicit_solvent['radii'] = 'uff'
+            implicit_solvent['vdwscale'] = 1.1
+        elif solvent_method.lower() == 'cosmo':
+            qctask_sol.use_cosmo()
+            implicit_solvent['model'] = 'cosmo'
+            implicit_solvent['dielectric_constant'] = 78.3553
+        elif solvent_method.lower() in ['sm12mk', 'sm12chelpg', 'sm12',
+                                        'sm8']:
+            implicit_solvent['model'] = solvent_method.lower()
+            smx_data_file = os.path.join(os.path.dirname(__file__),
+                                         "../utils/data", "smx_data.json")
+            with open(smx_data_file) as f:
+                smx_data = json.load(f)
+            if solvent not in smx_data["builtin_solvent"]:
+                smx_solvent = "other"
+                if solvent not in smx_data["custom_solvent"]:
+                    raise Exception("Don't know the SMx parameters for "
+                                    "solvent '{}'".format(solvent))
+                implicit_solvent['solvent_data'] = \
+                    smx_data["custom_solvent"][solvent]
+            else:
+                smx_solvent = solvent
+            rem_options = dict(solvent_method=solvent_method.lower(),
+                               smx_solvent=smx_solvent.lower())
+            qctask_sol.params['rem'].update(rem_options)
+            implicit_solvent['smx_solvent'] = smx_solvent
+        else:
+            raise Exception("Don't know how to setup solvent model '{}'".
+                            format(solvent_method))
         if not self.large:
-            qctask_sol.use_pcm(solvent_params={"Dielectric": 78.3553})
             qctask_sol.set_dft_grid(128, 302)
             qctask_sol.set_integral_threshold(12)
             qctask_sol.set_scf_convergence_threshold(8)
-        if self.large:
-            qctask_sol.use_pcm(pcm_params={"HPoints": 194,
-                                           "HeavyPoints": 194},
-                               solvent_params={"Dielectric": 78.3553})
+        else:
             qctask_sol.set_scf_algorithm_and_iterations(iterations=100)
+            if solvent_method.lower() in ['cpcm', 'ief-pcm']:
+                qctask_sol.params['pcm'].update({"hpoints": 194,
+                                                 "heavypoints": 194})
+
         qcinp = QcInput([qctask_vac, qctask_sol])
-        spec = self.base_spec()
         spec["qcinp"] = qcinp.to_dict
         spec['task_type'] = task_type
         spec['charge'] = charge
         spec['spin_multiplicity'] = spin_multiplicity
-        implicit_solvent = dict()
-        implicit_solvent['model'] = 'ief-pcm'
-        implicit_solvent['dielectric_constant'] = 78.3553
-        implicit_solvent['radii'] = 'uff'
-        implicit_solvent['vdwscale'] = 1.1
+
         spec['implicit_solvent'] = implicit_solvent
         task_name = self.molname + ' ' + state_name + ' ' + task_type
         from rubicon.firetasks.multistep_qchem_task \

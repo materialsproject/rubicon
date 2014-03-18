@@ -84,6 +84,15 @@ class QChemTask(FireTaskBase, FWSerializable):
             geom_max_cycles = 500
 
         qcinp.write_file("mol.qcinp")
+        if 'implicit_solvent' in fw_spec and\
+                'solvent_data' in fw_spec['implicit_solvent']:
+            solvent_data = fw_spec['implicit_solvent']['solvent_data']
+            values = ['.4f'.format(solvent_data[t]) for t in
+                      ['Dielec', 'SolN', 'SolA', 'SolB', 'SolG', 'SolC',
+                       'SolH']]
+            solvent_text = ' '.join(values)
+            with open('solvent_data', 'w') as f:
+                f.write(solvent_text)
         job = QchemJob(qc_exe, input_file="mol.qcinp", output_file="mol.qcout",
                        qclog_file="mol.qclog", alt_cmd=alt_cmd, gzipped=True)
         handler = QChemErrorHandler(qchem_job=job,
