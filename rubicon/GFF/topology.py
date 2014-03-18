@@ -43,11 +43,14 @@ class AC():
 
 class TopMol():
 
-    def __init__(self,bonds,angles,dihedrals,imdihedrals):
+    def __init__(self,bonds,angles,dihedrals,imdihedrals,num_bonds):
         self.bonds=bonds
         self.angles=angles
         self.dihedrals=dihedrals
         self.imdihedrals= imdihedrals
+        self.num_bonds=num_bonds
+        
+
 
     @classmethod
     def from_file(cls,filename):
@@ -63,13 +66,17 @@ class TopMol():
                 token = line.split()
                 if token[0]=='BOND':
                     bonds.append(token[1:3])
+
+
                 elif token[0]=='ANGL':
                     angles.append(token[1:4])
                 elif token[0]=='DIHE':
                     dihedrals.append(token[1:5])
                 elif token[0]=='IMPH':
                     imdihedrals.append(token[1:5])
-                    topology=TopMol(bonds,angles,dihedrals,imdihedrals)
+
+
+            topology=TopMol(bonds,angles,dihedrals,imdihedrals,len(bonds))
             return topology
 
 
