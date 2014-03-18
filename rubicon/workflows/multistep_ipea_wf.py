@@ -152,7 +152,7 @@ class QChemFireWorkCreator():
         return fw_freq_cal, fw_freq_db
 
     def sp_fw(self, charge, spin_multiplicity, fw_id_cal, fw_id_db,
-              solvent_method="ief-pcm", solvent="diglym"):
+              solvent_method="ief-pcm", solvent="water"):
         spec = self.base_spec()
         task_type = "single point energy"
         state_name = self.get_state_name(charge, spin_multiplicity)
