@@ -87,7 +87,7 @@ class QChemTask(FireTaskBase, FWSerializable):
         if 'implicit_solvent' in fw_spec and\
                 'solvent_data' in fw_spec['implicit_solvent']:
             solvent_data = fw_spec['implicit_solvent']['solvent_data']
-            values = ['.4f'.format(solvent_data[t]) for t in
+            values = ['{:.4f}'.format(solvent_data[t]) for t in
                       ['Dielec', 'SolN', 'SolA', 'SolB', 'SolG', 'SolC',
                        'SolH']]
             solvent_text = ' '.join(values)
