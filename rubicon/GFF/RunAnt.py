@@ -76,7 +76,7 @@ mol2 = Molecule(
 
 
 
-mols = [mol2]
+mols = [etc]
 
 """
 
@@ -128,6 +128,7 @@ for mol in mols:
     my_gff_lib = GFF_library()
     my_gff_lib.append_gff()
 
+#    my_ant.get_FF(my_gff, top, atom_gaff.atom_gaff)
     my_ant.get_FF_bonds(my_gff.bonds, top.bonds, atom_gaff.atom_gaff)
     my_ant.get_FF_angles(my_gff.angles, top.angles, atom_gaff.atom_gaff)
     my_ant.get_FF_dihedrals(my_gff.dihedrals, top.dihedrals, atom_gaff.atom_gaff)
@@ -142,7 +143,7 @@ for mol in mols:
     #print "number of dihedrals",my_ant.num_imdih_types
 
 
-    #my_ant.clean_files()
+    my_ant.clean_files()
     gff_list.append(gff)
 
     my_lampps=LMPInput()
@@ -151,7 +152,7 @@ for mol in mols:
     #print "Lampps input file",atom_gaff.num_types,my_lampps.bonds,my_lampps.angles,my_lampps.dihedrals,my_lampps.imdihedrals
     #print my_lampps.bonds
     print my_lampps.set_coeff(my_gff,top)
-    print my_lampps.set_atom()
+    #print my_lampps.set_atom()
 
 
 

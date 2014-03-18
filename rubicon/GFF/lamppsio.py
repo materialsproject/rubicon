@@ -112,10 +112,12 @@ class LMPInput():
         return '\n'.join(lines)
 
 
-    def set_atom(self):
+    def set_atom(self,coord,charge):
 
         lines=[]
         lines.append('Atoms')
+
+
 
         return '\n'.join(lines)
 

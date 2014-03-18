@@ -66,8 +66,6 @@ class TopMol():
                 token = line.split()
                 if token[0]=='BOND':
                     bonds.append(token[1:3])
-
-
                 elif token[0]=='ANGL':
                     angles.append(token[1:4])
                 elif token[0]=='DIHE':
