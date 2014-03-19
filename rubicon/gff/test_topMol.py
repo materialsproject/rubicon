@@ -1,6 +1,6 @@
 from unittest import TestCase
 import unittest
-from rubicon.gff2.topology import TopMol
+from rubicon.gff.topology import TopMol
 
 __author__ = 'navnidhirajput'
 

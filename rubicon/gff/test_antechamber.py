@@ -1,8 +1,8 @@
 from unittest import TestCase
 from pymatgen import Molecule
-from rubicon.gff2.Antechamber_wrapper import Antechamber
-from rubicon.gff2.gff import GFF_library, GFF
-from rubicon.gff2.topology import TopMol, AC
+from rubicon.gff.Antechamber_wrapper import Antechamber
+from rubicon.gff.gff import GFF_library, GFF
+from rubicon.gff.topology import TopMol, AC
 
 __author__ = 'navnidhirajput'
 
