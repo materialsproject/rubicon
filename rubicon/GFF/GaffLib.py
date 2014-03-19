@@ -94,28 +94,6 @@ class GaffLib(MSONable):
                     imdihedral_angle=float(token[2])
                     imdihedrals[imdihedral_type]=(imdihedral_distance,imdihedral_angle)
 
-                '''
-                if line.startswith('NONBONDED'):
-                    vdw_section = True
-                    continue
-                if vdw_section:
-                    if len(line.strip())==0:
-                        vdw_section = False
-                        continue
-                    if line.startswith("CUTNB"):
-                        continue
-                    if line.startswith("!"):
-                        continue
-                    token = line.split()
-                    vdw_type=token[0]
-                    epsilon=abs(float(token[2]))
-                    sigma=float(token[3])
-                    vdws[vdw_type]=(sigma,epsilon)
-            self.bonds.update(bonds)
-            self.angles.update(angles)
-            self.dihedrals.update(dihedrals)
-            self.imdihedrals.update(imdihedrals)
-            '''
 
             self.bonds.update(bonds)
             self.angles.update(angles)

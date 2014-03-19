@@ -1,7 +1,7 @@
 from unittest import TestCase
-from rubicon.gff.gff import GFF
-from rubicon.gff.lamppsio import LMPInput
-from rubicon.gff.topology import TopMol
+from rubicon.GFF.gff import GFF
+from rubicon.GFF.lamppsio import LMPInput
+from rubicon.GFF.topology import TopMol
 
 __author__ = 'navnidhirajput'
 

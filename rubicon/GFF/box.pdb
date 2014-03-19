@@ -1,0 +1,66 @@
+HEADER 
+TITLE     Built with Packmol                                             
+REMARK   Packmol generated pdb file 
+REMARK   Home-Page: http://www.ime.unicamp.br/~martinez/packmol
+REMARK
+HETATM    1  C   LIG A   1       3.652   5.056   3.731  1.00  0.00           C  
+HETATM    2  H   LIG A   1       3.382   5.492   2.771  1.00  0.00           H  
+HETATM    3  H   LIG A   1       4.616   4.557   3.645  1.00  0.00           H  
+HETATM    4  H   LIG A   1       3.716   5.842   4.482  1.00  0.00           H  
+HETATM    5  H   LIG A   1       2.894   4.332   4.027  1.00  0.00           H  
+HETATM    6  C   LIG A   2       6.427   6.629   0.442  1.00  0.00           C  
+HETATM    7  H   LIG A   2       6.498   6.581   1.527  1.00  0.00           H  
+HETATM    8  H   LIG A   2       6.240   7.657   0.135  1.00  0.00           H  
+HETATM    9  H   LIG A   2       7.360   6.283   0.001  1.00  0.00           H  
+HETATM   10  H   LIG A   2       5.608   5.996   0.104  1.00  0.00           H  
+HETATM   11  C   LIG A   3       0.590   2.953   1.561  1.00  0.00           C  
+HETATM   12  H   LIG A   3       0.640   2.935   2.649  1.00  0.00           H  
+HETATM   13  H   LIG A   3       0.082   3.861   1.236  1.00  0.00           H  
+HETATM   14  H   LIG A   3       1.598   2.936   1.151  1.00  0.00           H  
+HETATM   15  H   LIG A   3       0.039   2.083   1.208  1.00  0.00           H  
+HETATM   16  C   LIG A   4       7.998   7.129   6.886  1.00  0.00           C  
+HETATM   17  H   LIG A   4       7.289   6.420   7.311  1.00  0.00           H  
+HETATM   18  H   LIG A   4       8.640   6.615   6.171  1.00  0.00           H  
+HETATM   19  H   LIG A   4       7.455   7.925   6.379  1.00  0.00           H  
+HETATM   20  H   LIG A   4       8.608   7.554   7.681  1.00  0.00           H  
+HETATM   21  C   LIG B   1       6.811   0.553   3.585  1.00  0.00           C  
+HETATM   22  H   LIG B   1       6.448   1.573   3.696  1.00  0.00           H  
+HETATM   23  H   LIG B   1       6.744   0.037   4.542  1.00  0.00           H  
+HETATM   24  H   LIG B   1       6.204   0.030   2.847  1.00  0.00           H  
+HETATM   25  H   LIG B   1       7.848   0.570   3.254  1.00  0.00           H  
+HETATM   26  C   LIG B   2       4.755   0.649   5.989  1.00  0.00           C  
+HETATM   27  H   LIG B   2       4.088   0.975   6.786  1.00  0.00           H  
+HETATM   28  H   LIG B   2       5.177   1.521   5.491  1.00  0.00           H  
+HETATM   29  H   LIG B   2       5.558   0.048   6.412  1.00  0.00           H  
+HETATM   30  H   LIG B   2       4.196   0.055   5.269  1.00  0.00           H  
+HETATM   31  C   LIG B   3       0.585   5.632   4.165  1.00  0.00           C  
+HETATM   32  H   LIG B   3       0.045   6.026   5.025  1.00  0.00           H  
+HETATM   33  H   LIG B   3       0.716   4.557   4.281  1.00  0.00           H  
+HETATM   34  H   LIG B   3       0.020   5.833   3.257  1.00  0.00           H  
+HETATM   35  H   LIG B   3       1.561   6.111   4.100  1.00  0.00           H  
+HETATM   36  C   LIG B   4       6.573   8.206   3.607  1.00  0.00           C  
+HETATM   37  H   LIG B   4       6.554   8.521   2.564  1.00  0.00           H  
+HETATM   38  H   LIG B   4       6.617   7.119   3.657  1.00  0.00           H  
+HETATM   39  H   LIG B   4       7.448   8.628   4.098  1.00  0.00           H  
+HETATM   40  H   LIG B   4       5.671   8.556   4.107  1.00  0.00           H  
+HETATM   41  C   LIG B   5       5.192   3.955   6.358  1.00  0.00           C  
+HETATM   42  H   LIG B   5       4.237   4.334   5.997  1.00  0.00           H  
+HETATM   43  H   LIG B   5       5.708   4.738   6.912  1.00  0.00           H  
+HETATM   44  H   LIG B   5       5.019   3.101   7.012  1.00  0.00           H  
+HETATM   45  H   LIG B   5       5.803   3.646   5.512  1.00  0.00           H  
+HETATM   46  C   LIG B   6       6.701   1.730   0.631  1.00  0.00           C  
+HETATM   47  H   LIG B   6       7.454   1.259   0.000  1.00  0.00           H  
+HETATM   48  H   LIG B   6       5.831   1.079   0.705  1.00  0.00           H  
+HETATM   49  H   LIG B   6       7.114   1.897   1.625  1.00  0.00           H  
+HETATM   50  H   LIG B   6       6.406   2.683   0.195  1.00  0.00           H  
+HETATM   51  C   LIG B   7       2.176   3.428   8.018  1.00  0.00           C  
+HETATM   52  H   LIG B   7       2.045   3.159   6.971  1.00  0.00           H  
+HETATM   53  H   LIG B   7       3.193   3.783   8.177  1.00  0.00           H  
+HETATM   54  H   LIG B   7       1.472   4.216   8.281  1.00  0.00           H  
+HETATM   55  H   LIG B   7       1.994   2.556   8.643  1.00  0.00           H  
+HETATM   56  C   LIG B   8       7.738   1.683   7.853  1.00  0.00           C  
+HETATM   57  H   LIG B   8       8.108   1.184   6.959  1.00  0.00           H  
+HETATM   58  H   LIG B   8       7.447   2.703   7.605  1.00  0.00           H  
+HETATM   59  H   LIG B   8       6.874   1.143   8.238  1.00  0.00           H  
+HETATM   60  H   LIG B   8       8.521   1.702   8.609  1.00  0.00           H  
+END

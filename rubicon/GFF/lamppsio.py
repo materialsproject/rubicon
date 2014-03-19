@@ -45,7 +45,7 @@ class LMPInput():
 
 
 
-    def set_coeff(self,gff,top):
+    def set_coeff(self,gff,top,pmr):
 
         lines=[]
         if gff is not None:
@@ -63,6 +63,10 @@ class LMPInput():
             lines.append("{} {}".format(len(top.dihedrals),"angles"))
             lines.append("{} {}".format(len(top.imdihedrals),"dihedrals"))
             lines.append('\n')
+
+            lines.append("{} {} {}".format(pmr.param_list[0]['inside box'][0],pmr.param_list[0]['inside box'][3],"xlo  xhi"))
+            lines.append("{} {} {}".format(pmr.param_list[0]['inside box'][1],pmr.param_list[0]['inside box'][4],"ylo  yhi"))
+            lines.append("{} {} {}".format(pmr.param_list[0]['inside box'][2],pmr.param_list[0]['inside box'][5],"zlo  zhi"))
 
             if gff.masses is not None:
                 lines.append('Masses')
@@ -112,10 +116,10 @@ class LMPInput():
         return '\n'.join(lines)
 
 
-    def set_atom(self,coord,charge):
-
+    def set_atom(self,pmr):
         lines=[]
         lines.append('Atoms')
+
 
 
 
