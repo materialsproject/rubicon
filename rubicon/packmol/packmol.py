@@ -103,10 +103,12 @@ class PackmolRunner(object):
 
             proc = Popen(['packmol'], stdin=open(os.path.join(d, 'pack.inp'), 'r'),stdout=PIPE)
             (stdout, stderr) = proc.communicate()
+            print stdout
+            print stderr
+
 
             a = BabelMolAdaptor.from_file(os.path.join(d, "box.pdb"), "pdb")
             return a.pymatgen_mol
-
 
 if __name__ == '__main__':
     coords = [[0.000000, 0.000000, 0.000000],
