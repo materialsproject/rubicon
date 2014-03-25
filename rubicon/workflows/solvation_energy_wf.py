@@ -28,7 +28,7 @@ def solvation_energy_fws(mol, name, mission, dupefinder=None, priority=1,
     geom_db_id = None
 
     if len(mol) > 1:
-        geom_cal_id, geom_db_id = fwid_base + 1, fwid_base + 2
+        geom_cal_id, geom_db_id = fwid_base + 0, fwid_base + 1
         fws_geom = fw_creator.geom_fw(
             charge=0, spin_multiplicity=1, fw_id_cal=geom_cal_id,
             fw_id_db=geom_db_id)
@@ -36,7 +36,7 @@ def solvation_energy_fws(mol, name, mission, dupefinder=None, priority=1,
         links_dict[geom_cal_id] = geom_db_id
 
         if not large:
-            freq_cal_id, freq_db_id = fwid_base + 3, fwid_base + 4
+            freq_cal_id, freq_db_id = fwid_base + 2, fwid_base + 3
             fws_freq = fw_creator.freq_fw(
                 charge=0, spin_multiplicity=1, fw_id_cal=freq_cal_id,
                 fw_id_db=freq_db_id)
@@ -48,8 +48,8 @@ def solvation_energy_fws(mol, name, mission, dupefinder=None, priority=1,
     if num_solvents < 1:
         raise ValueError("You must provide at least one solvent")
 
-    sp_fw_ids = zip(* [iter(range(fwid_base + 5,
-                                  fwid_base + 5 + num_solvents*2))] * 2)
+    sp_fw_ids = zip(* [iter(range(fwid_base + 4,
+                                  fwid_base + 4 + num_solvents*2))] * 2)
     sp_fws = (fw_creator.sp_fw(
               charge=0, spin_multiplicity=1, fw_id_cal=fwid_cal,
               fw_id_db=fwid_db, solvent_method='sm12mk', solvent=solvent)
