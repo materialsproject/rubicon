@@ -59,16 +59,16 @@ def solvation_energy_fws(mol, name, mission, dupefinder=None, priority=1,
     fireworks.extend(itertools.chain.from_iterable(sp_fws))
     if len(mol) > 1:
         if large:
-            links_dict[geom_db_id] = sp_cal_ids
+            links_dict[geom_db_id] = list(sp_cal_ids)
         else:
-            links_dict[freq_db_id] = sp_cal_ids
+            links_dict[freq_db_id] = list(sp_cal_ids)
         if parent_fwid:
             for pfw_id in parent_fwid:
                 links_dict[pfw_id] = geom_cal_id
     else:
         if parent_fwid:
             for pfw_id in parent_fwid:
-                links_dict[pfw_id] = sp_cal_ids
+                links_dict[pfw_id] = list(sp_cal_ids)
     return fireworks, links_dict
 
 
