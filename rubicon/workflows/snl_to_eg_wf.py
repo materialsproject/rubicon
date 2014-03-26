@@ -38,8 +38,7 @@ def snl_to_eg_wf(snl, parameters=None):
         fws_tasks, connections = multistep_ipea_fws(
             snl.structure, molname, mission, DupeFinderEG(), priority, 1)
     elif workflow_type == 'solvation energy':
-        default_solvents = ['diglym', 'acetonitrile', 'dimethylsulfoxide',
-                            'tetrahydrofuran']
+        default_solvents = ['diglym', 'acetonitrile', 'dmso', 'thf']
         solvents = parameters.get('solvents', default_solvents)
         fws_tasks, connections = solvation_energy_fws(
             snl.structure, molname, mission, DupeFinderEG(), priority, 1,
