@@ -158,7 +158,7 @@ class QChemFireWorkCreator():
         state_name = self.get_state_name(charge, spin_multiplicity)
         title = self.molname + " " + state_name + " " + self.dft + " " + \
             self.bs + " " + task_type
-        title += "\n Gas Phase, {}".format(solvent)
+        title += "\n Gas Phase"
         qctask_vac = QcTask(self.mol, charge=charge,
                             spin_multiplicity=spin_multiplicity,
                             jobtype="sp", title=title,
@@ -171,7 +171,7 @@ class QChemFireWorkCreator():
         else:
             qctask_vac.set_scf_algorithm_and_iterations(iterations=100)
 
-        title = " Solution Phase"
+        title = " Solution Phase, {}".format(solvent)
         qctask_sol = QcTask(self.mol, charge=charge,
                             spin_multiplicity=spin_multiplicity,
                             jobtype="sp", title=title,
