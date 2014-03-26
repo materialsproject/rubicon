@@ -1,4 +1,6 @@
 import glob
+from pymatgen.packmol.packmol import PackmolRunner
+import sys
 from topology import AC, TopMol
 from lamppsio import LMPInput
 
@@ -76,7 +78,7 @@ mol2 = Molecule(
 
 
 
-mols = [etc]
+mols = [mol1]
 
 """
 
@@ -100,6 +102,7 @@ for mol in mols:
     #print "atom_name:gaff_atom_type",ac.atom_gaff
 
     top = TopMol.from_file('mol.rtf')
+    #print top.dihedrals
     
     #print "Top BONDS", tp.bonds,tp
     #print "Top ANGLES",tp.angles
@@ -146,13 +149,22 @@ for mol in mols:
     my_ant.clean_files()
     gff_list.append(gff)
 
+
+    pmr = PackmolRunner([mol1, mol1], [{"number":4,"inside box":[0.,0.,0.,40.,40.,40.]}, {"number":8}])
+    mol_pack= pmr.run()
+    #print mol_pack
+    #print "autobox---- size",pmr.param_list[0]['inside box'][3]
+
+
     my_lampps=LMPInput()
 
     #my_lampps.set_bond(tp.bonds)
     #print "Lampps input file",atom_gaff.num_types,my_lampps.bonds,my_lampps.angles,my_lampps.dihedrals,my_lampps.imdihedrals
     #print my_lampps.bonds
-    print my_lampps.set_coeff(my_gff,top)
+
+    #print my_lampps.set_coeff(my_gff,top,pmr)
     #print my_lampps.set_atom()
+
 
 
 
