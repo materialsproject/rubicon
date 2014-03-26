@@ -73,7 +73,7 @@ class Antechamber():
             filename = pdb file of the molecule
         """
 
-        command_parmchk=('parmchk -i '+ filename +' -f ac -o mol.frcmod -a Y')
+        command_parmchk=('parmchk -i '+ filename +'-f ac -o mol.frcmod -a Y')
 
         return_cmd=subprocess.call(shlex.split(command_parmchk))
         return return_cmd
@@ -114,68 +114,71 @@ class Antechamber():
             os.remove(filename)
 
 
-    def get_FF_bonds(self,bonds,top_bond,atom_gaff):
+    def get_FF_bonds(self,gff_bonds,top_bond,atom_gaff):
 
         self.gaff_info=[]
-        for keys, values in bonds.iteritems():
+        for keys, values in gff_bonds.iteritems():
                 self.gaff_info=[keys,values]
         for item in top_bond:
             d1=item[0]+' '+ item[1]
             a1,a2 = atom_gaff[item[0]],atom_gaff[item[1]]
-            if (str(a1),str(a2)) in bonds:
-                self.topbondFF[d1]=((str(a1),str(a2)),bonds[(str(a1),str(a2))])
-            elif (str(a2),str(a1)) in bonds:
-                self.topbondFF[d1]=((str(a1),str(a2)),bonds[(str(a1),str(a2))])
+            if (str(a1),str(a2)) in gff_bonds:
+                self.topbondFF[d1]=((str(a1),str(a2)),gff_bonds[(str(a1),str(a2))])
+            elif (str(a2),str(a1)) in gff_bonds:
+                bond_type=tuple(sorted((str(a1),str(a2))))
+                self.topbondFF[d1]=((str(a1),str(a2)),gff_bonds[bond_type])
                 self.num_bond_types = len(set(self.topbondFF.keys()))
 
 
-    def get_FF_angles(self,angles,top_angle,atom_gaff):
+    def get_FF_angles(self,gff_angles,top_angle,atom_gaff):
 
         self.gaff_info=[]
-        for keys, values in angles.iteritems():
+        for keys, values in gff_angles.iteritems():
                 self.gaff_info=[keys,values]
         for item in top_angle:
             d1=item[0]+' '+ item[1]+' '+item[2]
             a1,a2,a3 = atom_gaff[item[0]],atom_gaff[item[1]],atom_gaff[item[2]]
-            if (str(a1),str(a2),str(a3)) in angles:
-                self.topangleFF[d1]=(((str(a1),str(a2),str(a3))),angles[(str(a1),str(a2),str(a3))])
-            elif (str(a3),str(a2),str(a1)) in angles:
-                self.topangleFF[d1]=(((str(a1),str(a2),str(a3))),angles[(str(a1),str(a2),str(a3))])
+            if (str(a1),str(a2),str(a3)) in gff_angles:
+                self.topangleFF[d1]=(((str(a1),str(a2),str(a3))),gff_angles[(str(a1),str(a2),str(a3))])
+            elif (str(a3),str(a2),str(a1)) in gff_angles:
+                angle_type = tuple(sorted((str(a1),str(a2),str(a3))))
+                self.topangleFF[d1]=(((str(a1),str(a2),str(a3))),gff_angles[angle_type])
             self.num_ang_types = len(set(self.topangleFF.keys()))
 
 
 
-    def get_FF_dihedrals(self,dihedrals,top_dihedral,atom_gaff):
+    def get_FF_dihedrals(self,gff_dihedrals,top_dihedral,atom_gaff):
 
         self.gaff_info=[]
-        for keys, values in dihedrals.iteritems():
+        for keys, values in gff_dihedrals.iteritems():
                 self.gaff_info=[keys,values]
+
         for item in top_dihedral:
             d1=item[0]+' '+ item[1]+' '+item[2]+ ' '+item[3]
             a1,a2,a3,a4 = atom_gaff[item[0]],atom_gaff[item[1]],atom_gaff[item[2]],atom_gaff[item[3]]
-            if (str(a1),str(a2),str(a3),str(a4)) in dihedrals:
-                self.topdihedralFF[d1]=((str(a1),str(a2),str(a3),str(a4)),dihedrals[(str(a1),str(a2),str(a3),str(a4))])
-            elif (str(a4),str(a3),str(a2),str(a1)) in dihedrals:
-                self.topdihedralFF[d1]=((str(a1),str(a2),str(a3),str(a4)),dihedrals[(str(a1),str(a2),str(a3),str(a4))])
+            dihedral_label=(a1,a2,a3,a4)
+            if dihedral_label[0]>dihedral_label[3]:
+                        dihedral_label=tuple(reversed(list(dihedral_label)))
+            if dihedral_label in gff_dihedrals:
+                self.topdihedralFF[d1]=(dihedral_label,gff_dihedrals[dihedral_label])
             self.num_dih_types = len(set(self.topdihedralFF.keys()))
+        print self.topdihedralFF
 
 
-
-
-    def get_FF_imdihedrals(self,imdihedrals,top_imdihedral,atom_gaff):
+    def get_FF_imdihedrals(self,gff_imdihedrals,top_imdihedral,atom_gaff):
 
         self.gaff_info=[]
-        for keys, values in imdihedrals.iteritems():
+        for keys, values in gff_imdihedrals.iteritems():
                 self.gaff_info=[keys,values]
         for item in top_imdihedral:
             d1=item[0]+' '+ item[1]+' '+item[2]+ ' '+item[3]
             a1,a2,a3,a4 = atom_gaff[item[0]],atom_gaff[item[1]],atom_gaff[item[2]],atom_gaff[item[3]]
 
-            if (str(a1),str(a2),str(a3),str(a4)) in imdihedrals:
-                self.topimdihedralFF[d1]=((str(a1),str(a2),str(a3),str(a4)),imdihedrals[(str(a1),str(a2),str(a3),str(a4))])
+            if (str(a1),str(a2),str(a3),str(a4)) in gff_imdihedrals:
+                self.topimdihedralFF[d1]=((str(a1),str(a2),str(a3),str(a4)),gff_imdihedrals[(str(a1),str(a2),str(a3),str(a4))])
 
-            elif (str(a4),str(a3),str(a2),str(a1)) in imdihedrals:
-                self.topimdihedralFF[d1]=((str(a1),str(a2),str(a3),str(a4)),imdihedrals[(str(a1),str(a2),str(a3),str(a4))])
+            elif (str(a4),str(a3),str(a2),str(a1)) in gff_imdihedrals:
+                self.topimdihedralFF[d1]=((str(a1),str(a2),str(a3),str(a4)),gff_imdihedrals[(str(a1),str(a2),str(a3),str(a4))])
             self.num_imdih_types = len(set(self.topimdihedralFF.keys()))
 
 

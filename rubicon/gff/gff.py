@@ -1,15 +1,10 @@
-from pymatgen.core import bonds
+from collections import defaultdict
 
 __author__ = 'navnidhirajput'
 
 
 
 from pymatgen.serializers.json_coders import MSONable
-import glob
-
-import os
-
-
 
 class GFF(MSONable):
 
@@ -41,7 +36,7 @@ class GFF(MSONable):
 
 
 
-    def __init__(self,bonds={}, angles={}, dihedrals={},
+    def __init__(self,bonds={}, angles={}, dihedrals=defaultdict(dict),
                  imdihedrals={}, vdws={},masses={}):
 
         self.bonds = bonds
@@ -52,13 +47,11 @@ class GFF(MSONable):
         self.masses=masses
 
 
-
-
     def read_forcefield_para(self,filename=None):
 
         bonds = dict()
         angles = dict()
-        dihedrals = dict()
+        dihedrals = defaultdict(dict)
         imdihedrals = dict()
         vdws = dict()
         masses=dict()
@@ -81,7 +74,7 @@ class GFF(MSONable):
                         mass_section = False
                         continue
 
-                    atom_type=line[0:2]
+                    atom_type=line[0:2].strip()
                     mass=float(line[3:9])
                     masses[atom_type]=(mass)
                     num_masses=len(masses)
@@ -95,11 +88,13 @@ class GFF(MSONable):
                     if len(line.strip())==0:
                         bond_section = False
                         continue
-
-                    bond_type=line[0:5]
+                    bond_type=(line[0:2].strip(),line[3:5].strip())
+                    bond_type=tuple(sorted(bond_type))
                     bond_k_distance=float(line[7:13])
                     bond_distance=float(line[16:21])
                     bonds[bond_type]=(bond_k_distance,bond_distance)
+
+
 
                 if line.startswith('ANGLE'):
                     angle_section = True
@@ -108,10 +103,12 @@ class GFF(MSONable):
                     if len(line.strip())==0:
                         angle_section = False
                         continue
-                    angle_type=line[0:8]
+                    angle_type=line[0:2].strip(),line[3:5].strip(),line[6:8].strip()
+                    angle_type=tuple(sorted(angle_type))
                     angle_k_distance=float(line[11:17])
                     angle_distance=float(line[22:29])
                     angles[angle_type]=(angle_k_distance,angle_distance)
+
 
 
                 if line.startswith('DIHE'):
@@ -121,11 +118,14 @@ class GFF(MSONable):
                     if len(line.strip())==0:
                         dihedral_section = False
                         continue
-                    dihedral_type=line[0:11]
-                    dihedral_func_type=(line[14:15])
+                    dihedral_type=line[0:2].strip(),line[3:5].strip(),line[6:8].strip(),line[9:11].strip()
+                    if dihedral_type[0] > dihedral_type[3]:
+                        dihedral_type=tuple(reversed(list(dihedral_type)))
+                    dihedral_func_type=(line[49:50])
                     dihedral_k_distance=float(line[19:24])
                     dihedral_angle=float(line[31:38])
-                    dihedrals[dihedral_type]=(dihedral_k_distance,dihedral_angle)
+                    dihedrals[(dihedral_type)][dihedral_func_type]=(dihedral_k_distance,dihedral_angle)
+
 
 
                 if line.startswith('IMPROPER'):
@@ -135,22 +135,20 @@ class GFF(MSONable):
                     if len(line.strip())==0:
                         imdihedral_section = False
                         continue
-                    imdihedral_type=line[0:11]
-                    imdihedral_distance=float(line[18:28])
-                    imdihedral_angle=float(line[29:41])
+                    imdihedral_type=line[0:2].strip(),line[3:5].strip(),line[6:8].strip(),line[9:11].strip()
+                    imdihedral_distance=float(line[19:24])
+                    imdihedral_angle=float(line[31:38])
                     imdihedrals[imdihedral_type]=(imdihedral_distance,imdihedral_angle)
 
 
-                if line.startswith('NONBONDED'):
+                if line.startswith('NONBON'):
                     vdw_section = True
                     continue
                 if vdw_section:
                     if len(line.strip())==0:
                         vdw_section = False
                         continue
-                    if line.startswith("NONBON"):
-                        continue
-                    vdw_type=line[2:4]
+                    vdw_type=line[2:4].strip()
                     sigma=float(line[14:20])
                     epsilon=abs(float(line[22:28]))
                     vdws[vdw_type]=(sigma,epsilon)
@@ -161,7 +159,7 @@ class GFF(MSONable):
             self.dihedrals.update(dihedrals)
             self.imdihedrals.update(imdihedrals)
             self.vdws.update(vdws)
-            print masses
+
 
     @property
     def to_dict(self):
