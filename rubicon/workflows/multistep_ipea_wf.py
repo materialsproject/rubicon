@@ -158,7 +158,7 @@ class QChemFireWorkCreator():
         state_name = self.get_state_name(charge, spin_multiplicity)
         title = self.molname + " " + state_name + " " + self.dft + " " + \
             self.bs + " " + task_type
-        title += "\n Gas Phase"
+        title += "\n Gas Phase, {}".format(solvent)
         qctask_vac = QcTask(self.mol, charge=charge,
                             spin_multiplicity=spin_multiplicity,
                             jobtype="sp", title=title,
