@@ -1,4 +1,6 @@
-
+from pymatgen.packmol.packmol import PackmolRunner
+from rubicon.gff.lamppsio import LMPInput
+from rubicon.gff.topology import AC, TopMol
 
 __author__ = 'navnidhirajput'
 
@@ -9,9 +11,7 @@ __author__ = 'navnidhirajput'
 
 import os
 import subprocess
-import copy
-from pymatgen.core.structure import Molecule
-from pymatgen import write_mol
+from pymatgen import write_mol, Molecule
 import shlex
 from gff import GFF
 import glob
@@ -25,7 +25,6 @@ class Antechamber():
     A wrapper for Antechamber software
 
     """
-
 
     def __init__(self,molecule=None):
         """
@@ -46,24 +45,65 @@ class Antechamber():
         write_mol(molecule,filename)
         self.filename=filename
 
-    def run_antechamber(self,filename=None):
+    def run_antechamber(self,filename=None,mols=[]):
         """
         generate and run antechamber command for specified pdb file
 
         Args:
             filename = pdb file of the molecule
         """
-        #scratch = tempfile.gettempdir()
-        #with ScratchDir(scratch,copy_from_current_on_enter=True) as d:
+        scratch = tempfile.gettempdir()
+        return_cmd=None
+        my_gff=None
+        my_ant=None
+        with ScratchDir(scratch,copy_from_current_on_enter=True) as d:
 
-            #os.chdir(d)
-        command=('antechamber -i ' +filename +' -fi pdb -o ' +filename[:-4]+
+            gff_list = []
+            my_lammps_list=[]
+            for mol in mols:
+                #my_ant = Antechamber(mol)
+                self.convert_to_pdb(mol, 'mol.pdb')
+                command=('antechamber -i ' +filename +' -fi pdb -o ' +filename[:-4]+
                  " -fo charmm")
-        return_cmd=subprocess.call(shlex.split(command))
+                return_cmd=subprocess.call(shlex.split(command))
+                self.molname = filename.split('.')[0]
+                #my_ant.run_antechamber('mol.pdb')
 
-        self.molname = filename.split('.')[0]
+                self.run_parmchk('ANTECHAMBER_AC.AC')
+                gff = self.parse_output()
+                ac = AC()
+                ac.read_atomIndex('ANTECHAMBER_AC.AC')
+                ac.read_atomType('ANTECHAMBER_AC.AC')
+                pmr = PackmolRunner([mol, mol], [{"number":1,"inside box":[0.,0.,0.,40.,40.,40.]}, {"number":2}])
 
-        return return_cmd
+                top = TopMol.from_file('mol.rtf')
+
+                my_gff = GFF()
+                my_gff.read_forcefield_para('mol.frcmod')
+
+                atom_gaff = AC()
+                atom_gaff.read_atomType('ANTECHAMBER_AC.AC')
+
+                self.get_FF_bonds(my_gff.bonds, top.bonds, atom_gaff.atom_gaff)
+                self.get_FF_angles(my_gff.angles, top.angles, atom_gaff.atom_gaff)
+                self.get_FF_dihedrals(my_gff.dihedrals, top.dihedrals, atom_gaff.atom_gaff)
+                self.get_FF_imdihedrals(my_gff.imdihedrals, top.imdihedrals, atom_gaff.atom_gaff)
+
+                #my_ant.clean_files()
+                gff_list.append(gff)
+
+                my_lampps=LMPInput()
+
+                my_lampps.set_coeff(my_gff,top,pmr,self)
+                my_lampps.set_atom(pmr,my_gff,ac)
+                my_lampps.set_bonds(pmr,my_gff,ac,top)
+                my_lampps.set_angles(pmr,my_gff,ac,top)
+                my_lampps.set_dihedrals(pmr,my_gff,ac,top,self)
+                my_lampps.set_imdihedrals(pmr,my_gff,ac,top)
+                my_lammps_list.append(my_lampps)
+
+
+        return return_cmd,my_gff,my_ant,my_lammps_list,gff_list
 
     def run_parmchk(self,filename=None):
         """
@@ -73,7 +113,7 @@ class Antechamber():
             filename = pdb file of the molecule
         """
 
-        command_parmchk=('parmchk -i '+ filename +'-f ac -o mol.frcmod -a Y')
+        command_parmchk=('parmchk -i '+ filename +' -f ac -o mol.frcmod -a Y')
 
         return_cmd=subprocess.call(shlex.split(command_parmchk))
         return return_cmd
@@ -162,7 +202,7 @@ class Antechamber():
             if dihedral_label in gff_dihedrals:
                 self.topdihedralFF[d1]=(dihedral_label,gff_dihedrals[dihedral_label])
             self.num_dih_types = len(set(self.topdihedralFF.keys()))
-        print self.topdihedralFF
+
 
 
     def get_FF_imdihedrals(self,gff_imdihedrals,top_imdihedral,atom_gaff):
@@ -181,6 +221,46 @@ class Antechamber():
                 self.topimdihedralFF[d1]=((str(a1),str(a2),str(a3),str(a4)),gff_imdihedrals[(str(a1),str(a2),str(a3),str(a4))])
             self.num_imdih_types = len(set(self.topimdihedralFF.keys()))
 
+    @staticmethod
+    def run(mols):
+
+        gff_list = []
+        for mol in mols:
+            my_ant = Antechamber(mol)
+            my_ant.convert_to_pdb(mol, 'mol.pdb')
+            my_ant.run_antechamber('mol.pdb')
+            my_ant.run_parmchk('ANTECHAMBER_AC.AC')
+            gff = my_ant.parse_output()
+            ac = AC()
+            ac.read_atomIndex('ANTECHAMBER_AC.AC')
+            ac.read_atomType('ANTECHAMBER_AC.AC')
+            pmr = PackmolRunner([mol, mol], [{"number":1,"inside box":[0.,0.,0.,40.,40.,40.]}, {"number":2}])
+
+            top = TopMol.from_file('mol.rtf')
+
+            my_gff = GFF()
+            my_gff.read_forcefield_para('mol.frcmod')
+
+            atom_gaff = AC()
+            atom_gaff.read_atomType('ANTECHAMBER_AC.AC')
+
+            my_ant.get_FF_bonds(my_gff.bonds, top.bonds, atom_gaff.atom_gaff)
+            my_ant.get_FF_angles(my_gff.angles, top.angles, atom_gaff.atom_gaff)
+            my_ant.get_FF_dihedrals(my_gff.dihedrals, top.dihedrals, atom_gaff.atom_gaff)
+            my_ant.get_FF_imdihedrals(my_gff.imdihedrals, top.imdihedrals, atom_gaff.atom_gaff)
+
+            my_ant.clean_files()
+            gff_list.append(gff)
+
+            my_lampps=LMPInput()
+
+            my_lampps.set_coeff(my_gff,top,pmr,my_ant)
+            my_lampps.set_atom(pmr,my_gff,ac)
+            my_lampps.set_bonds(pmr,my_gff,ac,top)
+            my_lampps.set_angles(pmr,my_gff,ac,top)
+            my_lampps.set_dihedrals(pmr,my_gff,ac,top,my_ant)
+            my_lampps.set_imdihedrals(pmr,my_gff,ac,top)
+            return my_gff,my_ant,my_lampps
 
 
 

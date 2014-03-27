@@ -23,8 +23,9 @@ class LMPInput():
     write input file for lammps
     """
     def __init__(self):
-        #self.ant_atom_index={}
-        pass
+
+        self.lines =[]
+
 
 
     def write_data_file(self,basename=None):
@@ -94,7 +95,7 @@ class LMPInput():
             if gff.vdws:
                 lines.append('{} {}'.format('Pair Coeffs','\n'))
                 for i, v in enumerate(gff.vdws.values()):
-                    lines.append('{} {} {} {} {}'.format(i+1, v[0],v[1],'#',gff.vdws.keys()[i]))
+                    lines.append('{} {} {} {} {}'.format(i+1, v[0]*1.7818,v[1],'#',gff.vdws.keys()[i]))
                 lines.append('\n')
 
 
@@ -125,20 +126,19 @@ class LMPInput():
                 for i, v in enumerate(gff.imdihedrals.values()):
                     lines.append('{} {} {} {} {}'.format(i+1, v[0],v[1],'#',gff.imdihedrals.keys()[i][0],gff.imdihedrals.keys()[i][1],gff.imdihedrals.keys()[i][2],gff.imdihedrals.keys()[i][3]))
                 lines.append('\n')
-
+        self.lines.extend(lines)
         return '\n'.join(lines)
 
 
-    def set_atom(self,filename,pmr,gff,ac):
+    def set_atom(self,pmr,gff,ac):
         """
         TODO
         """
         lines=[]
         atom_type_index={}
         lines.append('{}{}{}'.format('\n','Atoms','\n'))
-        s=read_mol(filename)
+        mol_pack= pmr.run()
         self.box_mol_index=[]
-        #self.box_atom_index=[]
         for i, v in enumerate(gff.masses):
             atom_type_index[gff.masses.keys()[i]]=i+1
         i = 0
@@ -149,7 +149,7 @@ class LMPInput():
             num_this_mol=parm['number']
             #iterate every molecule of molecule type
             for imol in range(num_this_mol):
-                mol_coords = s.cart_coords[i:i+num_atoms]
+                mol_coords = mol_pack.cart_coords[i:i+num_atoms]
                 mol_index += 1
                 #iterate over atoms in every molecule
                 d={}
@@ -159,7 +159,7 @@ class LMPInput():
                 i += num_atoms
                 self.box_mol_index.append(d)
 
-
+        self.lines.extend(lines)
         return '\n'.join(lines)
 
 
@@ -191,6 +191,7 @@ class LMPInput():
                     bond_label=tuple(sorted([a,b]))
                     lines.append('{}  {}  {}  {}  {}  {}  {}  {}'.format(i+k+1 ,bond_type_index[bond_label],self.box_mol_index[0][v[0]],self.box_mol_index[0][v[1]],'#',mol_index,top.bonds[k][0],top.bonds[k][1]))
                 i += len(top.bonds)
+        self.lines.extend(lines)
         return '\n'.join(lines)
 
     def set_angles(self,pmr,gff,ac,top):
@@ -223,6 +224,7 @@ class LMPInput():
                     .format(i+k+1 ,angle_type_index[angle_label],self.box_mol_index[0][v[0]],self.box_mol_index[0][v[1]],self.box_mol_index[0][v[2]],'#',mol_index,top.angles[k][0],top.angles[k][1],top.angles[k][2]))
 
                 i += len(top.angles)
+        self.lines.extend(lines)
         return '\n'.join(lines)
 
     def set_dihedrals(self,pmr,gff,ac,top,my_ant):
@@ -266,6 +268,7 @@ class LMPInput():
                         lines.append('{}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}'
                     .format(j ,dihedral_type_index[dihedral_label],self.box_mol_index[0][A],self.box_mol_index[0][B],self.box_mol_index[0][C],self.box_mol_index[0][D],'#',mol_index,top.dihedrals[l][0],top.dihedrals[l][1],top.dihedrals[l][2],top.dihedrals[l][3]))
                 i += len(top.dihedrals)
+        self.lines.extend(lines)
         return '\n'.join(lines)
 
 
@@ -301,4 +304,5 @@ class LMPInput():
                     lines.append('{}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}'
                     .format(j,imdihedral_type_index[imdihedral_label],self.box_mol_index[0][v[0]],self.box_mol_index[0][v[1]],self.box_mol_index[0][v[2]],self.box_mol_index[0][v[3]],'#',mol_index,top.imdihedrals[k][0],top.imdihedrals[k][1],top.imdihedrals[k][2],top.imdihedrals[k][3]))
                 i += num_atoms
+        self.lines.extend(lines)
         return '\n'.join(lines)
