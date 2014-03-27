@@ -23,9 +23,7 @@ class LMPInput():
     write input file for lammps
     """
     def __init__(self):
-
         self.lines =[]
-
 
 
     def write_data_file(self,basename=None):
@@ -36,22 +34,7 @@ class LMPInput():
             f.write()
 
 
-    def get_data_file(self):
-        """Organize, format, and return a LAMMPS data (forcefield) file.
-        """
-
-        # create LAMMPS data file
-        pass
-
-    def set_atom(self):
-        pass
-
-    #def set_atom_types(self,atom_types):
-    #    self.atoms=len(atom_types)
-
-
-
-    def set_coeff(self,gff,top,pmr,my_ant):
+    def set_coeff(self,gff,top,pmr,ant):
 
         lines=[]
         num_mol=pmr.param_list[0]['number']+pmr.param_list[1]['number']
@@ -59,9 +42,8 @@ class LMPInput():
         num_total_dih=0
         for k,v in gff.dihedrals.iteritems():
                 num_dih+=len(v)
-        for k,v in my_ant.topdihedralFF.iteritems():
+        for k,v in ant.topdihedralFF.iteritems():
             num_total_dih+=len(v[1])
-
         if gff is not None:
             lines.append('LAMMPS Data File')
             lines.append(' \n')
@@ -83,7 +65,6 @@ class LMPInput():
             lines.append("{} {} {}".format(pmr.param_list[0]['inside box'][0],pmr.param_list[0]['inside box'][3],"xlo  xhi"))
             lines.append("{} {} {}".format(pmr.param_list[0]['inside box'][1],pmr.param_list[0]['inside box'][4],"ylo  yhi"))
             lines.append("{} {} {} {}".format(pmr.param_list[0]['inside box'][2],pmr.param_list[0]['inside box'][5],"zlo  zhi",'\n'))
-
 
 
             if gff.masses is not None:
@@ -247,7 +228,6 @@ class LMPInput():
             num_this_mol=parm['number']
             #iterate over first molecule
             for imol in range(num_this_mol):
-                mol_bonds = top.dihedrals[i:i+num_atoms]
                 mol_index += 1
                 l+=1
                 #iterate over bonds in first molecule
@@ -291,9 +271,8 @@ class LMPInput():
             num_this_mol=parm['number']
             #iterate over first molecule
             for imol in range(num_this_mol):
-                mol_bonds = top.imdihedrals[i:i+num_atoms]
                 mol_index += 1
-                #iterate over bonds in first molecule
+                #iterate over improper dihedrals in first molecule
                 for k, v in enumerate(top.imdihedrals):
                     j+=1
                     a=ac.atom_gaff[top.imdihedrals[k][0]]

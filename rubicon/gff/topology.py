@@ -40,10 +40,6 @@ class AC():
                     self.atom_gaff[atom_name]=gaff_name
             self.atom_gaff.update(self.atom_gaff)
         self.num_types = len(set(self.atom_gaff.values()))
-        #print self.atom_gaff
-
-
-
 
 
 class TopMol():

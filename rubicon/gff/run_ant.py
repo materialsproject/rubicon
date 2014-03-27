@@ -8,7 +8,7 @@ __author__ = 'navnidhirajput'
 
 from Antechamber_wrapper import Antechamber
 from pymatgen.core.structure import Molecule
-from gff import GFF
+
 
 
 coords = [[0.000000, 0.000000, 0.000000],
@@ -78,12 +78,13 @@ mol2 = Molecule(
 
 
 
-mols = [emc]
+mols = [mol2]
 
 
 my_ant=Antechamber(mols)
 return_cmd,my_gff,my_ant,my_lammps_list,gff_list=my_ant.run_antechamber('mol.pdb',mols)
 print '\n'.join(my_lammps_list[0].lines)
+
 
 
 
