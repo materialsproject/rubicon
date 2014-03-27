@@ -6,10 +6,10 @@ __author__ = 'navnidhirajput'
 
 from pymatgen.serializers.json_coders import MSONable
 
-class GFF(MSONable):
+class Gff(MSONable):
 
     """
-    A force field library. Right now reads the output file from Antechamber
+    A force field library. Right now reads the output file from AntechamberRunner
     and populate the FF library
 
     Args:
@@ -65,6 +65,7 @@ class GFF(MSONable):
             mass_section = False
 
             for line in f.readlines():
+
                 if line.startswith('MASS'):
                     mass_section = True
                     continue
@@ -118,8 +119,6 @@ class GFF(MSONable):
                     dihedral_angle=float(line[31:38])
                     dihedrals[(dihedral_type)][dihedral_func_type]=(dihedral_k_distance,dihedral_angle)
 
-
-
                 if line.startswith('IMPROPER'):
                     imdihedral_section = True
                     continue
@@ -128,8 +127,6 @@ class GFF(MSONable):
                         imdihedral_section = False
                         continue
                     imdihedral_type=line[0:2].strip(),line[3:5].strip(),line[6:8].strip(),line[9:11].strip()
-                    if imdihedral_type[0] > imdihedral_type[3]:
-                        imdihedral_type=tuple(reversed(list(imdihedral_type)))
                     imdihedral_distance=float(line[19:24])
                     imdihedral_angle=float(line[31:38])
                     imdihedrals[imdihedral_type]=(imdihedral_distance,imdihedral_angle)
@@ -167,7 +164,7 @@ class GFF(MSONable):
 
     @classmethod
     def from_dict(cls, d):
-        return GFF(bonds=d["bonds"],
+        return Gff(bonds=d["bonds"],
                     angles=d["angles"],
                     dihedrals=d["dihedrals"],
                     imdihedrals=d["imdihedrals"],

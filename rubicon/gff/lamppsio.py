@@ -18,12 +18,14 @@ from pymatgen.util.coord_utils import get_angle
 
 __author__ = 'navnidhirajput'
 
-class LMPInput():
+class LmpInput():
     """
     write input file for lammps
     """
     def __init__(self):
+
         self.lines =[]
+
 
 
     def write_data_file(self,basename=None):
@@ -34,16 +36,33 @@ class LMPInput():
             f.write()
 
 
-    def set_coeff(self,gff,top,pmr,ant):
+    def get_data_file(self):
+        """Organize, format, and return a LAMMPS data (forcefield) file.
+        """
+
+        # create LAMMPS data file
+        pass
+
+
+    def set_coeff(self,gff,top,pmr,my_ant):
 
         lines=[]
         num_mol=pmr.param_list[0]['number']+pmr.param_list[1]['number']
         num_dih=0
         num_total_dih=0
+        num_imdih=0
+        num_total_imdih=0
+
         for k,v in gff.dihedrals.iteritems():
                 num_dih+=len(v)
-        for k,v in ant.topdihedralFF.iteritems():
+        for k,v in my_ant.topdihedralff.iteritems():
             num_total_dih+=len(v[1])
+
+        for k,v in gff.imdihedrals.iteritems():
+            num_imdih+=len(v)
+        for k,v in my_ant.topimdihedralff.iteritems():
+            num_total_imdih+=len(v[1])
+
         if gff is not None:
             lines.append('LAMMPS Data File')
             lines.append(' \n')
@@ -65,6 +84,7 @@ class LMPInput():
             lines.append("{} {} {}".format(pmr.param_list[0]['inside box'][0],pmr.param_list[0]['inside box'][3],"xlo  xhi"))
             lines.append("{} {} {}".format(pmr.param_list[0]['inside box'][1],pmr.param_list[0]['inside box'][4],"ylo  yhi"))
             lines.append("{} {} {} {}".format(pmr.param_list[0]['inside box'][2],pmr.param_list[0]['inside box'][5],"zlo  zhi",'\n'))
+
 
 
             if gff.masses is not None:
@@ -231,7 +251,7 @@ class LMPInput():
                 mol_index += 1
                 l+=1
                 #iterate over bonds in first molecule
-                for k, v in my_ant.topdihedralFF.iteritems():
+                for k, v in my_ant.topdihedralff.iteritems():
                     A=k.split()[0]
                     B=k.split()[1]
                     C=k.split()[2]

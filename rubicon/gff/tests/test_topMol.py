@@ -18,7 +18,5 @@ class TestTopMol(TestCase):
         self.assertEquals(ans_imdihedrals,top.imdihedrals)
 
 
-
-
 if __name__ == '__main__':
     unittest.main()

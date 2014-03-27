@@ -1,6 +1,6 @@
 from unittest import TestCase
 import unittest
-from gff import GFF
+from gff import Gff
 
 __author__ = 'navnidhirajput'
 
@@ -10,7 +10,7 @@ class TestGFF(TestCase):
 
      def test_from_dict(self):
 
-        my_gff = GFF()
+        my_gff = Gff()
         my_gff.read_forcefield_para('mol.prm')
         my_gff.read_forcefield_para('mol.frcmod')
         my_gff.read_mass('mol.prm')

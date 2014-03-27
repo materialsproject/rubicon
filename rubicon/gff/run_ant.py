@@ -2,11 +2,11 @@ import glob
 from pymatgen.packmol.packmol import PackmolRunner
 
 from topology import AC, TopMol
-from lamppsio import LMPInput
+from lamppsio import LmpInput
 
 __author__ = 'navnidhirajput'
 
-from Antechamber_wrapper import Antechamber
+from antechamber_wrapper import AntechamberRunner
 from pymatgen.core.structure import Molecule
 
 
@@ -76,14 +76,12 @@ mol2 = Molecule(
      "H", "H", "N", "H", "H"], coords1)
 #['C'] * 5  + ["H"] * 10
 
-
-
 mols = [mol2]
 
-
-my_ant=Antechamber(mols)
-return_cmd,my_gff,my_ant,my_lammps_list,gff_list=my_ant.run_antechamber('mol.pdb',mols)
+ant=AntechamberRunner(mols)
+return_cmd,my_gff,ant,my_lammps_list,gff_list=ant._run_antechamber('mol.pdb',mols)
 print '\n'.join(my_lammps_list[0].lines)
+
 
 
 

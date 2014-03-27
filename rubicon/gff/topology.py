@@ -14,7 +14,7 @@ class AC():
         self.atom_index_gaff=dict()
         self.atom_gaff=dict()
 
-    def read_atomIndex(self,filename=None):
+    def read_atom_index(self,filename=None):
 
         with open(filename) as f:
 

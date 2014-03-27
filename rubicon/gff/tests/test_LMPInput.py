@@ -1,6 +1,6 @@
 from unittest import TestCase
-from rubicon.gff.gff import GFF
-from rubicon.gff.lamppsio import LMPInput
+from rubicon.gff.gff import Gff
+from rubicon.gff.lamppsio import LmpInput
 from rubicon.gff.topology import TopMol
 
 __author__ = 'navnidhirajput'
@@ -17,8 +17,8 @@ class TestLMPInput(TestCase):
         self.fail()
 
     def test_set_coeff(self):
-        my_lampps=LMPInput()
-        my_gff = GFF()
+        my_lampps=LmpInput()
+        my_gff = Gff()
         top = TopMol.from_file('mol.rtf')
 
         lampps_data=my_lampps.set_coeff(my_gff,top)
