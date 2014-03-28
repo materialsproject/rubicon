@@ -1,7 +1,7 @@
 from unittest import TestCase
 from pymatgen import Molecule
 from rubicon.gff.antechamber_wrapper import AntechamberRunner
-from rubicon.gff.gff import GFF_library, Gff
+from rubicon.gff.gff import Gff
 from rubicon.gff.topology import TopMol, AC
 
 __author__ = 'navnidhirajput'
@@ -19,7 +19,7 @@ class TestAntechamber(TestCase):
 
 
 
-    def test_get_FF_bonds(self):
+    def test_get_ff_bonds(self):
         my_ant = AntechamberRunner(mol)
         my_gff = Gff()
         top = TopMol.from_file('mol.rtf')
@@ -28,7 +28,7 @@ class TestAntechamber(TestCase):
         ans_bond={'C-H1': ('c3-hc', (337.3, 1.092)), 'C-H2': ('c3-hc', (337.3, 1.092)), 'C-H3': ('c3-hc', (337.3, 1.092)), 'C-H': ('c3-hc', (337.3, 1.092))}
         self.assertEquals(ans_bond,my_ant.topbondff)
 
-    def test_get_FF_angles(self):
+    def test_get_ff_angles(self):
         my_ant = AntechamberRunner(mol)
         my_gff = Gff()
         top = TopMol.from_file('mol.rtf')
@@ -37,7 +37,7 @@ class TestAntechamber(TestCase):
         ans_angle={'H1-C-H3': ('hc-c3-hc', (39.43, 108.35)), 'H1-C-H2': ('hc-c3-hc', (39.43, 108.35)), 'H2-C-H3': ('hc-c3-hc', (39.43, 108.35)), 'H-C-H3': ('hc-c3-hc', (39.43, 108.35)), 'H-C-H2': ('hc-c3-hc', (39.43, 108.35)), 'H-C-H1': ('hc-c3-hc', (39.43, 108.35))}
         self.assertEquals(ans_angle,my_ant.topangleff)
 
-    def test_get_FF_dihedrals(self):
+    def test_get_ff_dihedrals(self):
         my_ant = AntechamberRunner(mol)
         my_gff = Gff()
         top = TopMol.from_file('mol.rtf')
@@ -46,7 +46,7 @@ class TestAntechamber(TestCase):
         ans_dihedral={}
         self.assertEquals(ans_dihedral,my_ant.topdihedralff)
 
-    def test_get_FF_imdihedrals(self):
+    def test_get_ff_imdihedrals(self):
         my_ant = AntechamberRunner(mol)
         my_gff = Gff()
         top = TopMol.from_file('mol.rtf')

@@ -20,7 +20,5 @@ class TestGFF(TestCase):
         d2 = qc2.to_dict
         self.assertEqual(d1, d2)
 
-
-
 if __name__ == '__main__':
     unittest.main()

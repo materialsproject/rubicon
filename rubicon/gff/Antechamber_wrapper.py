@@ -114,16 +114,6 @@ class AntechamberRunner():
         ffm.read_forcefield_para(self.molname+".frcmod")
         return ffm
 
-    def clean_files(self):
-
-        """
-        clean files
-        """
-        for filename in glob.glob('*.pdb'):
-            shlex.os.remove(filename)
-
-
-
     def _get_ff_bonds(self,gff_bonds,top_bond,atom_gaff):
 
         self.gaff_info=[]
@@ -200,31 +190,26 @@ class AntechamberRunner():
             my_ant._convert_to_pdb(mol, 'mol.pdb')
             my_ant._run_antechamber('mol.pdb')
             my_ant._run_parmchk('ANTECHAMBER_AC.AC')
+
             gff = my_ant._parse_output()
+
             ac = AC()
             ac.read_atom_index('ANTECHAMBER_AC.AC')
             ac.read_atomType('ANTECHAMBER_AC.AC')
-            pmr = PackmolRunner([mol, mol], [{"number":1,"inside box":[0.,0.,0.,40.,40.,40.]}, {"number":2}])
 
+            pmr = PackmolRunner([mol, mol], [{"number":1,"inside box":[0.,0.,0.,40.,40.,40.]}, {"number":2}])
             top = TopMol.from_file('mol.rtf')
 
             my_gff = Gff()
             my_gff.read_forcefield_para('mol.frcmod')
-
             atom_gaff = AC()
             atom_gaff.read_atomType('ANTECHAMBER_AC.AC')
-
             my_ant._get_ff_bonds(my_gff.bonds, top.bonds, atom_gaff.atom_gaff)
             my_ant._get_ff_angles(my_gff.angles, top.angles, atom_gaff.atom_gaff)
             my_ant._get_ff_dihedrals(my_gff.dihedrals, top.dihedrals, atom_gaff.atom_gaff)
             my_ant._get_ff_imdihedrals(my_gff.imdihedrals, top.imdihedrals, atom_gaff.atom_gaff)
-            my_ant.clean_files()
-
-
             gff_list.append(gff)
-
             my_lampps=LmpInput()
-
             my_lampps.set_coeff(my_gff,top,pmr,my_ant)
             my_lampps.set_atom(pmr,my_gff,ac)
             my_lampps.set_bonds(pmr,my_gff,ac,top)

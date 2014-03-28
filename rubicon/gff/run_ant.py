@@ -1,5 +1,6 @@
 import glob
 from pymatgen.packmol.packmol import PackmolRunner
+from rubicon.gff.gff import Gff
 
 from topology import AC, TopMol
 from lamppsio import LmpInput
@@ -69,18 +70,20 @@ etc = Molecule(["C", "H", "H", "O", "C", "O", "O","C","H", "H"], coords2)
 
 emc = Molecule(["C", "O", "O", "O", "C", "C","C","H", "H","H", "H","H", "H","H", "H"], coords3)
 
-mol1 = Molecule(["C", "H", "H", "H", "H"], coords)
+mol = Molecule(["C", "H", "H", "H", "H"], coords)
 
 mol2 = Molecule(
     ["C", "C", "C", "C", "C", "C", "H", "H", "C", "C", "H", "H", "N", "N", "N",
      "H", "H", "N", "H", "H"], coords1)
 #['C'] * 5  + ["H"] * 10
 
-mols = [mol2]
+mols = [mol]
 
 ant=AntechamberRunner(mols)
 return_cmd,my_gff,ant,my_lammps_list,gff_list=ant._run_antechamber('mol.pdb',mols)
 print '\n'.join(my_lammps_list[0].lines)
+
+
 
 
 
