@@ -5,10 +5,11 @@ from rubicon.dupefinders.dupefinder_eg import DupeFinderEG
 from rubicon.firetasks.egsnl_tasks import AddEGSNLTask
 from rubicon.utils.snl.egsnl import EGStructureNL, get_meta_from_structure
 from rubicon.workflows.multistep_ipea_wf import multistep_ipea_fws
+from rubicon.workflows.solvation_energy_wf import solvation_energy_fws
 
 
 def snl_to_eg_wf(snl, parameters=None):
-    fws = []
+    fws_all = []
     parameters = parameters if parameters else {}
 
     snl_priority = parameters.get('priority', 1)
@@ -28,13 +29,24 @@ def snl_to_eg_wf(snl, parameters=None):
         spec['force_egsnl'] = snl.to_dict
         spec['force_snlgroup_id'] = parameters['snlgroup_id']
         del spec['snl']
-    fws.append(FireWork(tasks, spec,
+    fws_all.append(FireWork(tasks, spec,
                         name=get_slug(molname + ' -- Add to SNL database'),
                         fw_id=1))
 
-    ipea_fws, connections = multistep_ipea_fws(snl.structure, molname, mission,
-                                               DupeFinderEG(), priority, 1)
-    fws.extend(ipea_fws)
+    workflow_type = parameters.get('workflow', 'ipea')
+    if workflow_type == 'ipea':
+        fws_tasks, connections = multistep_ipea_fws(
+            snl.structure, molname, mission, DupeFinderEG(), priority, 1)
+    elif workflow_type == 'solvation energy':
+        default_solvents = ['diglym', 'acetonitrile', 'dmso', 'thf']
+        solvents = parameters.get('solvents', default_solvents)
+        fws_tasks, connections = solvation_energy_fws(
+            snl.structure, molname, mission, DupeFinderEG(), priority, 1,
+            solvents)
+    else:
+        raise ValueError('Workflow "{}" is not supported yet'.
+                         format(workflow_type))
+    fws_all.extend(fws_tasks)
 
     wf_meta = get_meta_from_structure(snl.structure)
     wf_meta['run_version'] = 'Jan 27, 2014'
@@ -43,6 +55,6 @@ def snl_to_eg_wf(snl, parameters=None):
             'submission_id' in snl.data['_electrolytegenome']:
         wf_meta['submission_id'] = snl.data['_electrolytegenome'][
             'submission_id']
-    return Workflow(fws, connections,
+    return Workflow(fws_all, connections,
                     name=molname,
                     metadata=wf_meta)

@@ -171,7 +171,7 @@ class QChemFireWorkCreator():
         else:
             qctask_vac.set_scf_algorithm_and_iterations(iterations=100)
 
-        title = " Solution Phase"
+        title = " Solution Phase, {}".format(solvent)
         qctask_sol = QcTask(self.mol, charge=charge,
                             spin_multiplicity=spin_multiplicity,
                             jobtype="sp", title=title,
