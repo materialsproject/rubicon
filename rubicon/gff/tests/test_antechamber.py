@@ -1,6 +1,6 @@
 from unittest import TestCase
 from pymatgen import Molecule
-from rubicon.gff.antechamber_wrapper import AntechamberRunner
+from rubicon.gff.antechamberio import AntechamberRunner
 from rubicon.gff.gff import Gff
 from rubicon.gff.topology import TopMol, AC
 

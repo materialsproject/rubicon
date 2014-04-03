@@ -1,9 +1,19 @@
 from unittest import TestCase
+from pymatgen import Molecule
+from pymatgen.packmol.packmol import PackmolRunner
 from rubicon.gff.gff import Gff
 from rubicon.gff.lamppsio import LmpInput
-from rubicon.gff.topology import TopMol
+from rubicon.gff.topology import TopMol, AC
 
 __author__ = 'navnidhirajput'
+
+coords = [[0.000000, 0.000000, 0.000000],
+          [0.000000, 0.000000, 1.089000],
+          [1.026719, 0.000000, -0.363000],
+          [-0.513360, -0.889165, -0.363000],
+          [-0.513360, 0.889165, -0.363000]]
+
+mol = Molecule(["C", "H", "H", "H", "H"], coords)
 
 
 class TestLMPInput(TestCase):
@@ -76,7 +86,12 @@ Imp Dihedral Coeffs
         self.assertEquals(ans,lampps_data)
 
     def test_set_atom(self):
-        self.fail()
+        my_lampps=LmpInput()
+        gff = Gff()
+        top = TopMol.from_file('mol.rtf')
+        pmr = PackmolRunner([mol, mol], [{"number":1,"inside box":[0.,0.,0.,40.,40.,40.]}, {"number":2}])
+        ac = AC()
+        lampps_data=my_lampps.set_bonds(pmr,ac,gff,top)
 
     def test_set_dimension(self):
         self.fail()

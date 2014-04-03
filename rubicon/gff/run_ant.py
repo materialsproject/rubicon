@@ -1,13 +1,14 @@
 import glob
 from pymatgen.packmol.packmol import PackmolRunner
 from rubicon.gff.gff import Gff
+from rubicon.gff.lammpsin import DictLammpsInputSet
 
 from topology import AC, TopMol
 from lamppsio import LmpInput
 
 __author__ = 'navnidhirajput'
 
-from antechamber_wrapper import AntechamberRunner
+from antechamberio import AntechamberRunner
 from pymatgen.core.structure import Molecule
 
 
@@ -83,6 +84,8 @@ ant=AntechamberRunner(mols)
 return_cmd,my_gff,ant,my_lammps_list,gff_list=ant._run_antechamber('mol.pdb',mols)
 print '\n'.join(my_lammps_list[0].lines)
 
+lammpsin=DictLammpsInputSet()
+#print lammpsin.get_lammps_config()
 
 
 
