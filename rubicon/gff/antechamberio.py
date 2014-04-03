@@ -14,7 +14,7 @@ from monty.io import ScratchDir
 import tempfile
 from pymatgen.packmol.packmol import PackmolRunner
 from rubicon.gff.lamppsio import LmpInput
-from rubicon.gff.topology import AC, TopMol
+from rubicon.gff.topology import TopMol
 
 ANTECHAMBER_DEBUG = False
 
@@ -35,6 +35,37 @@ class AntechamberRunner():
         self.topangleff = dict()
         self.topdihedralff = dict()
         self.topimdihedralff = dict()
+        self.atom_index=dict()
+        self.atom_index_gaff=dict()
+        self.atom_gaff=dict()
+
+
+    def read_atom_index(self,filename=None):
+
+        with open(filename) as f:
+
+            for line in f.readlines():
+                token = line.split()
+                if token[0]=='ATOM':
+                    index=int(token[1])
+                    atom_name=token[2]
+                    atom_gaff=token[9]
+                    self.atom_index[index]=atom_name
+                    self.atom_index_gaff[index]=atom_gaff
+
+
+    def read_atomType(self,filename=None):
+
+        with open(filename) as f:
+
+            for line in f.readlines():
+                token = line.split()
+                if token[0]=='ATOM':
+                    atom_name=token[2]
+                    gaff_name=token[-1]
+                    self.atom_gaff[atom_name]=gaff_name
+            self.atom_gaff.update(self.atom_gaff)
+        self.num_types = len(set(self.atom_gaff.values()))
 
 
     def _convert_to_pdb(self, molecule, filename=None):
@@ -68,32 +99,32 @@ class AntechamberRunner():
                 self.molname = filename.split('.')[0]
                 self._run_parmchk('ANTECHAMBER_AC.AC')
                 gff = self._parse_output()
-                ac = AC()
-                ac.read_atom_index('ANTECHAMBER_AC.AC')
-                ac.read_atomType('ANTECHAMBER_AC.AC')
+
+                self.read_atom_index('ANTECHAMBER_AC.AC')
+                self.read_atomType('ANTECHAMBER_AC.AC')
                 pmr = PackmolRunner([mol, mol], [
                     {"number": 1, "inside box": [0., 0., 0., 40., 40., 40.]},
                     {"number": 2}])
                 top = TopMol.from_file('mol.rtf')
                 my_gff = Gff()
                 my_gff.read_forcefield_para('mol.frcmod')
-                atom_gaff = AC()
-                atom_gaff.read_atomType('ANTECHAMBER_AC.AC')
-                self._get_ff_bonds(my_gff.bonds, top.bonds, atom_gaff.atom_gaff)
+                #atom_gaff = AC()
+                self.read_atomType('ANTECHAMBER_AC.AC')
+                self._get_ff_bonds(my_gff.bonds, top.bonds, self.atom_gaff)
                 self._get_ff_angles(my_gff.angles, top.angles,
-                                    atom_gaff.atom_gaff)
+                                    self.atom_gaff)
                 self._get_ff_dihedrals(my_gff.dihedrals, top.dihedrals,
-                                       atom_gaff.atom_gaff)
+                                       self.atom_gaff)
                 self._get_ff_imdihedrals(my_gff.imdihedrals, top.imdihedrals,
-                                         atom_gaff.atom_gaff)
+                                         self.atom_gaff)
                 gff_list.append(gff)
                 my_lampps = LmpInput()
                 my_lampps.set_coeff(my_gff, top, pmr, self)
-                my_lampps.set_atom(pmr, my_gff, ac)
-                my_lampps.set_bonds(pmr, my_gff, ac, top)
-                my_lampps.set_angles(pmr, my_gff, ac, top)
-                my_lampps.set_dihedrals(pmr, my_gff, ac, top, self)
-                my_lampps.set_imdihedrals(pmr, my_gff, ac, top)
+                my_lampps.set_atom(pmr, my_gff, self)
+                my_lampps.set_bonds(pmr, my_gff, top,self)
+                my_lampps.set_angles(pmr, my_gff, top, self)
+                my_lampps.set_dihedrals(pmr, my_gff, top, self)
+                my_lampps.set_imdihedrals(pmr, my_gff, top, self)
                 my_lammps_list.append(my_lampps)
         return return_cmd, my_gff, my_ant, my_lammps_list, gff_list
 
@@ -205,9 +236,9 @@ class AntechamberRunner():
 
             gff = my_ant._parse_output()
 
-            ac = AC()
-            ac.read_atom_index('ANTECHAMBER_AC.AC')
-            ac.read_atomType('ANTECHAMBER_AC.AC')
+            #ac = AC()
+            my_ant.read_atom_index('ANTECHAMBER_AC.AC')
+            my_ant.read_atomType('ANTECHAMBER_AC.AC')
 
             pmr = PackmolRunner([mol, mol], [
                 {"number": 1, "inside box": [0., 0., 0., 40., 40., 40.]},
@@ -216,24 +247,25 @@ class AntechamberRunner():
 
             my_gff = Gff()
             my_gff.read_forcefield_para('mol.frcmod')
-            atom_gaff = AC()
-            atom_gaff.read_atomType('ANTECHAMBER_AC.AC')
-            my_ant._get_ff_bonds(my_gff.bonds, top.bonds, atom_gaff.atom_gaff)
+            #atom_gaff = AC()
+            my_ant.read_atomType('ANTECHAMBER_AC.AC')
+            my_ant._get_ff_bonds(my_gff.bonds, top.bonds, my_ant.atom_gaff)
             my_ant._get_ff_angles(my_gff.angles, top.angles,
-                                  atom_gaff.atom_gaff)
+                                  my_ant.atom_gaff)
             my_ant._get_ff_dihedrals(my_gff.dihedrals, top.dihedrals,
-                                     atom_gaff.atom_gaff)
+                                     my_ant.atom_gaff)
             my_ant._get_ff_imdihedrals(my_gff.imdihedrals, top.imdihedrals,
-                                       atom_gaff.atom_gaff)
+                                       my_ant.atom_gaff)
             gff_list.append(gff)
             my_lampps = LmpInput()
             my_lampps.set_coeff(my_gff, top, pmr, my_ant)
-            my_lampps.set_atom(pmr, my_gff, ac)
-            my_lampps.set_bonds(pmr, my_gff, ac, top)
-            my_lampps.set_angles(pmr, my_gff, ac, top)
-            my_lampps.set_dihedrals(pmr, my_gff, ac, top, my_ant)
-            my_lampps.set_imdihedrals(pmr, my_gff, ac, top)
+            my_lampps.set_atom(pmr, my_gff,my_ant)
+            my_lampps.set_bonds(pmr, my_gff, top,my_ant)
+            my_lampps.set_angles(pmr, my_gff, top,my_ant)
+            my_lampps.set_dihedrals(pmr, my_gff, top, my_ant)
+            my_lampps.set_imdihedrals(pmr, my_gff, top,my_ant)
             return my_gff, my_ant, my_lampps
+
 
 
 

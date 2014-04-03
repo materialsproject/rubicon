@@ -3,7 +3,7 @@ __author__ = 'navnidhirajput'
 
 
 
-class AC():
+'''class AC():
 
     """
     load topology data from antechamber(.rtf) file
@@ -40,6 +40,7 @@ class AC():
                     self.atom_gaff[atom_name]=gaff_name
             self.atom_gaff.update(self.atom_gaff)
         self.num_types = len(set(self.atom_gaff.values()))
+        '''
 
 
 class TopMol():
@@ -51,6 +52,9 @@ class TopMol():
         self.dihedrals=dihedrals
         self.imdihedrals= imdihedrals
         self.num_bonds=num_bonds
+        self.atom_index=dict()
+        self.atom_index_gaff=dict()
+        self.atom_gaff=dict()
 
 
     @classmethod
@@ -78,6 +82,34 @@ class TopMol():
                     imdihedrals.append(token[1:5])
             topology=TopMol(atoms,bonds,angles,dihedrals,imdihedrals,len(bonds))
             return topology
+
+    def read_atom_index(self,filename=None):
+
+        with open(filename) as f:
+
+            for line in f.readlines():
+                token = line.split()
+                if token[0]=='ATOM':
+                    index=int(token[1])
+                    atom_name=token[2]
+                    atom_gaff=token[9]
+                    self.atom_index[index]=atom_name
+                    self.atom_index_gaff[index]=atom_gaff
+
+
+    def read_atomType(self,filename=None):
+
+        with open(filename) as f:
+
+            for line in f.readlines():
+                token = line.split()
+                if token[0]=='ATOM':
+                    atom_name=token[2]
+                    gaff_name=token[-1]
+                    self.atom_gaff[atom_name]=gaff_name
+            self.atom_gaff.update(self.atom_gaff)
+        self.num_types = len(set(self.atom_gaff.values()))
+
 
 
 

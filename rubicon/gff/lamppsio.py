@@ -153,7 +153,7 @@ class LmpInput():
         return '\n'.join(lines)
 
 
-    def set_atom(self, pmr, gff, ac):
+    def set_atom(self, pmr, gff, my_ant):
         """
         TODO
         """
@@ -179,10 +179,10 @@ class LmpInput():
                 for k, v in enumerate(mol_coords):
                     lines.append(
                         '{}  {}  {}  {}  {}  {} {} {}  {} {}'.format(k + i + 1,
-                         mol_index,atom_type_index[ac.atom_index_gaff[k + 1]],
+                         mol_index,atom_type_index[my_ant.atom_index_gaff[k + 1]],
                          v[0], v[1],v[2], '#', mol_index,
-                         ac.atom_index_gaff[k + 1],ac.atom_index[k + 1]))
-                    d[ac.atom_index[k + 1]] = k + i + 1
+                         my_ant.atom_index_gaff[k + 1],my_ant.atom_index[k + 1]))
+                    d[my_ant.atom_index[k + 1]] = k + i + 1
                 i += num_atoms
                 self.box_mol_index.append(d)
 
@@ -190,7 +190,7 @@ class LmpInput():
         return '\n'.join(lines)
 
 
-    def set_bonds(self, pmr, gff, ac, top):
+    def set_bonds(self, pmr, gff, top, my_ant):
         """
         TODO
         """
@@ -213,8 +213,8 @@ class LmpInput():
                 mol_index += 1
                 #iterate over bonds in first molecule
                 for k, v in enumerate(top.bonds):
-                    a = ac.atom_gaff[top.bonds[k][0]]
-                    b = ac.atom_gaff[top.bonds[k][1]]
+                    a = my_ant.atom_gaff[top.bonds[k][0]]
+                    b = my_ant.atom_gaff[top.bonds[k][1]]
                     bond_label = tuple(sorted([a, b]))
                     lines.append(
                         '{}  {}  {}  {}  {}  {}  {}  {}'.format(i + k + 1,
@@ -225,7 +225,7 @@ class LmpInput():
         self.lines.extend(lines)
         return '\n'.join(lines)
 
-    def set_angles(self, pmr, gff, ac, top):
+    def set_angles(self, pmr, gff,top, my_ant):
         """
         TODO
         """
@@ -247,9 +247,9 @@ class LmpInput():
                 mol_index += 1
                 #iterate over bonds in first molecule
                 for k, v in enumerate(top.angles):
-                    a = ac.atom_gaff[top.angles[k][0]]
-                    b = ac.atom_gaff[top.angles[k][1]]
-                    c = ac.atom_gaff[top.angles[k][2]]
+                    a = my_ant.atom_gaff[top.angles[k][0]]
+                    b = my_ant.atom_gaff[top.angles[k][1]]
+                    c = my_ant.atom_gaff[top.angles[k][2]]
                     angle_label = tuple(sorted([a, b, c]))
                     lines.append('{}  {}  {}  {}  {}  {}  {}  {}  {}  {}'
                     .format(i + k + 1, angle_type_index[angle_label],
@@ -263,7 +263,7 @@ class LmpInput():
         self.lines.extend(lines)
         return '\n'.join(lines)
 
-    def set_dihedrals(self, pmr, gff, ac, top, my_ant):
+    def set_dihedrals(self, pmr, gff, top, my_ant):
         """
         TODO
         """
@@ -291,10 +291,10 @@ class LmpInput():
                     B = k.split()[1]
                     C = k.split()[2]
                     D = k.split()[3]
-                    a = ac.atom_gaff[k.split()[0]]
-                    b = ac.atom_gaff[k.split()[1]]
-                    c = ac.atom_gaff[k.split()[2]]
-                    d = ac.atom_gaff[k.split()[3]]
+                    a = my_ant.atom_gaff[k.split()[0]]
+                    b = my_ant.atom_gaff[k.split()[1]]
+                    c = my_ant.atom_gaff[k.split()[2]]
+                    d = my_ant.atom_gaff[k.split()[3]]
                     dihedral_label = (a, b, c, d)
                     if dihedral_label[0] > dihedral_label[3]:
                         dihedral_label = tuple(reversed(list(dihedral_label)))
@@ -314,7 +314,7 @@ class LmpInput():
         return '\n'.join(lines)
 
 
-    def set_imdihedrals(self, pmr, gff, ac, top):
+    def set_imdihedrals(self, pmr, gff, top, my_ant):
         """
         TODO
         """
@@ -337,10 +337,10 @@ class LmpInput():
                 #iterate over improper dihedrals in first molecule
                 for k, v in enumerate(top.imdihedrals):
                     j += 1
-                    a = ac.atom_gaff[top.imdihedrals[k][0]]
-                    b = ac.atom_gaff[top.imdihedrals[k][1]]
-                    c = ac.atom_gaff[top.imdihedrals[k][2]]
-                    d = ac.atom_gaff[top.imdihedrals[k][3]]
+                    a = my_ant.atom_gaff[top.imdihedrals[k][0]]
+                    b = my_ant.atom_gaff[top.imdihedrals[k][1]]
+                    c = my_ant.atom_gaff[top.imdihedrals[k][2]]
+                    d = my_ant.atom_gaff[top.imdihedrals[k][3]]
                     imdihedral_label = tuple([a, b, c, d])
                     lines.append(
                         '{}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}'
