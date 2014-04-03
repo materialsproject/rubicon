@@ -14,3 +14,9 @@ class DictLammpsInputSet():
 
         return '\n'.join(lines)
 
+
+class JCESRLammpsInputSet(DictLammpsInputSet):
+
+    def __init__(self):
+        pass
+

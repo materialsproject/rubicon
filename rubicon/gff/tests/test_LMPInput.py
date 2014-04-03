@@ -3,7 +3,7 @@ from pymatgen import Molecule
 from pymatgen.packmol.packmol import PackmolRunner
 from rubicon.gff.gff import Gff
 from rubicon.gff.lamppsio import LmpInput
-from rubicon.gff.topology import TopMol, AC
+from rubicon.gff.topology import TopMol
 
 __author__ = 'navnidhirajput'
 

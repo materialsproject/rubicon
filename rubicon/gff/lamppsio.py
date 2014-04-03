@@ -1,19 +1,6 @@
 """
 This module implements input and output processing from Lampps.
 """
-from collections import defaultdict
-
-import copy
-import os
-import re
-import numpy as np
-from string import Template
-from pymatgen import read_mol
-from pymatgen.core.structure import Molecule
-from pymatgen.core.units import Energy
-from pymatgen.serializers.json_coders import MSONable
-from pymatgen.util.coord_utils import get_angle
-
 
 __author__ = 'navnidhirajput'
 
@@ -178,10 +165,10 @@ class LmpInput():
                 d = {}
                 for k, v in enumerate(mol_coords):
                     lines.append(
-                        '{}  {}  {}  {}  {}  {} {} {}  {} {}'.format(k + i + 1,
-                         mol_index,atom_type_index[my_ant.atom_index_gaff[k + 1]],
-                         v[0], v[1],v[2], '#', mol_index,
-                         my_ant.atom_index_gaff[k + 1],my_ant.atom_index[k + 1]))
+                    '{}  {}  {}  {}  {}  {} {} {}  {} {}'.format(k + i + 1,
+                     mol_index,atom_type_index[my_ant.atom_index_gaff[k + 1]],
+                     v[0], v[1],v[2], '#', mol_index,
+                     my_ant.atom_index_gaff[k + 1],my_ant.atom_index[k + 1]))
                     d[my_ant.atom_index[k + 1]] = k + i + 1
                 i += num_atoms
                 self.box_mol_index.append(d)
