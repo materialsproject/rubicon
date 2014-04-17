@@ -178,6 +178,7 @@ class QChemFireWorkCreator():
                             exchange=self.dft, basis_set=self.bs)
         qctask_sol.set_scf_initial_guess(guess="read")
         implicit_solvent = dict()
+        implicit_solvent['solvent_name'] = solvent
         if solvent_method.lower() in ['cpcm', 'ief-pcm']:
             if solvent_method.lower() == 'ief-pcm':
                 solvent_theory = 'ssvpe'
