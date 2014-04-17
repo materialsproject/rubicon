@@ -16,7 +16,7 @@ from pymatgen.packmol.packmol import PackmolRunner
 from rubicon.gff.lamppsio import LmpInput
 from rubicon.gff.topology import TopMol
 
-ANTECHAMBER_DEBUG = False
+ANTECHAMBER_DEBUG = True
 
 
 class AntechamberRunner():
@@ -108,7 +108,6 @@ class AntechamberRunner():
                 top = TopMol.from_file('mol.rtf')
                 my_gff = Gff()
                 my_gff.read_forcefield_para('mol.frcmod')
-                #atom_gaff = AC()
                 self.read_atomType('ANTECHAMBER_AC.AC')
                 self._get_ff_bonds(my_gff.bonds, top.bonds, self.atom_gaff)
                 self._get_ff_angles(my_gff.angles, top.angles,
@@ -235,8 +234,6 @@ class AntechamberRunner():
             my_ant._run_parmchk('ANTECHAMBER_AC.AC')
 
             gff = my_ant._parse_output()
-
-            #ac = AC()
             my_ant.read_atom_index('ANTECHAMBER_AC.AC')
             my_ant.read_atomType('ANTECHAMBER_AC.AC')
 
@@ -247,7 +244,6 @@ class AntechamberRunner():
 
             my_gff = Gff()
             my_gff.read_forcefield_para('mol.frcmod')
-            #atom_gaff = AC()
             my_ant.read_atomType('ANTECHAMBER_AC.AC')
             my_ant._get_ff_bonds(my_gff.bonds, top.bonds, my_ant.atom_gaff)
             my_ant._get_ff_angles(my_gff.angles, top.angles,

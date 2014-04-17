@@ -1,0 +1,35 @@
+{
+    "LAMMPSINNPT": {
+        "log":"mol.log",
+        "variable":"mytemp index 350",
+        "units": "real",
+        "atom_style": "full",
+        "boundary": "p p p",
+        "pair_style":"lj/cut/coul/long 12",
+        "kspace_style":"pppm 0.0001",
+        "pair_modify":"tail yes",
+        "pair_modify":"mix arithmetic",
+        "special_bonds":"amber",
+        "bond_style" :"harmonic",
+        "angle_style":"harmonic",
+        "dihedral_style":"charmm",
+        "improper_style":"cvff",
+        "read_data": "data.mol",
+        "neighbor": "2.0 bin",
+        "neigh_modify":"delay 0 every 1 check yes page 1000000 one 20000",
+        "timestep": 1.0,
+        "minimize":"1e-4 1e-6 10000 10000",
+        "velocity":"all create  ${mytemp} 314159265 units box",
+        "velocity":"all zero linear units box",
+        "dump":"DUMP all custom 2000 mol.lammpstrj id type x y z vx vy vz mol",
+        "thermo_style":"custom step vol temp press ke pe etotal enthalpy evdwl ecoul epair ebond eangle edihed eimp emol elong etail lx ly lz xy xz yz",
+        "thermo":1000,
+        "fix":"NVT all nvt temp ${mytemp} ${mytemp} 100.0 0",
+        "tempa"
+        "restart":"50000 restart.mol.1 restart.mol.2",
+        "run":10000000,
+        "write_restart":"restart.mol"
+
+
+    }
+}

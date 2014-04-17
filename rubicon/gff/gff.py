@@ -7,8 +7,8 @@ from pymatgen.serializers.json_coders import MSONable
 
 class Gff(MSONable):
     """
-    A force field library. Right now reads the output file from AntechamberRunner
-    and populate the FF library
+    A force field library. Right now reads the output file from
+    AntechamberRunner and populate the FF library
 
     Args:
         bonds: store the bond distance (A) and spring constant (Kcal/molA2)

@@ -341,3 +341,6 @@ class LmpInput():
                 i += num_atoms
         self.lines.extend(lines)
         return '\n'.join(lines)
+
+    def run(self):
+        pass
