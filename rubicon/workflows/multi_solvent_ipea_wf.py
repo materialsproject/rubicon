@@ -47,13 +47,18 @@ def multi_solvent_ipea_fws(mol, name, mission, solvents,
                                ngi_db: nfi_cal,
                                agi_db: afi_cal})
 
+    num_solvents = len(solvents)
+    if num_solvents < 1:
+        raise ValueError("You must provide at least one solvent")
+
     sp_fw_ids = []
     for sol_id, solvent in enumerate(solvents):
         fwid_start = fwid_base + 12 + (sol_id * 6)
         fwid_end = fwid_base + 12 + (sol_id * 6) + 6
         fw_ids = zip(* [iter(range(fwid_start, fwid_end))] * 2)
         sp_fw_ids.append(fw_ids)
-        fws = (fw_creator.sp_fw(ch, spin, fwid_cal, fwid_db)
+        fws = (fw_creator.sp_fw(ch, spin, fwid_cal, fwid_db,
+                                solvent_method="sm12mk", solvent=solvent)
                for ch, spin, (fwid_cal, fwid_db)
                in zip(charge, spin_multiplicity, fw_ids))
         links_dict.update(dict(fw_ids))
