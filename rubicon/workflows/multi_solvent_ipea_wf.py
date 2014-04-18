@@ -48,7 +48,7 @@ def multi_solvent_ipea_fws(mol, name, mission, solvents,
                                agi_db: afi_cal})
 
     sp_fw_ids = []
-    for sol_id, solvent in solvents:
+    for sol_id, solvent in enumerate(solvents):
         fwid_start = fwid_base + 12 + (sol_id * 6)
         fwid_end = fwid_base + 12 + (sol_id * 6) + 6
         fw_ids = zip(* [iter(range(fwid_start, fwid_end))] * 2)
