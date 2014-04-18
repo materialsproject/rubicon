@@ -42,7 +42,7 @@ def snl_to_eg_wf(snl, parameters=None):
     if workflow_type == 'ipea':
         fws_tasks, connections = multistep_ipea_fws(
             snl.structure, molname, mission, DupeFinderEG(), priority, 1)
-    elif workflow_type == 'multi_solvent_ipea':
+    elif workflow_type == 'multiple solvent ipea':
         solvents = parameters.get('solvents', default_solvents)
         fws_tasks, connections = multi_solvent_ipea_fws(
             snl.structure, molname, mission, solvents, DupeFinderEG(),
