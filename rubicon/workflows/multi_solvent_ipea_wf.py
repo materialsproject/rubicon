@@ -1,8 +1,10 @@
+import itertools
+from fireworks import Workflow
 from rubicon.workflows.multistep_ipea_wf import QChemFireWorkCreator
 
 
-def multi_solvent_ipea_fws(mol, name, mission, dupefinder=None, priority=1,
-                       parent_fwid=None):
+def multi_solvent_ipea_fws(mol, name, mission, solvents,
+                           dupefinder=None, priority=1, parent_fwid=None):
     large = False
     if len(mol) > 50:
         large = True
@@ -45,34 +47,46 @@ def multi_solvent_ipea_fws(mol, name, mission, dupefinder=None, priority=1,
                                ngi_db: nfi_cal,
                                agi_db: afi_cal})
 
-    fw_ids = zip(* [iter(range(fwid_base + 12, fwid_base + 12 + 6))] * 2)
-    fws = (fw_creator.sp_fw(ch, spin, fwid_cal, fwid_db)
-           for ch, spin, (fwid_cal, fwid_db)
-           in zip(charge, spin_multiplicity, fw_ids))
-    (cspi_cal, cspi_db), (nspi_cal, nspi_db), (aspi_cal, aspi_db) = fw_ids
-    links_dict.update((dict(fw_ids)))
-    fireworks.extend(itertools.chain.from_iterable(fws))
+    sp_fw_ids = []
+    for sol_id, solvent in solvents:
+        fwid_start = fwid_base + 12 + (sol_id * 6)
+        fwid_end = fwid_base + 12 + (sol_id * 6) + 6
+        fw_ids = zip(* [iter(range(fwid_start, fwid_end))] * 2)
+        sp_fw_ids.append(fw_ids)
+        fws = (fw_creator.sp_fw(ch, spin, fwid_cal, fwid_db)
+               for ch, spin, (fwid_cal, fwid_db)
+               in zip(charge, spin_multiplicity, fw_ids))
+        links_dict.update(dict(fw_ids))
+        fireworks.extend(itertools.chain.from_iterable(fws))
+    cspi_cal_list = []
+    nspi_cal_list = []
+    aspi_cal_list = []
+    for (cspi_cal, cspi_db), (nspi_cal, nspi_db), (aspi_cal, aspi_db) in\
+            sp_fw_ids:
+        cspi_cal_list.append(cspi_cal)
+        nspi_cal_list.append(nspi_cal)
+        aspi_cal_list.append(aspi_cal)
     if len(mol) > 1:
         if large:
-            links_dict.update({cgi_db: cspi_cal, ngi_db: nspi_cal,
-                               agi_db: aspi_cal})
+            links_dict.update({cgi_db: cspi_cal_list, ngi_db: nspi_cal_list,
+                               agi_db: aspi_cal_list})
         else:
-            links_dict.update({cfi_db: cspi_cal, nfi_db: nspi_cal,
-                               afi_db: aspi_cal})
-        links_dict.update({nspi_db: [cgi_cal, agi_cal]})
+            links_dict.update({cfi_db: cspi_cal_list, nfi_db: nspi_cal_list,
+                               afi_db: aspi_cal_list})
+        links_dict.update({nfi_db: [cgi_cal, agi_cal]})
         if parent_fwid:
             for pfw_id in parent_fwid:
                 links_dict[pfw_id] = ngi_cal
     else:
-        links_dict.update({nspi_db: [cspi_cal, aspi_cal]})
         if parent_fwid:
             for pfw_id in parent_fwid:
-                links_dict[pfw_id] = nspi_cal
+                links_dict[pfw_id] = nspi_cal_list
     return fireworks, links_dict
 
 
-def mol_to_solvent_ipea_wf(mol, name, mission, dupefinder=None, priority=1,
-                   parent_fwid=None):
+def mol_to_solvent_ipea_wf(mol, name, mission, solvents,
+                           dupefinder=None, priority=1, parent_fwid=None):
     fireworks, links_dict = multi_solvent_ipea_fws(mol, name, mission,
-                                                 dupefinder,
-                                               priority, parent_fwid)
+                                                   solvents, dupefinder,
+                                                   priority, parent_fwid)
+    return Workflow(fireworks, links_dict, name)

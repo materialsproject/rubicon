@@ -299,7 +299,7 @@ def multistep_ipea_fws(mol, name, mission, dupefinder=None, priority=1,
            for ch, spin, (fwid_cal, fwid_db)
            in zip(charge, spin_multiplicity, fw_ids))
     (cspi_cal, cspi_db), (nspi_cal, nspi_db), (aspi_cal, aspi_db) = fw_ids
-    links_dict.update((dict(fw_ids)))
+    links_dict.update(dict(fw_ids))
     fireworks.extend(itertools.chain.from_iterable(fws))
     if len(mol) > 1:
         if large:
