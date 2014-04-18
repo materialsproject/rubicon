@@ -1,6 +1,11 @@
 """
 This module implements input and output processing from Lampps.
 """
+from pybel import Molecule
+from pymatgen.packmol.packmol import PackmolRunner
+from rubicon.gff.antechamberio import AntechamberRunner
+from rubicon.gff.gff import Gff
+from rubicon.gff.topology import TopMol
 
 __author__ = 'navnidhirajput'
 
@@ -164,6 +169,7 @@ class LmpInput():
                 #iterate over atoms in every molecule
                 d = {}
                 for k, v in enumerate(mol_coords):
+
                     lines.append(
                     '{}  {}  {}  {}  {}  {} {} {}  {} {}'.format(k + i + 1,
                      mol_index,atom_type_index[my_ant.atom_index_gaff[k + 1]],
@@ -342,5 +348,25 @@ class LmpInput():
         self.lines.extend(lines)
         return '\n'.join(lines)
 
-    def run(self):
-        pass
+    def run(self,mols=[],pmr=None,ant=None):
+        my_lammps_list = []
+        for mol in mols:
+            my_lampps = LmpInput()
+            if ant is None:
+                ant = AntechamberRunner(mols)
+                my_gff, gff_list,top=ant._run_antechamber('mol.pdb',mols)
+            if pmr is None:
+                pmr = PackmolRunner([mol, mol], [
+                        {"number": 1, "inside box": [0., 0., 0., 40., 40., 40.]},
+                        {"number": 2}])
+            my_lammps_list.append(my_lampps.set_coeff(my_gff, top, pmr, ant))
+            my_lammps_list.append(my_lampps.set_atom(pmr, my_gff, ant))
+            my_lammps_list.append(my_lampps.set_bonds(pmr, my_gff, top,ant))
+            my_lammps_list.append(my_lampps.set_angles(pmr, my_gff, top, ant))
+            my_lammps_list.append(my_lampps.set_dihedrals(pmr, my_gff, top, ant))
+            my_lammps_list.append(my_lampps.set_imdihedrals(pmr, my_gff, top, ant))
+
+        return '\n'.join(my_lammps_list)
+
+
+

@@ -33,7 +33,7 @@ class DictLammpsInputSet():
         if user_lammps_settings:
             self.lammps_settings.update(user_lammps_settings)
 
-    def get_lammpsin(self,filename=None,ensemble=None,temp=None,datafile=None):
+    def get_lammpsin(self,filename=None,ensemble=None,temp=None):
 
 
         jsonfile=open(filename)
