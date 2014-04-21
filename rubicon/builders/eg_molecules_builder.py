@@ -133,19 +133,21 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
             molecule["inchi"][k] =docs[k]["inchi_final"]
         if solution_phase:
             # get the solution phase scf key name, scf_pcm, scf_sm12mk, etc.
-            scf = set(docs["neutral"]["calculations"].keys()).remove('scf')[0]
+            scf_all = set(docs["neutral"]["calculations"].keys())
+            scf_all.remove('scf')
+            scf_name = scf_all.pop()
         else:
-            scf = 'scf'
+            scf_name = 'scf'
         if "cation" in docs:
             molecule["IP"] = \
-                docs["cation"]["calculations"][scf]["energies"][-1][-1] \
+                docs["cation"]["calculations"][scf_name]["energies"][-1][-1] \
                 - \
-                docs["neutral"]["calculations"][scf]["energies"][-1][-1]
+                docs["neutral"]["calculations"][scf_name]["energies"][-1][-1]
         if "anion" in docs:
             molecule["EA"] = \
-                docs["neutral"]["calculations"][scf]["energies"][-1][-1] \
+                docs["neutral"]["calculations"][scf_name]["energies"][-1][-1] \
                 - \
-                docs["anion"]["calculations"][scf]["energies"][-1][-1]
+                docs["anion"]["calculations"][scf_name]["energies"][-1][-1]
         molecule['electrode_potentials'] = dict()
         if solution_phase:
             if 'IP' in molecule:
@@ -158,7 +160,7 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
                 for electrode in self.ref_potentials.keys():
                     molecule['electrode_potentials']['reduction'][electrode] \
                         = molecule['EA'] - self.ref_potentials[electrode]
-        return scf
+        return scf_name
 
     def build_molecule_solvated_properties(self, taskdocs):
         docs = dict()
