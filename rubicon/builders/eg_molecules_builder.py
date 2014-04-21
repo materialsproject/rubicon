@@ -74,7 +74,7 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
             states = self.run_parallel()
             sss.extend(states)
             self._build_indexes()
-        return self.combine_status(states)
+        return self.combine_status(sss)
 
 
     def process_item(self, inchi_root):
