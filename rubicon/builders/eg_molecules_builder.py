@@ -33,6 +33,7 @@ class TaskKeys:
         'nelements', 'reduced_cell_formula_abc', 'pretty_formula',
         'pointgroup', 'inchi_root',
         'calculations.scf.energies', 'calculations.scf_pcm.energies',
+        'calculations.scf_sm12mk.energies',
         'formula', 'task_id_deprecated', 'svg', 'xyz')
 
 
