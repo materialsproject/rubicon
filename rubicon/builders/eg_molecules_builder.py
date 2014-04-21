@@ -56,6 +56,7 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         """
         eg_shared.ParallelBuilder.__init__(self, **kwargs)
         self._c = collections
+        self._c.molecules.remove()
         self.ref_charge = 0
 
 
@@ -181,6 +182,8 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         molecule['solvation_energy'] = docs["neutral"]["calculations"]["scf"][
             "energies"][-1][-1] - \
             docs["neutral"]["calculations"][scf]["energies"][-1][-1]
+        molecule["implicit_solvent"] = copy.deepcopy(docs['neutral'][
+            "implicit_solvent"])
         return molecule
 
     def build_molecule_vacuum_properties(self, query):
@@ -209,7 +212,6 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         molecule["user_tags"] = copy.deepcopy(docs["user_tags"])
         molecule["run_tags"] = copy.deepcopy(docs["run_tags"])
         molecule["reduced_cell_formula_abc"] = docs["reduced_cell_formula_abc"]
-        molecule["implicit_solvent"] = copy.deepcopy(docs["implicit_solvent"])
         molecule["pretty_formula"] = docs["pretty_formula"]
         molecule["formula"] = docs["formula"]
         molecule["pointgroup"] = docs["pointgroup"]
