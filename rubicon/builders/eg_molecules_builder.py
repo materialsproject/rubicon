@@ -81,6 +81,7 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         )
         molecule = dict()
         docs_available = False
+        molecule['solvated_properties'] = dict()
         for solvent in solvents:
             query['implicit_solvent.solvent_name'] = solvent
             docs = list(self._c.tasks.find(query, fields=TaskKeys.fields))
@@ -91,12 +92,14 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
                 molecule['solvated_properties'][solvent] = d
         if not docs_available:
             return 1
-        if len(molecule) == 0:
+        if len(molecule['solvated_properties']) == 0:
             return 2
         del query['implicit_solvent.solvent_name']
         d = self.build_molecule_vacuum_properties(copy.deepcopy(query))
         if d and len(d) > 0:
             molecule['vacuum_properties'] = d
+        else:
+            return 2
         query['charge'] = self.ref_charge
         docs = self._c.tasks.findone(query, fields=TaskKeys.fields)
         if not docs:
