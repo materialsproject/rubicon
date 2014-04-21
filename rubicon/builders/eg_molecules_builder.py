@@ -202,7 +202,7 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
             query['charge'] = self.ref_charge + i
             taskdocs = self._c.tasks.find_one(query, fields=TaskKeys.fields)
             if not taskdocs:
-                return None
+                continue
             docs[c] = taskdocs
         if len(docs) < 2 or ("neutral" not in docs):
             return None
