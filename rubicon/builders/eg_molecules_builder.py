@@ -101,7 +101,7 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         else:
             return 2
         query['charge'] = self.ref_charge
-        docs = self._c.tasks.findone(query, fields=TaskKeys.fields)
+        docs = self._c.tasks.find_one(query, fields=TaskKeys.fields)
         if not docs:
             return 1
         d = self.build_molecule_common_properties(docs)
@@ -187,7 +187,7 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         docs = dict()
         for c, i in zip(["anion", "neutral", "cation"], [-1, 0, 1]):
             query['charge'] = self.ref_charge + i
-            taskdocs = self._c.tasks.findone(query, fields=TaskKeys.fields)
+            taskdocs = self._c.tasks.find_one(query, fields=TaskKeys.fields)
             if not taskdocs:
                 return None
             docs[c] = taskdocs
