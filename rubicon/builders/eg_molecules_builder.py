@@ -230,8 +230,8 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
     def _insert_molecule(self, doc):
         """All database insertion should be done from this method
         """
-        _log.info("Inserting Material from task_id i, ".
-            format(i=str(doc['task_id'])))
+        _log.info("Inserting Material with InChI i, ".
+            format(i=str(doc['inchi_root'])))
         self._c.molecules.insert(doc)
 
 
