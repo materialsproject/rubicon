@@ -58,17 +58,22 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         self._c = collections
         self._c.molecules.remove()
         self.ref_charge = 0
+        self.ref_charge_range = (-1, 0, 1)
 
 
     def run(self):
         """Run the builder.
         """
+        sss = []
         _log.info("Getting distinct root INCHIs")
         inchi_root = self._c.tasks.distinct('inchi_root')
-        map(self.add_item, inchi_root)
-        _log.info("Beginning analysis")
-        states = self.run_parallel()
-        self._build_indexes()
+        for ch in self.ref_charge_range:
+            self.ref_charge = ch
+            map(self.add_item, inchi_root)
+            _log.info("Beginning analysis")
+            states = self.run_parallel()
+            sss.extend(states)
+            self._build_indexes()
         return self.combine_status(states)
 
 
@@ -81,6 +86,7 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
             "implicit_solvent.solvent_name"
         )
         molecule = dict()
+        molecule['charge'] = self.ref_charge
         docs_available = False
         molecule['solvated_properties'] = dict()
         for solvent in solvents:
