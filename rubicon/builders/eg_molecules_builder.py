@@ -125,6 +125,8 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         molecule["molecule"] = dict()
         molecule["xyz"] = dict()
         molecule["inchi"] = dict()
+        molecule["can"] = dict()
+        molecule["smiles"] = dict()
         for k in docs.keys():
             molecule["task_id"][k] = docs[k]["task_id"]
             molecule["task_id_deprecated"][k] = docs[k]["task_id_deprecated"]
@@ -134,7 +136,9 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
             molecule["snl_final"][k] = docs[k]["snl_final"]
             molecule["molecule"][k] = docs[k]["molecule_final"]
             molecule["xyz"][k] = docs[k]["xyz"]
-            molecule["inchi"][k] =docs[k]["inchi_final"]
+            molecule["inchi"][k] = docs[k]["inchi_final"]
+            molecule["can"][k] = docs[k]["can"]
+            molecule["smiles"][k] = docs[k]["smiles"]
         if solution_phase:
             # get the solution phase scf key name, scf_pcm, scf_sm12mk, etc.
             scf_all = set(docs["neutral"]["calculations"].keys())
@@ -205,8 +209,6 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         """
         molecule = dict()
         molecule["inchi_root"] = docs["inchi_root"]
-        molecule["can"] = docs["can"]
-        molecule["smiles"] = docs["smiles"]
         molecule["elements"] = copy.deepcopy(docs["elements"])
         molecule["nelements"] = docs["nelements"]
         molecule["user_tags"] = copy.deepcopy(docs["user_tags"])
@@ -219,9 +221,9 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         return molecule
 
     def _build_indexes(self):
-        self._c.molecules.ensure_index('task_id', unique=True)
-        for key in ['snlgroup_id_final', 'inchi_final', 'task_type', 'can',
-                    'smiles', 'charge', 'spin_multiplicity', 'nelements',
+        self._c.molecules.ensure_index(
+            [('inchi_root', ASCENDING), ('charge', ASCENDING)], unique=True)
+        for key in ['inchi_root', 'charge', 'nelements', 'elements',
                     'reduced_cell_formula', 'pretty_formula']:
             _log.info("Building {} index".format(key))
             self._c.molecules.ensure_index(key)
