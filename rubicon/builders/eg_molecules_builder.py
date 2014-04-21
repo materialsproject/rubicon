@@ -55,6 +55,7 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         """
         eg_shared.ParallelBuilder.__init__(self, **kwargs)
         self._c = collections
+        self.ref_charge = 0
 
 
     def run(self):
@@ -74,46 +75,42 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         """
         query = {'state': 'successful', 'inchi_root': inchi_root,
                  'task_type': "single point energy"}
-        docs = list(self._c.tasks.find(query, fields=TaskKeys.fields))
+        solvents = self._c.tasks.find(query, fields=TaskKeys.fields).distinct(
+            "implicit_solvent.solvent_name"
+        )
+        molecule = dict()
+        docs_available = False
+        for solvent in solvents:
+            query['implicit_solvent.solvent_name'] = solvent
+            docs = list(self._c.tasks.find(query, fields=TaskKeys.fields))
+            if docs:
+                docs_available = True
+            d = self.build_molecule_solvated_properties(docs)
+            if d and len(d) > 0:
+                molecule['solvated_properties'][solvent] = d
+        if not docs_available:
+            return 1
+        if len(molecule) == 0:
+            return 2
+        del query['implicit_solvent.solvent_name']
+        d = self.build_molecule_vacuum_properties(copy.deepcopy(query))
+        if d and len(d) > 0:
+            molecule['vacuum_properties'] = d
+        query['charge'] = self.ref_charge
+        docs = self._c.tasks.findone(query, fields=TaskKeys.fields)
         if not docs:
             return 1
-        doc = self.build_molecule(docs)
-        if not doc:
+        d = self.build_molecule_common_properties(docs)
+        if d and len(d) > 0:
+            molecule.update(d)
+        else:
             return 2
-        doc['created_at'] = datetime.datetime.now()
-        doc['updated_at'] = datetime.datetime.now()
-        self._insert_molecule(doc)
+        molecule['created_at'] = datetime.datetime.now()
+        molecule['updated_at'] = datetime.datetime.now()
+        self._insert_molecule(molecule)
         return 0
 
-    def build_molecule(self, taskdocs):
-        """Transforms task document to molecules document.
-        """
-        docs = dict()
-        for td in taskdocs:
-            if td["charge"] == 0:
-                docs["neutral"] = td
-            elif td["charge"] == 1:
-                docs["cation"] = td
-            elif td["charge"] == -1:
-                docs["anion"] = td
-        if len(docs) < 2 or ("neutral" not in docs):
-            return None
-        molecule = dict()
-        molecule["inchi_root"] = docs["neutral"]["inchi_root"]
-        molecule["can"] = docs["neutral"]["can"]
-        molecule["smiles"] = docs["neutral"]["smiles"]
-        molecule["elements"] = copy.deepcopy(docs["neutral"]["elements"])
-        molecule["nelements"] = docs["neutral"]["nelements"]
-        molecule["user_tags"] = copy.deepcopy(docs["neutral"]["user_tags"])
-        molecule["run_tags"] = copy.deepcopy(docs["neutral"]["run_tags"])
-        molecule["reduced_cell_formula_abc"] = docs[
-            "neutral"]["reduced_cell_formula_abc"]
-        molecule["implicit_solvent"] = copy.deepcopy(docs["neutral"][
-            "implicit_solvent"])
-        molecule["pretty_formula"] = docs["neutral"]["pretty_formula"]
-        molecule["formula"] = docs["neutral"]["formula"]
-        molecule["pointgroup"] = docs["neutral"]["pointgroup"]
-
+    def build_molecule_ipea(self, docs, molecule, solution_phase=True):
         molecule["task_id"] = dict()
         molecule["task_id_deprecated"] = dict()
         molecule["snlgroup_id_final"] = dict()
@@ -133,48 +130,84 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
             molecule["molecule"][k] = docs[k]["molecule_final"]
             molecule["xyz"][k] = docs[k]["xyz"]
             molecule["inchi"][k] =docs[k]["inchi_final"]
+        if solution_phase:
+            # get the solution phase scf key name, scf_pcm, scf_sm12mk, etc.
+            scf = set(docs["neutral"]["calculations"].keys()).remove('scf')[0]
+        else:
+            scf = 'scf'
         if "cation" in docs:
-            molecule["IP"] = dict()
-            molecule["IP"]["vacuum"] = \
-                docs["cation"]["calculations"]["scf"]["energies"][-1][-1] \
+            molecule["IP"] = \
+                docs["cation"]["calculations"][scf]["energies"][-1][-1] \
                 - \
-                docs["neutral"]["calculations"]["scf"]["energies"][-1][-1]
-            molecule["IP"]["sol"] = \
-                docs["cation"]["calculations"]["scf_pcm"]["energies"][-1][-1] \
-                - \
-                docs["neutral"]["calculations"]["scf_pcm"]["energies"][-1][-1]
+                docs["neutral"]["calculations"][scf]["energies"][-1][-1]
         if "anion" in docs:
-            molecule["EA"] = dict()
-            molecule["EA"]["vacuum"] = \
-                docs["neutral"]["calculations"]["scf"]["energies"][-1][-1] \
+            molecule["EA"] = \
+                docs["neutral"]["calculations"][scf]["energies"][-1][-1] \
                 - \
-                docs["anion"]["calculations"]["scf"]["energies"][-1][-1]
-            molecule["EA"]["sol"] = \
-                docs["neutral"]["calculations"]["scf_pcm"]["energies"][-1][-1] \
-                - \
-                docs["anion"]["calculations"]["scf_pcm"]["energies"][-1][-1]
+                docs["anion"]["calculations"][scf]["energies"][-1][-1]
         molecule['electrode_potentials'] = dict()
-        if 'IP' in molecule:
-            molecule['electrode_potentials']['oxidation'] \
-                = {'vacuum': dict(), 'sol': dict()}
-            for phase in molecule['IP'].keys():
+        if solution_phase:
+            if 'IP' in molecule:
+                molecule['electrode_potentials']['oxidation'] = dict()
                 for electrode in self.ref_potentials.keys():
-                    molecule['electrode_potentials']['oxidation'][phase][
-                        electrode] \
-                        = -(molecule['IP'][phase] -
-                            self.ref_potentials[electrode])
-        if 'EA' in molecule:
-            molecule['electrode_potentials']['reduction'] = {'vacuum': dict(),
-                                                             'sol': dict()}
-            for phase in molecule['EA'].keys():
+                    molecule['electrode_potentials']['oxidation'][electrode] \
+                        = -(molecule['IP'] - self.ref_potentials[electrode])
+            if 'EA' in molecule:
+                molecule['electrode_potentials']['reduction'] = dict()
                 for electrode in self.ref_potentials.keys():
-                    molecule['electrode_potentials']['reduction'][phase][
-                        electrode] \
-                        = molecule['EA'][phase] - self.ref_potentials[electrode]
+                    molecule['electrode_potentials']['reduction'][electrode] \
+                        = molecule['EA'] - self.ref_potentials[electrode]
+        return scf
+
+    def build_molecule_solvated_properties(self, taskdocs):
+        docs = dict()
+        for td in taskdocs:
+            if td["charge"] == self.ref_charge:
+                docs["neutral"] = td
+            elif td["charge"] == self.ref_charge + 1:
+                docs["cation"] = td
+            elif td["charge"] == self.ref_charge - 1:
+                docs["anion"] = td
+        if len(docs) < 2 or ("neutral" not in docs):
+            return None
+        molecule = dict()
+        scf = self.build_molecule_ipea(docs, molecule, solution_phase=True)
         molecule['solvation_energy'] = docs["neutral"]["calculations"]["scf"][
             "energies"][-1][-1] - \
-            docs["neutral"]["calculations"]["scf_pcm"]["energies"][-1][-1]
-        molecule["svg"] = docs["neutral"]["svg"]
+            docs["neutral"]["calculations"][scf]["energies"][-1][-1]
+        return molecule
+
+    def build_molecule_vacuum_properties(self, query):
+        docs = dict()
+        for c, i in zip(["anion", "neutral", "cation"], [-1, 0, 1]):
+            query['charge'] = self.ref_charge + i
+            taskdocs = self._c.tasks.findone(query, fields=TaskKeys.fields)
+            if not taskdocs:
+                return None
+            docs[c] = taskdocs
+        if len(docs) < 2 or ("neutral" not in docs):
+            return None
+        molecule = dict()
+        self.build_molecule_ipea(docs, molecule, solution_phase=False)
+        return molecule
+
+    def build_molecule_common_properties(self, docs):
+        """Transforms task document to molecules document.
+        """
+        molecule = dict()
+        molecule["inchi_root"] = docs["inchi_root"]
+        molecule["can"] = docs["can"]
+        molecule["smiles"] = docs["smiles"]
+        molecule["elements"] = copy.deepcopy(docs["elements"])
+        molecule["nelements"] = docs["nelements"]
+        molecule["user_tags"] = copy.deepcopy(docs["user_tags"])
+        molecule["run_tags"] = copy.deepcopy(docs["run_tags"])
+        molecule["reduced_cell_formula_abc"] = docs["reduced_cell_formula_abc"]
+        molecule["implicit_solvent"] = copy.deepcopy(docs["implicit_solvent"])
+        molecule["pretty_formula"] = docs["pretty_formula"]
+        molecule["formula"] = docs["formula"]
+        molecule["pointgroup"] = docs["pointgroup"]
+        molecule["svg"] = docs["svg"]
         return molecule
 
     def _build_indexes(self):
