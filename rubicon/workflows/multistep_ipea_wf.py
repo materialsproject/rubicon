@@ -56,7 +56,8 @@ class QChemFireWorkCreator():
         spin_state = {1: "singlet", 2: "doublet", 3: "triplet"}
         return spin_state[spin_multiplicity] + " " + charge_state[charge]
 
-    def geom_fw(self, charge, spin_multiplicity, fw_id_cal, fw_id_db):
+    def geom_fw(self, charge, spin_multiplicity, fw_id_cal, fw_id_db,
+                priority=None):
         task_type = "geometry optimization"
         state_name = self.get_state_name(charge, spin_multiplicity)
         title = self.molname + " " + state_name + " " + self.dft + " " + \
@@ -90,6 +91,8 @@ class QChemFireWorkCreator():
         spec['task_type'] = task_type
         spec['charge'] = charge
         spec['spin_multiplicity'] = spin_multiplicity
+        if priority:
+            spec['_priority'] = priority
         task_name = self.molname + ' ' + state_name + ' ' + task_type
         from rubicon.firetasks.multistep_qchem_task \
             import QChemGeomOptDBInsertionTask
@@ -106,7 +109,8 @@ class QChemFireWorkCreator():
 
         return fw_geom_cal, fw_geom_db
 
-    def freq_fw(self, charge, spin_multiplicity, fw_id_cal, fw_id_db):
+    def freq_fw(self, charge, spin_multiplicity, fw_id_cal, fw_id_db,
+                priority=None):
         task_type = "vibrational frequency"
         state_name = self.get_state_name(charge, spin_multiplicity)
         title = self.molname + " " + state_name + " " + self.dft + " " +\
@@ -136,6 +140,8 @@ class QChemFireWorkCreator():
         spec['task_type'] = task_type
         spec['charge'] = charge
         spec['spin_multiplicity'] = spin_multiplicity
+        if priority:
+            spec['_priority'] = priority
         task_name = self.molname + ' ' + state_name + ' ' + task_type
         from rubicon.firetasks.multistep_qchem_task \
             import QChemFrequencyDBInsertionTask
@@ -152,8 +158,10 @@ class QChemFireWorkCreator():
         return fw_freq_cal, fw_freq_db
 
     def sp_fw(self, charge, spin_multiplicity, fw_id_cal, fw_id_db,
-              solvent_method="ief-pcm", solvent="water"):
+              solvent_method="ief-pcm", solvent="water", priority=None):
         spec = self.base_spec()
+        if priority:
+            spec['_priority'] = priority
         task_type = "single point energy"
         state_name = self.get_state_name(charge, spin_multiplicity)
         title = self.molname + " " + state_name + " " + self.dft + " " + \
