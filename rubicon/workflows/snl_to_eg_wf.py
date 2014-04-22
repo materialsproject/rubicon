@@ -48,8 +48,8 @@ def snl_to_eg_wf(snl, parameters=None):
     elif workflow_type == 'multiple solvent ipea':
         solvents = parameters.get('solvents', default_solvents)
         fws_tasks, connections = multi_solvent_ipea_fws(
-            snl.structure, molname, mission, ref_charge, spin_multiplicities,
-            solvents, DupeFinderEG(), priority, 1)
+            snl.structure, molname, mission, solvents, ref_charge,
+            spin_multiplicities, DupeFinderEG(), priority, 1)
     elif workflow_type == 'solvation energy':
         solvents = parameters.get('solvents', default_solvents)
         fws_tasks, connections = solvation_energy_fws(
