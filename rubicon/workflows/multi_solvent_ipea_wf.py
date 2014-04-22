@@ -86,9 +86,8 @@ def multi_solvent_ipea_fws(mol, name, mission, solvents, ref_charge,
     else:
         if parent_fwid:
             for pfw_id in parent_fwid:
-                links_dict[pfw_id] = nspi_cal_list + \
-                                     aspi_cal_list + \
-                                     cspi_cal_list
+                links_dict[pfw_id] = nspi_cal_list + aspi_cal_list + \
+                    cspi_cal_list
     return fireworks, links_dict
 
 
@@ -96,6 +95,6 @@ def mol_to_solvent_ipea_wf(mol, name, mission, solvents, ref_charge,
                            spin_multiplicities=(2, 1, 2), dupefinder=None,
                            priority=1, parent_fwid=None):
     fireworks, links_dict = multi_solvent_ipea_fws(
-        mol, name, mission, solvents, ref_charge, spin_multiplicities, dupefinder,
-        priority, parent_fwid)
+        mol, name, mission, solvents, ref_charge, spin_multiplicities,
+        dupefinder, priority, parent_fwid)
     return Workflow(fireworks, links_dict, name)

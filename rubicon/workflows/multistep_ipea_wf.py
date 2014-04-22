@@ -251,7 +251,8 @@ class QChemFireWorkCreator():
 
 
 def multistep_ipea_fws(mol, name, mission, ref_charge,
-                       spin_multiplicities=(2, 1, 2), dupefinder=None, priority=1,
+                       spin_multiplicities=(2, 1, 2), dupefinder=None,
+                       priority=1,
                        parent_fwid=None):
     large = False
     if len(mol) > 50:
@@ -320,7 +321,8 @@ def multistep_ipea_fws(mol, name, mission, ref_charge,
     return fireworks, links_dict
 
 
-def mol_to_ipea_wf(mol, name, mission, ref_charge, spin_multiplicities=(2, 1, 2),
+def mol_to_ipea_wf(mol, name, mission, ref_charge,
+                   spin_multiplicities=(2, 1, 2),
                    dupefinder=None, priority=1, parent_fwid=None):
     fireworks, links_dict = multistep_ipea_fws(
         mol, name, mission, ref_charge, spin_multiplicities, dupefinder,

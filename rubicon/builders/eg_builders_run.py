@@ -11,8 +11,8 @@ __author__ = 'Xiaohui Qu <xqu@lbl.gov>'
 __date__ = '1/1/14'
 
 
-
 _logname = 'eg.' + __name__
+
 
 def run(colls, args):
     """Run with information from command-line args.
@@ -39,9 +39,10 @@ def _run_one(obj):
     name = str(obj)
     _log.info("run.start builder={}".format(name))
     t0 = time.time()
+    # noinspection PyBroadException
     try:
         status = obj.run()
-    except Exception, err:
+    except:
         tb = traceback.format_exc()
         _log.error("run.end.error builder={} msg={}".format(name, tb))
         status = -1

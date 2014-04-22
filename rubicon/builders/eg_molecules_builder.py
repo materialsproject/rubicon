@@ -17,15 +17,17 @@ __status__ = "Development"
 __date__ = "1/1/14"
 
 
-
 _log = logging.getLogger('eg.' + __name__)
-
 
 
 class TaskKeys:
     """Keys we need to project from task collection to do
        the work of building the materials collection.
     """
+
+    def __init__(self):
+        pass
+
     fields = (
         'task_id', 'snlgroup_id_final', 'inchi_final', 'task_type', 'elements',
         'can', 'smiles', 'charge', 'spin_multiplicity', 'implicit_solvent',
@@ -60,7 +62,6 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         self.ref_charge = 0
         self.ref_charge_range = (-1, 0, 1)
 
-
     def run(self):
         """Run the builder.
         """
@@ -75,7 +76,6 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
             sss.extend(states)
             self._build_indexes()
         return self.combine_status(sss)
-
 
     def process_item(self, inchi_root):
         """Create and add material for a given grouping identifer.
@@ -210,7 +210,8 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         self.build_molecule_ipea(docs, molecule, solution_phase=False)
         return molecule
 
-    def build_molecule_common_properties(self, docs):
+    @staticmethod
+    def build_molecule_common_properties(docs):
         """Transforms task document to molecules document.
         """
         molecule = dict()
@@ -241,10 +242,5 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         """All database insertion should be done from this method
         """
         _log.info("Inserting Material with InChI i, ".
-            format(i=str(doc['inchi_root'])))
+                  format(i=str(doc['inchi_root'])))
         self._c.molecules.insert(doc)
-
-
-
-
-

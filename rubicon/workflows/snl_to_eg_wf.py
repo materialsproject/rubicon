@@ -31,8 +31,8 @@ def snl_to_eg_wf(snl, parameters=None):
         spec['force_snlgroup_id'] = parameters['snlgroup_id']
         del spec['snl']
     fws_all.append(FireWork(tasks, spec,
-                        name=get_slug(molname + ' -- Add to SNL database'),
-                        fw_id=1))
+                   name=get_slug(molname + ' -- Add to SNL database'),
+                   fw_id=1))
 
     default_solvents = ['diglym', 'acetonitrile', 'dmso', 'thf',
                         'dimethylamine', 'dimethoxyethane',
