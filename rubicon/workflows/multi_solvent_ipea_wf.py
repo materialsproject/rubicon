@@ -28,7 +28,8 @@ def multi_solvent_ipea_fws(mol, name, mission, solvents, ref_charge,
     charges = [ref_charge + i for i in (-1, 0, 1)]
     if len(mol) > 1:
         fw_ids = zip(* [iter(range(fwid_base + 0, fwid_base + 6))] * 2)
-        fws = (fw_creator.geom_fw(ch, spin, fwid_cal, fwid_db)
+        fws = (fw_creator.geom_fw(ch, spin, fwid_cal, fwid_db,
+                                  priority=priority+1)
                for ch, spin, (fwid_cal, fwid_db)
                in zip(charges, spin_multiplicities, fw_ids))
         (cgi_cal, cgi_db), (ngi_cal, ngi_db), (agi_cal, agi_db) = fw_ids
@@ -37,7 +38,8 @@ def multi_solvent_ipea_fws(mol, name, mission, solvents, ref_charge,
 
         if not large:
             fw_ids = zip(* [iter(range(fwid_base + 6, fwid_base + 6 + 6))] * 2)
-            fws = (fw_creator.freq_fw(ch, spin, fwid_cal, fwid_db)
+            fws = (fw_creator.freq_fw(ch, spin, fwid_cal, fwid_db,
+                                      priority=priority+1)
                    for ch, spin, (fwid_cal, fwid_db)
                    in zip(charges, spin_multiplicities, fw_ids))
             (cfi_cal, cfi_db), (nfi_cal, nfi_db), (afi_cal, afi_db) = fw_ids
