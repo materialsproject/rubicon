@@ -39,9 +39,12 @@ def snl_to_eg_wf(snl, parameters=None):
                         'dimethylaniline', 'tetraglyme']
 
     workflow_type = parameters.get('workflow', 'ipea')
+    ref_charge = parameters.get('ref_charge', 0)
+    spin_multiplicities = parameters.get('spin_multiplicities', (2, 1, 2))
     if workflow_type == 'ipea':
         fws_tasks, connections = multistep_ipea_fws(
-            snl.structure, molname, mission, DupeFinderEG(), priority, 1)
+            snl.structure, molname, mission, ref_charge, spin_multiplicities,
+            DupeFinderEG(), priority, 1)
     elif workflow_type == 'multiple solvent ipea':
         solvents = parameters.get('solvents', default_solvents)
         fws_tasks, connections = multi_solvent_ipea_fws(
