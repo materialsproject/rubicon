@@ -168,7 +168,7 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
                 molecule['electrode_potentials']['oxidation'] = dict()
                 for electrode in self.ref_potentials.keys():
                     molecule['electrode_potentials']['oxidation'][electrode] \
-                        = -(molecule['IP'] - self.ref_potentials[electrode])
+                        = molecule['IP'] - self.ref_potentials[electrode]
             if 'EA' in molecule:
                 molecule['electrode_potentials']['reduction'] = dict()
                 for electrode in self.ref_potentials.keys():
