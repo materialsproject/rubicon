@@ -77,7 +77,7 @@ def multi_solvent_ipea_fws(mol, name, mission, solvents, ref_charge,
         if large:
             links_dict.update({cgi_db: cspi_cal_list, ngi_db: nspi_cal_list,
                                agi_db: aspi_cal_list})
-            links_dict[nfi_db].extend([cgi_cal, agi_cal])
+            links_dict[ngi_db].extend([cgi_cal, agi_cal])
         else:
             links_dict.update({cfi_db: cspi_cal_list, nfi_db: nspi_cal_list,
                                afi_db: aspi_cal_list})
