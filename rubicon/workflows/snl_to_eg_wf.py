@@ -4,6 +4,7 @@ from pymatgen import Composition
 from rubicon.dupefinders.dupefinder_eg import DupeFinderEG
 from rubicon.firetasks.egsnl_tasks import AddEGSNLTask
 from rubicon.utils.snl.egsnl import EGStructureNL, get_meta_from_structure
+from rubicon.workflows.multi_solvent_ipea_wf import multi_solvent_ipea_fws
 from rubicon.workflows.multistep_ipea_wf import multistep_ipea_fws
 from rubicon.workflows.solvation_energy_wf import solvation_energy_fws
 
@@ -30,15 +31,26 @@ def snl_to_eg_wf(snl, parameters=None):
         spec['force_snlgroup_id'] = parameters['snlgroup_id']
         del spec['snl']
     fws_all.append(FireWork(tasks, spec,
-                        name=get_slug(molname + ' -- Add to SNL database'),
-                        fw_id=1))
+                   name=get_slug(molname + ' -- Add to SNL database'),
+                   fw_id=1))
+
+    default_solvents = ['diglym', 'acetonitrile', 'dmso', 'thf',
+                        'dimethylamine', 'dimethoxyethane',
+                        'dimethylaniline', 'tetraglyme']
 
     workflow_type = parameters.get('workflow', 'ipea')
+    ref_charge = parameters.get('ref_charge', 0)
+    spin_multiplicities = parameters.get('spin_multiplicities', (2, 1, 2))
     if workflow_type == 'ipea':
         fws_tasks, connections = multistep_ipea_fws(
-            snl.structure, molname, mission, DupeFinderEG(), priority, 1)
+            snl.structure, molname, mission, ref_charge, spin_multiplicities,
+            DupeFinderEG(), priority, 1)
+    elif workflow_type == 'multiple solvent ipea':
+        solvents = parameters.get('solvents', default_solvents)
+        fws_tasks, connections = multi_solvent_ipea_fws(
+            snl.structure, molname, mission, solvents, ref_charge,
+            spin_multiplicities, DupeFinderEG(), priority, 1)
     elif workflow_type == 'solvation energy':
-        default_solvents = ['diglym', 'acetonitrile', 'dmso', 'thf']
         solvents = parameters.get('solvents', default_solvents)
         fws_tasks, connections = solvation_energy_fws(
             snl.structure, molname, mission, DupeFinderEG(), priority, 1,

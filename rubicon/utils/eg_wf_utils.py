@@ -31,6 +31,10 @@ def get_eg_dir_loc(m_dir):
                 scr = os.environ[scr_key]
                 all_locs.append(os.path.join(scr, loc))
 
+    if "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"] == "edison":
+        all_locs.append("/scratch3/scratchdirs/xhqu/calculations/prod")
+        all_locs.append("/scratch3/scratchdirs/xhqu/calculations/test")
+
     grandpa_dir, parent_dir = get_eg_block_part(m_dir)
 
     for preamble in all_locs:

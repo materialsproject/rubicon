@@ -9,7 +9,7 @@ import sys
 from custodian.qchem.handlers import QChemErrorHandler
 from custodian.qchem.jobs import QchemJob
 from fireworks.core.firework import FireTaskBase, FWAction
-from fireworks.core.fw_config import FWData
+from fireworks.fw_config import FWData
 from fireworks.utilities.fw_serializers import FWSerializable
 
 from custodian.custodian import Custodian
