@@ -7,6 +7,7 @@ import logging
 import datetime
 from pymongo import ASCENDING
 from rubicon.builders import eg_shared
+from rubicon.workflows.multistep_ipea_wf import QChemFireWorkCreator
 
 __author__ = "Xiaohui Qu"
 __copyright__ = "Copyright 2012-2013, The Electrolyte Genome Project"
@@ -66,10 +67,15 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         """Run the builder.
         """
         sss = []
-        _log.info("Getting distinct root INCHIs")
-        inchi_root = self._c.tasks.distinct('inchi_root')
         for ch in self.ref_charge_range:
             self.ref_charge = ch
+            charge_state = QChemFireWorkCreator.get_state_name(ch, 1).split()[1]
+            _log.info("Getting distinct root INCHIs for {}s".format(charge_state))
+            inchi_root = self._c.tasks.find(
+                spec={"user_tags.mission": # read the initial charge state from mission
+                      {"$regex": ".*" + charge_state + ".*", "$options": "i"}},
+                fields='inchi_root')\
+                .distinct('inchi_root')
             map(self.add_item, inchi_root)
             _log.info("Beginning analysis")
             states = self.run_parallel()
