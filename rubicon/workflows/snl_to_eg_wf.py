@@ -41,20 +41,23 @@ def snl_to_eg_wf(snl, parameters=None):
     workflow_type = parameters.get('workflow', 'ipea')
     ref_charge = parameters.get('ref_charge', 0)
     spin_multiplicities = parameters.get('spin_multiplicities', (2, 1, 2))
+    use_tags = {"initial_charge": ref_charge}
     if workflow_type == 'ipea':
         fws_tasks, connections = multistep_ipea_fws(
-            snl.structure, molname, mission, ref_charge, spin_multiplicities,
-            DupeFinderEG(), priority, 1)
+            mol=snl.structure, name=molname, mission=mission, ref_charge=ref_charge,
+            spin_multiplicities=spin_multiplicities, dupefinder=DupeFinderEG(), priority=priority, parent_fwid=1,
+            additional_user_tags=use_tags)
     elif workflow_type == 'multiple solvent ipea':
         solvents = parameters.get('solvents', default_solvents)
         fws_tasks, connections = multi_solvent_ipea_fws(
-            snl.structure, molname, mission, solvents, ref_charge,
-            spin_multiplicities, DupeFinderEG(), priority, 1)
+            mol=snl.structure, name=molname, mission=mission, solvents=solvents, ref_charge=ref_charge,
+            spin_multiplicities=spin_multiplicities, dupefinder=DupeFinderEG(), priority=priority, parent_fwid=1,
+            additional_user_tags=use_tags)
     elif workflow_type == 'solvation energy':
         solvents = parameters.get('solvents', default_solvents)
         fws_tasks, connections = solvation_energy_fws(
-            snl.structure, molname, mission, DupeFinderEG(), priority, 1,
-            solvents)
+            mol=snl.structure, name=molname, mission=mission, dupefinder=DupeFinderEG(), priority=priority,
+            parent_fwid=1, solvents=solvents, additional_user_tags=use_tags)
     else:
         raise ValueError('Workflow "{}" is not supported yet'.
                          format(workflow_type))

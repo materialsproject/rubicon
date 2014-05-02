@@ -3,15 +3,14 @@ from fireworks import Workflow
 from rubicon.workflows.multistep_ipea_wf import QChemFireWorkCreator
 
 
-def multi_solvent_ipea_fws(mol, name, mission, solvents, ref_charge,
-                           spin_multiplicities=(2, 1, 2),
-                           dupefinder=None, priority=1, parent_fwid=None,):
+def multi_solvent_ipea_fws(mol, name, mission, solvents, ref_charge, spin_multiplicities=(2, 1, 2),
+                           dupefinder=None, priority=1, parent_fwid=None, additional_user_tags=None):
     large = False
     if len(mol) > 50:
         large = True
     fw_creator = QChemFireWorkCreator(mol=mol, molname=name, mission=mission,
                                       dupefinder=dupefinder,
-                                      priority=priority, large=large)
+                                      priority=priority, large=large, additional_user_tags)
     fwid_base = 1
     if parent_fwid:
         if not (isinstance(parent_fwid, int) or isinstance(parent_fwid, list)):
@@ -93,10 +92,9 @@ def multi_solvent_ipea_fws(mol, name, mission, solvents, ref_charge,
     return fireworks, links_dict
 
 
-def mol_to_solvent_ipea_wf(mol, name, mission, solvents, ref_charge,
-                           spin_multiplicities=(2, 1, 2), dupefinder=None,
-                           priority=1, parent_fwid=None):
+def mol_to_solvent_ipea_wf(mol, name, mission, solvents, ref_charge, spin_multiplicities=(2, 1, 2), dupefinder=None,
+                           priority=1, parent_fwid=None, additional_user_tags=None):
     fireworks, links_dict = multi_solvent_ipea_fws(
-        mol, name, mission, solvents, ref_charge, spin_multiplicities,
-        dupefinder, priority, parent_fwid)
+        mol, name, mission, solvents, ref_charge, spin_multiplicities, dupefinder, priority, parent_fwid,
+        additional_user_tags)
     return Workflow(fireworks, links_dict, name)
