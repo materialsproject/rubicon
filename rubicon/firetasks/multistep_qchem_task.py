@@ -260,7 +260,8 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                     'offending_fwid': offending_fwid})
         molname = d['user_tags']['molname']
         mission = d['user_tags']['mission']
-        additional_user_tags = {"img_freq_eli": img_freq_eli}
+        additional_user_tags = {"img_freq_eli": img_freq_eli,
+                                "initial_charge": fw_spec["user_tags"]["initial_charge"]}
         priority = fw_spec['_priority']
         old_snl = EGStructureNL.from_dict(d['snl_initial'])
         history = old_snl.history
