@@ -10,7 +10,7 @@ def multi_solvent_ipea_fws(mol, name, mission, solvents, ref_charge, spin_multip
         large = True
     fw_creator = QChemFireWorkCreator(mol=mol, molname=name, mission=mission,
                                       dupefinder=dupefinder,
-                                      priority=priority, large=large, additional_user_tags)
+                                      priority=priority, large=large, additional_user_tags=additional_user_tags)
     fwid_base = 1
     if parent_fwid:
         if not (isinstance(parent_fwid, int) or isinstance(parent_fwid, list)):
