@@ -71,11 +71,12 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
             self.ref_charge = ch
             charge_state = QChemFireWorkCreator.get_state_name(ch, 1).split()[1]
             _log.info("Getting distinct root INCHIs for {}s".format(charge_state))
-            inchi_root = self._c.tasks.find(
-                spec={"user_tags.mission": # read the initial charge state from mission
-                      {"$regex": ".*" + charge_state + ".*", "$options": "i"}},
-                fields='inchi_root')\
-                .distinct('inchi_root')
+            if ch == 0:
+                spec = {"$or": [{"user_tags.initial_charge": 0},
+                                {"user_tags.initial_charge": {"$exists": False}}]}
+            else:
+                spec = {"user_tags.initial_charge": ch}
+            inchi_root = self._c.tasks.find(spec=spec, fields='inchi_root').distinct('inchi_root')
             map(self.add_item, inchi_root)
             _log.info("Beginning analysis")
             states = self.run_parallel()
