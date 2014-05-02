@@ -132,7 +132,6 @@ class DictLammpsInputSet():
                 "@class": self.__class__.__name__,
                 "parajson": self.parajson}
 
-
     @classmethod
     def from_dict(cls, d):
         return DictLammpsInputSet(parajson=d["parajson"])

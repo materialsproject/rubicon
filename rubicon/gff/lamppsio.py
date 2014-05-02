@@ -12,31 +12,17 @@ __author__ = 'navnidhirajput'
 
 class LmpInput():
     """
-    write input file for lammps
+    write lammps data input file
     """
 
     def __init__(self):
-
         self.lines = []
 
 
-    def write_data_file(self, basename=None):
-        """Write LAMMPS data file using the specified file basename. Return
-        complete filename."""
-
-        with open("mol.data", 'w') as f:
-            f.write()
-
-
-    def get_data_file(self):
-        """Organize, format, and return a LAMMPS data (forcefield) file.
+    def set_coeff(self, gff, top, pmr):
         """
-
-        # create LAMMPS data file
-        pass
-
-
-    def set_coeff(self, gff, top, pmr, my_ant):
+        give the force field, topology and box size information
+        """
 
         lines = []
         num_mol = pmr.param_list[0]['number'] + pmr.param_list[1]['number']
@@ -47,12 +33,12 @@ class LmpInput():
 
         for k, v in gff.dihedrals.iteritems():
             num_dih += len(v)
-        for k, v in my_ant.topdihedralff.iteritems():
+        for k, v in top.topdihedralff.iteritems():
             num_total_dih += len(v[1])
 
         for k, v in gff.imdihedrals.iteritems():
             num_imdih += len(v)
-        for k, v in my_ant.topimdihedralff.iteritems():
+        for k, v in top.topimdihedralff.iteritems():
             num_total_imdih += len(v[1])
 
         if gff is not None:
@@ -61,7 +47,6 @@ class LmpInput():
             lines.append("{} {}".format(len(gff.masses), "atom type"))
             lines.append("{} {}".format(len(gff.bonds), "bond type"))
             lines.append("{} {}".format(len(gff.angles), "angle type"))
-
             lines.append("{} {}".format((num_dih), "dihedral type"))
             lines.append(
                 "{} {} {}".format(len(gff.imdihedrals), "improper type", '\n'))
@@ -136,18 +121,18 @@ class LmpInput():
                 lines.append('{} {}'.format('Imp Dihedral Coeffs', '\n'))
                 for i, v in enumerate(gff.imdihedrals.values()):
                     lines.append('{} {} {} {} {}'.format(i + 1, v[0], v[1], '#',
-                                 gff.imdihedrals.keys()[i][0],
-                                 gff.imdihedrals.keys()[i][1],
-                                 gff.imdihedrals.keys()[i][2],
-                                 gff.imdihedrals.keys()[i][3]))
+                                gff.imdihedrals.keys()[i][0],
+                                gff.imdihedrals.keys()[i][1],
+                                gff.imdihedrals.keys()[i][2],
+                                gff.imdihedrals.keys()[i][3]))
                 lines.append('\n')
         self.lines.extend(lines)
         return '\n'.join(lines)
 
 
-    def set_atom(self, pmr, gff, my_ant):
+    def set_atom(self, pmr, gff):
         """
-        TODO
+        set the Atoms section in lammps data file
         """
         lines = []
         atom_type_index = {}
@@ -168,24 +153,24 @@ class LmpInput():
                 mol_index += 1
                 #iterate over atoms in every molecule
                 d = {}
-                for k, v in enumerate(mol_coords):
-
+                for k, v in enumerate(mol_coords):#
                     lines.append(
-                    '{}  {}  {}  {}  {}  {} {} {}  {} {}'.format(k + i + 1,
-                     mol_index,atom_type_index[my_ant.atom_index_gaff[k + 1]],
-                     v[0], v[1],v[2], '#', mol_index,
-                     my_ant.atom_index_gaff[k + 1],my_ant.atom_index[k + 1]))
-                    d[my_ant.atom_index[k + 1]] = k + i + 1
+                        '{}  {}  {}  {}  {}  {} {} {}  {} {}'.format(k + i + 1,
+                         mol_index,atom_type_index[gff.atom_index_gaff
+                            [k + 1]],v[0], v[1],v[2], '#',mol_index,
+                            gff.atom_index_gaff[k + 1],
+                            gff.atom_index[k + 1]))
+
+                    d[gff.atom_index[k + 1]] = k + i + 1
                 i += num_atoms
                 self.box_mol_index.append(d)
-
         self.lines.extend(lines)
         return '\n'.join(lines)
 
 
-    def set_bonds(self, pmr, gff, top, my_ant):
+    def set_bonds(self, pmr, gff, top):
         """
-        TODO
+        set the Bonds section in lammps data file
         """
 
         lines = []
@@ -200,27 +185,31 @@ class LmpInput():
         for mol, parm in zip(pmr.mols, pmr.param_list):
             num_atoms = len(mol)
             num_this_mol = parm['number']
-            #iterate over first molecule
+            #iterate every molecule of molecule type
             for imol in range(num_this_mol):
                 mol_bonds = top.bonds[i:i + num_atoms]
+                #print "molbonds",mol_bonds
                 mol_index += 1
                 #iterate over bonds in first molecule
-                for k, v in enumerate(top.bonds):
-                    a = my_ant.atom_gaff[top.bonds[k][0]]
-                    b = my_ant.atom_gaff[top.bonds[k][1]]
+                for k, v in enumerate(mol_bonds):
+                    #print "===",k,v
+                    a = gff.atom_gaff[top.bonds[k][0]]
+                    b = gff.atom_gaff[top.bonds[k][1]]
+
                     bond_label = tuple(sorted([a, b]))
+
                     lines.append(
                         '{}  {}  {}  {}  {}  {}  {}  {}'.format(i + k + 1,
-                        bond_type_index[bond_label],self.box_mol_index[0][v[0]],
-                        self.box_mol_index[0][v[1]],'#', mol_index,
+                        bond_type_index[bond_label],self.box_mol_index[imol][v[0]],
+                        self.box_mol_index[imol][v[1]],'#', mol_index,
                         top.bonds[k][0],top.bonds[k][1]))
                 i += len(top.bonds)
         self.lines.extend(lines)
         return '\n'.join(lines)
 
-    def set_angles(self, pmr, gff,top, my_ant):
+    def set_angles(self, pmr, gff, top):
         """
-        TODO
+        set the Angles section in lammps data file
         """
         lines = []
         angle_type_index = {}
@@ -240,9 +229,9 @@ class LmpInput():
                 mol_index += 1
                 #iterate over bonds in first molecule
                 for k, v in enumerate(top.angles):
-                    a = my_ant.atom_gaff[top.angles[k][0]]
-                    b = my_ant.atom_gaff[top.angles[k][1]]
-                    c = my_ant.atom_gaff[top.angles[k][2]]
+                    a = gff.atom_gaff[top.angles[k][0]]
+                    b = gff.atom_gaff[top.angles[k][1]]
+                    c = gff.atom_gaff[top.angles[k][2]]
                     angle_label = tuple(sorted([a, b, c]))
                     lines.append('{}  {}  {}  {}  {}  {}  {}  {}  {}  {}'
                     .format(i + k + 1, angle_type_index[angle_label],
@@ -256,9 +245,9 @@ class LmpInput():
         self.lines.extend(lines)
         return '\n'.join(lines)
 
-    def set_dihedrals(self, pmr, gff, top, my_ant):
+    def set_dihedrals(self, pmr, gff, top):
         """
-        TODO
+        set the Dihedrals section in lammps data file
         """
         lines = []
         dihedral_type_index = {}
@@ -279,15 +268,16 @@ class LmpInput():
                 mol_index += 1
                 l += 1
                 #iterate over bonds in first molecule
-                for k, v in my_ant.topdihedralff.iteritems():
+                for k, v in top.topdihedralff.iteritems():
+                #for k, v in enumerate(top.dihedrals):
                     A = k.split()[0]
                     B = k.split()[1]
                     C = k.split()[2]
                     D = k.split()[3]
-                    a = my_ant.atom_gaff[k.split()[0]]
-                    b = my_ant.atom_gaff[k.split()[1]]
-                    c = my_ant.atom_gaff[k.split()[2]]
-                    d = my_ant.atom_gaff[k.split()[3]]
+                    a = gff.atom_gaff[k.split()[0]]
+                    b = gff.atom_gaff[k.split()[1]]
+                    c = gff.atom_gaff[k.split()[2]]
+                    d = gff.atom_gaff[k.split()[3]]
                     dihedral_label = (a, b, c, d)
                     if dihedral_label[0] > dihedral_label[3]:
                         dihedral_label = tuple(reversed(list(dihedral_label)))
@@ -307,9 +297,9 @@ class LmpInput():
         return '\n'.join(lines)
 
 
-    def set_imdihedrals(self, pmr, gff, top, my_ant):
+    def set_imdihedrals(self, pmr, gff, top):
         """
-        TODO
+        set the Improper Dihedral section in lammps data file
         """
 
         lines = []
@@ -330,10 +320,10 @@ class LmpInput():
                 #iterate over improper dihedrals in first molecule
                 for k, v in enumerate(top.imdihedrals):
                     j += 1
-                    a = my_ant.atom_gaff[top.imdihedrals[k][0]]
-                    b = my_ant.atom_gaff[top.imdihedrals[k][1]]
-                    c = my_ant.atom_gaff[top.imdihedrals[k][2]]
-                    d = my_ant.atom_gaff[top.imdihedrals[k][3]]
+                    a = gff.atom_gaff[top.imdihedrals[k][0]]
+                    b = gff.atom_gaff[top.imdihedrals[k][1]]
+                    c = gff.atom_gaff[top.imdihedrals[k][2]]
+                    d = gff.atom_gaff[top.imdihedrals[k][3]]
                     imdihedral_label = tuple([a, b, c, d])
                     lines.append(
                         '{}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}'
@@ -348,23 +338,33 @@ class LmpInput():
         self.lines.extend(lines)
         return '\n'.join(lines)
 
-    def run(self,mols=[],pmr=None,ant=None):
+    def run(self, mols=[], pmr=None, ant=None):
+        """
+        generate lammps data input file
+        """
         my_lammps_list = []
-        for mol in mols:
-            my_lampps = LmpInput()
-            if ant is None:
+        if ant is None:
                 ant = AntechamberRunner(mols)
-                my_gff, gff_list,top=ant._run_antechamber('mol.pdb',mols)
+                gff_list, top_list = ant._run_antechamber('mol.pdb', mols)
+                #print "MYGFF",my_gff.bonds
+                #print "mygfflist",gff_list[0].bonds
+        #print "top_list",top_list[1].bonds
+        #print "GFFLIST",gff_list[0].bonds
+        for mol, gff,top in zip(mols, gff_list,top_list):
+            print "GFFLIST",gff.bonds
+            print "TOPBONDS",top.bonds
+            my_lampps = LmpInput()
             if pmr is None:
-                pmr = PackmolRunner([mol, mol], [
-                        {"number": 1, "inside box": [0., 0., 0., 40., 40., 40.]},
-                        {"number": 2}])
-            my_lammps_list.append(my_lampps.set_coeff(my_gff, top, pmr, ant))
-            my_lammps_list.append(my_lampps.set_atom(pmr, my_gff, ant))
-            my_lammps_list.append(my_lampps.set_bonds(pmr, my_gff, top,ant))
-            my_lammps_list.append(my_lampps.set_angles(pmr, my_gff, top, ant))
-            my_lammps_list.append(my_lampps.set_dihedrals(pmr, my_gff, top, ant))
-            my_lammps_list.append(my_lampps.set_imdihedrals(pmr, my_gff, top, ant))
+                pmr = PackmolRunner\
+                        ([mol, mol, mol], [{"number":1,"inside box":[0.,0.,0.,40.,40.,40.]}, {"number":1},{"number":1}])
+            my_lammps_list.append(my_lampps.set_coeff(gff, top, pmr))
+            my_lammps_list.append(my_lampps.set_atom(pmr, gff))
+            my_lammps_list.append(my_lampps.set_bonds(pmr, gff, top))
+            my_lammps_list.append(my_lampps.set_angles(pmr, gff, top))
+            my_lammps_list.append(
+                my_lampps.set_dihedrals(pmr, gff, top))
+            my_lammps_list.append(
+                my_lampps.set_imdihedrals(pmr, gff, top))
 
         return '\n'.join(my_lammps_list)
 

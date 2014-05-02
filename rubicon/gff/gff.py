@@ -33,8 +33,7 @@ class Gff(MSONable):
     """
 
 
-    def __init__(self, bonds={}, angles={}, dihedrals=defaultdict(dict),
-                 imdihedrals={}, vdws={}, masses={}):
+    def __init__(self, bonds, angles, dihedrals, imdihedrals, vdws, masses):
 
         self.bonds = bonds
         self.angles = angles
@@ -42,9 +41,13 @@ class Gff(MSONable):
         self.imdihedrals = imdihedrals
         self.vdws = vdws
         self.masses = masses
+        self.atom_index=dict()
+        self.atom_index_gaff=dict()
+        self.atom_gaff=dict()
 
 
-    def read_forcefield_para(self, filename=None):
+    @classmethod
+    def from_forcefield_para(self, filename=None):
 
         bonds = dict()
         angles = dict()
@@ -145,12 +148,38 @@ class Gff(MSONable):
                     epsilon = abs(float(line[22:28]))
                     vdws[vdw_type] = (sigma, epsilon)
 
-            self.masses.update(masses)
-            self.bonds.update(bonds)
-            self.angles.update(angles)
-            self.dihedrals.update(dihedrals)
-            self.imdihedrals.update(imdihedrals)
-            self.vdws.update(vdws)
+            return Gff(bonds,angles,dihedrals,imdihedrals,vdws,masses)
+
+
+    def read_atom_index(self,filename=None):
+
+        with open(filename) as f:
+
+            for line in f.readlines():
+                token = line.split()
+                if token[0]=='ATOM':
+                    index=int(token[1])
+                    atom_name=token[2]
+                    atom_gaff=token[9]
+                    self.atom_index[index]=atom_name
+
+                    self.atom_index_gaff[index]=atom_gaff
+
+
+
+
+    def read_atomType(self,filename=None):
+
+        with open(filename) as f:
+
+            for line in f.readlines():
+                token = line.split()
+                if token[0]=='ATOM':
+                    atom_name=token[2]
+                    gaff_name=token[-1]
+                    self.atom_gaff[atom_name]=gaff_name
+            self.atom_gaff.update(self.atom_gaff)
+        self.num_types = len(set(self.atom_gaff.values()))
 
 
     @property
