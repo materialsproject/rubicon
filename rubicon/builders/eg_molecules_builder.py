@@ -6,6 +6,7 @@ import copy
 import logging
 import datetime
 from pymongo import ASCENDING
+import sys
 from rubicon.builders import eg_shared
 from rubicon.workflows.multistep_ipea_wf import QChemFireWorkCreator
 
@@ -62,6 +63,11 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         self._c.molecules.remove()
         self.ref_charge = 0
         self.ref_charge_range = (-1, 0, 1)
+        logging.basicConfig(level=logging.INFO)
+        _log.setLevel(logging.INFO)
+        sh = logging.StreamHandler(stream=sys.stdout)
+        sh.setLevel(getattr(logging, 'INFO'))
+        _log.addHandler(sh)
 
     def run(self):
         """Run the builder.
