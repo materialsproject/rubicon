@@ -1,22 +1,18 @@
-from rubicon.gff.antechamberio import AntechamberRunner
+#from rubicon.gff.antechamberio import AntechamberRunner
 
 
 class AtomTyper():
-    def init(self, filename):
+
+    def get_ffmol(self, mols):
         pass
 
-    def type_atom(self):
-        pass
-
-    def get_atom_types(self):
-        pass
-
+"""
 class AntechamberAtomTyper(AtomTyper):
     def __init__(self, filename):
         self.atom_types
         pass
 
-    def type_atom(self,mols):
+    def get_ffmol(self, mols):
         ant = AntechamberRunner(mols)
         gff_list, top_list = ant._run_antechamber('mol.pdb', mols)
         #run antechamber
@@ -55,18 +51,18 @@ class AntechamberAtomTyper(AtomTyper):
 
 
     def _convert_to_pdb(self, molecule, filename=None):
-        """
+
         generate pdb file for a given molecule
-        """
+
         write_mol(molecule, filename)
 
     def _run_parmchk(self, filename=None):
-        """
+
         run parmchk using ANTECHAMBER_AC.AC file
 
         Args:
             filename = pdb file of the molecule
-        """
+
         command_parmchk = (
         'parmchk -i ' + filename + ' -f ac -o mol.frcmod -a Y')
         return_cmd = subprocess.call(shlex.split(command_parmchk))
@@ -74,12 +70,12 @@ class AntechamberAtomTyper(AtomTyper):
 
 
     def _run_antechamber(self, filename=None, mols=[]):
-        """
+
         generate and run antechamber command for specified pdb file
 
         Args:
             filename = pdb file of the molecule
-        """
+
         scratch = tempfile.gettempdir()
         return_cmd = None
 
@@ -132,3 +128,4 @@ class AntechamberAtomTyper(AtomTyper):
             #print "TOPLIST0",top_list[2].bonds
 
             return  gff_list,top_list
+"""

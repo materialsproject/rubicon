@@ -1,4 +1,5 @@
 import copy
+from rubicon.gff.atomtyper import AtomTyper
 
 __author__ = 'navnidhirajput'
 
@@ -19,24 +20,22 @@ from rubicon.gff.topology import TopMol
 ANTECHAMBER_DEBUG = False
 
 
-class AntechamberRunner():
+class AntechamberRunner(AtomTyper):
     """
     A wrapper for AntechamberRunner software
 
     """
 
-    def __init__(self, molecule=None):
-        """
-        Args:
-        molecule: The input molecule. Default is None
-        """
-        self.molecule = molecule
+    def __init__(self, filename=None):
+        self.filename = filename
 
     def _convert_to_pdb(self, molecule, filename=None):
         """
         generate pdb file for a given molecule
         """
+
         write_mol(molecule, filename)
+
 
     def _run_parmchk(self, filename=None):
         """
@@ -51,15 +50,20 @@ class AntechamberRunner():
         return return_cmd
 
 
-    def _run_antechamber(self, filename=None, mols=[]):
+    def get_ffmol(self,mols,filename=None):
         """
         generate and run antechamber command for specified pdb file
 
         Args:
             filename = pdb file of the molecule
         """
+
+
         scratch = tempfile.gettempdir()
         return_cmd = None
+        #filename = self.filename
+
+
 
         with ScratchDir(scratch,
                         copy_to_current_on_exit=ANTECHAMBER_DEBUG) as d:
@@ -67,6 +71,8 @@ class AntechamberRunner():
             top_list=[]
 
             for mol in mols:
+
+
 
                 self._convert_to_pdb(mol, 'mol.pdb')
                 command = (
@@ -87,32 +93,32 @@ class AntechamberRunner():
                 my_gff = Gff.from_forcefield_para('mol.frcmod')
                 my_gff.read_atom_index('ANTECHAMBER_AC.AC')
                 my_gff.read_atomType('ANTECHAMBER_AC.AC')
-                print "+++++++",my_gff.atom_index_gaff
+                #print "+++++++",my_gff.atom_index_gaff
 
 #                self.read_atomType('ANTECHAMBER_AC.AC')
                 #my_gff = self._parse_output()
                 #self._get_ff_bonds(my_gff.bonds, top.bonds, self.atom_gaff)
                 #self._get_ff_angles(my_gff.angles, top.angles,
                 #                    self.atom_gaff)
-                #self._get_ff_dihedrals(my_gff.dihedrals, top.dihedrals,
-                #                       self.atom_gaff)
+               # top._get_ff_dihedrals(my_gff.dihedrals, top.dihedrals,
+                #                       gff.atom_gaff)
                 #self._get_ff_imdihedrals(my_gff.imdihedrals, top.imdihedrals,
                 #                         self.atom_gaff)
-                print "MYGFFBONDS",my_gff.bonds
+               # print "MYGFFBONDS",my_gff.bonds
 
 
                 #gff_list.append(copy.deepcopy(my_gff))
-                print '*', type(my_gff)
-                print '**', gff_list
+               # print '*', type(my_gff)
+               # print '**', gff_list
                 gff_list.append(my_gff)
-                print '***', [x.bonds for x in gff_list]
+               # print '***', [x.bonds for x in gff_list]
                 #print "GFFLIST0",gff_list[0].bonds,gff_list
                 top_list.append(top)
 
             #print "GFFLIST0",gff_list[0].bonds
             #print "TOPLIST0",top_list[2].bonds
 
-            return  gff_list,top_list
+            return  gff_list, top_list
 
 
 

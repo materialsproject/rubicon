@@ -342,17 +342,19 @@ class LmpInput():
         """
         generate lammps data input file
         """
+
         my_lammps_list = []
         if ant is None:
+
                 ant = AntechamberRunner(mols)
-                gff_list, top_list = ant._run_antechamber('mol.pdb', mols)
+                gff_list, top_list = ant.get_ffmol(mols,'mol.pdb')
                 #print "MYGFF",my_gff.bonds
                 #print "mygfflist",gff_list[0].bonds
         #print "top_list",top_list[1].bonds
         #print "GFFLIST",gff_list[0].bonds
         for mol, gff,top in zip(mols, gff_list,top_list):
-            print "GFFLIST",gff.bonds
-            print "TOPBONDS",top.bonds
+            #print "GFFLIST",gff.bonds
+            print "TOPBONDS",top.dihedrals
             my_lampps = LmpInput()
             if pmr is None:
                 pmr = PackmolRunner\

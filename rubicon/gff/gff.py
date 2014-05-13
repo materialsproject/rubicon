@@ -47,7 +47,7 @@ class Gff(MSONable):
 
 
     @classmethod
-    def from_forcefield_para(self, filename=None):
+    def from_forcefield_para(cls, filename=None):
 
         bonds = dict()
         angles = dict()
