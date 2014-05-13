@@ -161,9 +161,13 @@ class Gff(MSONable):
                     index=int(token[1])
                     atom_name=token[2]
                     atom_gaff=token[9]
+                    atom_name=token[2]
+                    gaff_name=token[-1]
+                    self.atom_gaff[atom_name]=gaff_name
                     self.atom_index[index]=atom_name
-
                     self.atom_index_gaff[index]=atom_gaff
+            self.atom_gaff.update(self.atom_gaff)
+        self.num_types = len(set(self.atom_gaff.values()))
 
 
 

@@ -92,7 +92,7 @@ class AntechamberRunner(AtomTyper):
 
                 my_gff = Gff.from_forcefield_para('mol.frcmod')
                 my_gff.read_atom_index('ANTECHAMBER_AC.AC')
-                my_gff.read_atomType('ANTECHAMBER_AC.AC')
+                #my_gff.read_atomType('ANTECHAMBER_AC.AC')
                 #print "+++++++",my_gff.atom_index_gaff
 
 #                self.read_atomType('ANTECHAMBER_AC.AC')
