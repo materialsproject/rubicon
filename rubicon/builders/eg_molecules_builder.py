@@ -7,6 +7,7 @@ import logging
 import datetime
 from pymongo import ASCENDING
 import sys
+import re
 from rubicon.builders import eg_shared
 from rubicon.workflows.multistep_ipea_wf import QChemFireWorkCreator
 
@@ -39,6 +40,17 @@ class TaskKeys:
         'calculations.scf.energies', 'calculations.scf_pcm.energies',
         'calculations.scf_sm12mk.energies',
         'formula', 'task_id_deprecated', 'svg', 'xyz')
+
+    base_molecules = ("quinoxaline", "anthrachinon", "thiane", "viologen")
+    lei_1_group_pattern = re.compile('(?P<base_mol>\w+)_wfs_(?P<position>\d+)_'
+                                     '(?P<group_name>\w+)')
+    lei_2_group_pattern = re.compile('(?P<base_mol>\w+)_(?P<pos1>\d+)_'
+                                     '(?P<group1>\w+)_(?P<pos2>\d+)(?P<group2>\w+)')
+    literal_to_formula_group_name = {"nitro": "-NO2", "cyano": "-CN", "trichloromethyl": "-CCl3", "carboxyl": "-COOH",
+                                     "fluoro": "-F", "ethynyl": "-CCH", "methyl": "-CH3", "ethyl": "-CH2CH3",
+                                     "hydroxyl": "-OH", "vinyl": "-C=CH2", "methoxyl": "-OCH3",
+                                     "ethanamide": "-NHC(O)CH3", "benzene": "-C5H6", "amine": "-NH2",
+                                     "methylamine": "-NHCH3", "dimethylamine": "-N(CH3)2"}
 
 
 class MoleculesBuilder(eg_shared.ParallelBuilder):
@@ -129,6 +141,11 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
             molecule.update(d)
         else:
             return 2
+        if d and len(d) > 0:
+            molecule.update(d)
+        else:
+            return 2
+        d = self.build_molecule_structure_properties(docs)
         molecule['created_at'] = datetime.datetime.now()
         molecule['updated_at'] = datetime.datetime.now()
         self._insert_molecule(molecule)
@@ -238,6 +255,29 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         molecule["formula"] = docs["formula"]
         molecule["pointgroup"] = docs["pointgroup"]
         molecule["svg"] = docs["svg"]
+        return molecule
+
+    @staticmethod
+    def build_molecule_structure_properties(docs):
+        molecule = dict()
+        if "molname" in docs["user_tags"]:
+            molname = docs["user_tags"]
+            m = TaskKeys.lei_1_group_pattern.search(molname)
+            if m:
+                base_mol = m.group("base_mol")
+                literal_group_name = m.group("group_name")
+                formula_group_name = TaskKeys.literal_to_formula_group_name[literal_group_name]
+                molecule["base_molecule"] = base_mol
+                molecule["functional_groups"] = [formula_group_name]
+            m = TaskKeys.lei_2_group_pattern.search(molname)
+            if m:
+                base_mol = m.group("base_mol")
+                literal_group1 = m.group("group1")
+                literal_group2 = m.group("group2")
+                formula_group1 = TaskKeys.literal_to_formula_group_name[literal_group1]
+                formula_group2 = TaskKeys.literal_to_formula_group_name[literal_group2]
+                molecule["base_molecule"] = base_mol
+                molecule["functional_groups"] = [formula_group1, formula_group2]
         return molecule
 
     def _build_indexes(self):
