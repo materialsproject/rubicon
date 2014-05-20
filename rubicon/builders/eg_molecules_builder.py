@@ -277,7 +277,7 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
                 formula_group1 = TaskKeys.literal_to_formula_group_name[literal_group1]
                 formula_group2 = TaskKeys.literal_to_formula_group_name[literal_group2]
                 molecule["base_molecule"] = base_mol
-                molecule["functional_groups"] = [formula_group1, formula_group2]
+                molecule["functional_groups"] = sorted([formula_group1, formula_group2])
         return molecule
 
     def _build_indexes(self):
