@@ -27,7 +27,7 @@ def transform_molecule_doc(mol1):
     mol2["run_tags"] = mol1["run_tags"]
     mol2["reduced_cell_formula_abc"] = mol1["reduced_cell_formula_abc"]
     if "water" in mol1["solvated_properties"]:
-        mol2["implicit_solvent"] = mol1["implicit_solvent"]
+        mol2["implicit_solvent"] = mol1["solvated_properties"]["water"]["implicit_solvent"]
     else:
         mol2["implicit_solvent"] = {}
     mol2["pretty_formula"] = mol1["pretty_formula"]
