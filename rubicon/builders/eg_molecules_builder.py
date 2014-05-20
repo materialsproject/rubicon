@@ -261,7 +261,7 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
     def build_molecule_structure_properties(docs):
         molecule = dict()
         if "molname" in docs["user_tags"]:
-            molname = docs["user_tags"]
+            molname = docs["user_tags"]['molname']
             m = TaskKeys.lei_1_group_pattern.search(molname)
             if m:
                 base_mol = m.group("base_mol")
