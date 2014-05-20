@@ -49,7 +49,6 @@ def transform_molecule_doc(mol1):
     if "EA" in mol1:
         mol2["EA"] = mol1["EA"]["sol"]
 
-    mol2['solvation_energy'] = mol1["solvation_energy"]
     mol2["svg"] = mol1["svg"]
     return mol2
 
