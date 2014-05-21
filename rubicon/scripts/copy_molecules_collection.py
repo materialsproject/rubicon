@@ -25,6 +25,10 @@ def transform_molecule_doc(mol1):
     mol2["nelements"] = mol1["nelements"]
     mol2["user_tags"] = mol1["user_tags"]
     mol2["run_tags"] = mol1["run_tags"]
+    if "base_molecule" in mol1:
+        mol2["base_molecule"] = mol1["base_molecule"]
+    if "functional_groups" in mol1:
+        mol2["functional_groups"] = mol1["functional_groups"]
     mol2["reduced_cell_formula_abc"] = mol1["reduced_cell_formula_abc"]
     if "water" in mol1["solvated_properties"]:
         mol2["implicit_solvent"] = mol1["solvated_properties"]["water"]["implicit_solvent"]
