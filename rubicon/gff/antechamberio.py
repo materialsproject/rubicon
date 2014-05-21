@@ -8,7 +8,7 @@ __author__ = 'navnidhirajput'
 """
 
 import subprocess
-from pymatgen import write_mol, Molecule
+from pymatgen import write_mol
 import shlex
 from gff import Gff
 from monty.io import ScratchDir
@@ -61,9 +61,6 @@ class AntechamberRunner(AtomTyper):
 
         scratch = tempfile.gettempdir()
         return_cmd = None
-        #filename = self.filename
-
-
 
         with ScratchDir(scratch,
                         copy_to_current_on_exit=ANTECHAMBER_DEBUG) as d:
@@ -71,9 +68,6 @@ class AntechamberRunner(AtomTyper):
             top_list=[]
 
             for mol in mols:
-
-
-
                 self._convert_to_pdb(mol, 'mol.pdb')
                 command = (
                 'antechamber -i ' + filename + ' -fi pdb -o ' + filename[:-4] +
@@ -82,17 +76,26 @@ class AntechamberRunner(AtomTyper):
                 return_cmd = subprocess.call(shlex.split(command))
                 self.molname = filename.split('.')[0]
                 self._run_parmchk('ANTECHAMBER_AC.AC')
+                top = TopMol.from_file('mol.rtf')
+                my_gff = Gff.from_forcefield_para('mol.frcmod')
+                my_gff.read_atom_index('ANTECHAMBER_AC.AC')
+                gff_list.append(my_gff)
+                top_list.append(top)
+            self.gff_list=gff_list
+            self.top_list=top_list
+
+
+            return  gff_list, top_list
 
                 #gff = self._parse_output()
                 #self.read_atom_index('ANTECHAMBER_AC.AC')
 #                self.read_atomType('ANTECHAMBER_AC.AC')
-                top = TopMol.from_file('mol.rtf')
+
                 #my_gff.read_forcefield_para('mol.frcmod')
 
 
-                my_gff = Gff.from_forcefield_para('mol.frcmod')
-                my_gff.read_atom_index('ANTECHAMBER_AC.AC')
-                #my_gff.read_atomType('ANTECHAMBER_AC.AC')
+
+
                 #print "+++++++",my_gff.atom_index_gaff
 
 #                self.read_atomType('ANTECHAMBER_AC.AC')
@@ -110,15 +113,15 @@ class AntechamberRunner(AtomTyper):
                 #gff_list.append(copy.deepcopy(my_gff))
                # print '*', type(my_gff)
                # print '**', gff_list
-                gff_list.append(my_gff)
+
                # print '***', [x.bonds for x in gff_list]
                 #print "GFFLIST0",gff_list[0].bonds,gff_list
-                top_list.append(top)
+
 
             #print "GFFLIST0",gff_list[0].bonds
             #print "TOPLIST0",top_list[2].bonds
 
-            return  gff_list, top_list
+
 
 
 

@@ -133,8 +133,10 @@ class Gff(MSONable):
                                       line[6:8].strip(), line[9:11].strip()
                     imdihedral_distance = float(line[19:24])
                     imdihedral_angle = float(line[31:38])
+                    imdihedral_function= float(line[47:50])
                     imdihedrals[imdihedral_type] = (
-                    imdihedral_distance, imdihedral_angle)
+                    imdihedral_distance, imdihedral_angle, imdihedral_function)
+
 
                 if line.startswith('NONBON'):
                     vdw_section = True

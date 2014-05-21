@@ -13,8 +13,8 @@ class AntechamberAtomTyper(AtomTyper):
         pass
 
     def get_ffmol(self, mols):
-        ant = AntechamberRunner(mols)
-        gff_list, top_list = ant._run_antechamber('mol.pdb', mols)
+        ffmol = AntechamberRunner(mols)
+        gff_list, top_list = ffmol._run_antechamber('mol.pdb', mols)
         #run antechamber
         #save atom types to self.atom_types
 

@@ -47,6 +47,28 @@ class TopMol(Molecule):
             return topology
 
 
+
+    def _get_ff_dihedrals(self, gff_dihedrals, top_dihedral, atom_gaff):
+
+        self.gaff_info = []
+        for keys, values in gff_dihedrals.iteritems():
+            self.gaff_info = [keys, values]
+
+        for item in top_dihedral:
+            d1 = item[0] + ' ' + item[1] + ' ' + item[2] + ' ' + item[3]
+            a1, a2, a3, a4 = atom_gaff[item[0]], atom_gaff[item[1]], atom_gaff[
+                item[2]], atom_gaff[item[3]]
+            dihedral_label = (a1, a2, a3, a4)
+            if dihedral_label[0] > dihedral_label[3]:
+                dihedral_label = tuple(reversed(list(dihedral_label)))
+            if dihedral_label in gff_dihedrals:
+                self.topdihedralff[d1] = (
+                dihedral_label, gff_dihedrals[dihedral_label])
+            self.num_dih_types = len(set(self.topdihedralff.keys()))
+
+
+
+
     def _get_ff_bonds(self, gff_bonds, top_bond, atom_gaff):
 
         self.gaff_info = []
@@ -83,26 +105,6 @@ class TopMol(Molecule):
                 ((str(a1), str(a2), str(a3))), gff_angles[angle_type])
             self.num_ang_types = len(set(self.topangleff.keys()))
 
-
-    def _get_ff_dihedrals(self, gff_dihedrals, top_dihedral, atom_gaff):
-
-        self.gaff_info = []
-        for keys, values in gff_dihedrals.iteritems():
-            self.gaff_info = [keys, values]
-
-        for item in top_dihedral:
-            d1 = item[0] + ' ' + item[1] + ' ' + item[2] + ' ' + item[3]
-            a1, a2, a3, a4 = atom_gaff[item[0]], atom_gaff[item[1]], atom_gaff[
-                item[2]], atom_gaff[item[3]]
-            dihedral_label = (a1, a2, a3, a4)
-            if dihedral_label[0] > dihedral_label[3]:
-                dihedral_label = tuple(reversed(list(dihedral_label)))
-            if dihedral_label in gff_dihedrals:
-                self.topdihedralff[d1] = (
-                dihedral_label, gff_dihedrals[dihedral_label])
-            self.num_dih_types = len(set(self.topdihedralff.keys()))
-
-
     def _get_ff_imdihedrals(self, gff_imdihedrals, top_imdihedral, atom_gaff):
 
         self.gaff_info = []
@@ -120,6 +122,8 @@ class TopMol(Molecule):
                 self.topimdihedralff[d1] = (
                 imdihedral_label, gff_imdihedrals[imdihedral_label])
             self.num_imdih_types = len(set(self.topimdihedralff.keys()))
+
+
 
 
 
