@@ -50,7 +50,7 @@ def transform_molecule_doc(mol1):
     mol2["inchi"] = mol1["vacuum_properties"]["inchi"]["neutral"]
 
     if "solvated_properties" in mol1 and "water" in mol1["solvated_properties"]:
-        if "IE" in mol1["solvated_properties"]["water"]:
+        if "IP" in mol1["solvated_properties"]["water"]:
             mol2["IE"] = mol1["solvated_properties"]["water"]["IP"]
         if "EA" in mol1["solvated_properties"]["water"]:
             mol2["EA"] = mol1["solvated_properties"]["water"]["EA"]
