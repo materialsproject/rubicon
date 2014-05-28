@@ -4,6 +4,7 @@ Build derived collections for Electrolyte Genome.
 import logging
 import traceback
 import time
+import sys
 import eg_molecules_builder as mols
 from rubicon.builders import eg_shared
 
@@ -18,6 +19,13 @@ def run(colls, args):
     """Run with information from command-line args.
     """
     _log = logging.getLogger(_logname)
+
+    logging.basicConfig(level=logging.INFO)
+    _log.setLevel(logging.INFO)
+    sh = logging.StreamHandler(stream=sys.stdout)
+    sh.setLevel(getattr(logging, 'INFO'))
+    _log.addHandler(sh)
+
     ncores = args.num_cores
     kw = dict(ncores=ncores)
 

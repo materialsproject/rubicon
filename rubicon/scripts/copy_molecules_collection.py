@@ -19,34 +19,41 @@ def get_molecules_collection(db_dir):
 def transform_molecule_doc(mol1):
     mol2 = dict()
     mol2["inchi_root"] = mol1["inchi_root"]
-    mol2["can"] = mol1["can"]
-    mol2["smiles"] = mol1["smiles"]
+    mol2["can"] = mol1['vacuum_properties']["can"]['neutral']
+    mol2["smiles"] = mol1['vacuum_properties']["smiles"]['neutral']
     mol2["elements"] = mol1["elements"]
     mol2["nelements"] = mol1["nelements"]
     mol2["user_tags"] = mol1["user_tags"]
     mol2["run_tags"] = mol1["run_tags"]
+    if "base_molecule" in mol1:
+        mol2["base_molecule"] = mol1["base_molecule"]
+    if "functional_groups" in mol1:
+        mol2["functional_groups"] = mol1["functional_groups"]
     mol2["reduced_cell_formula_abc"] = mol1["reduced_cell_formula_abc"]
-    mol2["implicit_solvent"] = mol1["implicit_solvent"]
+    if "water" in mol1["solvated_properties"]:
+        mol2["implicit_solvent"] = mol1["solvated_properties"]["water"]["implicit_solvent"]
+        mol2["electrode_potentials"] = mol1["solvated_properties"]["water"]["electrode_potentials"]
+    else:
+        mol2["implicit_solvent"] = {}
     mol2["pretty_formula"] = mol1["pretty_formula"]
     mol2["formula"] = mol1["formula"]
     mol2["pointgroup"] = mol1["pointgroup"]
 
-    mol2["task_id"] = mol1["task_id"]["neutral"]
-    mol2["task_id_deprecated"] = mol1["task_id_deprecated"]["neutral"]
-    mol2["snlgroup_id_final"] = mol1["snlgroup_id_final"]["neutral"]
-    mol2["charge"] = mol1["charge"]["neutral"]
-    mol2["spin_multiplicity"] = mol1["spin_multiplicity"]["neutral"]
-    mol2["snl_final"] = mol1["snl_final"]["neutral"]
-    mol2["molecule"] = mol1["molecule"]["neutral"]
-    mol2["xyz"] = mol1["xyz"]["neutral"]
-    mol2["inchi"] = mol1["inchi"]["neutral"]
+    mol2["task_id"] = mol1["vacuum_properties"]["task_id"]["neutral"]
+    mol2["task_id_deprecated"] = mol1["vacuum_properties"]["task_id_deprecated"]["neutral"]
+    mol2["snlgroup_id_final"] = mol1["vacuum_properties"]["snlgroup_id_final"]["neutral"]
+    mol2["charge"] = mol1["charge"]
+    mol2["spin_multiplicity"] = mol1["vacuum_properties"]["spin_multiplicity"]["neutral"]
+    mol2["snl_final"] = mol1["vacuum_properties"]["snl_final"]["neutral"]
+    mol2["molecule"] = mol1["vacuum_properties"]["molecule"]["neutral"]
+    mol2["xyz"] = mol1["vacuum_properties"]["xyz"]["neutral"]
+    mol2["inchi"] = mol1["vacuum_properties"]["inchi"]["neutral"]
 
     if "IP" in mol1:
         mol2["IE"] = mol1["IP"]["sol"]
     if "EA" in mol1:
         mol2["EA"] = mol1["EA"]["sol"]
 
-    mol2['solvation_energy'] = mol1["solvation_energy"]
     mol2["svg"] = mol1["svg"]
     return mol2
 
@@ -62,7 +69,8 @@ def copy_collections():
             molname = mol_web["user_tags"]["molname"]
         else:
             molname = mol_web["inchi"]
-        mol_doc = coll_dest.find_one({"inchi_root": mol_web["inchi_root"]})
+        mol_doc = coll_dest.find_one({"inchi_root": mol_web["inchi_root"],
+                                      "charge": mol_web["charge"]})
         if mol_doc:
             logging.info("Updating molecule \"{}\"".format(molname))
             coll_dest.update({"inchi_root": mol_web["inchi_root"]}, mol_web,

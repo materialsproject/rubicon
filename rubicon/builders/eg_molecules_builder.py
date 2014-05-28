@@ -6,7 +6,10 @@ import copy
 import logging
 import datetime
 from pymongo import ASCENDING
+import sys
+import re
 from rubicon.builders import eg_shared
+from rubicon.workflows.multistep_ipea_wf import QChemFireWorkCreator
 
 __author__ = "Xiaohui Qu"
 __copyright__ = "Copyright 2012-2013, The Electrolyte Genome Project"
@@ -38,6 +41,17 @@ class TaskKeys:
         'calculations.scf_sm12mk.energies',
         'formula', 'task_id_deprecated', 'svg', 'xyz')
 
+    base_molecules = ("quinoxaline", "anthrachinon", "thiane", "viologen")
+    lei_1_group_pattern = re.compile('(?P<base_mol>\w+)_wfs_(?P<position>\d+)_'
+                                     '(?P<group_name>\w+)')
+    lei_2_group_pattern = re.compile('(?P<base_mol>\w+)_(?P<pos1>\d+)_'
+                                     '(?P<group1>\w+)_(?P<pos2>\d+)(?P<group2>\w+)')
+    literal_to_formula_group_name = {"nitro": "-NO2", "cyano": "-CN", "trichloromethyl": "-CCl3", "carboxyl": "-COOH",
+                                     "fluoro": "-F", "ethynyl": "-CCH", "methyl": "-CH3", "ethyl": "-CH2CH3",
+                                     "hydroxyl": "-OH", "vinyl": "-C=CH2", "methoxyl": "-OCH3",
+                                     "ethanamide": "-NHC(O)CH3", "benzene": "-C5H6", "amine": "-NH2",
+                                     "methylamine": "-NHCH3", "dimethylamine": "-N(CH3)2"}
+
 
 class MoleculesBuilder(eg_shared.ParallelBuilder):
     """Build derived 'molecules' collection.
@@ -61,15 +75,26 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         self._c.molecules.remove()
         self.ref_charge = 0
         self.ref_charge_range = (-1, 0, 1)
+        logging.basicConfig(level=logging.INFO)
+        _log.setLevel(logging.INFO)
+        sh = logging.StreamHandler(stream=sys.stdout)
+        sh.setLevel(getattr(logging, 'INFO'))
+        _log.addHandler(sh)
 
     def run(self):
         """Run the builder.
         """
         sss = []
-        _log.info("Getting distinct root INCHIs")
-        inchi_root = self._c.tasks.distinct('inchi_root')
         for ch in self.ref_charge_range:
             self.ref_charge = ch
+            charge_state = QChemFireWorkCreator.get_state_name(ch, 1).split()[1]
+            _log.info("Getting distinct root INCHIs for {}s".format(charge_state))
+            if ch == 0:
+                spec = {"$or": [{"user_tags.initial_charge": 0},
+                                {"user_tags.initial_charge": {"$exists": False}}]}
+            else:
+                spec = {"user_tags.initial_charge": ch}
+            inchi_root = self._c.tasks.find(spec=spec, fields='inchi_root').distinct('inchi_root')
             map(self.add_item, inchi_root)
             _log.info("Beginning analysis")
             states = self.run_parallel()
@@ -112,6 +137,11 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         if not docs:
             return 1
         d = self.build_molecule_common_properties(docs)
+        if d and len(d) > 0:
+            molecule.update(d)
+        else:
+            return 2
+        d = self.build_molecule_structure_properties(docs)
         if d and len(d) > 0:
             molecule.update(d)
         else:
@@ -168,7 +198,7 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
                 molecule['electrode_potentials']['oxidation'] = dict()
                 for electrode in self.ref_potentials.keys():
                     molecule['electrode_potentials']['oxidation'][electrode] \
-                        = -(molecule['IP'] - self.ref_potentials[electrode])
+                        = molecule['IP'] - self.ref_potentials[electrode]
             if 'EA' in molecule:
                 molecule['electrode_potentials']['reduction'] = dict()
                 for electrode in self.ref_potentials.keys():
@@ -227,6 +257,29 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         molecule["svg"] = docs["svg"]
         return molecule
 
+    @staticmethod
+    def build_molecule_structure_properties(docs):
+        molecule = dict()
+        if "molname" in docs["user_tags"]:
+            molname = docs["user_tags"]['molname']
+            m = TaskKeys.lei_1_group_pattern.search(molname)
+            if m:
+                base_mol = m.group("base_mol")
+                literal_group_name = m.group("group_name")
+                formula_group_name = TaskKeys.literal_to_formula_group_name[literal_group_name]
+                molecule["base_molecule"] = base_mol
+                molecule["functional_groups"] = [formula_group_name]
+            m = TaskKeys.lei_2_group_pattern.search(molname)
+            if m:
+                base_mol = m.group("base_mol")
+                literal_group1 = m.group("group1")
+                literal_group2 = m.group("group2")
+                formula_group1 = TaskKeys.literal_to_formula_group_name[literal_group1]
+                formula_group2 = TaskKeys.literal_to_formula_group_name[literal_group2]
+                molecule["base_molecule"] = base_mol
+                molecule["functional_groups"] = sorted([formula_group1, formula_group2])
+        return molecule
+
     def _build_indexes(self):
         self._c.molecules.ensure_index(
             [('inchi_root', ASCENDING), ('charge', ASCENDING)], unique=True)
@@ -241,6 +294,6 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
     def _insert_molecule(self, doc):
         """All database insertion should be done from this method
         """
-        _log.info("Inserting Material with InChI i, ".
+        _log.info("Inserting Material with InChI {i}, ".
                   format(i=str(doc['inchi_root'])))
         self._c.molecules.insert(doc)

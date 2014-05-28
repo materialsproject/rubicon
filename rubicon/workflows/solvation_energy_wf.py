@@ -5,14 +5,13 @@ from rubicon.workflows.multistep_ipea_wf import QChemFireWorkCreator
 __author__ = 'xiaohuiqu'
 
 
-def solvation_energy_fws(mol, name, mission, dupefinder=None, priority=1,
-                         parent_fwid=None, solvents=tuple()):
+def solvation_energy_fws(mol, name, mission, dupefinder=None, priority=1, parent_fwid=None, solvents=tuple(),
+                         additional_user_tags=None):
     large = False
     if len(mol) > 50:
         large = True
-    fw_creator = QChemFireWorkCreator(mol=mol, molname=name, mission=mission,
-                                      dupefinder=dupefinder,
-                                      priority=priority, large=large)
+    fw_creator = QChemFireWorkCreator(mol=mol, molname=name, mission=mission, dupefinder=dupefinder,
+                                      priority=priority, large=large, additional_user_tags=additional_user_tags)
     fwid_base = 1
     if parent_fwid:
         if not (isinstance(parent_fwid, int) or isinstance(parent_fwid, list)):
@@ -73,7 +72,7 @@ def solvation_energy_fws(mol, name, mission, dupefinder=None, priority=1,
 
 
 def mol_to_solvation_energy_wf(mol, name, mission, dupefinder=None, priority=1,
-                   parent_fwid=None, solvents=tuple()):
+                   parent_fwid=None, solvents=tuple(), additional_user_tags=None):
     fireworks, links_dict = solvation_energy_fws(
-        mol, name, mission, dupefinder, priority, parent_fwid, solvents)
+        mol, name, mission, dupefinder, priority, parent_fwid, additional_user_tags)
     return Workflow(fireworks, links_dict, name)

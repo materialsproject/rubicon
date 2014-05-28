@@ -52,7 +52,7 @@ class QChemFireWorkCreator():
 
     @staticmethod
     def get_state_name(charge, spin_multiplicity):
-        charge_state = {-2: "anion_2", -1: "anion", 0: "neutral", 1: "cation"}
+        charge_state = {-2: "anion_2", -1: "anion", 0: "neutral", 1: "cation", 2: "cation_2"}
         spin_state = {1: "singlet", 2: "doublet", 3: "triplet"}
         return spin_state[spin_multiplicity] + " " + charge_state[charge]
 
@@ -258,16 +258,14 @@ class QChemFireWorkCreator():
         return fw_sp_cal, fw_sp_db
 
 
-def multistep_ipea_fws(mol, name, mission, ref_charge,
-                       spin_multiplicities=(2, 1, 2), dupefinder=None,
-                       priority=1,
-                       parent_fwid=None):
+def multistep_ipea_fws(mol, name, mission, ref_charge, spin_multiplicities=(2, 1, 2), dupefinder=None, priority=1,
+                       parent_fwid=None, additional_user_tags=None):
     large = False
     if len(mol) > 50:
         large = True
-    fw_creator = QChemFireWorkCreator(mol=mol, molname=name, mission=mission,
-                                      dupefinder=dupefinder,
-                                      priority=priority, large=large)
+    fw_creator = QChemFireWorkCreator(
+        mol=mol, molname=name, mission=mission, dupefinder=dupefinder, priority=priority, large=large,
+        additional_user_tags=additional_user_tags)
     fwid_base = 1
     if parent_fwid:
         if not (isinstance(parent_fwid, int) or isinstance(parent_fwid, list)):
@@ -329,10 +327,9 @@ def multistep_ipea_fws(mol, name, mission, ref_charge,
     return fireworks, links_dict
 
 
-def mol_to_ipea_wf(mol, name, mission, ref_charge,
-                   spin_multiplicities=(2, 1, 2),
-                   dupefinder=None, priority=1, parent_fwid=None):
+def mol_to_ipea_wf(mol, name, mission, ref_charge, spin_multiplicities=(2, 1, 2),
+                   dupefinder=None, priority=1, parent_fwid=None, additional_user_tags=None):
     fireworks, links_dict = multistep_ipea_fws(
-        mol, name, mission, ref_charge, spin_multiplicities, dupefinder,
-        priority, parent_fwid)
+        mol, name, mission, ref_charge, spin_multiplicities, dupefinder, priority, parent_fwid,
+        additional_user_tags)
     return Workflow(fireworks, links_dict, name)
