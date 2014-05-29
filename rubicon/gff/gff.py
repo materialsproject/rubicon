@@ -100,10 +100,14 @@ class Gff(MSONable):
                         continue
                     angle_type = line[0:2].strip(), line[3:5].strip(), \
                                  line[6:8].strip()
-                    angle_type = tuple(sorted(angle_type))
+
+                    if line[0:2].strip()> line[6:8].strip():
+                        angle_type=tuple(reversed(angle_type))
+
                     angle_k_distance = float(line[11:17])
                     angle_distance = float(line[22:29])
                     angles[angle_type] = (angle_k_distance, angle_distance)
+
 
                 if line.startswith('DIHE'):
                     dihedral_section = True
@@ -121,6 +125,7 @@ class Gff(MSONable):
                     dihedral_angle = float(line[31:38])
                     dihedrals[(dihedral_type)][dihedral_func_type] = (
                     dihedral_k_distance, dihedral_angle)
+
 
                 if line.startswith('IMPROPER'):
                     imdihedral_section = True

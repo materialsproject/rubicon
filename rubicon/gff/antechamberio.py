@@ -72,12 +72,11 @@ class AntechamberRunner(AtomTyper):
                 command = (
                 'antechamber -i ' + filename + ' -fi pdb -o ' + filename[:-4] +
                 " -fo charmm")
-
                 return_cmd = subprocess.call(shlex.split(command))
                 self.molname = filename.split('.')[0]
                 self._run_parmchk('ANTECHAMBER_AC.AC')
                 top = TopMol.from_file('mol.rtf')
-                my_gff = Gff.from_forcefield_para('mol.frcmod')
+                my_gff = Gff.from_forcefield_para('ANTECHAMBER.FRCMOD')
                 my_gff.read_atom_index('ANTECHAMBER_AC.AC')
                 gff_list.append(my_gff)
                 top_list.append(top)
@@ -86,44 +85,6 @@ class AntechamberRunner(AtomTyper):
 
 
             return  gff_list, top_list
-
-                #gff = self._parse_output()
-                #self.read_atom_index('ANTECHAMBER_AC.AC')
-#                self.read_atomType('ANTECHAMBER_AC.AC')
-
-                #my_gff.read_forcefield_para('mol.frcmod')
-
-
-
-
-                #print "+++++++",my_gff.atom_index_gaff
-
-#                self.read_atomType('ANTECHAMBER_AC.AC')
-                #my_gff = self._parse_output()
-                #self._get_ff_bonds(my_gff.bonds, top.bonds, self.atom_gaff)
-                #self._get_ff_angles(my_gff.angles, top.angles,
-                #                    self.atom_gaff)
-               # top._get_ff_dihedrals(my_gff.dihedrals, top.dihedrals,
-                #                       gff.atom_gaff)
-                #self._get_ff_imdihedrals(my_gff.imdihedrals, top.imdihedrals,
-                #                         self.atom_gaff)
-               # print "MYGFFBONDS",my_gff.bonds
-
-
-                #gff_list.append(copy.deepcopy(my_gff))
-               # print '*', type(my_gff)
-               # print '**', gff_list
-
-               # print '***', [x.bonds for x in gff_list]
-                #print "GFFLIST0",gff_list[0].bonds,gff_list
-
-
-            #print "GFFLIST0",gff_list[0].bonds
-            #print "TOPLIST0",top_list[2].bonds
-
-
-
-
 
 
     def _parse_output(self):
