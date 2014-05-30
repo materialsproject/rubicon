@@ -18,8 +18,6 @@ class TopMol(Molecule):
         self.topdihedralff = dict()
         self.topimdihedralff = dict()
 
-
-
     @classmethod
     def from_file(cls,filename):
         atoms=[]
@@ -47,7 +45,6 @@ class TopMol(Molecule):
             return topology
 
 
-
     def _get_ff_dihedrals(self, gff_dihedrals, top_dihedral, atom_gaff):
 
         self.gaff_info = []
@@ -65,8 +62,6 @@ class TopMol(Molecule):
                 self.topdihedralff[d1] = (
                 dihedral_label, gff_dihedrals[dihedral_label])
             self.num_dih_types = len(set(self.topdihedralff.keys()))
-
-
 
 
     def _get_ff_bonds(self, gff_bonds, top_bond, atom_gaff):
