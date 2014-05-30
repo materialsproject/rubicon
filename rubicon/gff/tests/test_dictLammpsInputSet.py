@@ -7,7 +7,7 @@ __author__ = 'navnidhirajput'
 class TestDictLammpsInputSet(TestCase):
     def test_get_lammpsin(self):
         mylammpsin=DictLammpsInputSet()
-        control_file=mylammpsin.get_lammpsin('LammpsNPT.json',ensemble="npt",temp=450)
+        control_file=mylammpsin.get_lammps_control('Lammps.json',ensemble="npt",temp=450)
         ans='''log mol.log
 read_start mol.restart
 units real

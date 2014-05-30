@@ -25,7 +25,6 @@ class AntechamberRunner(AtomTyper):
     A wrapper for AntechamberRunner software
 
     """
-
     def __init__(self, filename=None):
         self.filename = filename
 
@@ -33,7 +32,6 @@ class AntechamberRunner(AtomTyper):
         """
         generate pdb file for a given molecule
         """
-
         write_mol(molecule, filename)
 
 
@@ -57,10 +55,7 @@ class AntechamberRunner(AtomTyper):
         Args:
             filename = pdb file of the molecule
         """
-
-
         scratch = tempfile.gettempdir()
-        return_cmd = None
 
         with ScratchDir(scratch,
                         copy_to_current_on_exit=ANTECHAMBER_DEBUG) as d:
@@ -82,20 +77,7 @@ class AntechamberRunner(AtomTyper):
                 top_list.append(top)
             self.gff_list=gff_list
             self.top_list=top_list
-
-
             return  gff_list, top_list
-
-
-    def _parse_output(self):
-
-        """
-        create an object of forcefield_type_molecule
-        and call the function
-        """
-        ffm = Gff()
-        ffm.read_forcefield_para(self.molname + ".frcmod")
-        return ffm
 
 
 

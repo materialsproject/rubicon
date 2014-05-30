@@ -23,7 +23,7 @@
         "angle_style":"harmonic",
         "dihedral_style":"charmm",
         "improper_style":"cvff",
-        "read_data": "data.mol",
+        "read_data": "mol_data.lammps",
         "neighbor": {
             "skin": 2.0,
             "style":"bin"
