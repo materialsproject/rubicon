@@ -1,5 +1,4 @@
-import copy
-from rubicon.gff.atomtyper import AtomTyper
+
 
 __author__ = 'navnidhirajput'
 
@@ -13,14 +12,12 @@ import shlex
 from gff import Gff
 from monty.io import ScratchDir
 import tempfile
-
-
 from rubicon.gff.topology import TopMol
 
 ANTECHAMBER_DEBUG = False
 
 
-class AntechamberRunner(AtomTyper):
+class AntechamberRunner():
     """
     A wrapper for AntechamberRunner software
 

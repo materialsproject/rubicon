@@ -1,4 +1,5 @@
 from unittest import TestCase
+import unittest
 from pymatgen import Molecule
 from rubicon.gff.antechamberio import AntechamberRunner
 from rubicon.gff.gff import Gff
@@ -18,42 +19,6 @@ mol = Molecule(["C", "H", "H", "H", "H"], coords)
 class TestAntechamber(TestCase):
 
 
-
-    def test_get_ff_bonds(self):
-        my_ant = AntechamberRunner(mol)
-        my_gff = Gff()
-        top = TopMol.from_file('mol.rtf')
-
-        my_ant._get_ff_bonds(my_gff.bonds, top.bonds, my_ant.atom_gaff)
-        ans_bond={'C-H1': ('c3-hc', (337.3, 1.092)), 'C-H2': ('c3-hc', (337.3, 1.092)), 'C-H3': ('c3-hc', (337.3, 1.092)), 'C-H': ('c3-hc', (337.3, 1.092))}
-        self.assertEquals(ans_bond,my_ant.topbondff)
-
-    def test_get_ff_angles(self):
-        my_ant = AntechamberRunner(mol)
-        my_gff = Gff()
-        top = TopMol.from_file('mol.rtf')
-
-        my_ant._get_ff_angles(my_gff.angles, top.angles, my_ant.atom_gaff)
-        ans_angle={'H1-C-H3': ('hc-c3-hc', (39.43, 108.35)), 'H1-C-H2': ('hc-c3-hc', (39.43, 108.35)), 'H2-C-H3': ('hc-c3-hc', (39.43, 108.35)), 'H-C-H3': ('hc-c3-hc', (39.43, 108.35)), 'H-C-H2': ('hc-c3-hc', (39.43, 108.35)), 'H-C-H1': ('hc-c3-hc', (39.43, 108.35))}
-        self.assertEquals(ans_angle,my_ant.topangleff)
-
-    def test_get_ff_dihedrals(self):
-        my_ant = AntechamberRunner(mol)
-        my_gff = Gff()
-        top = TopMol.from_file('mol.rtf')
-
-        my_ant._get_ff_dihedrals(my_gff.dihedrals, top.dihedrals, my_ant.atom_gaff)
-        ans_dihedral={}
-        self.assertEquals(ans_dihedral,my_ant.topdihedralff)
-
-    def test_get_ff_imdihedrals(self):
-        my_ant = AntechamberRunner(mol)
-        my_gff = Gff()
-        top = TopMol.from_file('mol.rtf')
-
-        my_ant._get_ff_imdihedrals(my_gff.imdihedrals, top.imdihedrals, my_ant.atom_gaff)
-        ans_imdihedral={}
-        self.assertEquals(ans_imdihedral,my_ant.topimdihedralff)
 
     def test_run_antechamber(self):
         ant=AntechamberRunner(mol)
@@ -170,3 +135,8 @@ Impropers
 '''
 
         self.assertEquals(ans,output)
+
+
+
+if __name__ == '__main__':
+    unittest.main()

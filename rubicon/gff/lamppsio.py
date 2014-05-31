@@ -10,7 +10,7 @@ class LmpInput():
     write lammps data input file
     """
 
-    def __init__(self, mols_in_box, ffmol):
+    def __init__(self, ffmol, mols_in_box,):
         self.lines = []
         self.mols_in_box = mols_in_box
         self.ffmol = ffmol
@@ -33,7 +33,7 @@ class LmpInput():
         angle_type_list = []
         dihedral_type_list = []
         improper_type_list = []
-        lines.append("{} {}".format('LAMMPS Data File', ' \n'))
+        lines.append('LAMMPS Data File\n')
         for k, v in enumerate(mols_in_box.param_list):
             lines.append("{} {} {} {} {}".format('#', v['number'], "mol", k + 1,
                                                  "molecule"))
@@ -56,7 +56,7 @@ class LmpInput():
         lines.append("{} {}".format(num_angles_types, "angle type"))
         lines.append("{} {}".format((num_dihedrals_types), "dihedral type"))
         lines.append(
-            "{} {} {}".format(num_impropers_types, "improper type", '\n'))
+            "{} {}{}".format(num_impropers_types, "improper type",'\n'))
         self.lines.extend(lines)
         return '\n'.join(lines)
 
@@ -89,7 +89,7 @@ class LmpInput():
         lines.append("{} {}".format(num_angles, "angles"))
         lines.append("{} {}".format(num_dihedrals, "dihedrals"))
         lines.append(
-            "{} {} {}".format(num_impropers, "impropers",
+            "{} {}{}".format(num_impropers, "impropers",
                               '\n'))
         self.lines.extend(lines)
         return '\n'.join(lines)
@@ -109,7 +109,7 @@ class LmpInput():
                               mols_in_box.param_list[0]['inside box'][4],
                               "ylo  yhi"))
         lines.append(
-            "{} {} {} {}".format(mols_in_box.param_list[0]['inside box'][2],
+            "{} {} {}{}".format(mols_in_box.param_list[0]['inside box'][2],
                                  mols_in_box.param_list[0]['inside box'][5],
                                  "zlo  zhi", '\n'))
 
@@ -122,7 +122,8 @@ class LmpInput():
         num_atoms = 0
         mol_index = 1
         element_list = []
-        lines.append('{} {}'.format('Masses', '\n'))
+        #lines.append('{} {}'.format('Masses', '\n'))
+        lines.append('Masses\n')
         for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
                                        mols_in_box.mols,
                                        mols_in_box.param_list):
@@ -147,7 +148,7 @@ class LmpInput():
         num_atoms = 0
         mol_index = 1
         element_list = []
-        lines.append('{} {}'.format('Pair Coeffs', '\n'))
+        lines.append('Pair Coeffs\n')
         for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
                                        mols_in_box.mols,
                                        mols_in_box.param_list):
@@ -173,7 +174,7 @@ class LmpInput():
         num_atoms = 0
         element_list = []
         mol_index = 1
-        lines.append('{} {}'.format('Bond Coeffs', '\n'))
+        lines.append('Bond Coeffs\n')
         for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
                                        mols_in_box.mols,
                                        mols_in_box.param_list):
@@ -197,7 +198,7 @@ class LmpInput():
         num_atoms = 0
         element_list = []
         mol_index = 1
-        lines.append('{} {}'.format('Angle Coeffs', '\n'))
+        lines.append('Angle Coeffs\n')
         for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
                                        mols_in_box.mols,
                                        mols_in_box.param_list):
@@ -225,7 +226,7 @@ class LmpInput():
         j = 0
         element_list = []
         mol_index = 1
-        lines.append('{} {}'.format('Dihedral Coeffs', '\n'))
+        lines.append('Dihedral Coeffs\n')
         for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
                                        mols_in_box.mols,
                                        mols_in_box.param_list):
@@ -257,7 +258,7 @@ class LmpInput():
         num_atoms = 0
         element_list = []
         mol_index = 1
-        lines.append('{} {}'.format('Imp Dihedral Coeffs', '\n'))
+        lines.append('Imp Dihedral Coeffs\n')
         for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
                                        mols_in_box.mols,
                                        mols_in_box.param_list):
@@ -270,8 +271,9 @@ class LmpInput():
                          gff.imdihedrals.keys()[i][1],
                          gff.imdihedrals.keys()[i][2],
                          gff.imdihedrals.keys()[i][3], mol_index))
-                num_atoms = num_atoms + 1
+                    num_atoms = num_atoms + 1
             mol_index += 1
+        lines.append('\n')
         self.lines.extend(lines)
         return '\n'.join(lines)
 
@@ -285,7 +287,7 @@ class LmpInput():
         num_atoms = 0
         masses_index = 0
         atom_type_index = {}
-        lines.append('{}{}{}'.format('\n', 'Atoms', '\n'))
+        lines.append('Atoms\n')
         mol_pack = mols_in_box.run()
         self.box_mol_index = []
         i = 0
@@ -326,6 +328,7 @@ class LmpInput():
                     d[gff.atom_index[k + 1]] = k + i + 1
                 self.box_mol_index.append(d)
                 i += num_atoms
+        lines.append('\n')
         self.lines.extend(lines)
         return '\n'.join(lines)
 
@@ -339,7 +342,7 @@ class LmpInput():
         bond_type_index = {}
         i = 0
         mol_index = 0
-        lines.append('{}{}{}'.format('\n', 'Bonds', '\n'))
+        lines.append('Bonds\n')
         for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
                                        mols_in_box.mols,
                                        mols_in_box.param_list):
@@ -371,6 +374,7 @@ class LmpInput():
                                   top.bonds[k][
                                       1]))
                 i += len(top.bonds)
+        lines.append('\n')
         self.lines.extend(lines)
         return '\n'.join(lines)
 
@@ -384,7 +388,7 @@ class LmpInput():
         angle_index = 0
         i = 0
         mol_index = 0
-        lines.append('{}{}{}'.format('\n', 'Angles', '\n'))
+        lines.append('Angles\n')
         for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
                                        mols_in_box.mols,
                                        mols_in_box.param_list):
@@ -416,6 +420,7 @@ class LmpInput():
                             top.angles[k][2]))
 
                 i += len(top.angles)
+        lines.append('\n')
         self.lines.extend(lines)
         return '\n'.join(lines)
 
@@ -430,7 +435,7 @@ class LmpInput():
         j = 0
         l = 0
         mol_index = 0
-        lines.append('{}{}{}'.format('\n', 'Dihedrals', '\n'))
+        lines.append('Dihedrals\n')
         for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
                                        mols_in_box.mols,
                                        mols_in_box.param_list):
@@ -450,8 +455,6 @@ class LmpInput():
                     l += 1
                     #iterate over bonds in first molecule
                     for k, v in top.topdihedralff.iteritems():
-
-
                         A = k.split()[0]
                         B = k.split()[1]
                         C = k.split()[2]
@@ -480,6 +483,7 @@ class LmpInput():
                                         top.dihedrals[l][2],
                                         top.dihedrals[l][3]))
                     i += len(top.dihedrals)
+        lines.append('\n')
         self.lines.extend(lines)
         return '\n'.join(lines)
 
@@ -494,7 +498,7 @@ class LmpInput():
         i = 0
         j = 0
         mol_index = 0
-        lines.append('{}{}{}'.format('\n', 'Impropers', '\n'))
+        lines.append('Impropers\n')
         for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
                                        mols_in_box.mols,
                                        mols_in_box.param_list):
@@ -531,6 +535,7 @@ class LmpInput():
                                     top.imdihedrals[k][2],
                                     top.imdihedrals[k][3]))
                     i += len(top.imdihedrals)
+        lines.append('\n')
         self.lines.extend(lines)
         return '\n'.join(lines)
 
@@ -567,6 +572,7 @@ class LmpInput():
         """
         write lammps data input file
         """
+
         with open(filename, 'w') as f:
             f.write(self.get_lammps_string())
 
