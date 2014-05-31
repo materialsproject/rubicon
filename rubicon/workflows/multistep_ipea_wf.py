@@ -52,11 +52,12 @@ class QChemFireWorkCreator():
 
     @staticmethod
     def get_state_name(charge, spin_multiplicity):
-        charge_state = {-1: "anion", 0: "neutral", 1: "cation"}
+        charge_state = {-2: "anion_2", -1: "anion", 0: "neutral", 1: "cation", 2: "cation_2"}
         spin_state = {1: "singlet", 2: "doublet", 3: "triplet"}
         return spin_state[spin_multiplicity] + " " + charge_state[charge]
 
-    def geom_fw(self, charge, spin_multiplicity, fw_id_cal, fw_id_db):
+    def geom_fw(self, charge, spin_multiplicity, fw_id_cal, fw_id_db,
+                priority=None):
         task_type = "geometry optimization"
         state_name = self.get_state_name(charge, spin_multiplicity)
         title = self.molname + " " + state_name + " " + self.dft + " " + \
@@ -90,6 +91,8 @@ class QChemFireWorkCreator():
         spec['task_type'] = task_type
         spec['charge'] = charge
         spec['spin_multiplicity'] = spin_multiplicity
+        if priority:
+            spec['_priority'] = priority
         task_name = self.molname + ' ' + state_name + ' ' + task_type
         from rubicon.firetasks.multistep_qchem_task \
             import QChemGeomOptDBInsertionTask
@@ -106,7 +109,8 @@ class QChemFireWorkCreator():
 
         return fw_geom_cal, fw_geom_db
 
-    def freq_fw(self, charge, spin_multiplicity, fw_id_cal, fw_id_db):
+    def freq_fw(self, charge, spin_multiplicity, fw_id_cal, fw_id_db,
+                priority=None):
         task_type = "vibrational frequency"
         state_name = self.get_state_name(charge, spin_multiplicity)
         title = self.molname + " " + state_name + " " + self.dft + " " +\
@@ -136,6 +140,8 @@ class QChemFireWorkCreator():
         spec['task_type'] = task_type
         spec['charge'] = charge
         spec['spin_multiplicity'] = spin_multiplicity
+        if priority:
+            spec['_priority'] = priority
         task_name = self.molname + ' ' + state_name + ' ' + task_type
         from rubicon.firetasks.multistep_qchem_task \
             import QChemFrequencyDBInsertionTask
@@ -152,8 +158,10 @@ class QChemFireWorkCreator():
         return fw_freq_cal, fw_freq_db
 
     def sp_fw(self, charge, spin_multiplicity, fw_id_cal, fw_id_db,
-              solvent_method="ief-pcm", solvent="water"):
+              solvent_method="ief-pcm", solvent="water", priority=None):
         spec = self.base_spec()
+        if priority:
+            spec['_priority'] = priority
         task_type = "single point energy"
         state_name = self.get_state_name(charge, spin_multiplicity)
         title = self.molname + " " + state_name + " " + self.dft + " " + \
@@ -178,6 +186,7 @@ class QChemFireWorkCreator():
                             exchange=self.dft, basis_set=self.bs)
         qctask_sol.set_scf_initial_guess(guess="read")
         implicit_solvent = dict()
+        implicit_solvent['solvent_name'] = solvent
         if solvent_method.lower() in ['cpcm', 'ief-pcm']:
             if solvent_method.lower() == 'ief-pcm':
                 solvent_theory = 'ssvpe'
@@ -249,14 +258,14 @@ class QChemFireWorkCreator():
         return fw_sp_cal, fw_sp_db
 
 
-def multistep_ipea_fws(mol, name, mission, dupefinder=None, priority=1,
-                       parent_fwid=None):
+def multistep_ipea_fws(mol, name, mission, ref_charge, spin_multiplicities=(2, 1, 2), dupefinder=None, priority=1,
+                       parent_fwid=None, additional_user_tags=None):
     large = False
     if len(mol) > 50:
         large = True
-    fw_creator = QChemFireWorkCreator(mol=mol, molname=name, mission=mission,
-                                      dupefinder=dupefinder,
-                                      priority=priority, large=large)
+    fw_creator = QChemFireWorkCreator(
+        mol=mol, molname=name, mission=mission, dupefinder=dupefinder, priority=priority, large=large,
+        additional_user_tags=additional_user_tags)
     fwid_base = 1
     if parent_fwid:
         if not (isinstance(parent_fwid, int) or isinstance(parent_fwid, list)):
@@ -270,13 +279,12 @@ def multistep_ipea_fws(mol, name, mission, dupefinder=None, priority=1,
     cgi_cal, ngi_cal, agi_cal = (None, None, None)
     cfi_db, nfi_db, afi_db = (None, None, None)
     cgi_db, ngi_db, agi_db = (None, None, None)
-    charge = (-1, 0, 1)
-    spin_multiplicity = (2, 1, 2)
+    charges = [ref_charge + i for i in (-1, 0, 1)]
     if len(mol) > 1:
         fw_ids = zip(* [iter(range(fwid_base + 0, fwid_base + 6))] * 2)
         fws = (fw_creator.geom_fw(ch, spin, fwid_cal, fwid_db)
                for ch, spin, (fwid_cal, fwid_db)
-               in zip(charge, spin_multiplicity, fw_ids))
+               in zip(charges, spin_multiplicities, fw_ids))
         (cgi_cal, cgi_db), (ngi_cal, ngi_db), (agi_cal, agi_db) = fw_ids
         fireworks.extend(itertools.chain.from_iterable(fws))
         links_dict.update(dict(fw_ids))
@@ -285,7 +293,7 @@ def multistep_ipea_fws(mol, name, mission, dupefinder=None, priority=1,
             fw_ids = zip(* [iter(range(fwid_base + 6, fwid_base + 6 + 6))] * 2)
             fws = (fw_creator.freq_fw(ch, spin, fwid_cal, fwid_db)
                    for ch, spin, (fwid_cal, fwid_db)
-                   in zip(charge, spin_multiplicity, fw_ids))
+                   in zip(charges, spin_multiplicities, fw_ids))
             (cfi_cal, cfi_db), (nfi_cal, nfi_db), (afi_cal, afi_db) = fw_ids
             fireworks.extend(itertools.chain.from_iterable(fws))
             links_dict.update(dict(fw_ids))
@@ -296,9 +304,9 @@ def multistep_ipea_fws(mol, name, mission, dupefinder=None, priority=1,
     fw_ids = zip(* [iter(range(fwid_base + 12, fwid_base + 12 + 6))] * 2)
     fws = (fw_creator.sp_fw(ch, spin, fwid_cal, fwid_db)
            for ch, spin, (fwid_cal, fwid_db)
-           in zip(charge, spin_multiplicity, fw_ids))
+           in zip(charges, spin_multiplicities, fw_ids))
     (cspi_cal, cspi_db), (nspi_cal, nspi_db), (aspi_cal, aspi_db) = fw_ids
-    links_dict.update((dict(fw_ids)))
+    links_dict.update(dict(fw_ids))
     fireworks.extend(itertools.chain.from_iterable(fws))
     if len(mol) > 1:
         if large:
@@ -319,8 +327,9 @@ def multistep_ipea_fws(mol, name, mission, dupefinder=None, priority=1,
     return fireworks, links_dict
 
 
-def mol_to_ipea_wf(mol, name, mission, dupefinder=None, priority=1,
-                   parent_fwid=None):
-    fireworks, links_dict = multistep_ipea_fws(mol, name, mission, dupefinder,
-                                               priority, parent_fwid)
+def mol_to_ipea_wf(mol, name, mission, ref_charge, spin_multiplicities=(2, 1, 2),
+                   dupefinder=None, priority=1, parent_fwid=None, additional_user_tags=None):
+    fireworks, links_dict = multistep_ipea_fws(
+        mol, name, mission, ref_charge, spin_multiplicities, dupefinder, priority, parent_fwid,
+        additional_user_tags)
     return Workflow(fireworks, links_dict, name)

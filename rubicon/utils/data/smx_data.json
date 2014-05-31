@@ -5,9 +5,45 @@
             "SolA": 0.0,
             "SolB": 0.859,
             "SolC": 0.0,
-            "SolG": 25.589,
+            "SolG": 36.83,
             "SolH": 0.0,
             "SolN": 1.4097
+        },
+        "dimethylamine": {
+            "Dielec": 5.3,
+            "SolA": 0.182,
+            "SolB": 0.499,
+            "SolC": 0.0,
+            "SolG": 22.31,
+            "SolH": 0.0,
+            "SolN": 1.37
+        },
+        "dimethoxyethane": {
+            "Dielec": 7.2,
+            "SolA": 0.0,
+            "SolB": 0.651,
+            "SolC": 0.0,
+            "SolG": 30.8,
+            "SolH": 0.0,
+            "SolN": 1.379
+        },
+        "dimethylaniline": {
+            "Dielec": 4.9,
+            "SolA": 0.0,
+            "SolB": 0.576,
+            "SolC": 0.667,
+            "SolG": 49.94,
+            "SolH": 0.0,
+            "SolN": 1.558
+        },
+        "tetraglyme": {
+            "Dielec": 7.79,
+            "SolA": 0.000,
+            "SolB": 1.278,
+            "SolC": 0.0,
+            "SolG": 43.47,
+            "SolH": 0.0,
+            "SolN": 1.433
         }
     },
     "builtin_solvent": [
