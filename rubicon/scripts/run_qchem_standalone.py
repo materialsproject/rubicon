@@ -62,7 +62,9 @@ def run_qchem(filename):
                    qclog_file=log_filename, alt_cmd=alt_cmd, gzipped=True)
     handler = QChemErrorHandler(qchem_job=job,
                                 scf_max_cycles=scf_max_cycles,
-                                geom_max_cycles=geom_max_cycles)
+                                geom_max_cycles=geom_max_cycles,
+                                input_file=filename,
+                                output_file=output_filename)
     c = Custodian(handlers=[handler], jobs=[job], max_errors=50)
     c.run()
 
