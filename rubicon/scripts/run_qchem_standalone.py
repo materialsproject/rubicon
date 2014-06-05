@@ -109,8 +109,7 @@ def main():
     parser.add_argument("-f", "--filename", dest="filename", type=str,
                         required=True,
                         help="the QChem input filename")
-    parser.add_argument("-e", "--eliminate", dest="eli_img", type=bool,
-                        required=False, default=False, action="store_true",
+    parser.add_argument("-e", "--eliminate", dest="eli_img", action="store_true",
                         help="whether to eliminate imaginary frequency")
     parser.add_argument("-s", "--solvent", dest="solvent", type=str,
                         required=False,
