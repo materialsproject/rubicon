@@ -1,0 +1,3 @@
+import  rubicon.scripts.run_qchem_standalone as run_qchem
+
+run_qchem.main()

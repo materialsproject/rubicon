@@ -102,7 +102,7 @@ def perturb_molecule(old_mol, vib_mode, reversed_direction=False, perturb_scale=
                        spin_multiplicity=spin_multiplicity)
     return new_mol
 
-if __name__ == '__main__':
+def main():
     import argparse
     parser = argparse.ArgumentParser(
         description="Run A QChem Job for a QChem Input File")
@@ -181,4 +181,7 @@ if __name__ == '__main__':
                 eli_file_3 = base_filename + "_eli_img_3.qcinp"
                 qcinp.write_file(eli_file_3)
                 run_qchem(options.filename)
+
+if __name__ == '__main__':
+    main()
 
