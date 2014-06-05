@@ -59,7 +59,7 @@ def run_qchem(filename):
         geom_max_cycles = 500
 
     job = QchemJob(qc_exe, input_file=filename, output_file=output_filename,
-                   qclog_file=log_filename, alt_cmd=alt_cmd, gzipped=True)
+                   qclog_file=log_filename, alt_cmd=alt_cmd, gzipped=False)
     handler = QChemErrorHandler(qchem_job=job,
                                 scf_max_cycles=scf_max_cycles,
                                 geom_max_cycles=geom_max_cycles,
