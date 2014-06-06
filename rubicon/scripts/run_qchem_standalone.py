@@ -127,7 +127,7 @@ def main():
         if qcout.data[-1]['frequencies'][0]["frequency"] < -0.00:
             os.system("tar czvf img_freq_1.tar.gz *")
             old_mol = qcout.data[-1]["molecules"][-1]
-            vib_mode = ['frequencies'][0]["vib_mode"]
+            vib_mode = qcout.data[-1]['frequencies'][0]["vib_mode"]
             new_mol = perturb_molecule(old_mol, vib_mode)
             qctask_freq = qcout.data[-1]["input"]
             qctask_freq.mol = "read"
@@ -144,7 +144,7 @@ def main():
             if qcout.data[-1]['frequencies'][0]["frequency"] < -0.00:
                 os.system("tar czvf img_freq_2.tar.gz *")
                 old_mol = qcout.data[-1]["molecules"][-1]
-                vib_mode = ['frequencies'][0]["vib_mode"]
+                vib_mode = qcout.data[-1]['frequencies'][0]["vib_mode"]
                 new_mol = perturb_molecule(old_mol, vib_mode)
                 qctask_freq = qcout.data[-1]["input"]
                 qctask_freq.mol = "read"
@@ -166,7 +166,7 @@ def main():
             if qcout.data[-1]['frequencies'][0]["frequency"] < -0.00:
                 os.system("tar czvf img_freq_3.tar.gz *")
                 old_mol = qcout.data[-1]["molecules"][-1]
-                vib_mode = ['frequencies'][0]["vib_mode"]
+                vib_mode = qcout.data[-1]['frequencies'][0]["vib_mode"]
                 new_mol = perturb_molecule(old_mol, vib_mode)
                 qctask_freq = qcout.data[-1]["input"]
                 qctask_freq.mol = "read"
