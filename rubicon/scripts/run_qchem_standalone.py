@@ -137,7 +137,7 @@ def main():
             qcinp = QcInput([qctask_opt, qctask_freq])
             eli_file_1 = base_filename + "_eli_img_1.qcinp"
             qcinp.write_file(eli_file_1)
-            run_qchem(options.filename)
+            run_qchem(eli_file_1)
 
             output_filename = base_filename + "_eli_img_1.qcout"
             qcout = QcOutput(output_filename)
@@ -159,7 +159,7 @@ def main():
                         j.set_geom_max_iterations(100)
                 eli_file_2 = base_filename + "_eli_img_2.qcinp"
                 qcinp.write_file(eli_file_2)
-                run_qchem(options.filename)
+                run_qchem(eli_file_2)
 
             output_filename = base_filename + "_eli_img_2.qcout"
             qcout = QcOutput(output_filename)
@@ -181,7 +181,7 @@ def main():
                         j.set_geom_max_iterations(100)
                 eli_file_3 = base_filename + "_eli_img_3.qcinp"
                 qcinp.write_file(eli_file_3)
-                run_qchem(options.filename)
+                run_qchem(eli_file_3)
 
 if __name__ == '__main__':
     main()
