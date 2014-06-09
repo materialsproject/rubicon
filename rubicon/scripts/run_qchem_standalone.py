@@ -124,6 +124,14 @@ def main():
         base_filename = os.path.splitext(options.filename)[0]
         output_filename = base_filename + ".qcout"
         qcout = QcOutput(output_filename)
+        charge = None
+        spin_multiplicity = None
+        for d in qcout["data"]:
+            j = d["input"]
+            if j.charge:
+                charge = j.charge
+            if j.spin_multiplicity:
+                spin_multiplicity = j.spin_multiplicity
         if qcout.data[-1]['frequencies'][0]["frequency"] < -0.00:
             os.system("tar czvf img_freq_1.tar.gz *")
             old_mol = qcout.data[-1]["molecules"][-1]
@@ -131,6 +139,8 @@ def main():
             new_mol = perturb_molecule(old_mol, vib_mode)
             qctask_freq = qcout.data[-1]["input"]
             qctask_freq.mol = "read"
+            qctask_freq.charge = charge
+            qctask_freq.spin_multiplicity = spin_multiplicity
             qctask_opt = copy.deepcopy(qctask_freq)
             qctask_opt.params["rem"]["jobtype"] = "opt"
             qctask_opt.mol = new_mol
@@ -148,6 +158,8 @@ def main():
                 new_mol = perturb_molecule(old_mol, vib_mode)
                 qctask_freq = qcout.data[-1]["input"]
                 qctask_freq.mol = "read"
+                qctask_freq.charge = charge
+                qctask_freq.spin_multiplicity = spin_multiplicity
                 qctask_opt = copy.deepcopy(qctask_freq)
                 qctask_opt.params["rem"]["jobtype"] = "opt"
                 qctask_opt.mol = new_mol
@@ -161,27 +173,29 @@ def main():
                 qcinp.write_file(eli_file_2)
                 run_qchem(eli_file_2)
 
-            output_filename = base_filename + "_eli_img_2.qcout"
-            qcout = QcOutput(output_filename)
-            if qcout.data[-1]['frequencies'][0]["frequency"] < -0.00:
-                os.system("tar czvf img_freq_3.tar.gz *")
-                old_mol = qcout.data[-1]["molecules"][-1]
-                vib_mode = qcout.data[-1]['frequencies'][0]["vib_mode"]
-                new_mol = perturb_molecule(old_mol, vib_mode)
-                qctask_freq = qcout.data[-1]["input"]
-                qctask_freq.mol = "read"
-                qctask_opt = copy.deepcopy(qctask_freq)
-                qctask_opt.params["rem"]["jobtype"] = "opt"
-                qctask_opt.mol = new_mol
-                qcinp = QcInput([qctask_opt, qctask_freq])
-                for j in qcinp.jobs:
-                    j.set_dft_grid(90, 590)
-                    if j.params["rem"]["jobtype"] == "opt":
-                        j.scale_geom_opt_threshold(0.1, 0.1, 0.1)
-                        j.set_geom_max_iterations(100)
-                eli_file_3 = base_filename + "_eli_img_3.qcinp"
-                qcinp.write_file(eli_file_3)
-                run_qchem(eli_file_3)
+                output_filename = base_filename + "_eli_img_2.qcout"
+                qcout = QcOutput(output_filename)
+                if qcout.data[-1]['frequencies'][0]["frequency"] < -0.00:
+                    os.system("tar czvf img_freq_3.tar.gz *")
+                    old_mol = qcout.data[-1]["molecules"][-1]
+                    vib_mode = qcout.data[-1]['frequencies'][0]["vib_mode"]
+                    new_mol = perturb_molecule(old_mol, vib_mode)
+                    qctask_freq = qcout.data[-1]["input"]
+                    qctask_freq.mol = "read"
+                    qctask_freq.charge = charge
+                    qctask_freq.spin_multiplicity = spin_multiplicity
+                    qctask_opt = copy.deepcopy(qctask_freq)
+                    qctask_opt.params["rem"]["jobtype"] = "opt"
+                    qctask_opt.mol = new_mol
+                    qcinp = QcInput([qctask_opt, qctask_freq])
+                    for j in qcinp.jobs:
+                        j.set_dft_grid(90, 590)
+                        if j.params["rem"]["jobtype"] == "opt":
+                            j.scale_geom_opt_threshold(0.1, 0.1, 0.1)
+                            j.set_geom_max_iterations(100)
+                    eli_file_3 = base_filename + "_eli_img_3.qcinp"
+                    qcinp.write_file(eli_file_3)
+                    run_qchem(eli_file_3)
 
 if __name__ == '__main__':
     main()
