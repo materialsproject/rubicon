@@ -144,8 +144,6 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         d = self.build_molecule_structure_properties(docs)
         if d and len(d) > 0:
             molecule.update(d)
-        else:
-            return 2
         molecule['created_at'] = datetime.datetime.now()
         molecule['updated_at'] = datetime.datetime.now()
         self._insert_molecule(molecule)

@@ -49,10 +49,11 @@ def transform_molecule_doc(mol1):
     mol2["xyz"] = mol1["vacuum_properties"]["xyz"]["neutral"]
     mol2["inchi"] = mol1["vacuum_properties"]["inchi"]["neutral"]
 
-    if "IP" in mol1:
-        mol2["IE"] = mol1["IP"]["sol"]
-    if "EA" in mol1:
-        mol2["EA"] = mol1["EA"]["sol"]
+    if "solvated_properties" in mol1 and "water" in mol1["solvated_properties"]:
+        if "IP" in mol1["solvated_properties"]["water"]:
+            mol2["IE"] = mol1["solvated_properties"]["water"]["IP"]
+        if "EA" in mol1["solvated_properties"]["water"]:
+            mol2["EA"] = mol1["solvated_properties"]["water"]["EA"]
 
     mol2["svg"] = mol1["svg"]
     return mol2
