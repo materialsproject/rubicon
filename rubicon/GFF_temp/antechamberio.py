@@ -12,7 +12,7 @@ import shlex
 from gff import Gff
 from monty.io import ScratchDir
 import tempfile
-from rubicon.gff.topology import TopMol
+from rubicon.GFF_temp.topology import TopMol
 
 ANTECHAMBER_DEBUG = False
 
