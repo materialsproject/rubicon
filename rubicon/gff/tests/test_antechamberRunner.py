@@ -1,7 +1,7 @@
 from unittest import TestCase
 import unittest
 from pymatgen import Molecule
-from rubicon.GFF_temp.antechamberio import AntechamberRunner
+from rubicon.gff.antechamberio import AntechamberRunner
 
 __author__ = 'navnidhirajput'
 
