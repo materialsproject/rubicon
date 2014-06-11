@@ -1,6 +1,9 @@
+from collections import defaultdict
+import copy
 import datetime
 import json
 import os
+from pymatgen.io.babelio import BabelMolAdaptor
 from pymongo import MongoClient
 import yaml
 from rubicon.utils.snl.egsnl import get_meta_from_structure
@@ -27,7 +30,9 @@ class SubmissionMongoAdapterEG(object):
             self.database.authenticate(username, password)
 
         self.jobs = self.database.jobs
+        self.reactions = self.database.reactions
         self.id_assigner = self.database.id_assigner
+        self.reaction_id_assigner = self.database.reaction_id_assigner
 
         self._update_indices()
 
@@ -35,19 +40,40 @@ class SubmissionMongoAdapterEG(object):
         self._restart_id_assigner_at(1)
         self.jobs.remove()
 
+    def _reset_reactions_collection(self):
+        self._restart_reaction_id_assigner_at(1)
+        self.reactions.remove()
+
     def _update_indices(self):
         self.jobs.ensure_index('submission_id', unique=True)
         self.jobs.ensure_index('state')
         self.jobs.ensure_index('submitter_email')
+
+        self.reactions.ensure_index('reaction_id', unique=True)
+        self.reactions.ensure_index('all_inchis')
+        self.reactions.ensure_index('reactant_inchis')
+        self.reactions.ensure_index('product_inchis')
+        self.reactions.ensure_index('reactant_submission_ids')
+        self.reactions.ensure_index('product_submission_ids')
+        self.reactions.ensure_index('submitter_email')
 
     def _get_next_submission_id(self):
         return self.id_assigner.find_and_modify(
             query={}, update={'$inc': {'next_submission_id': 1}})[
                 'next_submission_id']
 
+    def _get_next_reaction_id(self):
+        return self.id_assigner.find_and_modify(
+            query={}, update={'$inc': {'next_submission_id': 1}})[
+            'next_submission_id']
+
     def _restart_id_assigner_at(self, next_submission_id):
         self.id_assigner.remove()
         self.id_assigner.insert({"next_submission_id": next_submission_id})
+
+    def _restart_reaction_id_assigner_at(self, next_reaction_id):
+        self.reaction_id_assigner.remove()
+        self.reaction_id_assigner.insert({"next_reaction_id": next_reaction_id})
 
     def submit_snl(self, snl, submitter_email, parameters=None):
         parameters = parameters if parameters else {}
@@ -67,6 +93,67 @@ class SubmissionMongoAdapterEG(object):
 
         self.jobs.insert(d)
         return d['submission_id']
+
+    def submit_reaction(self, reactant_snls, product_snls, submitter_email, parameters=None):
+        reaction_element_count = defaultdict(default_factory=lambda: 0)
+        for snl, n in reactant_snls:
+            mol = snl.structure
+            for site in mol.sites:
+                element = site.species[0]['element']
+                reaction_element_count[element] += 1
+        product_element_count = defaultdict(default_factory=lambda: 0)
+        for snl, n in product_snls:
+            mol = snl.structure
+            for site in mol.sites:
+                element = site.species[0]['element']
+                product_element_count[element] += 1
+        if reaction_element_count != product_element_count:
+            raise Exception("Number of atoms is inconsistant in reactant and product")
+        params = copy.deepcopy(parameters)
+        if "workflow" not in params:
+            params["workflow"] = "single point energy"
+        reactant_submission_ids = []
+        for snl, n in reactant_snls:
+            submission_id = self.submit_snl(snl, submitter_email, parameters)
+            reactant_submission_ids.append(submission_id)
+        product_submission_ids = []
+        for snl, n in product_snls:
+            submission_id = self.submit_snl(snl, submitter_email, parameters)
+            product_submission_ids.append(submission_id)
+        reactant_inchis = []
+        product_inchis = []
+        num_reactants = []
+        num_products = []
+        for snl, n in reactant_snls:
+            mol = snl.structure
+            bb = BabelMolAdaptor(mol)
+            pbmol = bb.pybel_mol
+            inchi = pbmol.write("inchi").strip()
+            reactant_inchis.append(inchi)
+            num_reactants.append(n)
+        for snl, n in product_snls:
+            mol = snl.structure
+            bb = BabelMolAdaptor(mol)
+            pbmol = bb.pybel_mol
+            inchi = pbmol.write("inchi").strip()
+            product_inchis.append(inchi)
+            num_products.append(n)
+        all_inchis = reactant_inchis + product_inchis
+        d = dict()
+        d['submitter_email'] = submitter_email
+        d['parameters'] = parameters
+        d['state'] = 'SUBMITTED'
+        d['reaction_id'] = self._get_next_reaction_id()
+        d['submitted_at'] = datetime.datetime.utcnow().isoformat()
+        d["reactant_snls"] = [s[0] for s in reactant_snls]
+        d["product_snls"] = [s[0] for s in product_snls]
+        d['all_inchis'] = all_inchis
+        d['reactant_inchis'] = reactant_inchis
+        d['product_inchis'] = product_inchis
+        d['num_reactions'] = num_reactants
+        d['num_products'] = num_products
+        d['reactant_submission_ids'] = reactant_submission_ids
+        d['product_submission_ids'] = product_submission_ids
 
     def resubmit(self, submission_id):
         self.jobs.update(

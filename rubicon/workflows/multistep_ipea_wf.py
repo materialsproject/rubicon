@@ -14,8 +14,6 @@ __author__ = 'xiaohuiqu'
 class QChemFireWorkCreator():
     def __init__(self, mol, molname, mission, additional_user_tags=None,
                  dupefinder=None, priority=1, update_spec=None, large=False):
-        self.bs = '6-31+G*'
-        self.dft = 'B3LYP'
         self.molname = molname
         self.mol = mol
         self.large = large
@@ -36,7 +34,6 @@ class QChemFireWorkCreator():
         spec["_trackers"] = [tracker_out, tracker_std, tracker_joberr,
                              tracker_jobout]
         spec['run_tags'] = dict()
-        spec['run_tags']['methods'] = [self.bs.lower(), self.dft.lower()]
         spec['implicit_solvent'] = {}
         spec['inchi'] = initial_inchi
         spec['num_atoms'] = len(mol)
@@ -56,41 +53,70 @@ class QChemFireWorkCreator():
         spin_state = {1: "singlet", 2: "doublet", 3: "triplet"}
         return spin_state[spin_multiplicity] + " " + charge_state[charge]
 
+    @staticmethod
+    def get_exchange_correlation_basis_auxbasis_remparams(method):
+        if method is None:
+            method = "B3LYP/6-31+G*"
+        aux_basis = None
+        correlation = None
+        rem_params = None
+        theoretical_level, basis_set = method.split('/')
+        if theoretical_level.lower() == "b3lyp-xdm":
+            exchange = 'b3lyp'
+            rem_params = {"DFTVDW_JOBNUMBER": 1,
+                          "DFTVDW_METHOD": 1,
+                          "DFTVDW_PRINT": 1,
+                          "DFTVDW_KAI": 800,
+                          "DFTVDW_USE_ELE_DRV": 1}
+        elif theoretical_level.lower() == "xyjgos":
+            exchange = "xygjos"
+            if basis_set == "6-31+G*":
+                aux_basis = "rimp2-aug-cc-pvdz"
+            else:
+                aux_basis = "rimp2-aug-cc-pvtz"
+        elif theoretical_level.lower() == "pbe-d3":
+            exchange = 'pbe'
+            correlation = 'pbe'
+            rem_params = {"DFT_D": "EMPIRICAL_GRIMME3",
+                          "DFT_D3_S6": 1000,
+                          "DFT_D3_RS6": 1217,
+                          "DFT_D3_S8": 722,
+                          "DFT_D3_3BODY": False}
+        else:
+            exchange = 'b3lyp'
+        method_token = [t for t in [basis_set, exchange, aux_basis, correlation, rem_params]
+                        if t]
+        return exchange, correlation, basis_set,  aux_basis, rem_params, method_token
+
+
     def geom_fw(self, charge, spin_multiplicity, fw_id_cal, fw_id_db,
-                priority=None):
+                priority=None, method=None):
         task_type = "geometry optimization"
         state_name = self.get_state_name(charge, spin_multiplicity)
-        title = self.molname + " " + state_name + " " + self.dft + " " + \
-            self.bs + " " + task_type
+        if not method:
+            if self.large:
+                method = "PBE-D3/6-31+G*"
+            else:
+                method = "B3lYP/6-31+G*"
+        title = self.molname + " " + state_name + " " + method + " " + task_type
+        exchange, correlation, basis_set,  aux_basis, rem_params, method_token = self.\
+            get_exchange_correlation_basis_auxbasis_remparams(method)
+        qctask = QcTask(self.mol, charge=charge, spin_multiplicity=spin_multiplicity,
+                        jobtype="opt", title=title, exchange=exchange, correlation=correlation,
+                        basis_set=basis_set, aux_basis_set=aux_basis, rem_params=rem_params)
         if self.large:
-            title = self.molname + " " + state_name + " PBE-D3/6-31+G* " + \
-                task_type
-            qctask = QcTask(self.mol, charge=charge,
-                            spin_multiplicity=spin_multiplicity,
-                            jobtype="opt", title=title,
-                            exchange='pbe', correlation='pbe',
-                            basis_set=self.bs,
-                            rem_params={"DFT_D": "EMPIRICAL_GRIMME3",
-                                        "DFT_D3_S6": 1000,
-                                        "DFT_D3_RS6": 1217,
-                                        "DFT_D3_S8": 722,
-                                        "DFT_D3_3BODY": False})
             qctask.set_geom_max_iterations(200)
             qctask.set_scf_algorithm_and_iterations(iterations=100)
             qctask.scale_geom_opt_threshold(gradient=1.0,
                                             displacement=10.0,
                                             energy=10.0)
-        else:
-            qctask = QcTask(self.mol, charge=charge,
-                            spin_multiplicity=spin_multiplicity,
-                            jobtype="opt", title=title,
-                            exchange=self.dft, basis_set=self.bs)
         qcinp = QcInput([qctask])
         spec = self.base_spec()
         spec["qcinp"] = qcinp.to_dict
         spec['task_type'] = task_type
         spec['charge'] = charge
         spec['spin_multiplicity'] = spin_multiplicity
+        spec['run_tags']['methods'] = method_token
         if priority:
             spec['_priority'] = priority
         task_name = self.molname + ' ' + state_name + ' ' + task_type
@@ -110,36 +136,29 @@ class QChemFireWorkCreator():
         return fw_geom_cal, fw_geom_db
 
     def freq_fw(self, charge, spin_multiplicity, fw_id_cal, fw_id_db,
-                priority=None):
+                priority=None, method=None):
+        if not method:
+            if self.large:
+                method = "PBE-D3/6-31+G*"
+            else:
+                method = "B3lYP/6-31+G*"
         task_type = "vibrational frequency"
         state_name = self.get_state_name(charge, spin_multiplicity)
-        title = self.molname + " " + state_name + " " + self.dft + " " +\
-            self.bs + " " + task_type
+        title = self.molname + " " + state_name + " " + method + " " + task_type
+        exchange, correlation, basis_set,  aux_basis, rem_params, method_token = self. \
+            get_exchange_correlation_basis_auxbasis_remparams(method)
+        qctask = QcTask(self.mol, charge=charge, spin_multiplicity=spin_multiplicity,
+                        jobtype="freq", title=title, exchange=exchange, correlation=correlation,
+                        basis_set=basis_set, aux_basis_set=aux_basis, rem_params=rem_params)
         if self.large:
-            title = self.molname + " " + state_name + " PBE-D3/6-31+G* " + \
-                task_type
-            qctask = QcTask(self.mol, charge=charge,
-                            spin_multiplicity=spin_multiplicity,
-                            jobtype="freq", title=title,
-                            exchange='pbe', correlation='pbe',
-                            basis_set=self.bs,
-                            rem_params={"DFT_D": "EMPIRICAL_GRIMME3",
-                                        "DFT_D3_S6": 1000,
-                                        "DFT_D3_RS6": 1217,
-                                        "DFT_D3_S8": 722,
-                                        "DFT_D3_3BODY": False})
             qctask.set_scf_algorithm_and_iterations(iterations=100)
-        else:
-            qctask = QcTask(self.mol, charge=charge,
-                            spin_multiplicity=spin_multiplicity,
-                            jobtype="freq", title=title,
-                            exchange=self.dft, basis_set=self.bs)
         qcinp = QcInput([qctask])
         spec = self.base_spec()
         spec["qcinp"] = qcinp.to_dict
         spec['task_type'] = task_type
         spec['charge'] = charge
         spec['spin_multiplicity'] = spin_multiplicity
+        spec['run_tags']['methods'] = method_token
         if priority:
             spec['_priority'] = priority
         task_name = self.molname + ' ' + state_name + ' ' + task_type
@@ -158,20 +177,29 @@ class QChemFireWorkCreator():
         return fw_freq_cal, fw_freq_db
 
     def sp_fw(self, charge, spin_multiplicity, fw_id_cal, fw_id_db,
-              solvent_method="ief-pcm", solvent="water", priority=None):
+              solvent_method="ief-pcm", solvent="water", priority=None, method=None,
+              population_method=None):
+        if not method:
+            method = "B3LYP/6-31+G*"
         spec = self.base_spec()
         if priority:
             spec['_priority'] = priority
         task_type = "single point energy"
         state_name = self.get_state_name(charge, spin_multiplicity)
-        title = self.molname + " " + state_name + " " + self.dft + " " + \
-            self.bs + " " + task_type
+        title = self.molname + " " + state_name + " " + method + " " + task_type
         title += "\n Gas Phase"
-        qctask_vac = QcTask(self.mol, charge=charge,
-                            spin_multiplicity=spin_multiplicity,
-                            jobtype="sp", title=title,
-                            exchange=self.dft, basis_set=self.bs,
-                            rem_params={"CHELPG": True})
+        exchange, correlation, basis_set,  aux_basis, rem_params, method_token = self. \
+            get_exchange_correlation_basis_auxbasis_remparams(method)
+        if population_method:
+            if not rem_params:
+                rem_params = dict()
+            if population_method.lower() == "nbo":
+                rem_params["nbo"] = 1
+            elif population_method.lower() == "chelpg":
+                rem_params["chelpg"] = True
+        qctask_vac = QcTask(self.mol, charge=charge, spin_multiplicity=spin_multiplicity,
+                            jobtype="sp", title=title, exchange=exchange, correlation=correlation,
+                            basis_set=basis_set, aux_basis_set=aux_basis, rem_params=rem_params)
         if not self.large:
             qctask_vac.set_dft_grid(128, 302)
             qctask_vac.set_integral_threshold(12)
@@ -180,10 +208,9 @@ class QChemFireWorkCreator():
             qctask_vac.set_scf_algorithm_and_iterations(iterations=100)
 
         title = " Solution Phase, {}".format(solvent)
-        qctask_sol = QcTask(self.mol, charge=charge,
-                            spin_multiplicity=spin_multiplicity,
-                            jobtype="sp", title=title,
-                            exchange=self.dft, basis_set=self.bs)
+        qctask_sol = QcTask(self.mol, charge=charge, spin_multiplicity=spin_multiplicity,
+                            jobtype="sp", title=title, exchange=exchange, correlation=correlation,
+                            basis_set=basis_set, aux_basis_set=aux_basis, rem_params=rem_params)
         qctask_sol.set_scf_initial_guess(guess="read")
         implicit_solvent = dict()
         implicit_solvent['solvent_name'] = solvent
@@ -240,7 +267,7 @@ class QChemFireWorkCreator():
         spec['task_type'] = task_type
         spec['charge'] = charge
         spec['spin_multiplicity'] = spin_multiplicity
-
+        spec['run_tags']['methods'] = method_token
         spec['implicit_solvent'] = implicit_solvent
         task_name = self.molname + ' ' + state_name + ' ' + task_type
         from rubicon.firetasks.multistep_qchem_task \
