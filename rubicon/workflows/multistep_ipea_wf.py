@@ -147,6 +147,7 @@ class QChemFireWorkCreator():
         title = self.molname + " " + state_name + " " + method + " " + task_type
         exchange, correlation, basis_set,  aux_basis, rem_params, method_token = self. \
             get_exchange_correlation_basis_auxbasis_remparams(method)
+        rem_params["IDERIV"] = 1
         qctask = QcTask(self.mol, charge=charge, spin_multiplicity=spin_multiplicity,
                         jobtype="freq", title=title, exchange=exchange, correlation=correlation,
                         basis_set=basis_set, aux_basis_set=aux_basis, rem_params=rem_params)
