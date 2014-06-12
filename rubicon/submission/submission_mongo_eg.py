@@ -95,6 +95,17 @@ class SubmissionMongoAdapterEG(object):
         return d['submission_id']
 
     def submit_reaction(self, reactant_snls, product_snls, submitter_email, parameters=None):
+        """
+            Submit a reaction. This task will be separated to several single point energy calculations, and submitted
+            as individual molecule.
+
+            Args:
+                reactant_snls: List of tuple(snl, count, nickname).
+                product_snls: List of tuple(snl, count, nickname).
+                submitter_email: Email.
+                parameters: dict of parameter. Expected parameters are 1) method: QChem theoretival method. e.g.
+                    B3LYP-XDM/6-31+G*; 2) solvent: implicit solvent in energy calcuation. e.g. THF; ...
+        """
         reaction_element_count = defaultdict(default_factory=lambda: 0)
         for snl, n, nick_name in reactant_snls:
             mol = snl.structure
