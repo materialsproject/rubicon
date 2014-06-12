@@ -96,13 +96,13 @@ class SubmissionMongoAdapterEG(object):
 
     def submit_reaction(self, reactant_snls, product_snls, submitter_email, parameters=None):
         reaction_element_count = defaultdict(default_factory=lambda: 0)
-        for snl, n in reactant_snls:
+        for snl, n, nick_name in reactant_snls:
             mol = snl.structure
             for site in mol.sites:
                 element = site.species[0]['element']
                 reaction_element_count[element] += 1
         product_element_count = defaultdict(default_factory=lambda: 0)
-        for snl, n in product_snls:
+        for snl, n, nick_name in product_snls:
             mol = snl.structure
             for site in mol.sites:
                 element = site.species[0]['element']
@@ -113,30 +113,38 @@ class SubmissionMongoAdapterEG(object):
         if "workflow" not in params:
             params["workflow"] = "single point energy"
         reactant_submission_ids = []
-        for snl, n in reactant_snls:
-            submission_id = self.submit_snl(snl, submitter_email, parameters)
+        for snl, n, nick_name in reactant_snls:
+            params_t = copy.deepcopy(params)
+            params_t["nick_name"] = nick_name
+            submission_id = self.submit_snl(snl, submitter_email, params_t)
             reactant_submission_ids.append(submission_id)
         product_submission_ids = []
-        for snl, n in product_snls:
-            submission_id = self.submit_snl(snl, submitter_email, parameters)
+        for snl, n, nick_name in product_snls:
+            params_t = copy.deepcopy(params)
+            params_t["nick_name"] = nick_name
+            submission_id = self.submit_snl(snl, submitter_email, params_t)
             product_submission_ids.append(submission_id)
         reactant_inchis = []
         product_inchis = []
         num_reactants = []
         num_products = []
-        for snl, n in reactant_snls:
+        reactant_nicknames = []
+        product_nicknames = []
+        for snl, n, nick_name in reactant_snls:
             mol = snl.structure
             bb = BabelMolAdaptor(mol)
             pbmol = bb.pybel_mol
             inchi = pbmol.write("inchi").strip()
             reactant_inchis.append(inchi)
+            reactant_nicknames.append(nick_name)
             num_reactants.append(n)
-        for snl, n in product_snls:
+        for snl, n, nick_name in product_snls:
             mol = snl.structure
             bb = BabelMolAdaptor(mol)
             pbmol = bb.pybel_mol
             inchi = pbmol.write("inchi").strip()
             product_inchis.append(inchi)
+            product_nicknames.append(nick_name)
             num_products.append(n)
         all_inchis = reactant_inchis + product_inchis
         d = dict()
@@ -154,6 +162,8 @@ class SubmissionMongoAdapterEG(object):
         d['num_products'] = num_products
         d['reactant_submission_ids'] = reactant_submission_ids
         d['product_submission_ids'] = product_submission_ids
+        d['reactant_nicknames'] = reactant_nicknames
+        d['product_nicknames'] = product_nicknames
 
     def resubmit(self, submission_id):
         self.jobs.update(
