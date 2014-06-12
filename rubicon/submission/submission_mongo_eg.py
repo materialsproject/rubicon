@@ -111,13 +111,13 @@ class SubmissionMongoAdapterEG(object):
             mol = snl.structure
             for site in mol.sites:
                 element = site.specie.symbol
-                reaction_element_count[element] += 1
+                reaction_element_count[element] += n
         product_element_count = defaultdict(lambda: 0)
         for snl, n, nick_name in product_snls:
             mol = snl.structure
             for site in mol.sites:
                 element = site.specie.symbol
-                product_element_count[element] += 1
+                product_element_count[element] += n
         if reaction_element_count != product_element_count:
             raise Exception("Number of atoms is inconsistant in reactant and product")
         params = copy.deepcopy(parameters)
