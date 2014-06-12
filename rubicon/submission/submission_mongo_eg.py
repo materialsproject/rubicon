@@ -175,7 +175,7 @@ class SubmissionMongoAdapterEG(object):
         d['product_submission_ids'] = product_submission_ids
         d['reactant_nicknames'] = reactant_nicknames
         d['product_nicknames'] = product_nicknames
-        self.jobs.insert(d)
+        self.reactions.insert(d)
         return d['reaction_id']
 
     def resubmit(self, submission_id):
