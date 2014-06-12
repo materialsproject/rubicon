@@ -33,24 +33,22 @@ def single_point_energy_fws(mol, name, mission, parameters, dupefinder=None, pri
         geom_cal_fwid, geom_db_fwid = fwid_base + 0, fwid_base + 1
         fw_geom = fw_creator.geom_fw(
             charge, spin_multiplicity, geom_cal_fwid, geom_db_fwid, priority, geom_method)
-        fws.append(fw_geom)
+        fws.extend(fw_geom)
         links_dict[geom_cal_fwid] = geom_db_fwid
 
         freq_cal_fwid, freq_db_fwid = fwid_base + 2, fwid_base + 3
         fw_freq = fw_creator.freq_fw(
             charge, spin_multiplicity, freq_cal_fwid, freq_db_fwid, priority, geom_method)
-        fws.append(fw_freq)
+        fws.extend(fw_freq)
         links_dict[geom_db_fwid] = freq_cal_fwid
         links_dict[freq_cal_fwid] = freq_db_fwid
 
     sp_cal_fwid, sp_db_fwid = fwid_base + 4, fwid_base + 5
     fw_sp = fw_creator.sp_fw(
         charge, spin_multiplicity, sp_cal_fwid, sp_db_fwid, solvent_method="sm12mk", solvent=solvent,
-        priority=priority, method=energy_method, population_method=population_method
-    )
-    fws.append(fw_sp)
+        priority=priority, method=energy_method, population_method=population_method)
+    fws.extend(fw_sp)
     links_dict[sp_cal_fwid] = sp_db_fwid
-    print parent_fwid
     if len(mol) > 1:
         links_dict[freq_db_fwid] = sp_cal_fwid
         for pfw_id in parent_fwid:
@@ -58,7 +56,6 @@ def single_point_energy_fws(mol, name, mission, parameters, dupefinder=None, pri
     else:
         for pfw_id in parent_fwid:
             links_dict[pfw_id] = sp_cal_fwid
-
     return fws, links_dict
 
 
