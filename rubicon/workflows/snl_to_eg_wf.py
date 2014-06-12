@@ -6,6 +6,7 @@ from rubicon.firetasks.egsnl_tasks import AddEGSNLTask
 from rubicon.utils.snl.egsnl import EGStructureNL, get_meta_from_structure
 from rubicon.workflows.multi_solvent_ipea_wf import multi_solvent_ipea_fws
 from rubicon.workflows.multistep_ipea_wf import multistep_ipea_fws
+from rubicon.workflows.single_point_energy_wf import single_point_energy_fws
 from rubicon.workflows.solvation_energy_wf import solvation_energy_fws
 
 
@@ -58,6 +59,10 @@ def snl_to_eg_wf(snl, parameters=None):
         fws_tasks, connections = solvation_energy_fws(
             mol=snl.structure, name=molname, mission=mission, dupefinder=DupeFinderEG(), priority=priority,
             parent_fwid=1, solvents=solvents, additional_user_tags=use_tags)
+    elif workflow_type == "single point energy":
+        fws_tasks, connections = single_point_energy_fws(
+            mol=snl.structure, name=molname, mission=mission, parameters=parameters, dupefinder=DupeFinderEG(),
+            priority=priority, parent_fwid=1, additional_user_tags=use_tags)
     else:
         raise ValueError('Workflow "{}" is not supported yet'.
                          format(workflow_type))
