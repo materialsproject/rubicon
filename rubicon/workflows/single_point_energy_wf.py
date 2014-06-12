@@ -50,11 +50,14 @@ def single_point_energy_fws(mol, name, mission, parameters, dupefinder=None, pri
     )
     fws.append(fw_sp)
     links_dict[sp_cal_fwid] = sp_db_fwid
+    print parent_fwid
     if len(mol) > 1:
         links_dict[freq_db_fwid] = sp_cal_fwid
-        links_dict[parent_fwid] = geom_cal_fwid
+        for pfw_id in parent_fwid:
+            links_dict[pfw_id] = geom_cal_fwid
     else:
-        links_dict[parent_fwid] = sp_cal_fwid
+        for pfw_id in parent_fwid:
+            links_dict[pfw_id] = sp_cal_fwid
 
     return fws, links_dict
 
