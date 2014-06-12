@@ -63,9 +63,9 @@ class SubmissionMongoAdapterEG(object):
                 'next_submission_id']
 
     def _get_next_reaction_id(self):
-        return self.id_assigner.find_and_modify(
-            query={}, update={'$inc': {'next_submission_id': 1}})[
-            'next_submission_id']
+        return self.reaction_id_assigner.find_and_modify(
+            query={}, update={'$inc': {'next_reaction_id': 1}})[
+            'next_reaction_id']
 
     def _restart_id_assigner_at(self, next_submission_id):
         self.id_assigner.remove()
