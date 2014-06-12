@@ -110,7 +110,7 @@ class SubmissionMongoAdapterEG(object):
         for snl, n, nick_name in reactant_snls:
             mol = snl.structure
             for site in mol.sites:
-                element = site.species[0]['element']
+                element = site.specie.symbol
                 reaction_element_count[element] += 1
         product_element_count = defaultdict(default_factory=lambda: 0)
         for snl, n, nick_name in product_snls:
