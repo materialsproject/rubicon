@@ -169,7 +169,7 @@ class SubmissionMongoAdapterEG(object):
         d['all_inchis'] = all_inchis
         d['reactant_inchis'] = reactant_inchis
         d['product_inchis'] = product_inchis
-        d['num_reactions'] = num_reactants
+        d['num_reactants'] = num_reactants
         d['num_products'] = num_products
         d['reactant_submission_ids'] = reactant_submission_ids
         d['product_submission_ids'] = product_submission_ids
