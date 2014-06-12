@@ -164,8 +164,8 @@ class SubmissionMongoAdapterEG(object):
         d['state'] = 'SUBMITTED'
         d['reaction_id'] = self._get_next_reaction_id()
         d['submitted_at'] = datetime.datetime.utcnow().isoformat()
-        d["reactant_snls"] = [s[0] for s in reactant_snls]
-        d["product_snls"] = [s[0] for s in product_snls]
+        d["reactant_snls"] = [s[0].to_dict for s in reactant_snls]
+        d["product_snls"] = [s[0].to_dict for s in product_snls]
         d['all_inchis'] = all_inchis
         d['reactant_inchis'] = reactant_inchis
         d['product_inchis'] = product_inchis
