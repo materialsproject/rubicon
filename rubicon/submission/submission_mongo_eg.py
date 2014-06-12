@@ -106,17 +106,17 @@ class SubmissionMongoAdapterEG(object):
                 parameters: dict of parameter. Expected parameters are 1) method: QChem theoretival method. e.g.
                     B3LYP-XDM/6-31+G*; 2) solvent: implicit solvent in energy calcuation. e.g. THF; ...
         """
-        reaction_element_count = defaultdict(default_factory=lambda: 0)
+        reaction_element_count = defaultdict(lambda: 0)
         for snl, n, nick_name in reactant_snls:
             mol = snl.structure
             for site in mol.sites:
                 element = site.specie.symbol
                 reaction_element_count[element] += 1
-        product_element_count = defaultdict(default_factory=lambda: 0)
+        product_element_count = defaultdict(lambda: 0)
         for snl, n, nick_name in product_snls:
             mol = snl.structure
             for site in mol.sites:
-                element = site.species[0]['element']
+                element = site.specie.symbol
                 product_element_count[element] += 1
         if reaction_element_count != product_element_count:
             raise Exception("Number of atoms is inconsistant in reactant and product")
