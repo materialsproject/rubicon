@@ -42,7 +42,8 @@ class TaskKeys:
         'formula', 'task_id_deprecated', 'svg', 'xyz')
     reactions_fields = ('reaction_id', 'num_reactants', 'num_products',  'reactant_nicknames',
                         'product_nicknames', 'reactant_inchis', 'product_inchis',
-                        'reactant_submission_ids', 'product_submission_ids', 'all_inchis')
+                        'reactant_submission_ids', 'product_submission_ids', 'all_inchis',
+                        'reactant_spin_multiplicities', 'product_spin_multiplicities')
 
 
 
@@ -91,10 +92,13 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
         sp_query_template = {"implicit_solvent.solvent_name": solvent,
                              "state": "successful",
                              "task_type": "single point energy"}
-        for inchi, charge in zip(reaction["reactant_inchis"], reaction["reactant_charges"]):
+        for inchi, charge, spin in zip(reaction["reactant_inchis"],
+                                       reaction["reactant_charges"],
+                                       reaction["reactant_spin_multiplicties"]):
             freq_query = copy.deepcopy(freq_query_template)
             freq_query["inchi_root"] = inchi
             freq_query["charge"] = charge
+            freq_query["spin_multiplicity"] = spin
             freq_doc = self._c.findone(freq_query, fields=TaskKeys.tasks_fields)
             if not freq_doc:
                 return None
@@ -102,15 +106,19 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
             sp_query = copy.deepcopy(sp_query_template)
             sp_query["inchi_root"] = inchi
             sp_query["charge"] = charge
+            sp_query["spin_multiplicity"] = spin
             sp_doc = self._c.findone(sp_query, fields=TaskKeys.tasks_fields)
             if not sp_doc:
                 return None
             reactant_sp_docs.append(sp_doc)
 
-        for inchi, charge in zip(reaction["product_inchis"], reaction["product_charges"]):
+        for inchi, charge, spin in zip(reaction["product_inchis"],
+                                       reaction["product_charges"],
+                                       reaction["reactant_spin_multiplicties"]):
             freq_query = copy.deepcopy(freq_query_template)
             freq_query["inchi_root"] = inchi
             freq_query["charge"] = charge
+            freq_query["spin_multiplicity"] = spin
             freq_doc = self._c.findone(freq_query, fields=TaskKeys.tasks_fields)
             if not freq_doc:
                 return None
@@ -118,6 +126,7 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
             sp_query = copy.deepcopy(sp_query_template)
             sp_query["inchi_root"] = inchi
             sp_query["charge"] = charge
+            sp_query["spin_multiplicity"] = spin
             sp_doc = self._c.findone(sp_query, fields=TaskKeys.tasks_fields)
             if not sp_doc:
                 return None
@@ -176,7 +185,7 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
                     specie["task_id"][task_type] = d["task_id"]
                     specie["task_id_deprecated"][task_type] = d["task_id_deprecated"]
                 data[side].append(specie)
-        gibbs_energy  = {"reactant": [], "product": []}
+        gibbs_energy = {"reactant": [], "product": []}
         for side in ["reactant", "product"]:
             for specie in data[side]:
                 elec_energy = specie["scf_energy"]
