@@ -95,7 +95,7 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
                              "task_type": "single point energy"}
         for inchi, charge, spin in zip(reaction["reactant_inchis"],
                                        reaction["reactant_charges"],
-                                       reaction["reactant_spin_multiplicties"]):
+                                       reaction["reactant_spin_multiplicities"]):
             freq_query = copy.deepcopy(freq_query_template)
             freq_query["inchi_root"] = inchi
             freq_query["charge"] = charge
@@ -115,7 +115,7 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
 
         for inchi, charge, spin in zip(reaction["product_inchis"],
                                        reaction["product_charges"],
-                                       reaction["reactant_spin_multiplicties"]):
+                                       reaction["reactant_spin_multiplicities"]):
             freq_query = copy.deepcopy(freq_query_template)
             freq_query["inchi_root"] = inchi
             freq_query["charge"] = charge
