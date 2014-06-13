@@ -6,6 +6,7 @@ import traceback
 import time
 import sys
 import eg_molecules_builder as mols
+import eg_reactions_builder as reactions
 from rubicon.builders import eg_shared
 
 __author__ = 'Xiaohui Qu <xqu@lbl.gov>'
@@ -31,7 +32,8 @@ def run(colls, args):
 
     _log.info("create_builders.start")
     try:
-        builders = [mols.MoleculesBuilder(colls, **kw)]
+        builders = [mols.MoleculesBuilder(colls, **kw),
+                    reactions.ReactionsBuilder(colls, **kw)]
     except Exception, err:
         tb = traceback.format_exc()
         _log.error("create_builders.end.error msg={} traceback="

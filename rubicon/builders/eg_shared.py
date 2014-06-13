@@ -33,7 +33,7 @@ class Collections:
     """
     #: Collection names that are accessible as attributes
     #: of an instance of this class
-    known_collections = ['tasks', 'molecules']
+    known_collections = ['tasks', 'molecules', 'reactions']
 
     MIN_VER = 1
     MAX_VER = 1
