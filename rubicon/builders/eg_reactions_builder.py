@@ -173,7 +173,7 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
                 specie["svg"] = freq_and_sp[0]["svg"]
                 freq_cal_doc = freq_and_sp[0]["calculations"]
                 sp_cal_doc = freq_and_sp[1]["calculations"]
-                specie["thermo_corrections"] = freq_cal_doc["corrections"]
+                specie["thermo_corrections"] = freq_cal_doc["freq"]["corrections"]
                 if solution_phase:
                     # get the solution phase scf key name, scf_pcm, scf_sm12mk, etc.
                     scf_all = set(sp_cal_doc.keys())
