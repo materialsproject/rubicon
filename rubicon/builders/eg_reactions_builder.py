@@ -239,15 +239,14 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
         pass
 
     def _build_indexes(self):
-        self._c.reactions.ensure_index(
-            [('inchi_root', ASCENDING), ('charge', ASCENDING)], unique=True)
-        for key in ['inchi_root', 'charge', 'nelements', 'elements',
-                    'reduced_cell_formula', 'pretty_formula']:
-            _log.info("Building {} index".format(key))
-            self._c.molecules.ensure_index(key)
-        _log.info("Building nelements and elements compound index")
-        compound_index = [('nelements', ASCENDING), ('elements', ASCENDING)]
-        self._c.reactions.ensure_index(compound_index)
+        _log.info("Building reaction index")
+        self._c.reactions.ensure_index("reaction_id", unique=True)
+        self._c.reactions.ensure_index("all_inchis")
+        self._c.reactions.ensure_index("reactant_inchis")
+        self._c.reactions.ensure_index("product_inchis")
+        self._c.reactions.ensure_index("reactant_nicknames")
+        self._c.reactions.ensure_index("product_nicknames")
+        self._c.reactions.ensure_index("submitter_email")
 
     def _insert_molecule(self, doc):
         """All database insertion should be done from this method
