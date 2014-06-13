@@ -142,7 +142,7 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
         data = dict()
         for side, freq_and_sps, counts in zip(["reactant", "product"],
                                               docs,
-                                              [reaction["num_reactants"], reaction["num_reactants"]]):
+                                              [reaction["num_reactants"], reaction["num_products"]]):
             data[side] = []
             for n, freq_and_sp in zip(counts, freq_and_sps):
                 specie = dict()
