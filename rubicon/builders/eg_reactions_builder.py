@@ -190,7 +190,8 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
                 s = specie["thermo_corrections"]["Total Entropy"]
                 g= elec_energy + (h - t * s)
                 gibbs_energy[side].append(g)
-        data["total_gibbs_free_energy"] = sum(gibbs_energy["product"]) - sum(gibbs_energy["reactant"])
+        data["total_gibbs_free_energies"] = gibbs_energy
+        data["delta_g"] = sum(gibbs_energy["product"]) - sum(gibbs_energy["reactant"])
         return data
 
 
