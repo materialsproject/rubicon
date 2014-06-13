@@ -80,7 +80,7 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
         map(self.add_item, reactions)
         _log.info("Beginning analysis")
         states = self.run_parallel()
-        return states
+        return self.combine_status(states)
 
     def find_reaction_tasks_docs(self, solvent, reaction):
         reactant_freq_docs = []
