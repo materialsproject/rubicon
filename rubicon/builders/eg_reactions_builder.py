@@ -100,7 +100,7 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
             freq_query["inchi_root"] = inchi
             freq_query["charge"] = charge
             freq_query["spin_multiplicity"] = spin
-            freq_doc = self._c.findone(freq_query, fields=TaskKeys.tasks_fields)
+            freq_doc = self._c.tasks.find_one(freq_query, fields=TaskKeys.tasks_fields)
             if not freq_doc:
                 return None
             reactant_freq_docs.append(freq_doc)
@@ -108,7 +108,7 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
             sp_query["inchi_root"] = inchi
             sp_query["charge"] = charge
             sp_query["spin_multiplicity"] = spin
-            sp_doc = self._c.findone(sp_query, fields=TaskKeys.tasks_fields)
+            sp_doc = self._c.tasks.find_one(sp_query, fields=TaskKeys.tasks_fields)
             if not sp_doc:
                 return None
             reactant_sp_docs.append(sp_doc)
@@ -120,7 +120,7 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
             freq_query["inchi_root"] = inchi
             freq_query["charge"] = charge
             freq_query["spin_multiplicity"] = spin
-            freq_doc = self._c.findone(freq_query, fields=TaskKeys.tasks_fields)
+            freq_doc = self._c.tasks.find_one(freq_query, fields=TaskKeys.tasks_fields)
             if not freq_doc:
                 return None
             product_freq_docs.append(freq_doc)
@@ -128,7 +128,7 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
             sp_query["inchi_root"] = inchi
             sp_query["charge"] = charge
             sp_query["spin_multiplicity"] = spin
-            sp_doc = self._c.findone(sp_query, fields=TaskKeys.tasks_fields)
+            sp_doc = self._c.tasks.find_one(sp_query, fields=TaskKeys.tasks_fields)
             if not sp_doc:
                 return None
             product_sp_docs.append(sp_doc)
