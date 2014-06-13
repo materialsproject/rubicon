@@ -44,7 +44,7 @@ class TaskKeys:
                         'product_nicknames', 'reactant_inchis', 'product_inchis',
                         'reactant_submission_ids', 'product_submission_ids', 'all_inchis',
                         'reactant_spin_multiplicities', 'product_spin_multiplicities',
-                        'reactant_charges', 'product_charges')
+                        'reactant_charges', 'product_charges', "submitter_email")
 
 
 
@@ -138,7 +138,6 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
 
     def build_reaction_data(self, docs, reaction, solution_phase=True):
         data = dict()
-        data["reaction_id"] = reaction["reaction_id"]
         for side, freq_and_sps, counts, nicknames in zip(["reactant", "product"],
                                                          docs,
                                                          [reaction["num_reactants"],
@@ -210,6 +209,11 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
                                       fields=TaskKeys.tasks_fields)\
             .distinct("implicit_solvent.solvent_name")
         fe_docs = dict()
+        fe_docs["reaction_id"] = reaction["reaction_id"]
+        fe_docs["all_inchis"] = reaction["all_inchis"]
+        fe_docs["reactant_inchis"] = reaction["reactant_inchis"]
+        fe_docs["product_inchis"] = reaction["product_inchis"]
+        fe_docs["submitter_email"] = reaction["submitter_email"]
         docs_available = False
         fe_docs['solvated_properties'] = dict()
         for solvent in solvents:
@@ -228,6 +232,7 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
 
         fe_docs['created_at'] = datetime.datetime.now()
         fe_docs['updated_at'] = datetime.datetime.now()
+
         self._insert_molecule(fe_docs)
         return 0
 
@@ -248,6 +253,6 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
     def _insert_molecule(self, doc):
         """All database insertion should be done from this method
         """
-        _log.info("Inserting Material with InChI {i}, ".
-                  format(i=str(doc['inchi_root'])))
+        _log.info('Inserting Reaction with ID "{i}", '.
+                  format(i=str(doc['reaction_id'])))
         self._c.molecules.insert(doc)
