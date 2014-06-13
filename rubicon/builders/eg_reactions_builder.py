@@ -43,7 +43,8 @@ class TaskKeys:
     reactions_fields = ('reaction_id', 'num_reactants', 'num_products',  'reactant_nicknames',
                         'product_nicknames', 'reactant_inchis', 'product_inchis',
                         'reactant_submission_ids', 'product_submission_ids', 'all_inchis',
-                        'reactant_spin_multiplicities', 'product_spin_multiplicities')
+                        'reactant_spin_multiplicities', 'product_spin_multiplicities',
+                        'reactant_charges', 'product_charges')
 
 
 
