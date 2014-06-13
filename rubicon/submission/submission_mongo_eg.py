@@ -154,7 +154,7 @@ class SubmissionMongoAdapterEG(object):
             reactant_nicknames.append(nick_name)
             num_reactants.append(n)
             reactant_charges.append(mol.charge)
-            reactant_spin_multiplicities.append(mol.spin_multiplicities)
+            reactant_spin_multiplicities.append(mol.spin_multiplicity)
         for snl, n, nick_name in product_snls:
             mol = snl.structure
             bb = BabelMolAdaptor(mol)
@@ -164,7 +164,7 @@ class SubmissionMongoAdapterEG(object):
             product_nicknames.append(nick_name)
             num_products.append(n)
             product_charges.append(mol.charge)
-            product_spin_multiplicities.append(mol.spin_multiplicities)
+            product_spin_multiplicities.append(mol.spin_multiplicity)
         all_inchis = reactant_inchis + product_inchis
         d = dict()
         d['submitter_email'] = submitter_email
