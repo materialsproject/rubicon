@@ -133,8 +133,8 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
                 return None
             product_sp_docs.append(sp_doc)
 
-        return [(reactant_freq_docs, reactant_sp_docs),
-                (product_freq_docs, product_sp_docs)]
+        return [zip(reactant_freq_docs, reactant_sp_docs),
+                zip(product_freq_docs, product_sp_docs)]
 
     def build_reaction_data(self, docs, reaction, solution_phase=True):
         data = dict()
