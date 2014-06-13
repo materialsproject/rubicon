@@ -6,6 +6,7 @@ import copy
 import json
 import logging
 import datetime
+import math
 from pymongo import ASCENDING
 import sys
 import re
@@ -192,8 +193,10 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
                 g = elec_energy + (h - self.TEMPERATURE * s)
                 gibbs_energy[side].append(g)
         data["total_gibbs_free_energies"] = gibbs_energy
-        data["delta_g"] = sum(gibbs_energy["product"]) - sum(gibbs_energy["reactant"])
-        data["equilibrium_constants"] = (data["delta_g"]/(self.GAS_CONSTANT*self.TEMPERATURE))
+        reactant_energy = sum([energy*n for energy, n in zip(gibbs_energy["reactant"], reaction["num_reactants"])])
+        product_energy = sum([energy*n for energy, n in zip(gibbs_energy["product"], reaction["num_products"])])
+        data["delta_g"] = product_energy - reactant_energy
+        data["equilibrium_constants"] = math.exp(-data["delta_g"]/(self.GAS_CONSTANT*self.TEMPERATURE))
         return data
 
 
