@@ -52,7 +52,8 @@ class TaskKeys:
 class ReactionsBuilder(eg_shared.ParallelBuilder):
     """Build derived 'reactions' collection.
     """
-
+    GAS_CONSTANT = 8.3144621 * (0.01036410 * 10E-3)  # eV K^-1 mol^-1
+    TEMPERATURE = 298.15 # K
 
     def __init__(self, collections, **kwargs):
         """Create new molecules builder.
@@ -186,12 +187,12 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
             for specie in data[side]:
                 elec_energy = specie["scf_energy"]
                 h = specie["thermo_corrections"]["Total Enthalpy"]
-                t = 298.15
                 s = specie["thermo_corrections"]["Total Entropy"]
-                g= elec_energy + (h - t * s)
+                g = elec_energy + (h - self.TEMPERATURE * s)
                 gibbs_energy[side].append(g)
         data["total_gibbs_free_energies"] = gibbs_energy
         data["delta_g"] = sum(gibbs_energy["product"]) - sum(gibbs_energy["reactant"])
+        data["equilibrium_constants"] = (data["delta_g"]/(self.GAS_CONSTANT*self.TEMPERATURE))
         return data
 
 
@@ -234,9 +235,6 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
 
         self._insert_molecule(fe_docs)
         return 0
-
-    def build_reaction(self):
-        pass
 
     def _build_indexes(self):
         _log.info("Building reaction index")
