@@ -138,17 +138,13 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
 
     def build_reaction_data(self, docs, reaction, solution_phase=True):
         data = dict()
-        for side, freq_and_sps, counts, nicknames in zip(["reactant", "product"],
-                                                         docs,
-                                                         [reaction["num_reactants"],
-                                                          reaction["num_reactants"]],
-                                                         [reaction["reactant_nicknames"],
-                                                          reaction["product_nicknames"]]):
+        for side, freq_and_sps, counts in zip(["reactant", "product"],
+                                              docs,
+                                              [reaction["num_reactants"],reaction["num_reactants"]]):
             data[side] = []
-            for n, nickname, freq_and_sp in zip(counts, nicknames, freq_and_sps):
+            for n, freq_and_sp in zip(counts, freq_and_sps):
                 specie = dict()
                 specie["number"] = n
-                specie["nick_name"] = nickname
                 specie["task_id"] = dict()
                 specie["task_id_deprecated"] = dict()
                 specie["snlgroup_id_final"] = freq_and_sp[0]["snlgroup_id_final"]
@@ -213,6 +209,8 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
         fe_docs["all_inchis"] = reaction["all_inchis"]
         fe_docs["reactant_inchis"] = reaction["reactant_inchis"]
         fe_docs["product_inchis"] = reaction["product_inchis"]
+        fe_docs["reactant_nicknames"] = reaction["reactant_nicknames"]
+        fe_docs["product_nicknames"] = reaction["product_nicknames"]
         fe_docs["submitter_email"] = reaction["submitter_email"]
         docs_available = False
         fe_docs['solvated_properties'] = dict()
