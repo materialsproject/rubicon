@@ -182,16 +182,16 @@ class QChemFireWorkCreator():
               solvent_method="ief-pcm", solvent="water", priority=None, qm_method=None,
               population_method=None):
         if not qm_method:
-            method = "B3LYP/6-31+G*"
+            qm_method = "B3LYP/6-31+G*"
         spec = self.base_spec()
         if priority:
             spec['_priority'] = priority
         task_type = "single point energy"
         state_name = self.get_state_name(charge, spin_multiplicity)
-        title = self.molname + " " + state_name + " " + method + " " + task_type
+        title = self.molname + " " + state_name + " " + qm_method + " " + task_type
         title += "\n Gas Phase"
         exchange, correlation, basis_set,  aux_basis, rem_params, method_token = self. \
-            get_exchange_correlation_basis_auxbasis_remparams(method)
+            get_exchange_correlation_basis_auxbasis_remparams(qm_method)
         if population_method:
             if not rem_params:
                 rem_params = dict()
