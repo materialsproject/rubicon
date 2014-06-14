@@ -46,7 +46,7 @@ def single_point_energy_fws(mol, name, mission, parameters, dupefinder=None, pri
     sp_cal_fwid, sp_db_fwid = fwid_base + 4, fwid_base + 5
     fw_sp = fw_creator.sp_fw(
         charge, spin_multiplicity, sp_cal_fwid, sp_db_fwid, solvent_method="sm12mk", solvent=solvent,
-        priority=priority, method=energy_method, population_method=population_method)
+        priority=priority, qm_method=energy_method, population_method=population_method)
     fws.extend(fw_sp)
     links_dict[sp_cal_fwid] = sp_db_fwid
     if len(mol) > 1:
