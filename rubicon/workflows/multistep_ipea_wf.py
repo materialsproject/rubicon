@@ -61,30 +61,31 @@ class QChemFireWorkCreator():
         correlation = None
         rem_params = None
         theoretical_level, basis_set = method.split('/')
+        basis_set = basis_set.lower()
         if theoretical_level.lower() == "b3lyp-xdm":
             exchange = 'b3lyp'
-            rem_params = {"DFTVDW_JOBNUMBER": 1,
-                          "DFTVDW_METHOD": 1,
-                          "DFTVDW_PRINT": 1,
-                          "DFTVDW_KAI": 800,
-                          "DFTVDW_USE_ELE_DRV": 1}
+            rem_params = {"dftvdw_jobnumber": 1,
+                          "dftvdw_method": 1,
+                          "dftvdw_print": 1,
+                          "dftvdw_kai": 800,
+                          "dftvdw_use_ele_drv": 1}
         elif theoretical_level.lower() == "xyjgos":
             exchange = "xygjos"
-            if basis_set == "6-31+G*":
+            if basis_set == "6-31+g*":
                 aux_basis = "rimp2-aug-cc-pvdz"
             else:
                 aux_basis = "rimp2-aug-cc-pvtz"
         elif theoretical_level.lower() == "pbe-d3":
             exchange = 'pbe'
             correlation = 'pbe'
-            rem_params = {"DFT_D": "EMPIRICAL_GRIMME3",
-                          "DFT_D3_S6": 1000,
-                          "DFT_D3_RS6": 1217,
-                          "DFT_D3_S8": 722,
-                          "DFT_D3_3BODY": False}
+            rem_params = {"dft_d": "empirical_grimme3",
+                          "dft_d3_s6": 1000,
+                          "dft_d3_rs6": 1217,
+                          "dft_d3_s8": 722,
+                          "dft_d3_3body": False}
         else:
-            exchange = 'b3lyp'
-        method_token = [t.lower() if isinstance(t, str) else t for t in [basis_set, exchange, aux_basis, correlation, rem_params]
+            exchange = theoretical_level.lower()
+        method_token = [t for t in [basis_set, exchange, aux_basis, correlation, rem_params]
                         if t]
         return exchange, correlation, basis_set,  aux_basis, rem_params, method_token
 
