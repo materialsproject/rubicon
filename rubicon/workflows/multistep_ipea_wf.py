@@ -84,7 +84,7 @@ class QChemFireWorkCreator():
                           "DFT_D3_3BODY": False}
         else:
             exchange = 'b3lyp'
-        method_token = [t for t in [basis_set, exchange, aux_basis, correlation, rem_params]
+        method_token = [t.lower() if isinstance(t, str) else t for t in [basis_set, exchange, aux_basis, correlation, rem_params]
                         if t]
         return exchange, correlation, basis_set,  aux_basis, rem_params, method_token
 
