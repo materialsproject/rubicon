@@ -126,7 +126,7 @@ def main():
         qcout = QcOutput(output_filename)
         charge = None
         spin_multiplicity = None
-        for d in qcout["data"]:
+        for d in qcout.data:
             j = d["input"]
             if j.charge:
                 charge = j.charge
