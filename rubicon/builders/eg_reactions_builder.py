@@ -224,7 +224,7 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
             docs = self.find_reaction_tasks_docs(solvent, reaction)
             if docs:
                 docs_available = True
-            d = self.build_reaction_data(docs, reaction, solution_phase=True)
+            d = self.build_reaction_data(docs, reaction, solution_phase=True) if docs else None
             if d and len(d) > 0:
                 fe_docs['solvated_properties'][solvent] = d
                 if "vacuum_properties" not in fe_docs:
