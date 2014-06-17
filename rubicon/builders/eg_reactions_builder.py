@@ -54,7 +54,7 @@ class TaskKeys:
 class ReactionsBuilder(eg_shared.ParallelBuilder):
     """Build derived 'reactions' collection.
     """
-    GAS_CONSTANT = 8.3144621 * (0.01036410 * 10E-3)  # eV K^-1 mol^-1
+    GAS_CONSTANT = 8.3144621 * (0.01036410 * 1.0E-3)  # eV K^-1 mol^-1
     TEMPERATURE = 298.15 # K
 
     def __init__(self, collections, **kwargs):
