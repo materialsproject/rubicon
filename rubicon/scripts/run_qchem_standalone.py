@@ -128,9 +128,9 @@ def main():
         spin_multiplicity = None
         for d in qcout.data:
             j = d["input"]
-            if j.charge:
+            if j.charge is not None:
                 charge = j.charge
-            if j.spin_multiplicity:
+            if j.spin_multiplicity is not None:
                 spin_multiplicity = j.spin_multiplicity
         if qcout.data[-1]['frequencies'][0]["frequency"] < -0.00:
             os.system("tar czvf img_freq_1.tar.gz *")
