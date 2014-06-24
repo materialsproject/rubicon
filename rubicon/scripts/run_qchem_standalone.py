@@ -166,6 +166,7 @@ def main():
                 qcinp = QcInput([qctask_opt, qctask_freq])
                 for j in qcinp.jobs:
                     j.set_dft_grid(128, 302)
+                    j.set_integral_threshold(12)
                     if j.params["rem"]["jobtype"] == "opt":
                         j.scale_geom_opt_threshold(0.1, 0.1, 0.1)
                         j.set_geom_max_iterations(100)
@@ -190,6 +191,7 @@ def main():
                     qcinp = QcInput([qctask_opt, qctask_freq])
                     for j in qcinp.jobs:
                         j.set_dft_grid(90, 590)
+                        j.set_integral_threshold(12)
                         if j.params["rem"]["jobtype"] == "opt":
                             j.scale_geom_opt_threshold(0.1, 0.1, 0.1)
                             j.set_geom_max_iterations(100)
