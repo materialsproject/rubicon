@@ -98,8 +98,7 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
         sol_query_template = {"implicit_solvent.solvent_name": solvent,
                              "state": "successful",
                              "task_type": "solvation energy"}
-        sp_query_template = {"implicit_solvent.solvent_name": solvent,
-                             "state": "successful",
+        sp_query_template = {"state": "successful",
                              "task_type": "vacuum only single point energy"}
         for inchi, charge, spin in zip(reaction["reactant_inchis"],
                                        reaction["reactant_charges"],
