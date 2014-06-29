@@ -230,7 +230,8 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
         solvents = self._c.tasks.find({"inchi_root": {"$in": reaction["all_inchis"]},
                                        "state": "successful",
                                        "task_type": {"$in": ["vibrational frequency",
-                                                             "single point energy"]}},
+                                                             "vacuum only single point energy",
+                                                             "solvation energy"]}},
                                       fields=TaskKeys.tasks_fields)\
             .distinct("implicit_solvent.solvent_name")
         fe_docs = dict()
