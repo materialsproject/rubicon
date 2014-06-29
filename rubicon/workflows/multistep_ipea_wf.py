@@ -252,13 +252,13 @@ class QChemFireWorkCreator():
 
     def sp_fw(self, charge, spin_multiplicity, fw_id_cal, fw_id_db,
               solvent_method="ief-pcm", solvent="water", priority=None, qm_method=None,
-              population_method=None):
+              population_method=None, task_type_name=None):
         if not qm_method:
             qm_method = "B3LYP/6-31+G*"
         spec = self.base_spec()
         if priority:
             spec['_priority'] = priority
-        task_type = "single point energy"
+        task_type = task_type_name if task_type_name else "single point energy"
         state_name = self.get_state_name(charge, spin_multiplicity)
         title = self.molname + " " + state_name + " " + qm_method + " " + task_type
         title += "\n Gas Phase"
@@ -295,6 +295,57 @@ class QChemFireWorkCreator():
         spec['spin_multiplicity'] = spin_multiplicity
         spec['run_tags']['methods'] = method_token
         spec['implicit_solvent'] = implicit_solvent
+        task_name = self.molname + ' ' + state_name + ' ' + task_type
+        from rubicon.firetasks.multistep_qchem_task \
+            import QChemSinglePointEnergyDBInsertionTask
+        fw_sp_cal = FireWork([QChemTask()],
+                             spec=spec, name=task_name, fw_id=fw_id_cal)
+        spec_db = copy.deepcopy(spec)
+        del spec_db['_dupefinder']
+        spec_db['_allow_fizzled_parents'] = True
+        spec_db['task_type'] = task_type + ' DB Insertion'
+        del spec_db["_trackers"][:2]
+        task_name_db = task_name + " DB Insertion"
+        fw_sp_db = FireWork([QChemSinglePointEnergyDBInsertionTask()],
+                            spec=spec_db, name=task_name_db, fw_id=fw_id_db)
+        return fw_sp_cal, fw_sp_db
+
+    def vacuum_only_sp_fw(self, charge, spin_multiplicity, fw_id_cal, fw_id_db,
+                          priority=None, qm_method=None, population_method=None):
+        if not qm_method:
+            qm_method = "B3LYP/6-31+G*"
+        spec = self.base_spec()
+        if priority:
+            spec['_priority'] = priority
+        task_type = "vacuum only single point energy"
+        state_name = self.get_state_name(charge, spin_multiplicity)
+        title = self.molname + " " + state_name + " " + qm_method + " " + task_type
+        title += "\n Gas Phase"
+        exchange, correlation, basis_set,  aux_basis, rem_params, method_token = self. \
+            get_exchange_correlation_basis_auxbasis_remparams(qm_method)
+        if population_method:
+            if not rem_params:
+                rem_params = dict()
+            if population_method.lower() == "nbo":
+                rem_params["nbo"] = 1
+            elif population_method.lower() == "chelpg":
+                rem_params["chelpg"] = True
+        qctask_vac = QcTask(self.mol, charge=charge, spin_multiplicity=spin_multiplicity,
+                            jobtype="sp", title=title, exchange=exchange, correlation=correlation,
+                            basis_set=basis_set, aux_basis_set=aux_basis, rem_params=rem_params)
+        if not self.large:
+            qctask_vac.set_dft_grid(128, 302)
+            qctask_vac.set_integral_threshold(12)
+            qctask_vac.set_scf_convergence_threshold(8)
+        else:
+            qctask_vac.set_scf_algorithm_and_iterations(iterations=100)
+
+        qcinp = QcInput([qctask_vac])
+        spec["qcinp"] = qcinp.to_dict
+        spec['task_type'] = task_type
+        spec['charge'] = charge
+        spec['spin_multiplicity'] = spin_multiplicity
+        spec['run_tags']['methods'] = method_token
         task_name = self.molname + ' ' + state_name + ' ' + task_type
         from rubicon.firetasks.multistep_qchem_task \
             import QChemSinglePointEnergyDBInsertionTask
