@@ -4,15 +4,12 @@ from rubicon.workflows.multistep_ipea_wf import QChemFireWorkCreator
 __author__ = 'xiaohuiqu'
 
 
-def single_point_energy_fws(mol, name, mission, parameters, dupefinder=None, priority=1,
+def single_point_energy_fws(mol, name, mission, solvent, solvent_method, qm_method, pop_method, dupefinder=None, priority=1,
                             parent_fwid=None, additional_user_tags=None):
     large = False
     if len(mol) > 50:
         large = True
-    solvent = parameters.get("solvent", "water")
-    method = parameters.get("method", None)
-    population_method = parameters.get("population_method", None)
-    energy_method, geom_method = method.split("//")
+    energy_method, geom_method = qm_method.split("//")
     charge = mol.charge
     spin_multiplicity = mol.spin_multiplicity
     fw_creator = QChemFireWorkCreator(mol=mol, molname=name, mission=mission,
@@ -45,8 +42,8 @@ def single_point_energy_fws(mol, name, mission, parameters, dupefinder=None, pri
 
     sp_cal_fwid, sp_db_fwid = fwid_base + 4, fwid_base + 5
     fw_sp = fw_creator.sp_fw(
-        charge, spin_multiplicity, sp_cal_fwid, sp_db_fwid, solvent_method="sm12mk", solvent=solvent,
-        priority=priority, qm_method=energy_method, population_method=population_method)
+        charge, spin_multiplicity, sp_cal_fwid, sp_db_fwid, solvent_method=solvent_method, solvent=solvent,
+        priority=priority, qm_method=energy_method, population_method=pop_method)
     fws.extend(fw_sp)
     links_dict[sp_cal_fwid] = sp_db_fwid
     if len(mol) > 1:
@@ -59,8 +56,6 @@ def single_point_energy_fws(mol, name, mission, parameters, dupefinder=None, pri
     return fws, links_dict
 
 
-def single_point_energy_wf(mol, name, mission, parameters, dupefinder=None, priority=1,
-                           parent_fwid=None, additional_user_tags=None):
-    fws, links_dict = single_point_energy_fws(mol, name, mission, parameters, dupefinder, priority,
-                                              parent_fwid, additional_user_tags)
+def single_point_energy_wf(mol, name, **kwargs):
+    fws, links_dict = single_point_energy_fws(mol, name, **kwargs)
     return Workflow(fws, links_dict, name)
