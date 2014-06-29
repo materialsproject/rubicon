@@ -218,17 +218,17 @@ class QChemFireWorkCreator():
                 solvent_theory = 'ssvpe'
             else:
                 solvent_theory = 'cpcm'
-            qctask_sol.use_pcm(solvent_params={"Dielectric": 78.3553},
+            dielectric_constant = self.get_dielectric_constant(solvent)
+            qctask_sol.use_pcm(solvent_params={"Dielectric": dielectric_constant},
                                pcm_params={'Theory': solvent_theory})
             implicit_solvent['model'] = solvent_method.lower()
-            dielectric_constant = self.get_dielectric_constant(solvent)
             implicit_solvent['dielectric_constant'] = dielectric_constant
             implicit_solvent['radii'] = 'uff'
             implicit_solvent['vdwscale'] = 1.1
         elif solvent_method.lower() == 'cosmo':
-            qctask_sol.use_cosmo()
-            implicit_solvent['model'] = 'cosmo'
             dielectric_constant = self.get_dielectric_constant(solvent)
+            qctask_sol.use_cosmo(dielectric_constant)
+            implicit_solvent['model'] = 'cosmo'
             implicit_solvent['dielectric_constant'] = dielectric_constant
         elif solvent_method.lower() in ['sm12mk', 'sm12chelpg', 'sm12',
                                         'sm8']:
