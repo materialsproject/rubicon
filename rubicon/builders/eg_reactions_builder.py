@@ -194,10 +194,10 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
                 specie["thermo_corrections"] = freq_cal_doc["freq"]["corrections"]
                 if solution_phase:
                     # get the solution phase scf key name, scf_pcm, scf_sm12mk, etc.
-                    scf_all = set(sp_cal_doc.keys())
+                    sol_doc = freq_sol_sp[1]["calculations"]
+                    scf_all = set(sol_doc.keys())
                     scf_all.remove('scf')
                     scf_name = scf_all.pop()
-                    sol_doc = freq_sol_sp[1]["calculations"]
                     specie["solvation_energy"] = sol_doc[scf_name]["energies"][-1][-1] - \
                         sol_doc["scf"]["energies"][-1][-1]
                 specie["scf_energy"] = sp_cal_doc["scf"]["energies"][-1][-1]
