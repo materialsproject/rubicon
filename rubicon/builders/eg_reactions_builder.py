@@ -87,15 +87,20 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
 
     def find_reaction_tasks_docs(self, solvent, reaction):
         reactant_freq_docs = []
+        reactant_sol_docs = []
         reactant_sp_docs = []
         product_freq_docs = []
+        product_sol_docs = []
         product_sp_docs = []
         freq_query_template = {"state": "successful",
                                "task_type": "vibrational frequency",
                                "stationary_type": "minimum"}
+        sol_query_template = {"implicit_solvent.solvent_name": solvent,
+                             "state": "successful",
+                             "task_type": "solvation energy"}
         sp_query_template = {"implicit_solvent.solvent_name": solvent,
                              "state": "successful",
-                             "task_type": "single point energy"}
+                             "task_type": "vacuum only single point energy"}
         for inchi, charge, spin in zip(reaction["reactant_inchis"],
                                        reaction["reactant_charges"],
                                        reaction["reactant_spin_multiplicities"]):
@@ -115,6 +120,14 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
             if not sp_doc:
                 return None
             reactant_sp_docs.append(sp_doc)
+            sol_query = copy.deepcopy(sol_query_template)
+            sol_query["inchi_root"] = inchi
+            sol_query["charge"] = charge
+            sol_query["spin_multiplicity"] = spin
+            sol_doc = self._c.tasks.find_one(sol_query, fields=TaskKeys.tasks_fields)
+            if not sol_doc:
+                return None
+            reactant_sol_docs.append(sol_doc)
 
         for inchi, charge, spin in zip(reaction["product_inchis"],
                                        reaction["product_charges"],
@@ -135,52 +148,61 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
             if not sp_doc:
                 return None
             product_sp_docs.append(sp_doc)
+            sol_query = copy.deepcopy(sol_query_template)
+            sol_query["inchi_root"] = inchi
+            sol_query["charge"] = charge
+            sol_query["spin_multiplicity"] = spin
+            sol_doc = self._c.tasks.find_one(sol_query, fields=TaskKeys.tasks_fields)
+            if not sol_doc:
+                return None
+            product_sol_docs.append(sol_doc)
 
-        return [zip(reactant_freq_docs, reactant_sp_docs),
-                zip(product_freq_docs, product_sp_docs)]
+        return [zip(reactant_freq_docs, reactant_sol_docs, reactant_sp_docs),
+                zip(product_freq_docs, product_sol_docs, product_sp_docs)]
 
     def build_reaction_data(self, docs, reaction, solution_phase=True):
         data = dict()
-        for side, freq_and_sps, counts in zip(["reactant", "product"],
+        for side, freq_sol_sps, counts in zip(["reactant", "product"],
                                               docs,
                                               [reaction["num_reactants"], reaction["num_products"]]):
             data[side] = []
-            for n, freq_and_sp in zip(counts, freq_and_sps):
+            for n, freq_sol_sp in zip(counts, freq_sol_sps):
                 specie = dict()
                 specie["number"] = n
                 specie["task_id"] = dict()
                 specie["task_id_deprecated"] = dict()
-                specie["snlgroup_id_final"] = freq_and_sp[0]["snlgroup_id_final"]
-                specie["charge"] = freq_and_sp[0]["charge"]
-                specie["spin_multiplicity"] = freq_and_sp[0]["spin_multiplicity"]
-                specie["snl_final"] = freq_and_sp[0]["snl_final"]
-                specie["molecule"] = freq_and_sp[0]["molecule_final"]
-                specie["xyz"] = freq_and_sp[0]["xyz"]
-                specie["inchi"] = freq_and_sp[0]["inchi_final"]
-                specie["can"] = freq_and_sp[0]["can"]
-                specie["smiles"] = freq_and_sp[0]["smiles"]
-                specie["inchi_root"] = freq_and_sp[0]["inchi_root"]
-                specie["elements"] = freq_and_sp[0]["elements"]
-                specie["nelements"] = freq_and_sp[0]["nelements"]
-                specie["user_tags"] = freq_and_sp[0]["user_tags"]
-                specie["run_tags"] = freq_and_sp[0]["run_tags"]
-                specie["reduced_cell_formula_abc"] = freq_and_sp[0]["reduced_cell_formula_abc"]
-                specie["pretty_formula"] = freq_and_sp[0]["pretty_formula"]
-                specie["formula"] = freq_and_sp[0]["formula"]
-                specie["pointgroup"] = freq_and_sp[0]["pointgroup"]
-                specie["svg"] = freq_and_sp[0]["svg"]
-                freq_cal_doc = freq_and_sp[0]["calculations"]
-                sp_cal_doc = freq_and_sp[1]["calculations"]
+                specie["snlgroup_id_final"] = freq_sol_sp[0]["snlgroup_id_final"]
+                specie["charge"] = freq_sol_sp[0]["charge"]
+                specie["spin_multiplicity"] = freq_sol_sp[0]["spin_multiplicity"]
+                specie["snl_final"] = freq_sol_sp[0]["snl_final"]
+                specie["molecule"] = freq_sol_sp[0]["molecule_final"]
+                specie["xyz"] = freq_sol_sp[0]["xyz"]
+                specie["inchi"] = freq_sol_sp[0]["inchi_final"]
+                specie["can"] = freq_sol_sp[0]["can"]
+                specie["smiles"] = freq_sol_sp[0]["smiles"]
+                specie["inchi_root"] = freq_sol_sp[0]["inchi_root"]
+                specie["elements"] = freq_sol_sp[0]["elements"]
+                specie["nelements"] = freq_sol_sp[0]["nelements"]
+                specie["user_tags"] = freq_sol_sp[0]["user_tags"]
+                specie["run_tags"] = freq_sol_sp[0]["run_tags"]
+                specie["reduced_cell_formula_abc"] = freq_sol_sp[0]["reduced_cell_formula_abc"]
+                specie["pretty_formula"] = freq_sol_sp[0]["pretty_formula"]
+                specie["formula"] = freq_sol_sp[0]["formula"]
+                specie["pointgroup"] = freq_sol_sp[0]["pointgroup"]
+                specie["svg"] = freq_sol_sp[0]["svg"]
+                freq_cal_doc = freq_sol_sp[0]["calculations"]
+                sp_cal_doc = freq_sol_sp[2]["calculations"]
                 specie["thermo_corrections"] = freq_cal_doc["freq"]["corrections"]
                 if solution_phase:
                     # get the solution phase scf key name, scf_pcm, scf_sm12mk, etc.
                     scf_all = set(sp_cal_doc.keys())
                     scf_all.remove('scf')
                     scf_name = scf_all.pop()
-                else:
-                    scf_name = 'scf'
-                specie["scf_energy"] = sp_cal_doc[scf_name]["energies"][-1][-1]
-                for task_type, d in zip(["freq", "sp"], freq_and_sp):
+                    sol_doc = freq_sol_sp[1]["calculations"]
+                    specie["solvation_energy"] = sol_doc[scf_name]["energies"][-1][-1] - \
+                        sol_doc["scf"]["energies"][-1][-1]
+                specie["scf_energy"] = sp_cal_doc["scf"]["energies"][-1][-1]
+                for task_type, d in zip(["freq", "sol", "sp"], freq_sol_sp):
                     specie["task_id"][task_type] = d["task_id"]
                     specie["task_id_deprecated"][task_type] = d["task_id_deprecated"]
                 data[side].append(specie)
@@ -188,9 +210,10 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
         for side in ["reactant", "product"]:
             for specie in data[side]:
                 elec_energy = specie["scf_energy"]
+                solvation_energy = specie['solvation_energy'] if 'solvation_energy' in specie else 0.0
                 h = specie["thermo_corrections"]["Total Enthalpy"]
                 s = specie["thermo_corrections"]["Total Entropy"]
-                g = elec_energy + (h - self.TEMPERATURE * s)
+                g = elec_energy + solvation_energy + (h - self.TEMPERATURE * s)
                 gibbs_energy[side].append(g)
         data["total_gibbs_free_energies"] = gibbs_energy
         reactant_energy = sum([energy*n for energy, n in zip(gibbs_energy["reactant"], reaction["num_reactants"])])
