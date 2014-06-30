@@ -69,7 +69,7 @@ class QChemFireWorkCreator():
                           "dftvdw_print": 1,
                           "dftvdw_kai": 800,
                           "dftvdw_use_ele_drv": 1}
-        elif theoretical_level.lower() == "xyjgos":
+        elif theoretical_level.lower() == "xygjos":
             exchange = "xygjos"
             if basis_set == "6-31+g*":
                 aux_basis = "rimp2-aug-cc-pvdz"
