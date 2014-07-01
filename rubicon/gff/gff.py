@@ -1,4 +1,6 @@
 from collections import defaultdict
+import json
+import os
 
 __author__ = 'navnidhirajput'
 
@@ -33,7 +35,7 @@ class Gff(MSONable):
     """
 
 
-    def __init__(self, bonds, angles, dihedrals, imdihedrals, vdws, masses):
+    def __init__(self, bonds, angles, dihedrals, imdihedrals, vdws, masses,charges):
 
         self.bonds = bonds
         self.angles = angles
@@ -41,9 +43,11 @@ class Gff(MSONable):
         self.imdihedrals = imdihedrals
         self.vdws = vdws
         self.masses = masses
+        self.charges = dict() if charges is None else charges
         self.atom_index=dict()
         self.atom_index_gaff=dict()
         self.atom_gaff=dict()
+
 
 
     @classmethod
@@ -55,6 +59,7 @@ class Gff(MSONable):
         imdihedrals = dict()
         vdws = dict()
         masses = dict()
+
 
         with open(filename) as f:
             bond_section = False
@@ -155,10 +160,10 @@ class Gff(MSONable):
                     epsilon = abs(float(line[22:28]))
                     vdws[vdw_type] = (sigma, epsilon)
 
-            return Gff(bonds,angles,dihedrals,imdihedrals,vdws,masses)
+            return Gff(bonds,angles,dihedrals,imdihedrals,vdws,masses,None)
 
 
-    def read_atom_index(self,filename=None):
+    def read_atom_index(self,mol,filename=None):
 
         with open(filename) as f:
 
@@ -173,7 +178,13 @@ class Gff(MSONable):
                     self.atom_gaff[atom_name]=gaff_name
                     self.atom_index[index]=atom_name
                     self.atom_index_gaff[index]=atom_gaff
+                    # print (self.atom_index.values())
+                    # mol.add_site_property("atomname",self.atom_index.values())
             self.atom_gaff.update(self.atom_gaff)
+            # for atom_name in (self.atom_index.values()):
+            #     atom_name.append(atom_name)
+            # mol.add_site_property("atomname",atom_name)
+            # print  mol.site_properties["atomname"]
         self.num_types = len(set(self.atom_gaff.values()))
 
 
@@ -191,6 +202,16 @@ class Gff(MSONable):
                     self.atom_gaff[atom_name]=gaff_name
             self.atom_gaff.update(self.atom_gaff)
         self.num_types = len(set(self.atom_gaff.values()))
+
+    def read_charges(self):
+        filename = os.path.join(os.path.dirname(__file__),'charges.json')
+        jsonfile = open(filename)
+        self.charges = json.load(jsonfile, encoding="utf-8")
+        #print self.charges["TFN"]['O']
+
+
+
+
 
 
     @property

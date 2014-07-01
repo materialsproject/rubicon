@@ -132,9 +132,10 @@ class LmpInput():
                     if gff.masses.keys()[i] in element_list:
                         continue
                     element_list.append(gff.masses.keys()[i])
-                    lines.append('{} {} {} {} {}'.format(num_atoms + 1, v, '#',
+                    lines.append('{} {} {} {} {} {}'.format(num_atoms + 1, v, '#',
                                                          gff.masses.keys()[i],
-                                                         mol_index))
+                                                         mol_index,
+                                            mol.site_properties["mol_name"][0]))
                     num_atoms = num_atoms + 1
             mol_index += 1
         lines.append('\n')
@@ -158,10 +159,11 @@ class LmpInput():
                         continue
                     element_list.append(gff.vdws.keys()[i])
                     lines.append(
-                        '{} {} {} {} {} {}'.format(num_atoms + 1, v[1],
+                        '{} {} {} {} {} {} {}'.format(num_atoms + 1, v[1],
                                                    v[0] * 1.7818, '#',
                                                    gff.vdws.keys()[i],
-                                                   mol_index))
+                                                   mol_index,
+                                                   mol.site_properties["mol_name"][0]))
                     num_atoms = num_atoms + 1
             mol_index += 1
         lines.append('\n')
@@ -181,11 +183,12 @@ class LmpInput():
             if gff.bonds:
                 for i, v in enumerate(gff.bonds.values()):
                     lines.append(
-                        '{} {}  {} {} {} {} {}'.format(num_atoms + 1, v[0],
+                        '{} {}  {} {} {} {} {} {}'.format(num_atoms + 1, v[0],
                                                        v[1], '#',
                                                        gff.bonds.keys()[i][0],
                                                        gff.bonds.keys()[i][1],
-                                                       mol_index))
+                                                       mol_index,
+                                                       mol.site_properties["mol_name"][0]))
                     num_atoms = num_atoms + 1
             mol_index += 1
         lines.append('\n')
@@ -205,14 +208,15 @@ class LmpInput():
             if gff.angles:
                 for i, v in enumerate(gff.angles.values()):
                     lines.append(
-                        '{} {} {} {} {} {} {} {}'.format(num_atoms + 1, v[0],
+                        '{} {} {} {} {} {} {} {} {}'.format(num_atoms + 1, v[0],
                                                          v[1], '#',
                                                          gff.angles.keys()[i][
                                                              0],
                                                          gff.angles.keys()[i][
                                                              1],
                                                          gff.angles.keys()[i][
-                                                             2], mol_index))
+                                                             2], mol_index,
+                                                         mol.site_properties["mol_name"][0]))
                     num_atoms = num_atoms + 1
             mol_index += 1
         lines.append('\n')
@@ -235,7 +239,7 @@ class LmpInput():
                     for func_form, d in v.iteritems():
                         j += 1
                         lines.append(
-                            '{}  {}  {}  {} {} {} {} {} {} {}'.format(j, d[0],
+                            '{}  {}  {}  {} {} {} {} {} {} {} {}'.format(j, d[0],
                               func_form,
                               d[1], '#',
                               gff.dihedrals.keys()[
@@ -247,7 +251,8 @@ class LmpInput():
                               [2],
                               gff.dihedrals.keys()[
                                   i][3],
-                              mol_index))
+                              mol_index,
+                              mol.site_properties["mol_name"][0]))
             mol_index += 1
         lines.append('\n')
         self.lines.extend(lines)
@@ -264,13 +269,14 @@ class LmpInput():
                                        mols_in_box.param_list):
             if gff.imdihedrals:
                 for i, v in enumerate(gff.imdihedrals.values()):
-                    lines.append('{} {}  {}  {} {} {} {} {} {} {}'.format
+                    lines.append('{} {}  {}  {} {} {} {} {} {} {} {}'.format
                         (num_atoms + 1, v[0],
                          round(math.cos(math.degrees(v[1])), 0), v[2], '#',
                          gff.imdihedrals.keys()[i][0],
                          gff.imdihedrals.keys()[i][1],
                          gff.imdihedrals.keys()[i][2],
-                         gff.imdihedrals.keys()[i][3], mol_index))
+                         gff.imdihedrals.keys()[i][3], mol_index,
+                         mol.site_properties["mol_name"][0]))
                     num_atoms = num_atoms + 1
             mol_index += 1
         lines.append('\n')
@@ -304,27 +310,42 @@ class LmpInput():
                     atom_type_index[gff.masses.keys()[m]] = masses_index
             num_atoms = len(mol)
             num_this_mol = parm['number']
+
+
+            #if mol.site_properties["mol_name"][0]=="PC":
+
+                #print gff.charges["PC"]["O"]
+                #print "PC"
             #iterate every molecule of molecule type
             for imol in range(num_this_mol):
+
                 mol_coords = mol_pack.cart_coords[i:i + num_atoms]
                 mol_index += 1
+                #print mol.site_properties["atomname"]
+                #print gff.charges["PC"]
                 #iterate over atoms in every molecule
                 d = {}
                 for k, v in enumerate(mol_coords):
+                    print gff.charges[mol.site_properties["mol_name"][0]][gff.atom_index[
+                             k + 1]]
+
                     lines.append(
-                        '{}  {}  {}  {}  {}  {} {} {}  {} {}'.format(k + i + 1,
+                        '{}  {}  {}  {}  {}  {} {} {}  {} {} {} {}'.format(k + i + 1,
                          mol_index,
                          atom_type_index[
                              gff.atom_index_gaff
                              [
                                  k + 1]],
+                         gff.charges[mol.site_properties["mol_name"][0]][gff.atom_index[
+                             k + 1]],
                          v[0], v[1],
                          v[2], '#',
                          mol_index,
                          gff.atom_index_gaff[
                              k + 1],
                          gff.atom_index[
-                             k + 1]))
+                             k + 1],
+                         mol.site_properties["mol_name"][0]))
                     d[gff.atom_index[k + 1]] = k + i + 1
                 self.box_mol_index.append(d)
                 i += num_atoms
@@ -358,7 +379,7 @@ class LmpInput():
                     a = gff.atom_gaff[top.bonds[k][0]]
                     b = gff.atom_gaff[top.bonds[k][1]]
                     bond_label = tuple(sorted([a, b]))
-                    lines.append('{} {} {} {} {} {} {} {}'.format((i + k + 1),
+                    lines.append('{} {} {} {} {} {} {} {} {}'.format((i + k + 1),
                                   bond_type_index[
                                       bond_label],
                                   self.box_mol_index[
@@ -372,7 +393,8 @@ class LmpInput():
                                   top.bonds[k][
                                       0],
                                   top.bonds[k][
-                                      1]))
+                                      1],
+                                  mol.site_properties["mol_name"][0]))
                 i += len(top.bonds)
         lines.append('\n')
         self.lines.extend(lines)
@@ -410,14 +432,15 @@ class LmpInput():
                     angle_label = (a, b, c)
                     if angle_label[0] > angle_label[2]:
                         angle_label = tuple(reversed(list(angle_label)))
-                    lines.append('{}  {}  {}  {}  {}  {}  {}  {}  {}  {}'
+                    lines.append('{}  {}  {}  {}  {}  {}  {}  {}  {}  {} {}'
                     .format(i + k + 1, angle_type_index[angle_label],
                             self.box_mol_index[mol_index - 1][v[0]],
                             self.box_mol_index[mol_index - 1][v[1]],
                             self.box_mol_index[mol_index - 1][v[2]], '#',
                             mol_index,
                             top.angles[k][0], top.angles[k][1],
-                            top.angles[k][2]))
+                            top.angles[k][2],
+                            mol.site_properties["mol_name"][0]))
 
                 i += len(top.angles)
         lines.append('\n')
@@ -471,7 +494,7 @@ class LmpInput():
                         for func_form, d in v[1].iteritems():
                             j += 1
                             lines.append(
-                                '{}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}'
+                                '{}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {} {}'
                                 .format(j, dihedral_type_index[dihedral_label],
                                         self.box_mol_index[mol_index - 1][A],
                                         self.box_mol_index[mol_index - 1][B],
@@ -481,7 +504,8 @@ class LmpInput():
                                         top.dihedrals[l][0],
                                         top.dihedrals[l][1],
                                         top.dihedrals[l][2],
-                                        top.dihedrals[l][3]))
+                                        top.dihedrals[l][3],
+                                        mol.site_properties["mol_name"][0]))
                     i += len(top.dihedrals)
         lines.append('\n')
         self.lines.extend(lines)
@@ -523,7 +547,7 @@ class LmpInput():
                         d = gff.atom_gaff[top.imdihedrals[k][3]]
                         imdihedral_label = tuple([a, b, c, d])
                         lines.append(
-                            '{}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}'
+                            '{}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {} {}'
                             .format(j, imdihedral_type_index[imdihedral_label],
                                     self.box_mol_index[mol_index - 1][v[0]],
                                     self.box_mol_index[mol_index - 1][v[1]],
@@ -533,7 +557,8 @@ class LmpInput():
                                     top.imdihedrals[k][0],
                                     top.imdihedrals[k][1],
                                     top.imdihedrals[k][2],
-                                    top.imdihedrals[k][3]))
+                                    top.imdihedrals[k][3],
+                                    mol.site_properties["mol_name"][0]))
                     i += len(top.imdihedrals)
         lines.append('\n')
         self.lines.extend(lines)

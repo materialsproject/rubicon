@@ -14,7 +14,7 @@ from monty.io import ScratchDir
 import tempfile
 from rubicon.gff.topology import TopMol
 
-ANTECHAMBER_DEBUG = False
+ANTECHAMBER_DEBUG = True
 
 
 class AntechamberRunner():
@@ -24,6 +24,7 @@ class AntechamberRunner():
     """
     def __init__(self, filename=None):
         self.filename = filename
+
 
     def _convert_to_pdb(self, molecule, filename=None):
         """
@@ -69,7 +70,10 @@ class AntechamberRunner():
                 self._run_parmchk('ANTECHAMBER_AC.AC')
                 top = TopMol.from_file('mol.rtf')
                 my_gff = Gff.from_forcefield_para('ANTECHAMBER.FRCMOD')
-                my_gff.read_atom_index('ANTECHAMBER_AC.AC')
+                my_gff.read_atom_index(mol,'ANTECHAMBER_AC.AC')
+                my_gff.read_charges()
+                mol.add_site_property("atomname",(my_gff.atom_index.values()))
+                #print mol.site_properties["atomname"]
                 gff_list.append(my_gff)
                 top_list.append(top)
             self.gff_list=gff_list
