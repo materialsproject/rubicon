@@ -14,7 +14,7 @@ from monty.io import ScratchDir
 import tempfile
 from rubicon.gff.topology import TopMol
 
-ANTECHAMBER_DEBUG = False
+
 
 
 class AntechamberRunner():
@@ -65,7 +65,7 @@ class AntechamberRunner():
         scratch = tempfile.gettempdir()
 
         with ScratchDir(scratch,
-                        copy_to_current_on_exit=ANTECHAMBER_DEBUG) as d:
+                        copy_to_current_on_exit=False) as d:
             gff_list = []
             top_list=[]
 
