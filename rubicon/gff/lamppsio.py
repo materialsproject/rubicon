@@ -312,23 +312,14 @@ class LmpInput():
             num_this_mol = parm['number']
 
 
-            #if mol.site_properties["mol_name"][0]=="PC":
-
-                #print gff.charges["PC"]["O"]
-                #print "PC"
             #iterate every molecule of molecule type
             for imol in range(num_this_mol):
 
                 mol_coords = mol_pack.cart_coords[i:i + num_atoms]
                 mol_index += 1
-                #print mol.site_properties["atomname"]
-                #print gff.charges["PC"]
-                #iterate over atoms in every molecule
+
                 d = {}
                 for k, v in enumerate(mol_coords):
-                    print gff.charges[mol.site_properties["mol_name"][0]][gff.atom_index[
-                             k + 1]]
-
                     lines.append(
                         '{}  {}  {}  {}  {}  {} {} {}  {} {} {} {}'.format(k + i + 1,
                          mol_index,

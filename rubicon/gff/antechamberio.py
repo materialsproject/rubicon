@@ -14,7 +14,7 @@ from monty.io import ScratchDir
 import tempfile
 from rubicon.gff.topology import TopMol
 
-ANTECHAMBER_DEBUG = True
+ANTECHAMBER_DEBUG = False
 
 
 class AntechamberRunner():
@@ -22,8 +22,13 @@ class AntechamberRunner():
     A wrapper for AntechamberRunner software
 
     """
-    def __init__(self, filename=None):
-        self.filename = filename
+    def __init__(self, mols):
+        """
+        Args:
+            mols: List of molecules
+        """
+
+        self.mols = mols
 
 
     def _convert_to_pdb(self, molecule, filename=None):
@@ -33,12 +38,12 @@ class AntechamberRunner():
         write_mol(molecule, filename)
 
 
-    def _run_parmchk(self, filename=None):
+    def _run_parmchk(self, filename='ANTECHAMBER_AC.AC'):
         """
         run parmchk using ANTECHAMBER_AC.AC file
 
         Args:
-            filename = pdb file of the molecule
+            filename: pdb file of the molecule
         """
         command_parmchk = (
         'parmchk -i ' + filename + ' -f ac -o mol.frcmod -a Y')
@@ -51,7 +56,11 @@ class AntechamberRunner():
         generate and run antechamber command for specified pdb file
 
         Args:
-            filename = pdb file of the molecule
+            filename: pdb file of the molecule
+            mols: list of molecules
+        Returns:
+            gff_list : list of force field parameters of molecules
+            top_list: list of topology of molecules
         """
         scratch = tempfile.gettempdir()
 
@@ -67,13 +76,12 @@ class AntechamberRunner():
                 " -fo charmm")
                 return_cmd = subprocess.call(shlex.split(command))
                 self.molname = filename.split('.')[0]
-                self._run_parmchk('ANTECHAMBER_AC.AC')
+                self._run_parmchk()
                 top = TopMol.from_file('mol.rtf')
                 my_gff = Gff.from_forcefield_para('ANTECHAMBER.FRCMOD')
                 my_gff.read_atom_index(mol,'ANTECHAMBER_AC.AC')
                 my_gff.read_charges()
                 mol.add_site_property("atomname",(my_gff.atom_index.values()))
-                #print mol.site_properties["atomname"]
                 gff_list.append(my_gff)
                 top_list.append(top)
             self.gff_list=gff_list
