@@ -555,7 +555,7 @@ class LmpInput():
         self.lines.extend(lines)
         return '\n'.join(lines)
 
-    def get_lammps_string(self):
+    def __str__(self):
         """
         returns a string of lammps data input file
         """
@@ -590,5 +590,5 @@ class LmpInput():
         """
 
         with open(filename, 'w') as f:
-            f.write(self.get_lammps_string())
+            f.write(self.__str__())
 

@@ -187,11 +187,6 @@ class Gff(MSONable):
         filename = os.path.join(os.path.dirname(__file__),'charges.json')
         jsonfile = open(filename)
         self.charges = json.load(jsonfile, encoding="utf-8")
-        #print self.charges["TFN"]['O']
-
-
-
-
 
 
     @property

@@ -718,7 +718,7 @@ class TestLmpInput(TestCase):
     def test_get_lammps_string(self):
         data_lammps=LmpInput(self.ffmol,self.mols_in_box)
         data_lammps._set_atom(self.ffmol, self.mols_in_box)
-        lammps_data = data_lammps.get_lammps_string()
+        lammps_data = data_lammps.__str__()
 
 
         ans="""LAMMPS Data File
