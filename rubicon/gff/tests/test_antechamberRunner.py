@@ -74,7 +74,7 @@ class TestAntechamberRunner(TestCase):
 
     def test_get_ffmol(self):
         ffmol = AntechamberRunner(mols)
-        gff_list, top_list = ffmol.get_ffmol(mols,'mol.pdb')
+        gff_list, top_list = ffmol.get_ff_top_mol(mols,'mol.pdb')
         for gff in gff_list:
             m =  gff.masses
 

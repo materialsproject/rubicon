@@ -80,7 +80,7 @@ class TestLmpInput(TestCase):
     def setUpClass(cls):
         mols=[tfn,n1c,pc]
         cls.ffmol = AntechamberRunner(mols)
-        cls.gff_list, top_list = cls.ffmol.get_ffmol(mols,'mol.pdb')
+        cls.gff_list, top_list = cls.ffmol.get_ff_top_mol(mols,'mol.pdb')
         cls.mols_in_box = PackmolRunner(mols, [{"number":1,"inside box":[0.,0.,0.,40.,40.,40.]},{"number":1},{"number":1}])
         super(TestLmpInput, cls).setUpClass()
 

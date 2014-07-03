@@ -51,7 +51,7 @@ class AntechamberRunner():
         return return_cmd
 
 
-    def get_ffmol(self,mols,filename=None):
+    def get_ff_top_mol(self,mols,filename=None):
         """
         generate and run antechamber command for specified pdb file
 
