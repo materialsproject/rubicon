@@ -178,30 +178,10 @@ class Gff(MSONable):
                     self.atom_gaff[atom_name]=gaff_name
                     self.atom_index[index]=atom_name
                     self.atom_index_gaff[index]=atom_gaff
-                    # print (self.atom_index.values())
-                    # mol.add_site_property("atomname",self.atom_index.values())
-            self.atom_gaff.update(self.atom_gaff)
-            # for atom_name in (self.atom_index.values()):
-            #     atom_name.append(atom_name)
-            # mol.add_site_property("atomname",atom_name)
-            # print  mol.site_properties["atomname"]
-        self.num_types = len(set(self.atom_gaff.values()))
-
-
-
-
-    def read_atomType(self,filename=None):
-
-        with open(filename) as f:
-
-            for line in f.readlines():
-                token = line.split()
-                if token[0]=='ATOM':
-                    atom_name=token[2]
-                    gaff_name=token[-1]
-                    self.atom_gaff[atom_name]=gaff_name
             self.atom_gaff.update(self.atom_gaff)
         self.num_types = len(set(self.atom_gaff.values()))
+
+
 
     def read_charges(self):
         filename = os.path.join(os.path.dirname(__file__),'charges.json')
