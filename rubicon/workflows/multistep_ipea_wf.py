@@ -182,14 +182,15 @@ class QChemFireWorkCreator():
     @staticmethod
     def get_dielectric_constant(solvent):
         dielec_const_file = os.path.join(os.path.dirname(__file__),
-                                         "../utils/data", "dielectric_constants.json")
+                                         "../utils/data", "pcm_params.json")
         with open(dielec_const_file) as f:
             dielec_consts = json.load(f)
         if solvent not in dielec_consts:
             raise Exception("Don't know the dielectric constants for "
                             "solvent '{}'".format(solvent))
-        dielectric_constant = dielec_consts[solvent]
-        return dielectric_constant
+        dielectric_constant = dielec_consts[solvent]["dielectric"]
+        probe_radius = dielec_consts[solvent]["solvent_probe_radius"]
+        return dielectric_constant, probe_radius
 
     @staticmethod
     def get_smx_solvent(implicit_solvent, solvent, solvent_method):
@@ -218,15 +219,17 @@ class QChemFireWorkCreator():
                 solvent_theory = 'ssvpe'
             else:
                 solvent_theory = 'cpcm'
-            dielectric_constant = self.get_dielectric_constant(solvent)
+            dielectric_constant, probe_radius = self.get_dielectric_constant(solvent)
             qctask_sol.use_pcm(solvent_params={"Dielectric": dielectric_constant},
-                               pcm_params={'Theory': solvent_theory})
+                               pcm_params={'Theory': solvent_theory,
+                                           "SASrad": probe_radius})
             implicit_solvent['model'] = solvent_method.lower()
             implicit_solvent['dielectric_constant'] = dielectric_constant
+            implicit_solvent['solvent_probe_radius'] = probe_radius
             implicit_solvent['radii'] = 'uff'
             implicit_solvent['vdwscale'] = 1.1
         elif solvent_method.lower() == 'cosmo':
-            dielectric_constant = self.get_dielectric_constant(solvent)
+            dielectric_constant = self.get_dielectric_constant(solvent)[0]
             qctask_sol.use_cosmo(dielectric_constant)
             implicit_solvent['model'] = 'cosmo'
             implicit_solvent['dielectric_constant'] = dielectric_constant
