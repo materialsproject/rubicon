@@ -320,7 +320,6 @@ class LmpInput():
 
                 d = {}
                 for k, v in enumerate(mol_coords):
-                    print "===", mol.site_properties["mol_name"]
                     lines.append(
                         '{}  {}  {}  {}  {}  {} {} {}  {} {} {} {}'.format(k + i + 1,
                          mol_index,
