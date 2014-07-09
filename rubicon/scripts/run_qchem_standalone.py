@@ -128,9 +128,9 @@ def main():
         spin_multiplicity = None
         for d in qcout.data:
             j = d["input"]
-            if j.charge:
+            if j.charge is not None:
                 charge = j.charge
-            if j.spin_multiplicity:
+            if j.spin_multiplicity is not None:
                 spin_multiplicity = j.spin_multiplicity
         if qcout.data[-1]['frequencies'][0]["frequency"] < -0.00:
             os.system("tar czvf img_freq_1.tar.gz *")
@@ -166,6 +166,7 @@ def main():
                 qcinp = QcInput([qctask_opt, qctask_freq])
                 for j in qcinp.jobs:
                     j.set_dft_grid(128, 302)
+                    j.set_integral_threshold(12)
                     if j.params["rem"]["jobtype"] == "opt":
                         j.scale_geom_opt_threshold(0.1, 0.1, 0.1)
                         j.set_geom_max_iterations(100)
@@ -190,6 +191,7 @@ def main():
                     qcinp = QcInput([qctask_opt, qctask_freq])
                     for j in qcinp.jobs:
                         j.set_dft_grid(90, 590)
+                        j.set_integral_threshold(12)
                         if j.params["rem"]["jobtype"] == "opt":
                             j.scale_geom_opt_threshold(0.1, 0.1, 0.1)
                             j.set_geom_max_iterations(100)

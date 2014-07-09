@@ -5,7 +5,7 @@ from rubicon.workflows.multistep_ipea_wf import QChemFireWorkCreator
 __author__ = 'xiaohuiqu'
 
 
-def solvation_energy_fws(mol, name, mission, dupefinder=None, priority=1, parent_fwid=None, solvents=tuple(),
+def solvation_energy_fws(mol, name, mission, solvents, solvent_method, dupefinder=None, priority=1, parent_fwid=None,
                          additional_user_tags=None, qm_method=None):
     large = False
     if len(mol) > 50:
@@ -52,7 +52,7 @@ def solvation_energy_fws(mol, name, mission, dupefinder=None, priority=1, parent
                                   fwid_base + 4 + num_solvents*2))] * 2)
     sp_fws = (fw_creator.sp_fw(
               charge=0, spin_multiplicity=1, fw_id_cal=fwid_cal,
-              fw_id_db=fwid_db, solvent_method='sm12mk', solvent=solvent,
+              fw_id_db=fwid_db, solvent_method=solvent_method, solvent=solvent,
               qm_method=energy_method)
               for (fwid_cal, fwid_db), solvent in zip(sp_fw_ids, solvents))
     sp_cal_ids, sp_db_ids = zip(*sp_fw_ids)
@@ -73,8 +73,7 @@ def solvation_energy_fws(mol, name, mission, dupefinder=None, priority=1, parent
     return fireworks, links_dict
 
 
-def mol_to_solvation_energy_wf(mol, name, mission, dupefinder=None, priority=1,
-                   parent_fwid=None, solvents=tuple(), additional_user_tags=None, qm_method=None):
+def mol_to_solvation_energy_wf(mol, name, **kwargs):
     fireworks, links_dict = solvation_energy_fws(
-        mol, name, mission, dupefinder, priority, parent_fwid, solvents, additional_user_tags, qm_method)
+        mol, name, **kwargs)
     return Workflow(fireworks, links_dict, name)

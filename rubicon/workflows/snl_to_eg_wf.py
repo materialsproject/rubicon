@@ -42,27 +42,33 @@ def snl_to_eg_wf(snl, parameters=None):
     workflow_type = parameters.get('workflow', 'ipea')
     ref_charge = parameters.get('ref_charge', 0)
     spin_multiplicities = parameters.get('spin_multiplicities', (2, 1, 2))
-    qm_method = parameters.get("method", None)
     use_tags = {"initial_charge": ref_charge}
+    solvent_method = parameters.get("solvent_method", "ief-pcm")
+    qm_method = parameters.get("qm_method", None)
+    population_method = parameters.get("population_method", None)
     if workflow_type == 'ipea':
+        solvent = parameters.get('solvent', "water")
         fws_tasks, connections = multistep_ipea_fws(
-            mol=snl.structure, name=molname, mission=mission, ref_charge=ref_charge,
-            spin_multiplicities=spin_multiplicities, dupefinder=DupeFinderEG(), priority=priority, parent_fwid=1,
-            additional_user_tags=use_tags, qm_method=qm_method)
+            mol=snl.structure, name=molname, mission=mission, solvent=solvent, solvent_method=solvent_method,
+            ref_charge=ref_charge, spin_multiplicities=spin_multiplicities, dupefinder=DupeFinderEG(),
+            priority=priority, parent_fwid=1, additional_user_tags=use_tags, qm_method=qm_method)
     elif workflow_type == 'multiple solvent ipea':
         solvents = parameters.get('solvents', default_solvents)
         fws_tasks, connections = multi_solvent_ipea_fws(
-            mol=snl.structure, name=molname, mission=mission, solvents=solvents, ref_charge=ref_charge,
-            spin_multiplicities=spin_multiplicities, dupefinder=DupeFinderEG(), priority=priority, parent_fwid=1,
-            additional_user_tags=use_tags, qm_method=qm_method)
+            mol=snl.structure, name=molname, mission=mission, solvents=solvents, solvent_method=solvent_method,
+            ref_charge=ref_charge, spin_multiplicities=spin_multiplicities, dupefinder=DupeFinderEG(),
+            priority=priority, parent_fwid=1, additional_user_tags=use_tags, qm_method=qm_method)
     elif workflow_type == 'solvation energy':
-        solvents = parameters.get('solvents', default_solvents)
+        solvents = parameters.get('solvents', "water")
         fws_tasks, connections = solvation_energy_fws(
-            mol=snl.structure, name=molname, mission=mission, dupefinder=DupeFinderEG(), priority=priority,
-            parent_fwid=1, solvents=solvents, additional_user_tags=use_tags, qm_method=qm_method)
+            mol=snl.structure, name=molname, mission=mission, solvents=solvents, solvent_method=solvent_method,
+            dupefinder=DupeFinderEG(), priority=priority, parent_fwid=1, additional_user_tags=use_tags,
+            qm_method=qm_method)
     elif workflow_type == "single point energy":
+        solvent = parameters.get('solvent', "water")
         fws_tasks, connections = single_point_energy_fws(
-            mol=snl.structure, name=molname, mission=mission, parameters=parameters, dupefinder=DupeFinderEG(),
+            mol=snl.structure, name=molname, mission=mission, solvent=solvent, solvent_method=solvent_method,
+            qm_method=qm_method, pop_method=population_method, dupefinder=DupeFinderEG(),
             priority=priority, parent_fwid=1, additional_user_tags=use_tags)
     else:
         raise ValueError('Workflow "{}" is not supported yet'.

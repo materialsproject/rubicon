@@ -164,6 +164,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                 qcinp = QcInput.from_dict(fw.spec["qcinp"])
                 for j in qcinp.jobs:
                     j.set_dft_grid(*grid)
+                    j.set_integral_threshold(12)
                     if j.params["rem"]["jobtype"] == "opt":
                         j.scale_geom_opt_threshold(0.1, 0.1, 0.1)
                         j.set_geom_max_iterations(100)

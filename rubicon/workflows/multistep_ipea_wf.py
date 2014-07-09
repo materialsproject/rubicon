@@ -69,7 +69,7 @@ class QChemFireWorkCreator():
                           "dftvdw_print": 1,
                           "dftvdw_kai": 800,
                           "dftvdw_use_ele_drv": 1}
-        elif theoretical_level.lower() == "xyjgos":
+        elif theoretical_level.lower() == "xygjos":
             exchange = "xygjos"
             if basis_set == "6-31+g*":
                 aux_basis = "rimp2-aug-cc-pvdz"
@@ -179,15 +179,89 @@ class QChemFireWorkCreator():
                               spec=spec_db, name=task_name_db, fw_id=fw_id_db)
         return fw_freq_cal, fw_freq_db
 
+    @staticmethod
+    def get_dielectric_constant(solvent):
+        dielec_const_file = os.path.join(os.path.dirname(__file__),
+                                         "../utils/data", "pcm_params.json")
+        with open(dielec_const_file) as f:
+            dielec_consts = json.load(f)
+        if solvent not in dielec_consts:
+            raise Exception("Don't know the dielectric constants for "
+                            "solvent '{}'".format(solvent))
+        dielectric_constant = dielec_consts[solvent]["dielectric"]
+        probe_radius = dielec_consts[solvent]["solvent_probe_radius"]
+        return dielectric_constant, probe_radius
+
+    @staticmethod
+    def get_smx_solvent(implicit_solvent, solvent, solvent_method):
+        smx_data_file = os.path.join(os.path.dirname(__file__),
+                                     "../utils/data", "smx_data.json")
+        with open(smx_data_file) as f:
+            smx_data = json.load(f)
+        if solvent not in smx_data["builtin_solvent"]:
+            smx_solvent = "other"
+            if solvent not in smx_data["custom_solvent"]:
+                raise Exception("Don't know the SMx parameters for "
+                                "solvent '{}'".format(solvent))
+            implicit_solvent['solvent_data'] = \
+                smx_data["custom_solvent"][solvent]
+        else:
+            smx_solvent = solvent
+        rem_options = dict(solvent_method=solvent_method.lower(),
+                           smx_solvent=smx_solvent.lower())
+        return rem_options, smx_solvent
+
+    def set_solvent_method(self, qctask_sol, solvent, solvent_method):
+        implicit_solvent = dict()
+        implicit_solvent['solvent_name'] = solvent
+        if solvent_method.lower() in ['cpcm', 'ief-pcm']:
+            if solvent_method.lower() == 'ief-pcm':
+                solvent_theory = 'ssvpe'
+            else:
+                solvent_theory = 'cpcm'
+            dielectric_constant, probe_radius = self.get_dielectric_constant(solvent)
+            qctask_sol.use_pcm(solvent_params={"Dielectric": dielectric_constant},
+                               pcm_params={'Theory': solvent_theory,
+                                           "SASrad": probe_radius})
+            implicit_solvent['model'] = solvent_method.lower()
+            implicit_solvent['dielectric_constant'] = dielectric_constant
+            implicit_solvent['solvent_probe_radius'] = probe_radius
+            implicit_solvent['radii'] = 'uff'
+            implicit_solvent['vdwscale'] = 1.1
+        elif solvent_method.lower() == 'cosmo':
+            dielectric_constant = self.get_dielectric_constant(solvent)[0]
+            qctask_sol.use_cosmo(dielectric_constant)
+            implicit_solvent['model'] = 'cosmo'
+            implicit_solvent['dielectric_constant'] = dielectric_constant
+        elif solvent_method.lower() in ['sm12mk', 'sm12chelpg', 'sm12',
+                                        'sm8']:
+            implicit_solvent['model'] = solvent_method.lower()
+            rem_options, smx_solvent = self.get_smx_solvent(implicit_solvent, solvent, solvent_method)
+            qctask_sol.params['rem'].update(rem_options)
+            implicit_solvent['smx_solvent'] = smx_solvent
+        else:
+            raise Exception("Don't know how to setup solvent model '{}'".
+                            format(solvent_method))
+        if not self.large:
+            qctask_sol.set_dft_grid(128, 302)
+            qctask_sol.set_integral_threshold(12)
+            qctask_sol.set_scf_convergence_threshold(8)
+        else:
+            qctask_sol.set_scf_algorithm_and_iterations(iterations=100)
+            if solvent_method.lower() in ['cpcm', 'ief-pcm']:
+                qctask_sol.params['pcm'].update({"hpoints": 194,
+                                                 "heavypoints": 194})
+        return implicit_solvent
+
     def sp_fw(self, charge, spin_multiplicity, fw_id_cal, fw_id_db,
               solvent_method="ief-pcm", solvent="water", priority=None, qm_method=None,
-              population_method=None):
+              population_method=None, task_type_name=None):
         if not qm_method:
             qm_method = "B3LYP/6-31+G*"
         spec = self.base_spec()
         if priority:
             spec['_priority'] = priority
-        task_type = "single point energy"
+        task_type = task_type_name if task_type_name else "single point energy"
         state_name = self.get_state_name(charge, spin_multiplicity)
         title = self.molname + " " + state_name + " " + qm_method + " " + task_type
         title += "\n Gas Phase"
@@ -215,55 +289,7 @@ class QChemFireWorkCreator():
                             jobtype="sp", title=title, exchange=exchange, correlation=correlation,
                             basis_set=basis_set, aux_basis_set=aux_basis, rem_params=rem_params)
         qctask_sol.set_scf_initial_guess(guess="read")
-        implicit_solvent = dict()
-        implicit_solvent['solvent_name'] = solvent
-        if solvent_method.lower() in ['cpcm', 'ief-pcm']:
-            if solvent_method.lower() == 'ief-pcm':
-                solvent_theory = 'ssvpe'
-            else:
-                solvent_theory = 'cpcm'
-            qctask_sol.use_pcm(solvent_params={"Dielectric": 78.3553},
-                               pcm_params={'Theory': solvent_theory})
-            implicit_solvent['model'] = solvent_method.lower()
-            implicit_solvent['dielectric_constant'] = 78.3553
-            implicit_solvent['radii'] = 'uff'
-            implicit_solvent['vdwscale'] = 1.1
-        elif solvent_method.lower() == 'cosmo':
-            qctask_sol.use_cosmo()
-            implicit_solvent['model'] = 'cosmo'
-            implicit_solvent['dielectric_constant'] = 78.3553
-        elif solvent_method.lower() in ['sm12mk', 'sm12chelpg', 'sm12',
-                                        'sm8']:
-            implicit_solvent['model'] = solvent_method.lower()
-            smx_data_file = os.path.join(os.path.dirname(__file__),
-                                         "../utils/data", "smx_data.json")
-            with open(smx_data_file) as f:
-                smx_data = json.load(f)
-            if solvent not in smx_data["builtin_solvent"]:
-                smx_solvent = "other"
-                if solvent not in smx_data["custom_solvent"]:
-                    raise Exception("Don't know the SMx parameters for "
-                                    "solvent '{}'".format(solvent))
-                implicit_solvent['solvent_data'] = \
-                    smx_data["custom_solvent"][solvent]
-            else:
-                smx_solvent = solvent
-            rem_options = dict(solvent_method=solvent_method.lower(),
-                               smx_solvent=smx_solvent.lower())
-            qctask_sol.params['rem'].update(rem_options)
-            implicit_solvent['smx_solvent'] = smx_solvent
-        else:
-            raise Exception("Don't know how to setup solvent model '{}'".
-                            format(solvent_method))
-        if not self.large:
-            qctask_sol.set_dft_grid(128, 302)
-            qctask_sol.set_integral_threshold(12)
-            qctask_sol.set_scf_convergence_threshold(8)
-        else:
-            qctask_sol.set_scf_algorithm_and_iterations(iterations=100)
-            if solvent_method.lower() in ['cpcm', 'ief-pcm']:
-                qctask_sol.params['pcm'].update({"hpoints": 194,
-                                                 "heavypoints": 194})
+        implicit_solvent = self.set_solvent_method(qctask_sol, solvent, solvent_method)
 
         qcinp = QcInput([qctask_vac, qctask_sol])
         spec["qcinp"] = qcinp.to_dict
@@ -287,8 +313,59 @@ class QChemFireWorkCreator():
                             spec=spec_db, name=task_name_db, fw_id=fw_id_db)
         return fw_sp_cal, fw_sp_db
 
+    def vacuum_only_sp_fw(self, charge, spin_multiplicity, fw_id_cal, fw_id_db,
+                          priority=None, qm_method=None, population_method=None):
+        if not qm_method:
+            qm_method = "B3LYP/6-31+G*"
+        spec = self.base_spec()
+        if priority:
+            spec['_priority'] = priority
+        task_type = "vacuum only single point energy"
+        state_name = self.get_state_name(charge, spin_multiplicity)
+        title = self.molname + " " + state_name + " " + qm_method + " " + task_type
+        title += "\n Gas Phase"
+        exchange, correlation, basis_set,  aux_basis, rem_params, method_token = self. \
+            get_exchange_correlation_basis_auxbasis_remparams(qm_method)
+        if population_method:
+            if not rem_params:
+                rem_params = dict()
+            if population_method.lower() == "nbo":
+                rem_params["nbo"] = 1
+            elif population_method.lower() == "chelpg":
+                rem_params["chelpg"] = True
+        qctask_vac = QcTask(self.mol, charge=charge, spin_multiplicity=spin_multiplicity,
+                            jobtype="sp", title=title, exchange=exchange, correlation=correlation,
+                            basis_set=basis_set, aux_basis_set=aux_basis, rem_params=rem_params)
+        if not self.large:
+            qctask_vac.set_dft_grid(128, 302)
+            qctask_vac.set_integral_threshold(12)
+            qctask_vac.set_scf_convergence_threshold(8)
+        else:
+            qctask_vac.set_scf_algorithm_and_iterations(iterations=100)
 
-def multistep_ipea_fws(mol, name, mission, ref_charge, spin_multiplicities=(2, 1, 2), dupefinder=None, priority=1,
+        qcinp = QcInput([qctask_vac])
+        spec["qcinp"] = qcinp.to_dict
+        spec['task_type'] = task_type
+        spec['charge'] = charge
+        spec['spin_multiplicity'] = spin_multiplicity
+        spec['run_tags']['methods'] = method_token
+        task_name = self.molname + ' ' + state_name + ' ' + task_type
+        from rubicon.firetasks.multistep_qchem_task \
+            import QChemSinglePointEnergyDBInsertionTask
+        fw_sp_cal = FireWork([QChemTask()],
+                             spec=spec, name=task_name, fw_id=fw_id_cal)
+        spec_db = copy.deepcopy(spec)
+        del spec_db['_dupefinder']
+        spec_db['_allow_fizzled_parents'] = True
+        spec_db['task_type'] = task_type + ' DB Insertion'
+        del spec_db["_trackers"][:2]
+        task_name_db = task_name + " DB Insertion"
+        fw_sp_db = FireWork([QChemSinglePointEnergyDBInsertionTask()],
+                            spec=spec_db, name=task_name_db, fw_id=fw_id_db)
+        return fw_sp_cal, fw_sp_db
+
+
+def multistep_ipea_fws(mol, name, mission, solvent, solvent_method, ref_charge, spin_multiplicities=(2, 1, 2), dupefinder=None, priority=1,
                        parent_fwid=None, additional_user_tags=None, qm_method=None):
     large = False
     if len(mol) > 50:
@@ -333,7 +410,8 @@ def multistep_ipea_fws(mol, name, mission, ref_charge, spin_multiplicities=(2, 1
                                agi_db: afi_cal})
 
     fw_ids = zip(* [iter(range(fwid_base + 12, fwid_base + 12 + 6))] * 2)
-    fws = (fw_creator.sp_fw(ch, spin, fwid_cal, fwid_db, qm_method=energy_method)
+    fws = (fw_creator.sp_fw(ch, spin, fwid_cal, fwid_db, solvent=solvent, solvent_method=solvent_method,
+                            qm_method=energy_method)
            for ch, spin, (fwid_cal, fwid_db)
            in zip(charges, spin_multiplicities, fw_ids))
     (cspi_cal, cspi_db), (nspi_cal, nspi_db), (aspi_cal, aspi_db) = fw_ids
@@ -358,9 +436,6 @@ def multistep_ipea_fws(mol, name, mission, ref_charge, spin_multiplicities=(2, 1
     return fireworks, links_dict
 
 
-def mol_to_ipea_wf(mol, name, mission, ref_charge, spin_multiplicities=(2, 1, 2),
-                   dupefinder=None, priority=1, parent_fwid=None, additional_user_tags=None, qm_method=None):
-    fireworks, links_dict = multistep_ipea_fws(
-        mol, name, mission, ref_charge, spin_multiplicities, dupefinder, priority, parent_fwid,
-        additional_user_tags, qm_method)
+def mol_to_ipea_wf(mol, name, **kwargs):
+    fireworks, links_dict = multistep_ipea_fws(mol, name, **kwargs)
     return Workflow(fireworks, links_dict, name)
