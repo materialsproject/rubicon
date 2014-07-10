@@ -69,12 +69,14 @@ class QChemFireWorkCreator():
                           "dftvdw_print": 1,
                           "dftvdw_kai": 800,
                           "dftvdw_use_ele_drv": 1}
-        elif theoretical_level.lower() == "xygjos":
-            exchange = "xygjos"
+        elif theoretical_level.lower() in ["xygjos", "lxygjos"]:
+            exchange = theoretical_level.lower()
             if basis_set == "6-31+g*":
                 aux_basis = "rimp2-aug-cc-pvdz"
             else:
                 aux_basis = "rimp2-aug-cc-pvtz"
+            if exchange == "lxygjos":
+                rem_params = {"omega": 200}
         elif theoretical_level.lower() == "pbe-d3":
             exchange = 'pbe'
             correlation = 'pbe'
@@ -82,7 +84,15 @@ class QChemFireWorkCreator():
                           "dft_d3_s6": 1000,
                           "dft_d3_rs6": 1217,
                           "dft_d3_s8": 722,
-                          "dft_d3_3body": False}
+                          "dft_d3_3body": True}
+        elif theoretical_level.lower() == "blyp-d3":
+            exchange = 'b'
+            correlation = 'lyp'
+            rem_params = {"dft_d": "empirical_grimme3",
+                          "dft_d3_s6": 1000,
+                          "dft_d3_rs6": 1094,
+                          "dft_d3_s8": 1682,
+                          "dft_d3_3body": True}
         else:
             exchange = theoretical_level.lower()
         method_token = [t for t in [basis_set, exchange, aux_basis, correlation, rem_params]
