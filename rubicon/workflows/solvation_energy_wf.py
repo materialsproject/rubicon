@@ -1,6 +1,9 @@
-from fireworks.core.firework import Workflow
 import itertools
-from rubicon.workflows.multistep_ipea_wf import QChemFireWorkCreator
+
+from fireworks.core.firework import Workflow
+
+from rubicon.utils.qchem_firework_creator import QChemFireWorkCreator
+
 
 __author__ = 'xiaohuiqu'
 

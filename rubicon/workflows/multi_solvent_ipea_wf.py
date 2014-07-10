@@ -1,6 +1,8 @@
 import itertools
+
 from fireworks import Workflow
-from rubicon.workflows.multistep_ipea_wf import QChemFireWorkCreator
+
+from rubicon.utils.qchem_firework_creator import QChemFireWorkCreator
 
 
 def multi_solvent_ipea_fws(mol, name, mission, solvents, solvent_method, ref_charge, spin_multiplicities=(2, 1, 2),

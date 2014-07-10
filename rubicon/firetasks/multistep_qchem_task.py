@@ -18,6 +18,7 @@ from rubicon.utils.eg_wf_utils import get_eg_file_loc, \
     get_defuse_causing_qchem_fwid
 from rubicon.utils.snl.egsnl import EGStructureNL
 from rubicon.utils.snl.egsnl_mongo import EGSNLMongoAdapter
+from rubicon.utils.qchem_firework_creator import QChemFireWorkCreator
 
 
 __author__ = 'xiaohuiqu'
@@ -143,8 +144,6 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
     def spawn_opt_freq_wf(mol, molname, mission, additional_user_tags,
                           priority, update_spec, charge,
                           spin_multiplicity, grid):
-        from rubicon.workflows.multistep_ipea_wf \
-            import QChemFireWorkCreator
         fw_creator = QChemFireWorkCreator(
             mol=mol, molname=molname, mission=mission,
             additional_user_tags=additional_user_tags, priority=priority,
