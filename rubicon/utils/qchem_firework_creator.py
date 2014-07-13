@@ -232,7 +232,7 @@ class QChemFireWorkCreator():
             pol_per_vol = total_polarization / 1.0
             a, b, c = 2, - (1 + 9 * pol_per_vol), -1
             dielectric_constant = (-b + math.sqrt(b**2 - 4 * a * c)) / (2 * a)
-            solvent_name = ', '.join(['{:.2%} {:s}'.format(vol, name)
+            solvent_name = ', '.join(['{:.0%} {:s}'.format(vol, name)
                                       for vol, name in zip(vol_ratio, compounds)]) \
                            + ' in volume'
         elif isinstance(solvent, str):
@@ -284,13 +284,13 @@ class QChemFireWorkCreator():
             implicit_solvent['solvent_probe_radius'] = probe_radius
             implicit_solvent['radii'] = 'uff'
             implicit_solvent['vdwscale'] = 1.1
-            implicit_solvent['solvent_name'] = solvent
+            implicit_solvent['solvent_name'] = solvent_name
         elif solvent_method.lower() == 'cosmo':
             dielectric_constant, dummy, solvent_name = self.get_dielectric_constant(solvent)
             qctask_sol.use_cosmo(dielectric_constant)
             implicit_solvent['model'] = 'cosmo'
             implicit_solvent['dielectric_constant'] = dielectric_constant
-            implicit_solvent['solvent_name'] = solvent
+            implicit_solvent['solvent_name'] = solvent_name
         elif solvent_method.lower() in ['sm12mk', 'sm12chelpg', 'sm12',
                                         'sm8']:
             implicit_solvent['model'] = solvent_method.lower()
