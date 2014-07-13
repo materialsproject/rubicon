@@ -198,7 +198,8 @@ class QChemFireWorkCreator():
         with open(dielec_const_file) as f:
             dielec_consts = json.load(f)
         if isinstance(solvent, dict):
-            # e. g. {"components": {"EC": 3.0, "PC": 7.0}
+            # e. g. {"components": {"ethylenecarbonate": 3.0,
+            #                       "ethylmethylcarbonate": 7.0}
             #        "metrics": "molarity"}
             # supported metrics: molarity and volume
             # probe_radius mix by volume
@@ -227,7 +228,7 @@ class QChemFireWorkCreator():
             volume_per_molecule = 1.0/total_mole
             probe_radius = volume_per_molecule ** (1/3)
             polarizations = [((epsilon - 1) * (2 * epsilon + 1))/(9 * epsilon) for epsilon in dielecs]
-            total_polarization = [p * v for p, v in zip(polarizations, vol_ratio)]
+            total_polarization = sum([p * v for p, v in zip(polarizations, vol_ratio)])
             pol_per_vol = total_polarization / 1.0
             a, b, c = 2, - (1 + 9 * pol_per_vol), -1
             dielectric_constant = (-b + math.sqrt(b**2 - 4 * a * c)) / (2 * a)

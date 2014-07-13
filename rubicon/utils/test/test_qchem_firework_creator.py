@@ -11,3 +11,9 @@ class TestQChemFireWorkCreator(TestCase):
         dielectric, probe_radius = QChemFireWorkCreator.get_dielectric_constant(solvent)
         self.assertEqual(dielectric, 90.0)
         self.assertEqual(probe_radius, 2.38)
+
+        solvent = {"components": {"ethylenecarbonate": 3.0,
+                                  "ethylmethylcarbonate": 7.0},
+                   "metrics": "molarity"}
+        dielectric, probe_radius = QChemFireWorkCreator.get_dielectric_constant(solvent)
+        print dielectric, probe_radius
