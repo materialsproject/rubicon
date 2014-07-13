@@ -9,9 +9,9 @@ __author__ = 'xiaohuiqu'
 
 
 def multistep_ipea_fws(mol, name, mission, solvent, solvent_method, ref_charge, spin_multiplicities=(2, 1, 2), dupefinder=None, priority=1,
-                       parent_fwid=None, additional_user_tags=None, qm_method=None):
+                       parent_fwid=None, additional_user_tags=None, qm_method=None, check_large=True):
     large = False
-    if len(mol) > 50:
+    if len(mol) > 50 and check_large:
         large = True
     energy_method, geom_method = qm_method.split("//") if qm_method else (None, None)
     fw_creator = QChemFireWorkCreator(
