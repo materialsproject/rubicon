@@ -232,6 +232,9 @@ class QChemFireWorkCreator():
             pol_per_vol = total_polarization / 1.0
             a, b, c = 2, - (1 + 9 * pol_per_vol), -1
             dielectric_constant = (-b + math.sqrt(b**2 - 4 * a * c)) / (2 * a)
+            solvent_name = ', '.join(['{:.2%} {:s}'.format(vol, name)
+                                      for vol, name in zip(vol_ratio, compounds)]) \
+                           + ' in volume'
         elif isinstance(solvent, str):
             solvent_pure = solvent.lower()
             if solvent_pure not in dielec_consts:
@@ -239,10 +242,11 @@ class QChemFireWorkCreator():
                                 "solvent '{}'".format(solvent_pure))
             dielectric_constant = dielec_consts[solvent_pure]["dielectric"]
             probe_radius = dielec_consts[solvent_pure]["solvent_probe_radius"]
+            solvent_name = solvent
         else:
             raise Exception("Please use a string for pure solvent, and use"
                             "dict for mixtures")
-        return dielectric_constant, probe_radius
+        return dielectric_constant, probe_radius, solvent_name
 
     @staticmethod
     def get_smx_solvent(implicit_solvent, solvent, solvent_method):
@@ -271,7 +275,7 @@ class QChemFireWorkCreator():
                 solvent_theory = 'ssvpe'
             else:
                 solvent_theory = 'cpcm'
-            dielectric_constant, probe_radius = self.get_dielectric_constant(solvent)
+            dielectric_constant, probe_radius, solvent_name = self.get_dielectric_constant(solvent)
             qctask_sol.use_pcm(solvent_params={"Dielectric": dielectric_constant},
                                pcm_params={'Theory': solvent_theory,
                                            "SASrad": probe_radius})
@@ -280,11 +284,13 @@ class QChemFireWorkCreator():
             implicit_solvent['solvent_probe_radius'] = probe_radius
             implicit_solvent['radii'] = 'uff'
             implicit_solvent['vdwscale'] = 1.1
+            implicit_solvent['solvent_name'] = solvent
         elif solvent_method.lower() == 'cosmo':
-            dielectric_constant = self.get_dielectric_constant(solvent)[0]
+            dielectric_constant, dummy, solvent_name = self.get_dielectric_constant(solvent)
             qctask_sol.use_cosmo(dielectric_constant)
             implicit_solvent['model'] = 'cosmo'
             implicit_solvent['dielectric_constant'] = dielectric_constant
+            implicit_solvent['solvent_name'] = solvent
         elif solvent_method.lower() in ['sm12mk', 'sm12chelpg', 'sm12',
                                         'sm8']:
             implicit_solvent['model'] = solvent_method.lower()
