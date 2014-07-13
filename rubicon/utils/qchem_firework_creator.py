@@ -226,7 +226,7 @@ class QChemFireWorkCreator():
             moles = [v / (r**3) for v, r in zip(vol_ratio, rads)]
             total_mole = sum(moles)
             volume_per_molecule = 1.0/total_mole
-            probe_radius = volume_per_molecule ** (1/3)
+            probe_radius = volume_per_molecule ** (1.0/3)
             polarizations = [((epsilon - 1) * (2 * epsilon + 1))/(9 * epsilon) for epsilon in dielecs]
             total_polarization = sum([p * v for p, v in zip(polarizations, vol_ratio)])
             pol_per_vol = total_polarization / 1.0

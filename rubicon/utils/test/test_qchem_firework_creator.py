@@ -4,7 +4,6 @@ from rubicon.utils.qchem_firework_creator import QChemFireWorkCreator
 __author__ = 'xiaohuiqu'
 
 
-
 class TestQChemFireWorkCreator(TestCase):
     def test_get_dielectric_constant(self):
         solvent = "ethylenecarbonate"
@@ -16,4 +15,5 @@ class TestQChemFireWorkCreator(TestCase):
                                   "ethylmethylcarbonate": 7.0},
                    "metrics": "molarity"}
         dielectric, probe_radius = QChemFireWorkCreator.get_dielectric_constant(solvent)
-        print dielectric, probe_radius
+        self.assertAlmostEqual(dielectric, 21.6455062218, 3)
+        self.assertAlmostEqual(probe_radius, 2.65719345195, 3)
