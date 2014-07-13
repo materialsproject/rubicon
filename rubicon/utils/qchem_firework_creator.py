@@ -235,7 +235,7 @@ class QChemFireWorkCreator():
             solvent_name = ', '.join(['{:.0%} {:s}'.format(vol, name)
                                       for vol, name in zip(vol_ratio, compounds)]) \
                            + ' in volume'
-        elif isinstance(solvent, str):
+        elif isinstance(solvent, str) or isinstance(solvent, unicode):
             solvent_pure = solvent.lower()
             if solvent_pure not in dielec_consts:
                 raise Exception("Don't know the dielectric constants for "
