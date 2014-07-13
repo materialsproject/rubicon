@@ -3,6 +3,7 @@ import json
 import os
 from fireworks import FireWork
 from fireworks.core.firework import Tracker
+import math
 from pymatgen.io.babelio import BabelMolAdaptor
 from pymatgen.io.qchemio import QcTask, QcInput
 from rubicon.dupefinders.dupefinder_eg import DupeFinderEG
@@ -190,16 +191,55 @@ class QChemFireWorkCreator():
         return fw_freq_cal, fw_freq_db
 
     @staticmethod
-    def get_dielectric_constant(solvent):
+    def get_dielectric_constant(solvent_total):
         dielec_const_file = os.path.join(os.path.dirname(__file__),
                                          "../utils/data", "pcm_params.json")
         with open(dielec_const_file) as f:
             dielec_consts = json.load(f)
-        if solvent not in dielec_consts:
-            raise Exception("Don't know the dielectric constants for "
-                            "solvent '{}'".format(solvent))
-        dielectric_constant = dielec_consts[solvent]["dielectric"]
-        probe_radius = dielec_consts[solvent]["solvent_probe_radius"]
+        if isinstance(solvent_total, dict):
+            # e. g. {"components": {"EC": 3.0, "PC": 7.0}
+            #        "metrics": "molarity"}
+            # supported metrics: molarity and volume
+            # probe_radius mix by volume
+            # dielectric constants mix according to
+            # "Peiming Wang, Andrzej Anderko; Fluid Phase Equilibria 186 (2001) 103–122"
+            components = sorted([(comp.lower(), float(amount))
+                                 for comp, amount in solvent_total["components"].items()])
+            compounds = [comp for comp, amount in components]
+            for comp in compounds:
+                if comp not in dielec_consts:
+                    raise Exception("Don't know the dielectric constants for "
+                                    "solvent '{}' in mixtures".format(comp))
+            rads = [dielec_consts[comp]["solvent_probe_radius"] for comp in compounds]
+            dielecs = [dielec_consts[comp]["dielectric"] for comp in compounds]
+            if solvent_total["metrics"] == "volume":
+                total_volume = sum([amount for comp, amount in components])
+                vol_ratio = [amount/total_volume for comp, amount in components]
+            elif solvent_total["metrics"] == "molarity":
+                volumes = [amount * (r**3) for (comp, amount), r in zip(components, rads)]
+                total_volume = sum(volumes)
+                vol_ratio = [v/total_volume for v in volumes]
+            else:
+                raise Exception("Only molartiy and volume ratio is supported")
+            moles = [v / (r**3) for v, r in zip(vol_ratio, rads)]
+            total_mole = sum(moles)
+            volume_per_molecule = 1.0/total_mole
+            probe_radius = volume_per_molecule ** (1/3)
+            polarizations = [((epsilon - 1) * (2 * epsilon + 1))/(9 * epsilon) for epsilon in dielecs]
+            total_polarization = [p * v for p, v in zip(polarizations, vol_ratio)]
+            pol_per_vol = total_polarization / 1.0
+            a, b, c = 2, - (1 + 9 * pol_per_vol), -1
+            dielectric_constant = (-b + math.sqrt(b**2 - 4 * a * c)) / (2 * a)
+        elif isinstance(solvent_total, str):
+            solvent = solvent_total.lower()
+            if solvent not in dielec_consts:
+                raise Exception("Don't know the dielectric constants for "
+                                "solvent '{}'".format(solvent))
+            dielectric_constant = dielec_consts[solvent]["dielectric"]
+            probe_radius = dielec_consts[solvent]["solvent_probe_radius"]
+        else:
+            raise Exception("Please use a string for pure solvent, and use"
+                            "dict for mixtures")
         return dielectric_constant, probe_radius
 
     @staticmethod
