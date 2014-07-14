@@ -1,7 +1,7 @@
 {
     "LAMMPSINNPT": {
         "log":"mol.log",
-        "read_start":"mol.restart",
+        "read_restart":"mol.restart",
         "temp":298,
         "units": "real",
         "atom_style": "full",

@@ -263,7 +263,7 @@ class LmpInput():
         num_atoms = 0
         element_list = []
         mol_index = 1
-        lines.append('Imp Dihedral Coeffs\n')
+        lines.append('Improper Coeffs\n')
         for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
                                        mols_in_box.mols,
                                        mols_in_box.param_list):
@@ -314,7 +314,7 @@ class LmpInput():
 
             #iterate every molecule of molecule type
             for imol in range(num_this_mol):
-
+                print mols_in_box
                 mol_coords = mol_pack.cart_coords[i:i + num_atoms]
                 mol_index += 1
 
@@ -574,13 +574,13 @@ class LmpInput():
             self._set_dihedral_coeffs(self.ffmol, self.mols_in_box))
         my_lammps_list.append(
             self._set_improper_coeffs(self.ffmol, self.mols_in_box))
-        my_lammps_list.append(self._set_atom(self.ffmol, self.mols_in_box, ))
-        my_lammps_list.append(self._set_bonds(self.ffmol, self.mols_in_box, ))
-        my_lammps_list.append(self._set_angles(self.ffmol, self.mols_in_box, ))
+        my_lammps_list.append(self._set_atom(self.ffmol, self.mols_in_box ))
+        my_lammps_list.append(self._set_bonds(self.ffmol, self.mols_in_box ))
+        my_lammps_list.append(self._set_angles(self.ffmol, self.mols_in_box ))
         my_lammps_list.append(
-            self._set_dihedrals(self.ffmol, self.mols_in_box, ))
+            self._set_dihedrals(self.ffmol, self.mols_in_box ))
         my_lammps_list.append(
-            self._set_imdihedrals(self.ffmol, self.mols_in_box, ))
+            self._set_imdihedrals(self.ffmol, self.mols_in_box ))
 
         return '\n'.join(my_lammps_list)
 

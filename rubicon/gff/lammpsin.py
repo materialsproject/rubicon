@@ -35,7 +35,7 @@ class DictLammpsInputSet():
             self.lammps_settings.update(user_lammps_settings)
 
     def get_lammps_control(self, filename=None, ensemble=None, temp=None):
-        jsonfile = open(filename)
+        jsonfile = open(os.path.join(os.path.dirname(__file__), "Lammps.json"))
         self.parajson = json.load(jsonfile, encoding="utf-8")
         self.parajson['LAMMPSINNPT']['temp'] = temp
         self.parajson['LAMMPSINNPT']['fix']['style'] = ensemble
@@ -47,7 +47,7 @@ class DictLammpsInputSet():
     def __str__(self):
         lines = []
         lines.append('log ' + self.parajson['LAMMPSINNPT']['log'])
-        lines.append('read_start ' + self.parajson['LAMMPSINNPT']['read_start'])
+        lines.append('read_restart ' + self.parajson['LAMMPSINNPT']['read_restart'])
 
         lines.append('units ' + self.parajson['LAMMPSINNPT']['units'])
         lines.append('atom_style ' + self.parajson['LAMMPSINNPT']['atom_style'])
@@ -60,7 +60,7 @@ class DictLammpsInputSet():
                                                                 "style"]]),
                                        (self.parajson['LAMMPSINNPT'][
                                             'pair_style']["args"])))
-        lines.append('{} {}'.format('kspace_style ', (
+        lines.append('{} {} {}'.format('kspace_style ', 'pppm',(
         self.parajson['LAMMPSINNPT']['kspace_style']["pppm"])))
         lines.append('{} {} {} {} {}'.format('pair_modify ', "tail", (
         self.parajson['LAMMPSINNPT']['pair_modify']["tail"]),
