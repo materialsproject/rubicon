@@ -244,9 +244,9 @@ class LmpInput():
                     for func_form, d in v.iteritems():
                         j += 1
                         lines.append(
-                            '{}  {}  {}  {} {} {} {} {} {} {} {}'.format(j, d[0],
+                            '{}  {}  {}  {} {} {} {} {} {} {} {} {}'.format(j, d[0],
                               func_form,
-                              d[1], '#',
+                              d[1], '0.0','#',
                               gff.dihedrals.keys()[
                                   i][0],
                               gff.dihedrals.keys()[
