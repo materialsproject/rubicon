@@ -33,7 +33,7 @@ class LmpInput():
         angle_type_list = []
         dihedral_type_list = []
         improper_type_list = []
-        lines.append('LAMMPS Data File\n')
+        lines.append('LAMMPS data File\n')
         for  mol, parm in zip(mols_in_box.mols,mols_in_box.param_list):
             lines.append("{} {} {} {}".format('#',parm['number'],
                                               mol.site_properties["mol_name"][0],
@@ -246,7 +246,7 @@ class LmpInput():
                         lines.append(
                             '{}  {}  {}  {} {} {} {} {} {} {} {} {}'.format(j, d[0],
                               func_form,
-                              d[1], '0.0','#',
+                              int(d[1]), '0.0','#',
                               gff.dihedrals.keys()[
                                   i][0],
                               gff.dihedrals.keys()[
@@ -276,7 +276,7 @@ class LmpInput():
                 for i, v in enumerate(gff.imdihedrals.values()):
                     lines.append('{} {}  {}  {} {} {} {} {} {} {} {}'.format
                         (num_atoms + 1, v[0],
-                         round(math.cos(math.degrees(v[1])), 0), v[2], '#',
+                         int(round(math.cos(math.degrees(v[1])), 0)), int(v[2]), '#',
                          gff.imdihedrals.keys()[i][0],
                          gff.imdihedrals.keys()[i][1],
                          gff.imdihedrals.keys()[i][2],
