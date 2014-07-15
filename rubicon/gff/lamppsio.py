@@ -108,15 +108,15 @@ class LmpInput():
         lines.append(
             "{} {} {}".format(mols_in_box.param_list[0]['inside box'][0],
                               mols_in_box.param_list[0]['inside box'][3],
-                              "xlo  xhi"))
+                              "xlo xhi"))
         lines.append(
             "{} {} {}".format(mols_in_box.param_list[0]['inside box'][1],
                               mols_in_box.param_list[0]['inside box'][4],
-                              "ylo  yhi"))
+                              "ylo yhi"))
         lines.append(
             "{} {} {}{}".format(mols_in_box.param_list[0]['inside box'][2],
                                  mols_in_box.param_list[0]['inside box'][5],
-                                 "zlo  zhi", '\n'))
+                                 "zlo zhi", '\n'))
 
         self.lines.extend(lines)
         return '\n'.join(lines)
