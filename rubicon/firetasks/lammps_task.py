@@ -1,18 +1,24 @@
 import shlex
 import shutil
 import subprocess
-from fireworks.core.firework import Workflow
+
 from pymatgen import Molecule
+try:
+    # work around before packmole is merged into master
+    from pymatgen.packmol.packmol import PackmolRunner
+except:
+    pass
+
 from rubicon.gff.lammpsin import DictLammpsInputSet
 from rubicon.gff.lamppsio import LmpInput
-from pymatgen.packmol.packmol import PackmolRunner
 from rubicon.gff.antechamberio import AntechamberRunner
+
 
 __author__ = 'navnidhirajput'
 
 
-from fireworks import FireTaskBase, FWAction, explicit_serialize, FireWork, LaunchPad
-from custodian import Custodian
+from fireworks import FireTaskBase, explicit_serialize
+
 
 @explicit_serialize
 class WritelammpsInputTask(FireTaskBase):

@@ -3,16 +3,14 @@ Build molecules collection
 Adapted from Dan Gunter and Wei Chen's vasp materials builder
 """
 import copy
-import json
 import logging
 import datetime
 import math
-from pymongo import ASCENDING
 import sys
-import re
+
 from rubicon.builders import eg_shared
 from rubicon.submission.submission_mongo_eg import SubmissionMongoAdapterEG
-from rubicon.workflows.multistep_ipea_wf import QChemFireWorkCreator
+
 
 __author__ = "Xiaohui Qu"
 __copyright__ = "Copyright 2012-2013, The Electrolyte Genome Project"
