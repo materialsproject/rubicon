@@ -34,9 +34,14 @@ class LmpInput():
         dihedral_type_list = []
         improper_type_list = []
         lines.append('LAMMPS Data File\n')
-        for k, v in enumerate(mols_in_box.param_list):
-            lines.append("{} {} {} {} {}".format('#', v['number'], "mol", k + 1,
-                                                 "molecule"))
+        for  mol, parm in zip(mols_in_box.mols,mols_in_box.param_list):
+            lines.append("{} {} {} {}".format('#',parm['number'],
+                                              mol.site_properties["mol_name"][0],
+                                              "molecules"))
+
+        # for k, v in enumerate(mols_in_box.param_list):
+        #     lines.append("{} {} {} {} {}".format('#', v['number'], "mol", k + 1,
+        #                                          "molecule"))
         lines.append('\n')
         for gff, top in zip(ffmol.gff_list, ffmol.top_list):
             atom_type_list.extend(gff.masses.keys())
@@ -314,7 +319,6 @@ class LmpInput():
 
             #iterate every molecule of molecule type
             for imol in range(num_this_mol):
-                print mols_in_box
                 mol_coords = mol_pack.cart_coords[i:i + num_atoms]
                 mol_index += 1
 

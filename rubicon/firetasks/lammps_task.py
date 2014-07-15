@@ -44,7 +44,7 @@ class WritelammpsInputTask(FireTaskBase):
         data_lammps=LmpInput(ffmol,mols_in_box)
         data_lammps.write_lammps_data('mol_data.lammps')
         control_lammps = DictLammpsInputSet()
-        control_lammps.get_lammps_control('Lammps.json',ensemble='nvt',temp=350)
+        control_lammps.get_lammps_control('Lammps.json',ensemble='npt',temp=350)
         control_lammps.write_lampps_control('mol_control.lammps')
         subprocess.check_call(shlex.split("lmp_mac <  mol_control.lammps"))
 

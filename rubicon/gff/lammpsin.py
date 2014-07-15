@@ -47,7 +47,7 @@ class DictLammpsInputSet():
     def __str__(self):
         lines = []
         lines.append('log ' + self.parajson['LAMMPSINNPT']['log'])
-        lines.append('read_restart ' + self.parajson['LAMMPSINNPT']['read_restart'])
+        lines.append(' # read_restart ' + self.parajson['LAMMPSINNPT']['read_restart'])
 
         lines.append('units ' + self.parajson['LAMMPSINNPT']['units'])
         lines.append('atom_style ' + self.parajson['LAMMPSINNPT']['atom_style'])
@@ -74,6 +74,8 @@ class DictLammpsInputSet():
         self.parajson['LAMMPSINNPT']['angle_style'])))
         lines.append('{} {}'.format('dihedral_style ', (
         self.parajson['LAMMPSINNPT']['dihedral_style'])))
+        lines.append('{} {}'.format('improper_style ', (
+        self.parajson['LAMMPSINNPT']['improper_style'])))
         lines.append('{} {}'.format('read_data ', (
         self.parajson['LAMMPSINNPT']['read_data'])))
         lines.append('{} {} {}'.format('neighbor ', (
