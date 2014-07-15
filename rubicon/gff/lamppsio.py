@@ -56,12 +56,12 @@ class LmpInput():
             for k, v in gff.dihedrals.iteritems():
                 num_dih += len(v)
         num_dihedrals_types += num_dih
-        lines.append("{} {}".format(num_atoms_types, "atom type"))
-        lines.append("{} {}".format(num_bonds_types, "bond type"))
-        lines.append("{} {}".format(num_angles_types, "angle type"))
-        lines.append("{} {}".format((num_dihedrals_types), "dihedral type"))
+        lines.append("{} {}".format(num_atoms_types, "atom types"))
+        lines.append("{} {}".format(num_bonds_types, "bond types"))
+        lines.append("{} {}".format(num_angles_types, "angle types"))
+        lines.append("{} {}".format((num_dihedrals_types), "dihedral types"))
         lines.append(
-            "{} {}{}".format(num_impropers_types, "improper type",'\n'))
+            "{} {}{}".format(num_impropers_types, "improper types",'\n'))
         self.lines.extend(lines)
         return '\n'.join(lines)
 
