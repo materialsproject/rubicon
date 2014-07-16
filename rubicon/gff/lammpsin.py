@@ -60,8 +60,8 @@ class DictLammpsInputSet():
                                                                 "style"]]),
                                        (self.parajson['LAMMPSINNPT'][
                                             'pair_style']["args"])))
-        lines.append('{} {} {}'.format('kspace_style ', 'pppm',(
-        self.parajson['LAMMPSINNPT']['kspace_style']["pppm"])))
+        lines.append('{} {} {}'.format('kspace_style ', 'ewald',(
+        self.parajson['LAMMPSINNPT']['kspace_style']["ewald"])))
         lines.append('{} {} {} {} {}'.format('pair_modify ', "tail", (
         self.parajson['LAMMPSINNPT']['pair_modify']["tail"]),
                                              "mix", (
