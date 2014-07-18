@@ -95,6 +95,13 @@ class QChemFireWorkCreator():
                           "dft_d3_rs6": 1094,
                           "dft_d3_s8": 1682,
                           "dft_d3_3body": True}
+        elif theoretical_level.lower == "b3lyp-d3":
+            exchange = 'b3lyp'
+            rem_params = {"dft_d": "empirical_grimme3",
+                          "dft_d3_s6": 1000,
+                          "dft_d3_rs6": 1261,
+                          "dft_d3_s8": 1703,
+                          "dft_d3_3body": True}
         else:
             exchange = theoretical_level.lower()
         method_token = [t for t in [basis_set, exchange, aux_basis, correlation, rem_params]
