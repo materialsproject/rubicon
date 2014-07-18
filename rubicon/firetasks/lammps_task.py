@@ -1,3 +1,5 @@
+import shlex
+import shutil
 import subprocess
 
 from pymatgen import Molecule
@@ -40,40 +42,15 @@ class WritelammpsInputTask(FireTaskBase):
 
 
     def run_task(self, fw_spec):
-        m = Molecule.from_dict(fw_spec["molecules"][0])
-        print m
-        ffmol = AntechamberRunner(m)
-        mols_in_box = PackmolRunner(m, [{"number":1,"inside box":[0.,0.,0.,40.,40.,40.]},{"number":1},{"number":1}])
+        mols_dict = fw_spec["molecules"]
+        mols = [Molecule.from_dict(m) for m in mols_dict]
+        ffmol = AntechamberRunner(mols)
+        gff_list, top_list = ffmol.get_ff_top_mol(mols,'mol.pdb')
+        mols_in_box = PackmolRunner(mols, [{"number":1,"inside box":[0.,0.,0.,40.,40.,40.]},{"number":1},{"number":1}])
         data_lammps=LmpInput(ffmol,mols_in_box)
         data_lammps.write_lammps_data('mol_data.lammps')
         control_lammps = DictLammpsInputSet()
-        control_lammps.get_lammps_control('Lammps.json',ensemble='nvt',temp=350)
+        control_lammps.get_lammps_control('Lammps.json',ensemble='npt',temp=350)
         control_lammps.write_lampps_control('mol_control.lammps')
-        subprocess.check_call("lmp_hopper <  mol_control.lammps")
-#
-#
-# @explicit_serialize
-# class LamppsCustodianTask(FireTaskBase):
-#     """
-#     Runs LAMMPS using Custodian.
-#
-#     Required Params:
-#
-#     """
-#     required_params = []
-#
-#     optional_params = []
-#
-#     def run_task(self, fw_spec):
-#         subprocess.check_call("lammps < lmps.inp")
-#
-# @explicit_serialize
-# class LammpsAnalyzeTask(FireTaskBase):
-#     """
-#
-#     """
-#
-#     optional_params = ["vasprun_fname"]
-#
-#     def run_task(self, fw_spec):
-#         pass
+        subprocess.check_call(shlex.split("lmp_hopper <  mol_control.lammps"))
+
