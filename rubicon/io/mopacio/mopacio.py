@@ -188,7 +188,7 @@ class MopTask(MSONable):
         keywords = cls._parse_keywords(lines[0:1])
         title = lines[1: 3]
         mol = cls._parse_molecule(lines[3:])
-        d = {"keywords": keywords, "title": title, "mol": mol,
+        d = {"keywords": keywords, "title": title, "molecule": mol,
              "@module": cls.__module__, "@class": cls.__name__}
         return cls.from_dict(d)
 
@@ -203,7 +203,7 @@ class MopTask(MSONable):
             if "=" not in t:
                 d[t.upper()] = None
             else:
-                k, v = t.split("+")
+                k, v = t.split("=")
                 if int_pattern.match(v):
                     d[k.upper()] = int(v)
                 elif float_pattern.match(v):
