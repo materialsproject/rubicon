@@ -15,8 +15,9 @@ mol = Molecule(["C", "H", "H", "H", "Cl"], coords)
 
 class TestMopTask(TestCase):
 
-    def elementary_io_verify(self, text, moptask):
+    def elementary_io_verify(self, moptask):
         self.to_and_from_dict_verify(moptask)
+        self.from_string_verify(str(moptask), moptask.to_dict)
 
     def to_and_from_dict_verify(self, moptask):
         """
@@ -26,6 +27,12 @@ class TestMopTask(TestCase):
         mop2 = MopTask.from_dict(d1)
         d2 = mop2.to_dict
         self.assertEqual(d1, d2)
+
+    def from_string_verify(self, contents, ref_dict):
+        moptask = MopTask.from_string(contents)
+        d2 = moptask.to_dict
+        self.assertEqual(ref_dict, d2)
+
 
     def test_str(self):
         mop = MopTask(mol, charge=0, jobtype="opt", title="first test methane",
@@ -41,7 +48,7 @@ first test methane
 
 """
         self.assertEqual(ans, str(mop))
-        self.elementary_io_verify(ans, mop)
+        self.elementary_io_verify(mop)
         mop = MopTask(mol, charge=-1, jobtype="opt", sqm_method="pm6-dh2",
                       title="first test methane. Use a long title to exceed the limit"
                             "of one line purposly. Doest it work with three line long "
@@ -58,4 +65,4 @@ Doest it work with three line long text? I don't know, just try make up more
 
 """
         self.assertEqual(ans, str(mop))
-        self.elementary_io_verify(ans, mop)
+        self.elementary_io_verify(mop)
