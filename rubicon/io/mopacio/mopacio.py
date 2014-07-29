@@ -49,7 +49,7 @@ class MopTask(MSONable):
         self.keywords = dict()
 
         explicit_keywords = {"CHARGE"} | self.available_sqm_tasktext | self.available_sqm_methods
-        optional_keywords = set([k.upper() for k in optional_params.keys()])
+        optional_keywords = set([k.upper() for k in optional_params.keys()]) if optional_params else set()
         overlap_keywords = explicit_keywords & optional_keywords
         if len(overlap_keywords) > 0:
             raise Exception(" ".join(overlap_keywords) + " are duplicated"
