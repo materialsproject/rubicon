@@ -149,5 +149,5 @@ class MopTask(MSONable):
         used_key = ["CHARGE", sqm_method, jobtext]
         optional_key = list(all_keys - set(used_key))
         optional_params = {k: d["keywords"][k] for k in optional_key}
-        mop = MopTask(self.mol, charge, jobtype, title, sqm_method, optional_params)
+        mop = MopTask(mol, charge, jobtype, title, sqm_method, optional_params)
         return mop
