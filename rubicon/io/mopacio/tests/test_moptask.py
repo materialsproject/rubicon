@@ -33,7 +33,6 @@ class TestMopTask(TestCase):
         d2 = moptask.to_dict
         self.assertEqual(ref_dict, d2)
 
-
     def test_str(self):
         mop = MopTask(mol, charge=0, jobtype="opt", title="first test methane",
                       optional_params={"PRECISE": None, "CYCLES": 500})
@@ -65,4 +64,13 @@ Doest it work with three line long text? I don't know, just try make up more
 
 """
         self.assertEqual(ans, str(mop))
+        self.elementary_io_verify(mop)
+
+    def test_use_precise(self):
+        mop = MopTask(mol, charge=0, jobtype="opt", title="first test methane")
+        self.assertFalse("PRECISE" in mop.keywords)
+        mop.use_precise()
+        self.assertTrue("PRECISE" in mop.keywords)
+        mop.use_precise(False)
+        self.assertFalse("PRECISE" in mop.keywords)
         self.elementary_io_verify(mop)

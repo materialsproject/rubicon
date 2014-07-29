@@ -125,8 +125,7 @@ class MopTask(MSONable):
                 tokens.append("{k:s}={v:d}".format(k=k, v=v))
             elif isinstance(v, str) or isinstance(v, unicode):
                 tokens.append("{k:s}={v:s}".format(k=k, v=v))
-        lines = []
-        lines.append(' '.join(tokens))
+        lines = [' '.join(tokens)]
         return lines
 
     def _format_title(self):
@@ -156,7 +155,7 @@ class MopTask(MSONable):
         sqm_method = (all_keys & cls.available_sqm_methods).pop()
         jobtext = (all_keys & cls.available_sqm_tasktext).pop()
         jobtype = cls.jobtext2type[jobtext]
-        title = ' '.join(d["title"]) if len(d["title"][1])>0 else d["title"][0]
+        title = ' '.join(d["title"]) if len(d["title"][1]) > 0 else d["title"][0]
         used_key = ["CHARGE", sqm_method, jobtext]
         optional_key = list(all_keys - set(used_key))
         optional_params = {k: d["keywords"][k] for k in optional_key}
@@ -171,7 +170,6 @@ class MopTask(MSONable):
     def from_file(cls, filename):
         with zopen(filename) as f:
             return cls.from_string(f.read())
-
 
     @classmethod
     def from_string(cls, contents):
@@ -191,7 +189,6 @@ class MopTask(MSONable):
         d = {"keywords": keywords, "title": title, "molecule": mol.to_dict,
              "@module": cls.__module__, "@class": cls.__name__}
         return cls.from_dict(d)
-
 
     @classmethod
     def _parse_keywords(cls, contents):
@@ -323,3 +320,12 @@ class MopTask(MSONable):
         species = map(parse_species, species)
 
         return Molecule(species, coords)
+
+    def use_precise(self, use=True):
+        """
+        Tighten criteria of the all the calculations.
+        """
+        if use:
+            self.keywords["PRECISE"] = None
+        else:
+            self.keywords.pop("PRECISE", None)
