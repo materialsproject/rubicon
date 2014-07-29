@@ -70,7 +70,7 @@ class MopTask(MSONable):
 
         title_wrapper = TextWrapper(width=80, expand_tabs=True, replace_whitespace=True, break_long_words=True,
                                     drop_whitespace=True)
-        raw_title_lines = title_wrapper.wrap(self.title)[:2]
+        raw_title_lines = title_wrapper.wrap(title)[:2]
         title_lines = raw_title_lines + [""] * max([0, 2 - len(raw_title_lines)])
         self.title = title_lines
         if sqm_method.upper() not in self.available_sqm_methods:
