@@ -5,6 +5,7 @@ This module implements input and output processing from MOPAC
 """
 import copy
 from textwrap import TextWrapper
+from monty.io import zopen
 from pymatgen.core.structure import Molecule
 from pymatgen.serializers.json_coders import MSONable
 
@@ -151,3 +152,17 @@ class MopTask(MSONable):
         optional_params = {k: d["keywords"][k] for k in optional_key}
         mop = MopTask(mol, charge, jobtype, title, sqm_method, optional_params)
         return mop
+
+    def write_file(self, filename):
+        with zopen(filename, "w") as f:
+            f.write(self.__str__())
+
+    @classmethod
+    def from_file(cls, filename):
+        with zopen(filename) as f:
+            return cls.from_string(f.read())
+
+
+    @classmethod
+    def from_string(cls, contents):
+        pass
