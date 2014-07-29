@@ -188,7 +188,7 @@ class MopTask(MSONable):
         keywords = cls._parse_keywords(lines[0:1])
         title = lines[1: 3]
         mol = cls._parse_molecule(lines[3:])
-        d = {"keywords": keywords, "title": title, "molecule": mol,
+        d = {"keywords": keywords, "title": title, "molecule": mol.to_dict,
              "@module": cls.__module__, "@class": cls.__name__}
         return cls.from_dict(d)
 
