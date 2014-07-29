@@ -3,6 +3,7 @@
 """
 This module implements input and output processing from MOPAC
 """
+import copy
 from textwrap import TextWrapper
 from pymatgen.core.structure import Molecule
 from pymatgen.serializers.json_coders import MSONable
@@ -42,7 +43,7 @@ class MopTask(MSONable):
                  optional_params=None):
         if not isinstance(molecule, Molecule):
             raise Exception("only pymatgen Molecule object is accepted")
-        self.mol = molecule
+        self.mol = copy.deepcopy(molecule)
         if not isinstance(charge, int):
             raise Exception("charge must an integer")
         self.keywords = dict()
@@ -97,8 +98,8 @@ class MopTask(MSONable):
 
     def _format_keywords(self):
         all_keys = set(self.keywords.keys())
-        sqm_method = all_keys & self.available_sqm_methods
-        task = all_keys & self.available_sqm_tasktext
+        sqm_method = (all_keys & self.available_sqm_methods).pop()
+        task = (all_keys & self.available_sqm_tasktext).pop()
         priority_key_list = [sqm_method, task, "CHARGE"]
         full_key_list = priority_key_list + list(all_keys - set(priority_key_list))
         tokens = []
@@ -127,3 +128,26 @@ class MopTask(MSONable):
                          "{z:>17.8f}".format(element=site.species_string,
                                              x=site.x, y=site.y, z=site.z))
         return lines
+
+    @property
+    def to_dict(self):
+        return {"@module": self.__class__.__module__,
+                "@class": self.__class__.__name__,
+                "molecule": self.mol.to_dict,
+                "keywords": self.keywords,
+                "title": self.title}
+
+    @classmethod
+    def from_dict(cls, d):
+        mol = Molecule.from_dict(d["molecule"])
+        charge = d["keywords"]["CHARGE"]
+        all_keys = set(d["keywords"].keys())
+        sqm_method = (all_keys & cls.available_sqm_methods).pop()
+        jobtext = (all_keys & cls.available_sqm_tasktext).pop()
+        jobtype = cls.jobtext2type[jobtext]
+        title = d["title"]
+        used_key = ["CHARGE", sqm_method, jobtext]
+        optional_key = list(all_keys - set(used_key))
+        optional_params = {k: d["keywords"][k] for k in optional_key}
+        mop = MopTask(self.mol, charge, jobtype, title, sqm_method, optional_params)
+        return mop
