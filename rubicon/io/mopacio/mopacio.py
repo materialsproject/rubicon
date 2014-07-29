@@ -156,7 +156,7 @@ class MopTask(MSONable):
         sqm_method = (all_keys & cls.available_sqm_methods).pop()
         jobtext = (all_keys & cls.available_sqm_tasktext).pop()
         jobtype = cls.jobtext2type[jobtext]
-        title = d["title"]
+        title = ' '.join(d["title"]) if len(d["title"][1])>0 else d["title"][0]
         used_key = ["CHARGE", sqm_method, jobtext]
         optional_key = list(all_keys - set(used_key))
         optional_params = {k: d["keywords"][k] for k in optional_key}
