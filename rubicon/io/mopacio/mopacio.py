@@ -351,9 +351,13 @@ class MopOutput(object):
 
     @classmethod
     def _parse_job(cls, output):
-        errors = []
+        heat_pattern = re.compile("FINAL HEAT OF FORMATION =\s+(?P<energy>-?\d+\.\d+)\s+KCAL/MOL")
+        total_energy_pattern = re.compile("TOTAL ENERGY\s+=\s+(?P<energy>-\d+\.\d+)\s+EV")
+        energies = []
         parse_keywords = None
         input_keywords = None
+        jobtype = None
+        errors = []
         for line in output.split('\n'):
             if parse_keywords:
                 input_keywords = MopTask._parse_keywords([line])
@@ -362,6 +366,14 @@ class MopOutput(object):
                 parse_keywords = False
             if "-" * 50 in line:
                 parse_keywords = True
+            m = heat_pattern.search(line)
+            if m:
+                heat_of_formation = float(m.group("energy")) * cls.kcal_per_mol_2_eV
+                energies.append(tuple(["Heat of Formation", heat_of_formation]))
+            m = total_energy_pattern.search(line)
+            if m:
+                total_energy = float(m.group("energy"))
+                energies.append(tuple(["Total Energy", total_energy]))
 
         if len(errors) == 0:
             for text in cls._expected_successful_pattern(input_keywords):
@@ -371,6 +383,7 @@ class MopOutput(object):
 
         data = {
             "jobtype": jobtype,
+            "energies": energies,
             "errors": errors,
             "has_error": len(errors) > 0
         }

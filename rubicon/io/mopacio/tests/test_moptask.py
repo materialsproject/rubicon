@@ -87,3 +87,7 @@ class TestMopOutput(TestCase):
         moo = MopOutput(os.path.join(test_dir, "ch3cl_ef.out"))
         self.assertFalse(moo.data["has_error"])
         self.assertEqual(moo.data["jobtype"], "OPT")
+
+    def test_energies(self):
+        moo = MopOutput(os.path.join(test_dir, "ch3cl_ef.out"))
+        print moo.data
