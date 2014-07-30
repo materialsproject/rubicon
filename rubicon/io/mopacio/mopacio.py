@@ -357,6 +357,8 @@ class MopOutput(object):
         for line in output.split('\n'):
             if parse_keywords:
                 input_keywords = MopTask._parse_keywords([line])
+                jobtext = (set(input_keywords.keys()) & MopTask.available_sqm_tasktext).pop()
+                jobtype = MopTask.jobtext2type[jobtext]
                 parse_keywords = False
             if "-" * 50 in line:
                 parse_keywords = True
@@ -368,6 +370,7 @@ class MopOutput(object):
                     errors.append("Can't find text to indicate success")
 
         data = {
+            "jobtype": jobtype,
             "errors": errors,
             "has_error": len(errors) > 0
         }

@@ -80,8 +80,10 @@ Doest it work with three line long text? I don't know, just try make up more
         self.assertFalse("PRECISE" in mop.keywords)
         self.elementary_io_verify(mop)
 
-class TestMopTask(TestCase):
+
+class TestMopOutput(TestCase):
 
     def test_successful_message(self):
         moo = MopOutput(os.path.join(test_dir, "ch3cl_ef.out"))
         self.assertFalse(moo.data["has_error"])
+        self.assertEqual(moo.data["jobtype"], "OPT")
