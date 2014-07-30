@@ -353,11 +353,19 @@ class MopOutput(object):
     def _parse_job(cls, output):
         heat_pattern = re.compile("FINAL HEAT OF FORMATION =\s+(?P<energy>-?\d+\.\d+)\s+KCAL/MOL")
         total_energy_pattern = re.compile("TOTAL ENERGY\s+=\s+(?P<energy>-\d+\.\d+)\s+EV")
+        coord_pattern = re.compile("\s*\d+\s+(?P<element>[A-Z][a-z]*)\s+"
+                                   "(?P<x>\-?\d+\.\d+)\s+"
+                                   "(?P<y>\-?\d+\.\d+)\s+"
+                                   "(?P<z>\-?\d+\.\d+)")
         energies = []
         parse_keywords = None
+        parse_coords = False
         input_keywords = None
         jobtype = None
         errors = []
+        coords = []
+        species = []
+        molecules = []
         for line in output.split('\n'):
             if parse_keywords:
                 input_keywords = MopTask._parse_keywords([line])
@@ -366,6 +374,26 @@ class MopOutput(object):
                 parse_keywords = False
             if "-" * 50 in line:
                 parse_keywords = True
+            if parse_coords:
+                if "ATOM" in line:
+                    continue
+                if len(line.strip()) == 0:
+                    if len(coords) == 0:
+                        continue
+                    else:
+                        parse_coords = False
+                        molecules.append(Molecule(species, coords))
+                        species = None
+                        coords = None
+                        continue
+                m = coord_pattern.match(line)
+                coords.append([float(m.group("x")), float(m.group("y")),
+                               float(m.group("z"))])
+                species.append(m.group("element"))
+            if "CARTESIAN COORDINATES" in line:
+                parse_coords = True
+                coords = []
+                species = []
             m = heat_pattern.search(line)
             if m:
                 heat_of_formation = float(m.group("energy")) * cls.kcal_per_mol_2_eV
@@ -384,6 +412,7 @@ class MopOutput(object):
         data = {
             "jobtype": jobtype,
             "energies": energies,
+            "molecules": molecules,
             "errors": errors,
             "has_error": len(errors) > 0
         }
