@@ -347,11 +347,13 @@ class MopOutput(object):
         all_keys = input_keywords.keys()
         if "EF" in all_keys or "BFGS" in all_keys:
             text.append("GEOMETRY OPTIMISED USING .*\(.*\)\.")
+        return text
 
     @classmethod
     def _parse_job(cls, output):
         errors = []
         parse_keywords = None
+        input_keywords = None
         for line in output.split('\n'):
             if parse_keywords:
                 input_keywords = MopTask._parse_keywords([line])

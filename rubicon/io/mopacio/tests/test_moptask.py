@@ -1,9 +1,14 @@
+import os
 from unittest import TestCase
 from pymatgen import Molecule
-from rubicon.io.mopacio.mopacio import MopTask
+from rubicon.io.mopacio.mopacio import MopTask, MopOutput
 
 __author__ = 'xiaohuiqu'
 
+
+test_dir = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "..", "..", "..",
+                 "test_files", "mopac"))
 
 coords = [[0.000000, 0.000000, 0.000000],
           [0.000000, 0.000000, 1.089000],
@@ -74,3 +79,9 @@ Doest it work with three line long text? I don't know, just try make up more
         mop.use_precise(False)
         self.assertFalse("PRECISE" in mop.keywords)
         self.elementary_io_verify(mop)
+
+class TestMopTask(TestCase):
+
+    def test_successful_message(self):
+        moo = MopOutput(os.path.join(test_dir, "ch3cl_ef.out"))
+        self.assertFalse(moo.data["has_error"])
