@@ -362,6 +362,7 @@ class MopOutput(object):
         parse_coords = False
         input_keywords = None
         jobtype = None
+        gracefully_terminated = False
         errors = []
         coords = []
         species = []
@@ -402,6 +403,8 @@ class MopOutput(object):
             if m:
                 total_energy = float(m.group("energy"))
                 energies.append(tuple(["Total Energy", total_energy]))
+            if "== MOPAC DONE ==" in line:
+                gracefully_terminated = True
 
         if len(errors) == 0:
             for text in cls._expected_successful_pattern(input_keywords):
@@ -414,7 +417,8 @@ class MopOutput(object):
             "energies": energies,
             "molecules": molecules,
             "errors": errors,
-            "has_error": len(errors) > 0
+            "has_error": len(errors) > 0,
+            "gracefully_terminated": gracefully_terminated
         }
         return data
 
