@@ -329,3 +329,45 @@ class MopTask(MSONable):
             self.keywords["PRECISE"] = None
         else:
             self.keywords.pop("PRECISE", None)
+
+
+class MopOutput(object):
+
+    kcal_per_mol_2_eV = 4.3363E-2
+
+    def __init__(self, filename):
+        self.filename = filename
+        with zopen(filename) as f:
+            chunk = f.read()
+        self.data = self._parse_job(chunk)
+
+    @classmethod
+    def _expected_successful_pattern(cls, input_keywords):
+        text = ["SCF FIELD WAS ACHIEVED"]
+        all_keys = input_keywords.keys()
+        if "EF" in all_keys or "BFGS" in all_keys:
+            text.append("GEOMETRY OPTIMISED USING .*\(.*\)\.")
+
+    @classmethod
+    def _parse_job(cls, output):
+        errors = []
+        parse_keywords = None
+        for line in output.split('\n'):
+            if parse_keywords:
+                input_keywords = MopTask._parse_keywords([line])
+                parse_keywords = False
+            if "-" * 50 in line:
+                parse_keywords = True
+
+        if len(errors) == 0:
+            for text in cls._expected_successful_pattern(input_keywords):
+                sucess_pattern = re.compile(text)
+                if not sucess_pattern.search(output):
+                    errors.append("Can't find text to indicate success")
+
+        data = {
+            "errors": errors,
+            "has_error": len(errors) > 0
+        }
+        return data
+
