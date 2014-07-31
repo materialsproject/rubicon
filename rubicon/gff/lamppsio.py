@@ -10,12 +10,12 @@ class LmpInput():
     write lammps data input file
     """
 
-    def __init__(self, ffmol, mols_in_box,):
+    def __init__(self, ffmol_list, mols_in_box,):
         self.lines = []
         self.mols_in_box = mols_in_box
-        self.ffmol = ffmol
+        self.ffmol_list = ffmol_list
 
-    def _set_gff_types(self, ffmol, mols_in_box):
+    def _set_gff_types(self, ffmol_list, mols_in_box):
 
         """
         set force field information about number of atom types, bond types etc.
@@ -23,7 +23,6 @@ class LmpInput():
         lines = []
         num_dih = 0
         num_atoms_types = 0
-        num_atoms_types_sorted = 0
         num_bonds_types = 0
         num_angles_types = 0
         num_dihedrals_types = 0
@@ -39,11 +38,20 @@ class LmpInput():
                                               mol.site_properties["mol_name"][0],
                                               "molecules"))
 
-        # for k, v in enumerate(mols_in_box.param_list):
-        #     lines.append("{} {} {} {} {}".format('#', v['number'], "mol", k + 1,
-        #                                          "molecule"))
-        lines.append('\n')
-        for gff, top in zip(ffmol.gff_list, ffmol.top_list):
+        for ffmol in ffmol_list:
+            #print ffmol
+            gff = ffmol.gff
+            #top = ffmol.top
+            atom_type_list.extend(gff.masses.keys())
+            #print type(gff), type(top)
+            #print top.bonds
+
+            #print gff,top
+
+        #lines.append('\n')
+        #for gff, top in zip(ffmol.gff, ffmol.top):
+        #for gff, top in zip(ffmol_list.gff_list, ffmol_list.top_list):
+        #for ffmol in ffmol_list:
             atom_type_list.extend(gff.masses.keys())
             bond_type_list.extend(gff.bonds.keys())
             angle_type_list.extend(gff.angles.keys())
@@ -65,7 +73,7 @@ class LmpInput():
         self.lines.extend(lines)
         return '\n'.join(lines)
 
-    def _set_top_types(self, ffmol, mols_in_box):
+    def _set_top_types(self, ffmol_list, mols_in_box):
         """
         set force field information about number of atom types, bond types etc.
         """
@@ -77,10 +85,14 @@ class LmpInput():
         num_impropers = 0
         num_total_dih = 0
         num_mol = 0
-        for gff, top, v, in zip(ffmol.gff_list, ffmol.top_list,
-                                mols_in_box.param_list):
+        for ffmol in ffmol_list:
+            gff = ffmol.gff
+            top = ffmol.top
+
+        #for gff, top, v, in zip(ffmol.gff_list, ffmol.top_list,
+#                                mols_in_box.param_list):
             top._get_ff_dihedrals(gff.dihedrals, top.dihedrals, gff.atom_gaff)
-            num_mol = v['number']
+            num_mol = v[0]
             num_atoms += (len(top.atoms)) * num_mol
             num_bonds += len((top.bonds) * num_mol)
             num_angles += (len(top.angles) * num_mol)
@@ -299,13 +311,13 @@ class LmpInput():
         masses_index = 0
         atom_type_index = {}
         lines.append('Atoms\n')
-        mol_pack = mols_in_box.run()
+        #mol_pack = mols_in_box
         self.box_mol_index = []
         i = 0
         mol_index = 0
         for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
                                        mols_in_box.mols,
-                                       mols_in_box.param_list):
+                                       mols_in_box.no):
             if gff.masses is not None:
                 for m, v in enumerate(gff.masses.values()):
                     if gff.masses.keys()[m] in element_list:
@@ -319,7 +331,8 @@ class LmpInput():
 
             #iterate every molecule of molecule type
             for imol in range(num_this_mol):
-                mol_coords = mol_pack.cart_coords[i:i + num_atoms]
+                mol_coords = mols_in_box.cart_coords[i:i + num_atoms]
+                #print mol
                 mol_index += 1
 
                 d = {}
@@ -564,7 +577,7 @@ class LmpInput():
         returns a string of lammps data input file
         """
         my_lammps_list = []
-        my_lammps_list.append(self._set_gff_types(self.ffmol, self.mols_in_box))
+        my_lammps_list.append(self._set_gff_types(self.ffmol_list, self.mols_in_box))
         my_lammps_list.append(self._set_top_types(self.ffmol, self.mols_in_box))
         my_lammps_list.append(self._set_box_dimensions(self.mols_in_box))
         my_lammps_list.append(self._set_masses(self.ffmol, self.mols_in_box))

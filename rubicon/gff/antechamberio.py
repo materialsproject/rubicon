@@ -1,4 +1,5 @@
-
+from collections import namedtuple
+from rubicon.gff.ffmol import FFmol
 
 __author__ = 'navnidhirajput'
 
@@ -51,42 +52,41 @@ class AntechamberRunner():
         return return_cmd
 
 
-    def get_ff_top_mol(self,mols,filename=None):
+    def get_ff_top_mol(self,mol,filename=None):
         """
-        generate and run antechamber command for specified pdb file
+        run antechamber for a specified pdb file then run parmchk
+        to generate missing force field parameters. Store and return
+        the force field and topology information in ff_mol.
 
         Args:
             filename: pdb file of the molecule
-            mols: list of molecules
+            mol: molecule
         Returns:
-            gff_list : list of force field parameters of molecules
-            top_list: list of topology of molecules
+            ff_mol : Object of FFmol which contains information of
+                     force field and topology
         """
         scratch = tempfile.gettempdir()
 
         with ScratchDir(scratch,
                         copy_to_current_on_exit=False) as d:
-            gff_list = []
-            top_list=[]
 
-            for mol in mols:
-                self._convert_to_pdb(mol, 'mol.pdb')
-                command = (
-                'antechamber -i ' + filename + ' -fi pdb -o ' + filename[:-4] +
-                " -fo charmm")
-                return_cmd = subprocess.call(shlex.split(command))
-                self.molname = filename.split('.')[0]
-                self._run_parmchk()
-                top = TopMol.from_file('mol.rtf')
-                my_gff = Gff.from_forcefield_para('ANTECHAMBER.FRCMOD')
-                my_gff.read_atom_index(mol,'ANTECHAMBER_AC.AC')
-                my_gff.read_charges()
-                mol.add_site_property("atomname",(my_gff.atom_index.values()))
-                gff_list.append(my_gff)
-                top_list.append(top)
-            self.gff_list=gff_list
-            self.top_list=top_list
-            return  gff_list, top_list
+            self._convert_to_pdb(mol, 'mol.pdb')
+            command = (
+            'antechamber -i ' + filename + ' -fi pdb -o ' + filename[:-4] +
+            " -fo charmm")
+            return_cmd = subprocess.call(shlex.split(command))
+            self.molname = filename.split('.')[0]
+            self._run_parmchk()
+            top = TopMol.from_file('mol.rtf')
+            gff = Gff.from_forcefield_para('ANTECHAMBER.FRCMOD')
+            gff.read_atom_index(mol,'ANTECHAMBER_AC.AC')
+            gff.read_charges()
+            mol.add_site_property("atomname",(gff.atom_index.values()))
+        ffmol= FFmol(gff,top)
+        return ffmol
+
+
+
 
 
 

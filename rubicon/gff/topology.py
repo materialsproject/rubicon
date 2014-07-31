@@ -5,6 +5,8 @@ __author__ = 'navnidhirajput'
 
 class TopMol(Molecule):
 
+    atoms= 'cl'
+
     def __init__(self,atoms,bonds,angles,dihedrals,imdihedrals,num_bonds):
 
         self.atoms=atoms
@@ -20,6 +22,12 @@ class TopMol(Molecule):
 
     @classmethod
     def from_file(cls,filename):
+
+        """
+        read the .rtf file created by antechamber and stores
+        the atoms, bonds, angles, dihedrals and improper dihedrals of
+        a molecule
+        """
         atoms=[]
         bonds=[]
         angles=[]
@@ -79,7 +87,7 @@ class TopMol(Molecule):
                 bond_type = tuple(sorted((str(a1), str(a2))))
                 self.topbondff[d1] = ((str(a1), str(a2)), gff_bonds[bond_type])
                 self.num_bond_types = len(set(self.topbondff.keys()))
-                #print "TOPBONDFF",self.topbondff
+
 
 
     def _get_ff_angles(self, gff_angles, top_angle, atom_gaff):

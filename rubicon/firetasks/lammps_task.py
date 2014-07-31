@@ -1,14 +1,7 @@
 import shlex
-import shutil
+
 import subprocess
-
 from pymatgen import Molecule
-try:
-    # work around before packmole is merged into master
-    from pymatgen.packmol.packmol import PackmolRunner
-except:
-    pass
-
 from rubicon.gff.lammpsin import DictLammpsInputSet
 from rubicon.gff.lamppsio import LmpInput
 from rubicon.gff.antechamberio import AntechamberRunner
@@ -52,5 +45,6 @@ class WritelammpsInputTask(FireTaskBase):
         control_lammps = DictLammpsInputSet()
         control_lammps.get_lammps_control('Lammps.json',ensemble='npt',temp=350)
         control_lammps.write_lampps_control('mol_control.lammps')
-        subprocess.check_call(shlex.split("lmp_hopper <  mol_control.lammps"))
+        subprocess.check_call(shlex.split("lmp_mac <  mol_control.lammps"))
+        #subprocess.check_call(shlex.split("lmp_hopper <  mol_control.lammps"))
 
