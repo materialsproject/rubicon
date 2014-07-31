@@ -80,6 +80,13 @@ Doest it work with three line long text? I don't know, just try make up more
         self.assertFalse("PRECISE" in mop.keywords)
         self.elementary_io_verify(mop)
 
+    def test_use_bfgs(self):
+        mop = MopTask(mol, charge=0, jobtype="opt", title="first test methane")
+        self.assertTrue("EF" in mop.keywords)
+        mop.use_bfgs()
+        self.assertTrue("BFGS" in mop.keywords)
+        self.assertFalse("EF" in mop.keywords)
+
 
 class TestMopOutput(TestCase):
 

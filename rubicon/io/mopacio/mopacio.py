@@ -102,6 +102,10 @@ class MopTask(MSONable):
             raise Exception("max iterations must be an integer")
         self.keywords["CYCLES"] = iterations
 
+    def use_bfgs(self):
+        self.keywords.pop("EF", None)
+        self.keywords["BFGS"] = None
+
     def __str__(self):
         lines = []
         lines.extend(self._format_keywords())
@@ -169,7 +173,7 @@ class MopTask(MSONable):
     @classmethod
     def from_file(cls, filename):
         with zopen(filename) as f:
-            return cls.from_string(f.read())
+            return MopTask.from_string(f.read())
 
     @classmethod
     def from_string(cls, contents):
@@ -188,7 +192,7 @@ class MopTask(MSONable):
         mol = cls._parse_molecule(lines[3:])
         d = {"keywords": keywords, "title": title, "molecule": mol.to_dict,
              "@module": cls.__module__, "@class": cls.__name__}
-        return cls.from_dict(d)
+        return MopTask.from_dict(d)
 
     @classmethod
     def _parse_keywords(cls, contents):
