@@ -299,7 +299,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                                         additional_user_tags, priority,
                                         update_specs, charge,
                                         spin_multiplicity,
-                                        grid=None)
+                                        grid=None, qm_method=qm_method)
         elif eli_strategy == "den_dis_opt":
             logging.info("Eliminate Imaginary Frequency By Perturbing the "
                          "Structure of Molecule, and increase the grid "
@@ -308,7 +308,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                                         additional_user_tags, priority,
                                         update_specs, charge,
                                         spin_multiplicity,
-                                        grid=(128, 302))
+                                        grid=(128, 302), qm_method=qm_method)
         elif eli_strategy == "alt_den_dis_opt":
             logging.info("Eliminate Imaginary Frequency By Perturbing the "
                          "Structure of Molecule, and increase the grid "
@@ -317,7 +317,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                                         additional_user_tags, priority,
                                         update_specs, charge,
                                         spin_multiplicity,
-                                        grid=(90, 590))
+                                        grid=(90, 590), qm_method=qm_method)
         else:
             raise Exception("Unknown imaginary frequency fixing method")
 
