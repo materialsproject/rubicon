@@ -137,6 +137,7 @@ class QChemFireWorkCreator():
         spec['charge'] = charge
         spec['spin_multiplicity'] = spin_multiplicity
         spec['run_tags']['methods'] = method_token
+        spec["qm_method"] = method
         if priority:
             spec['_priority'] = priority
         task_name = self.molname + ' ' + state_name + ' ' + task_type
@@ -181,6 +182,7 @@ class QChemFireWorkCreator():
         spec['charge'] = charge
         spec['spin_multiplicity'] = spin_multiplicity
         spec['run_tags']['methods'] = method_token
+        spec["qm_method"] = method
         if priority:
             spec['_priority'] = priority
         task_name = self.molname + ' ' + state_name + ' ' + task_type
@@ -362,6 +364,7 @@ class QChemFireWorkCreator():
         spec['charge'] = charge
         spec['spin_multiplicity'] = spin_multiplicity
         spec['run_tags']['methods'] = method_token
+        spec["qm_method"] = qm_method
         spec['implicit_solvent'] = implicit_solvent
         task_name = self.molname + ' ' + state_name + ' ' + task_type
         from rubicon.firetasks.multistep_qchem_task \
@@ -414,6 +417,7 @@ class QChemFireWorkCreator():
         spec['charge'] = charge
         spec['spin_multiplicity'] = spin_multiplicity
         spec['run_tags']['methods'] = method_token
+        spec["qm_method"] = qm_method
         task_name = self.molname + ' ' + state_name + ' ' + task_type
         from rubicon.firetasks.multistep_qchem_task \
             import QChemSinglePointEnergyDBInsertionTask
