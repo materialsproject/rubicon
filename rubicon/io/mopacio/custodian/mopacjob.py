@@ -10,7 +10,7 @@ class MopacJob(Job):
     A basic MOPAC job.
     """
 
-    def __init__(self, mopac_cmd, input_file="mol.mop", gzipped=False, backup=True):
+    def __init__(self, mopac_cmd="mopac", input_file="mol.mop", gzipped=False, backup=True):
         self.mopac_cmd = mopac_cmd
         self.input_file = input_file
         basename = os.path.splitext(self.input_file)[0]
