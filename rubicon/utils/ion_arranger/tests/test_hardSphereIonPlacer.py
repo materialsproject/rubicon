@@ -7,7 +7,7 @@ from pymatgen.core.structure import Molecule
 from pymatgen.io.babelio import BabelMolAdaptor
 from pymatgen.io.qchemio import QcOutput
 
-from rubicon.utils.ion_arranger.ion_arranger import HardSphereIonPlacer
+from rubicon.utils.ion_arranger.ion_arranger import IonPlacer
 
 
 __author__ = 'xiaohuiqu'
@@ -41,7 +41,7 @@ class TestHardSphereIonPlacer(TestCase):
         # noinspection PyProtectedMember
         acetoxyq_obmol = BabelMolAdaptor(pymatgen_acetoxyq)._obmol
         acetoxyq_charges = acetoxyq_anion_qcout.data[0]["charges"]['chelpg']
-        self.acetoxyq_nacl_placer = HardSphereIonPlacer(
+        self.acetoxyq_nacl_placer = IonPlacer(
             acetoxyq_obmol, acetoxyq_charges, sodium_obmol, [1.0],
             chloride_obmol, [-1.0])
         tfsi_qcout = QcOutput(os.path.join(test_dir, "tfsi.qcout"))
@@ -49,7 +49,7 @@ class TestHardSphereIonPlacer(TestCase):
         # noinspection PyProtectedMember
         tfsi_obmol = BabelMolAdaptor(pymatgen_tfsi)._obmol
         tfsi_charges = tfsi_qcout.data[0]["charges"]['chelpg']
-        self.acetoxyq_natfsi_placer = HardSphereIonPlacer(
+        self.acetoxyq_natfsi_placer = IonPlacer(
             acetoxyq_obmol, acetoxyq_charges, sodium_obmol, [1.0],
             tfsi_obmol, tfsi_charges)
 
@@ -59,7 +59,7 @@ class TestHardSphereIonPlacer(TestCase):
 
     def test_normalize_molecule(self):
         obmol = self.get_copy_of_mol()
-        coords, radius, elements = HardSphereIonPlacer.normalize_molecule(
+        coords, radius, elements = IonPlacer.normalize_molecule(
             obmol, 2.0, 0.9)
         x, y, z = 0.0, 0.0, 0.0
         for c in coords:
@@ -98,8 +98,8 @@ class TestHardSphereIonPlacer(TestCase):
 
     def test_rotate(self):
         obmol1 = self.get_copy_of_mol()
-        HardSphereIonPlacer.rotate(obmol1, math.pi/2, math.pi/4)
-        coords1 = HardSphereIonPlacer.get_mol_coords(obmol1)
+        IonPlacer.rotate(obmol1, math.pi/2, math.pi/4)
+        coords1 = IonPlacer.get_mol_coords(obmol1)
         ref_coords1 = [[-4.85126, -2e-05, 4.66393], [-5.02525, 3e-05, 2.06331],
                        [-2.79667, 3e-05, 0.57618], [-0.38313, -3e-05, 1.80275],
                        [-0.26084, -6e-05, 4.484], [-2.45876, -5e-05, 5.88096],
@@ -119,8 +119,8 @@ class TestHardSphereIonPlacer(TestCase):
             for x1, x2 in zip(c1, c2):
                 self.assertAlmostEqual(x1, x2, 3)
         obmol2 = self.get_copy_of_mol()
-        HardSphereIonPlacer.rotate(obmol2, math.pi/3, -math.pi * 0.6)
-        coords2 = HardSphereIonPlacer.get_mol_coords(obmol2)
+        IonPlacer.rotate(obmol2, math.pi/3, -math.pi * 0.6)
+        coords2 = IonPlacer.get_mol_coords(obmol2)
         ref_coords2 = [[2.18824, -0.06625, -6.3635],
                        [3.27396, -1.04718, -4.20654],
                        [2.03023, -0.78504, -1.84804],
@@ -152,7 +152,7 @@ class TestHardSphereIonPlacer(TestCase):
         xyz3 = obconv.WriteString(obmol3)
         xyz4 = obconv.WriteString(obmol4)
         self.assertEqual(xyz3, xyz4)
-        HardSphereIonPlacer.rotate(obmol4, math.pi/3, math.pi/4)
+        IonPlacer.rotate(obmol4, math.pi/3, math.pi/4)
         xyz3 = obconv.WriteString(obmol3)
         xyz4 = obconv.WriteString(obmol4)
         self.assertNotEqual(xyz3, xyz4)
@@ -164,11 +164,11 @@ class TestHardSphereIonPlacer(TestCase):
         coords2 = [[0.0, 0.0, 0.0]]
         charges2 = [-1.0]
         radius2 = [0.4]
-        energy = HardSphereIonPlacer.pair_energy(coords1, charges1, radius1,
+        energy = IonPlacer.pair_energy(coords1, charges1, radius1,
                                                  coords2, charges2, radius2)
         self.assertEqual(energy, -1.0)
         radius1, radius2 = [0.8], [0.8]
-        energy = HardSphereIonPlacer.pair_energy(coords1, charges1, radius1,
+        energy = IonPlacer.pair_energy(coords1, charges1, radius1,
                                                  coords2, charges2, radius2)
         self.assertGreater(energy, 1000.0)
 
