@@ -156,7 +156,7 @@ class HardSphereElectrostaticEnergyEvaluator(EnergyEvaluator):
     def __init__(self, mol_coords, mol_radius, cation_radius, anion_radius,
                  mol_charges, cation_charges, anion_charges):
         super(HardSphereElectrostaticEnergyEvaluator, self).__init__(mol_coords)
-        self.hardsphere = HardSphereEnergyEvaluator(mol_radius, mol_radius, cation_radius, anion_radius)
+        self.hardsphere = HardSphereEnergyEvaluator(mol_coords, mol_radius, cation_radius, anion_radius)
         self.coulumb = CoulumbEnergyEvaluator(mol_coords, mol_charges, cation_charges, anion_charges,
                                               mol_radius, cation_radius, anion_radius)
         self.gravitation = GravitationalEnergyEvaluator(mol_coords, mol_radius, cation_radius, anion_radius)
