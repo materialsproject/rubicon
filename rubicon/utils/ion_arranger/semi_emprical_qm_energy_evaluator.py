@@ -55,7 +55,7 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
         cur_dir = os.getcwd()
         all_errors = set()
         energy = 0.0
-        with ScratchDir(rootpath=cur_dir, copy_from_current_on_enter=True, copy_to_current_on_exit=True):
+        with ScratchDir(rootpath=cur_dir, copy_from_current_on_enter=False, copy_to_current_on_exit=False):
             order_text = ["st", "nd", "th"]
             title = "Salt Alignment {}{} Calculation".format(
                 self.run_number, order_text[self.run_number-1 if self.run_number < 3 else 2])
@@ -71,8 +71,10 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
             for run in custodian_out:
                 for correction in run['corrections']:
                     all_errors.update(correction['errors'])
-        if len(all_errors) > 0:
-            os.system("cat mol.out >> out_error_logs.txt")
+            if len(all_errors) > 0:
+                out_error_logs_file = os.path.join(cur_dir, "out_error_logs.txt")
+                bak_cmd = "cat {} >> {}".format("mol.out", out_error_logs_file)
+                os.system(bak_cmd)
         return energy
 
     def _get_super_molecule(self, cation_coords, anion_coords):
