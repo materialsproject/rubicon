@@ -49,6 +49,9 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
             return self.gravitation.calc_energy(cation_coords, anion_coords)
         mol = self._get_super_molecule(cation_coords, anion_coords)
         energy = self.run_mopac(mol)
+        energy = round(energy, 3)
+        # coarse grained energy,
+        # make potential energy surface simpler
         return energy
 
     def run_mopac(self, mol):
