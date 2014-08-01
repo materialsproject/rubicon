@@ -56,8 +56,9 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
         all_errors = set()
         energy = 0.0
         with ScratchDir(rootpath=cur_dir, copy_from_current_on_enter=True, copy_to_current_on_exit=True):
-            order_text = ["st", "nd"]
-            title = "Salt Alignment {}{} Calculation".format(self.run_number, order_text[self.run_number-1])
+            order_text = ["st", "nd", "th"]
+            title = "Salt Alignment {}{} Calculation".format(
+                self.run_number, order_text[self.run_number-1 if self.run_number < 3 else 2])
             self.run_number += 1
             mop = MopTask(mol, self.total_charge, "opt", title, "PM7", {"CYCLES": 1000})
             mop.write_file("mol.mop")
