@@ -55,7 +55,7 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
         cur_dir = os.getcwd()
         all_errors = set()
         energy = 0.0
-        with ScratchDir(rootpath=cur_dir, copy_from_current_on_enter=False, copy_to_current_on_exit=False):
+        with ScratchDir(rootpath=cur_dir, copy_from_current_on_enter=False, copy_to_current_on_exit=True):
             order_text = ["st", "nd", "th"]
             title = "Salt Alignment {}{} Calculation".format(
                 self.run_number, order_text[self.run_number-1 if self.run_number < 3 else 2])
