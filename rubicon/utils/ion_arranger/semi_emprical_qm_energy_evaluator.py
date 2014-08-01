@@ -84,7 +84,7 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
         for ac in anion_coords:
             super_mol_species.extend(copy.deepcopy(self.anion_species))
             super_mol_coords.extend(copy.deepcopy(ac))
-        return Molecule(super_mol_species, super_mol_species)
+        return Molecule(super_mol_species, super_mol_coords)
 
 
     @staticmethod
