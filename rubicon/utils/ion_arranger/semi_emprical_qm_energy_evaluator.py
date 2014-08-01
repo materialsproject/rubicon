@@ -33,7 +33,8 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
             upper_covalent_radius_scale, upper_metal_radius_scale,
             mol_coords, ob_mol, ob_cation, ob_anion)
         self.gravitation = self._constructure_gravitational_energy_evaluator(
-            upper_covalent_radius_scale, upper_metal_radius_scale)
+            upper_covalent_radius_scale, upper_metal_radius_scale,
+            mol_coords, ob_mol, ob_cation, ob_anion)
         self.mol_species = IonPlacer.get_mol_species(ob_mol)
         self.cation_species = IonPlacer.get_mol_species(ob_cation)
         self.anion_species = IonPlacer.get_mol_species(ob_anion)
