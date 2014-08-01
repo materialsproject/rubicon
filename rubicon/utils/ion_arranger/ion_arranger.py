@@ -13,6 +13,7 @@ from pymatgen.io.smartio import write_mol
 import numpy as np
 from rubicon.utils.ion_arranger.hard_sphere_energy_evaluators import HardSphereElectrostaticEnergyEvaluator, \
     AtomicRadiusUtils
+from rubicon.utils.ion_arranger.semi_emprical_qm_energy_evaluator import SemiEmpricalQuatumMechanicalEnergyEvaluator
 
 
 class IonPlacer():
@@ -229,6 +230,8 @@ def main():
                         help="maximum number of evaluations")
     parser.add_argument("-s", "--size", dest="size", type=int, default=100,
                         help="population size")
+    parser.add_argument("-e", "--evaluator", dest="evaluator", type=str, default="hardsphere",
+                        choices=["hardsphere", "sqm"], help="Energy Evaluator")
     options = parser.parse_args()
     qcout_molecule = QcOutput(options.molecule)
     qcout_cation = QcOutput(options.cation)
@@ -247,8 +250,13 @@ def main():
     obmol_cation = BabelMolAdaptor(pymatgen_mol_cation)._obmol
     # noinspection PyProtectedMember
     obmol_anion = BabelMolAdaptor(pymatgen_mol_anion)._obmol
-    energy_evaluator = HardSphereElectrostaticEnergyEvaluator.from_qchem_output(
+    hardsphere_evaluator = lambda: HardSphereElectrostaticEnergyEvaluator.from_qchem_output(
         qcout_molecule, qcout_cation, qcout_anion)
+    sqm_evaluator = lambda: SemiEmpricalQuatumMechanicalEnergyEvaluator(
+        obmol_molecule, obmol_cation, obmol_anion, total_charge=0)
+    evaluator_creators = {"hardsphere": hardsphere_evaluator, "sqm": sqm_evaluator}
+    creator = evaluator_creators[options.evaluator]
+    energy_evaluator = creator()
     placer = IonPlacer(
         obmol_molecule, obmol_cation, obmol_anion, num_cation, num_anion, energy_evaluator)
     placer.place(max_evaluations=options.num_iter,
