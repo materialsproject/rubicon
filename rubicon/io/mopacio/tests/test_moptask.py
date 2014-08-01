@@ -150,4 +150,5 @@ Sites (17)
 
     def test_geom_opt_failed(self):
         moo = MopOutput(os.path.join(test_dir, "quino_salt_geom_failed.out"))
-        print moo.data
+        self.assertTrue(moo.data["has_error"])
+        self.assertTrue(moo.data["errors"], ['Geometry optimization failed'])

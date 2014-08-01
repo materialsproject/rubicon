@@ -350,7 +350,8 @@ class MopOutput(object):
         text = ["SCF FIELD WAS ACHIEVED"]
         all_keys = input_keywords.keys()
         if "EF" in all_keys or "BFGS" in all_keys:
-            text.append("GEOMETRY OPTIMISED USING .*\(.*\)\.")
+            text.append("GEOMETRY OPTIMISED USING .*\(\w+\)\.|"
+                        "\w+ TEST WAS SATISFIED IN \w+ OPTIMIZATION")
         return text
 
     @classmethod
@@ -361,6 +362,10 @@ class MopOutput(object):
                                    "(?P<x>\-?\d+\.\d+)\s+"
                                    "(?P<y>\-?\d+\.\d+)\s+"
                                    "(?P<z>\-?\d+\.\d+)")
+        error_defs = (
+            (re.compile("EXCESS NUMBER OF OPTIMIZATION CYCLES"), "Geometry optimization failed"),
+            (re.compile("UNABLE TO ACHIEVE SELF-CONSISTENCE"), "Bad SCF convergence")
+        )
         energies = []
         parse_keywords = None
         result_section = False
@@ -369,11 +374,14 @@ class MopOutput(object):
         input_keywords = None
         jobtype = None
         gracefully_terminated = False
-        errors = []
+        errors = set()
         coords = []
         species = []
         molecules = []
         for line in output.split('\n'):
+            for ep, message in error_defs:
+                if ep.search(line):
+                    errors.add(message)
             if parse_keywords and input_keywords is None:
                 input_keywords = MopTask._parse_keywords([line])
                 jobtext = (set(input_keywords.keys()) & MopTask.available_sqm_tasktext).pop()
@@ -420,8 +428,9 @@ class MopOutput(object):
             for text in cls._expected_successful_pattern(input_keywords):
                 sucess_pattern = re.compile(text)
                 if not sucess_pattern.search(output):
-                    errors.append("Can't find text to indicate success")
+                    errors.add("Can't find text to indicate success")
 
+        errors = list(errors)
         data = {
             "jobtype": jobtype,
             "energies": energies,
