@@ -1,0 +1,198 @@
+ *******************************************************************************
+ ** Site#: 20348        For non-commercial use only     Version 14.139M 64BITS**
+ *******************************************************************************
+ ** Cite this work as:                                                        **
+ **                                                                           **
+ ** (a) MOPAC2012, James J. P. Stewart, Stewart Computational Chemistry,      **
+ **  Version 14.139M web: HTTP://OpenMOPAC.net         Days remaining: 291    **
+ **                                                                           **
+ **                                 AND                                       **
+ **                                                                           **
+ ** (b) Maia, J.D.C., et al., J. Chem. Theory Comput. 2012, 8, 3072-3081.     **
+ **                DOI: 10.1021/ct3004645.                                    **
+ *******************************************************************************
+ **                                                                           **
+ **                                MOPAC2012                                  **
+ **                                                                           **
+ *******************************************************************************
+
+                            PM7 CALCULATION RESULTS
+
+
+ *******************************************************************************
+ *  CALCULATION DONE:                                Fri Aug  1 15:57:25 2014  *
+ *  PM7      - The PM7 Hamiltonian to be used
+ *
+ *
+ *
+ *                 CHARGE ON SYSTEM =     0
+ *
+ *
+ *
+ *  XYZ      - CARTESIAN COORDINATE SYSTEM TO BE USED
+ *  BFGS     - USE THE BFGS GEOMETRY OPTIMIZER
+ *  T=       - A TIME OF 172800.0 SECONDS REQUESTED
+ *  DUMP=N   - RESTART FILE WRITTEN EVERY  7200.000 SECONDS
+ *  CYCLES=  - DO A MAXIMUM OF  1000 STEPS
+ *  ITRY=    - DO A MAXIMUM OF     5 ITERATIONS FOR SCF
+ *******************************************************************************
+PM7  itry=5 BFGS CHARGE=0 XYZ CYCLES=1000
+ Salt Alignment 140th Calculation
+
+   ATOM   CHEMICAL          X               Y               Z
+  NUMBER   SYMBOL      (ANGSTROMS)     (ANGSTROMS)     (ANGSTROMS)
+ 
+     1       C          4.20759191  *   1.34211491  *   0.00000000  *
+     2       C          1.96677357  *   2.67016530  *   0.00000000  *
+     3       C         -0.37036223  *   1.35350996  *   0.00000000  *
+     4       C         -0.37028475  *  -1.35329028  *   0.00000000  *
+     5       C          1.96682837  *  -2.67006845  *   0.00000000  *
+     6       C          4.20768828  *  -1.34208042  *   0.00000000  *
+     7       H          5.99710208  *   2.35008916  *   0.00000000  *
+     8       H          1.91824351  *   4.72226425  *   0.00000000  *
+     9       H          1.91822083  *  -4.72213150  *   0.00000000  *
+    10       H          5.99738742  *  -2.34971641  *   0.00000000  *
+    11       C         -4.67859953  *  -1.34448038  *   0.00000000  *
+    12       C         -4.67885275  *   1.34427109  *   0.00000000  *
+    13       H         -6.45923743  *  -2.37641446  *   0.00000000  *
+    14       N         -2.58116227  *  -2.68276174  *   0.00000000  *
+    15       N         -2.58156100  *   2.68282646  *   0.00000000  *
+    16       H         -6.45977601  *   2.37570250  *   0.00000000  *
+    17      Li          5.02946183  *  -9.40417874  *   6.43251964  *
+    18       B          9.33011354  *  30.27883412  *  -8.23701788  *
+    19       F         10.34843769  *  28.24664671  *  -9.65470510  *
+    20       F          7.33476295  *  31.41669410  *  -9.61526575  *
+    21       F         11.24601418  *  32.09286097  *  -7.77616625  *
+    22       F          8.39129962  *  29.35811232  *  -5.90331118  *
+ 
+
+
+          CARTESIAN COORDINATES 
+
+    NO.       ATOM         X         Y         Z
+
+     1         C        4.2076    1.3421    0.0000
+     2         C        1.9668    2.6702    0.0000
+     3         C       -0.3704    1.3535    0.0000
+     4         C       -0.3703   -1.3533    0.0000
+     5         C        1.9668   -2.6701    0.0000
+     6         C        4.2077   -1.3421    0.0000
+     7         H        5.9971    2.3501    0.0000
+     8         H        1.9182    4.7223    0.0000
+     9         H        1.9182   -4.7221    0.0000
+    10         H        5.9974   -2.3497    0.0000
+    11         C       -4.6786   -1.3445    0.0000
+    12         C       -4.6789    1.3443    0.0000
+    13         H       -6.4592   -2.3764    0.0000
+    14         N       -2.5812   -2.6828    0.0000
+    15         N       -2.5816    2.6828    0.0000
+    16         H       -6.4598    2.3757    0.0000
+    17        Li        5.0295   -9.4042    6.4325
+    18         B        9.3301   30.2788   -8.2370
+    19         F       10.3484   28.2466   -9.6547
+    20         F        7.3348   31.4167   -9.6153
+    21         F       11.2460   32.0929   -7.7762
+    22         F        8.3913   29.3581   -5.9033
+
+     ===================== shared-memory parallel CPU Section ======================
+     **                                                                           **
+     **  MOPAC calculations will run in shared-memory parallel CPUs               **
+     **                                                                           **
+     **  Number of Threads =  2                                                   **
+     **                                                                           **
+     **                                                                           **
+     **  For information on this work, see:                                       **
+     **                                                                           **
+     **  Maia, J.D.C., et al., J. Chem. Theory Comput. 2012, 8, 3072-3081.        **
+     **        DOI: 10.1021/ct3004645.                                            **
+     **                                                                           **
+     ===================== shared-memory parallel CPU Section ======================
+      
+
+
+ General Reference for PM7:
+ "Optimization of Parameters for Semiempirical Methods VI: More Modifications to the 
+ NDDO Approximations and Re-optimization of Parameters", J. J. P. Stewart, J. Mol. Mod., 1:32, 19 (2013)
+ http://www.springerlink.com/openurl.asp?genre=article&id=doi:10.1007/s00894-012-1667-x
+
+           Empirical Formula: C8 H6 N2 Li B F4  =    22 atoms
+
+
+
+      MOLECULAR POINT GROUP   :   C1  
+
+
+      RHF CALCULATION, NO. OF DOUBLY OCCUPIED LEVELS =   40
+
+      Geometry optimization using BFGS
+
+
+ ALL CONVERGERS ARE NOW FORCED ON
+ SHIFT=10, PULAY ON, CAMP-KING ON
+ AND ITERATION COUNTER RESET
+
+
+
+
+          """""""""""""UNABLE TO ACHIEVE SELF-CONSISTENCE
+
+
+
+          DELTAE=   0.2878E+05     DELTAP=   0.2000E+01
+
+
+
+
+ -------------------------------------------------------------------------------
+PM7  itry=5 BFGS CHARGE=0 XYZ CYCLES=1000
+ Salt Alignment 140th Calculation
+
+
+
+     A FAILURE HAS OCCURRED, TREAT RESULTS WITH CAUTION!!     
+      ++++----**** FAILED TO ACHIEVE SCF. ****----++++        
+
+
+                              PM7 CALCULATION
+                                                       MOPAC2012 (Version: 14.139M)
+                                                       Fri Aug  1 15:57:25 2014
+                                                       No. of days left = 291
+ 
+ 
+ FOR SOME REASON THE SCF CALCULATION FAILED.
+ 
+ THE RESULTS WOULD BE MEANINGLESS, SO WILL NOT BE PRINTED.
+ TRY TO FIND THE REASON FOR THE FAILURE BY USING 'PL'.
+ 
+ CHECK YOUR GEOMETRY AND ALSO TRY USING SHIFT OR PULAY. 
+   ATOM   CHEMICAL          X               Y               Z
+  NUMBER   SYMBOL      (ANGSTROMS)     (ANGSTROMS)     (ANGSTROMS)
+ 
+     1       C          4.20759191  *   1.34211491  *   0.00000000  *
+     2       C          1.96677357  *   2.67016530  *   0.00000000  *
+     3       C         -0.37036223  *   1.35350996  *   0.00000000  *
+     4       C         -0.37028475  *  -1.35329028  *   0.00000000  *
+     5       C          1.96682837  *  -2.67006845  *   0.00000000  *
+     6       C          4.20768828  *  -1.34208042  *   0.00000000  *
+     7       H          5.99710208  *   2.35008916  *   0.00000000  *
+     8       H          1.91824351  *   4.72226425  *   0.00000000  *
+     9       H          1.91822083  *  -4.72213150  *   0.00000000  *
+    10       H          5.99738742  *  -2.34971641  *   0.00000000  *
+    11       C         -4.67859953  *  -1.34448038  *   0.00000000  *
+    12       C         -4.67885275  *   1.34427109  *   0.00000000  *
+    13       H         -6.45923743  *  -2.37641446  *   0.00000000  *
+    14       N         -2.58116227  *  -2.68276174  *   0.00000000  *
+    15       N         -2.58156100  *   2.68282646  *   0.00000000  *
+    16       H         -6.45977601  *   2.37570250  *   0.00000000  *
+    17      Li          5.02946183  *  -9.40417874  *   6.43251964  *
+    18       B          9.33011354  *  30.27883412  *  -8.23701788  *
+    19       F         10.34843769  *  28.24664671  *  -9.65470510  *
+    20       F          7.33476295  *  31.41669410  *  -9.61526575  *
+    21       F         11.24601418  *  32.09286097  *  -7.77616625  *
+    22       F          8.39129962  *  29.35811232  *  -5.90331118  *
+
+
+
+ TOTAL JOB TIME:             0.02 SECONDS
+
+ == MOPAC DONE ==

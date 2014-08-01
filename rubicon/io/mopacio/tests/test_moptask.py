@@ -152,3 +152,8 @@ Sites (17)
         moo = MopOutput(os.path.join(test_dir, "quino_salt_geom_failed.out"))
         self.assertTrue(moo.data["has_error"])
         self.assertTrue(moo.data["errors"], ['Geometry optimization failed'])
+
+    def test_scf_failed(self):
+        moo = MopOutput(os.path.join(test_dir, "quino_salt_scf_failed.out"))
+        self.assertTrue(moo.data["has_error"])
+        self.assertTrue(moo.data["errors"], ['Bad SCF convergence'])
