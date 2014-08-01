@@ -1,12 +1,14 @@
+import copy
 import os
 
 from custodian import Custodian
 from monty.tempfile import ScratchDir
+from pymatgen.core.structure import Molecule
 from pymatgen.core.units import Energy
 
 from rubicon.io.mopacio.custodian.mopac_error_handlers import MopacErrorHandler
 from rubicon.io.mopacio.custodian.mopacjob import MopacJob
-from rubicon.io.mopacio.mopacio import MopOutput
+from rubicon.io.mopacio.mopacio import MopOutput, MopTask
 from rubicon.utils.ion_arranger.energy_evaluator import EnergyEvaluator
 from rubicon.utils.ion_arranger.hard_sphere_energy_evaluators import HardSphereEnergyEvaluator, AtomicRadiusUtils, \
     GravitationalEnergyEvaluator
@@ -35,6 +37,7 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
         self.mol_species = IonPlacer.get_mol_species(ob_mol)
         self.cation_species = IonPlacer.get_mol_species(ob_cation)
         self.anion_species = IonPlacer.get_mol_species(ob_anion)
+        self.run_number = 1
 
     def calc_energy(self, cation_coords, anion_coords):
         energy = self.lower_sphere.calc_energy(cation_coords, anion_coords)
@@ -43,14 +46,19 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
         energy = self.upper_sphere.calc_energy(cation_coords, anion_coords)
         if energy < 1.0:
             return self.gravitation.calc_energy(cation_coords, anion_coords)
-        energy = self.run_mopac()
+        mol = self._get_super_molecule(cation_coords, anion_coords)
+        energy = self.run_mopac(mol)
         return energy
 
-    def run_mopac(self):
+    def run_mopac(self, mol):
         cur_dir = os.getcwd()
         all_errors = set()
         energy = 0.0
         with ScratchDir(rootpath=cur_dir, copy_from_current_on_enter=True, copy_to_current_on_exit=True):
+            title = "Salt Alignment {}th Calculation".format(self.run_number)
+            self.run_number += 1
+            mop = MopTask(mol, self.total_charge, "opt", title, "PM7", {"CYCLES": 1000})
+            mop.write_file("mol.mop")
             job = MopacJob()
             handler = MopacErrorHandler()
             c = Custodian(handlers=[handler], jobs=[job], max_errors=50)
@@ -63,6 +71,19 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
         if len(all_errors) > 0:
             os.system("cat mol.out >> out_error_logs.txt")
         return energy
+
+    def _get_super_molecule(self, cation_coords, anion_coords):
+        super_mol_species = []
+        super_mol_coords = []
+        super_mol_species.extend(copy.deepcopy(self.mol_species))
+        super_mol_coords.extend(copy.deepcopy(self.mol_coords))
+        for cc in cation_coords:
+            super_mol_species.extend(copy.deepcopy(self.cation_species))
+            super_mol_coords.extend(copy.deepcopy(cc))
+        for ac in anion_coords:
+            super_mol_species.extend(copy.deepcopy(self.anion_species))
+            super_mol_coords.extend(copy.deepcopy(ac))
+        return Molecule(super_mol_species, super_mol_species)
 
 
     @staticmethod
