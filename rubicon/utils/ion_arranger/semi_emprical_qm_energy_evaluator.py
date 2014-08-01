@@ -21,7 +21,7 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
 
     def __init__(self, ob_mol, ob_cation, ob_anion, total_charge=0,
                  lower_covalent_radius_scale=1.8, lower_metal_radius_scale=0.5,
-                 upper_covalent_radius_scale=4.0, upper_metal_radius_scale=4.0,):
+                 upper_covalent_radius_scale=4.0, upper_metal_radius_scale=3.0,):
         from rubicon.utils.ion_arranger.ion_arranger import IonPlacer
         mol_coords = IonPlacer.normalize_molecule(ob_mol)
         super(SemiEmpricalQuatumMechanicalEnergyEvaluator, self).__init__(mol_coords)
