@@ -79,17 +79,17 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
 
     def _get_super_molecule(self, cation_coords, anion_coords):
         super_mol_species = []
-        super_mol_coords = []
+        super_mol_coords_au = []
         super_mol_species.extend(copy.deepcopy(self.mol_species))
-        super_mol_coords.extend(copy.deepcopy(self.mol_coords))
+        super_mol_coords_au.extend(copy.deepcopy(self.mol_coords))
         for cc in cation_coords:
             super_mol_species.extend(copy.deepcopy(self.cation_species))
-            super_mol_coords.extend(copy.deepcopy(cc))
+            super_mol_coords_au.extend(copy.deepcopy(cc))
         for ac in anion_coords:
             super_mol_species.extend(copy.deepcopy(self.anion_species))
-            super_mol_coords.extend(copy.deepcopy(ac))
-        return Molecule(super_mol_species, super_mol_coords)
-
+            super_mol_coords_au.extend(copy.deepcopy(ac))
+        super_mol_coords_ang = [[x/AtomicRadiusUtils.angstrom2au for x in coord] for coord in super_mol_coords_au]
+        return Molecule(super_mol_species, super_mol_coords_ang)
 
     @staticmethod
     def _constructure_hardsphere_energy_evaluator(covalent_radius_scale, metal_radius_scale,
