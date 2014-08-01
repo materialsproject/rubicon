@@ -147,3 +147,7 @@ Sites (17)
 16 H    -3.793316     0.519019    -1.743723
 17 H     0.183750     2.356539    -0.192487"""
         self.assertEqual(ans_mol2, str(moo.data["molecules"][1]))
+
+    def test_geom_opt_failed(self):
+        moo = MopOutput(os.path.join(test_dir, "quino_salt_geom_failed.out"))
+        print moo.data

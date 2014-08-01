@@ -363,6 +363,8 @@ class MopOutput(object):
                                    "(?P<z>\-?\d+\.\d+)")
         energies = []
         parse_keywords = None
+        result_section = False
+        star_line_count = 0
         parse_coords = False
         input_keywords = None
         jobtype = None
@@ -372,13 +374,17 @@ class MopOutput(object):
         species = []
         molecules = []
         for line in output.split('\n'):
-            if parse_keywords:
+            if parse_keywords and input_keywords is None:
                 input_keywords = MopTask._parse_keywords([line])
                 jobtext = (set(input_keywords.keys()) & MopTask.available_sqm_tasktext).pop()
                 jobtype = MopTask.jobtext2type[jobtext]
                 parse_keywords = False
-            if "-" * 50 in line:
-                parse_keywords = True
+            if result_section and "*" * 50 in line:
+                star_line_count += 1
+                if star_line_count == 2:
+                    parse_keywords = True
+            if "PM7 CALCULATION RESULTS" in line:
+                result_section = True
             if parse_coords:
                 if "ATOM" in line:
                     continue
