@@ -26,7 +26,7 @@ class MopacErrorHandler(ErrorHandler):
         self.mopinp = MopTask.from_file(self.input_file)
         self.errors = None
         if self.outdata["has_error"]:
-            self.errors = self.outdata["error"]
+            self.errors = self.outdata["errors"]
             return True
         return False
 
