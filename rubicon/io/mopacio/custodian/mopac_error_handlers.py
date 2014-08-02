@@ -49,8 +49,7 @@ class MopacErrorHandler(ErrorHandler):
         filename = "error.{}.tar.gz".format(error_num + 1)
         logging.info("Backing up run to {}.".format(filename))
         tar = tarfile.open(filename, "w:gz")
-        bak_list = [self.input_file, self.output_file] + \
-                   list(self.ex_backup_list)
+        bak_list = [self.input_file, self.output_file, self.arc_file]
         for f in bak_list:
             if os.path.exists(f):
                 tar.add(f)
