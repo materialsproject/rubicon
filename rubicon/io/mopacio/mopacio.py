@@ -64,7 +64,7 @@ class MopTask(MSONable):
             raise Exception(" ".join(overlap_keywords) + " are duplicated"
                             "in optional_params")
         self.keywords["CHARGE"] = charge
-        if jobtype.upper() not in ["SP", "OPT", "FREQ"]:
+        if jobtype.upper() not in ["SP", "OPT", "OPT_BFGS", "FREQ"]:
             raise Exception('Job type "{}" is not supported currently'.format(jobtype))
         self.keywords[self.jobtype2text[jobtype.upper()]] = None
 
