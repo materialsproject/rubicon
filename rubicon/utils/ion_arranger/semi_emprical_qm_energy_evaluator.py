@@ -47,7 +47,7 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
         if energy > HardSphereEnergyEvaluator.overlap_energy * 0.9:
             return energy
         energy = self.upper_sphere.calc_energy(cation_coords, anion_coords)
-        if energy > HardSphereEnergyEvaluator.overlap_energy * 0.9:
+        if energy < 1.0:
             return self.gravitation.calc_energy(cation_coords, anion_coords)
         mol = self._get_super_molecule(cation_coords, anion_coords)
         energy = self.run_mopac(mol)
