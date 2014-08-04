@@ -4,13 +4,13 @@ import math
 import itertools
 
 import inspyred
-from pymatgen.analysis.molecule_structure_comparator import CovalentRadius
 import openbabel as ob
 from pymatgen.core.structure import Molecule
 from pymatgen.io.babelio import BabelMolAdaptor
 from pymatgen.io.qchemio import QcOutput
 from pymatgen.io.smartio import write_mol
 import numpy as np
+
 from rubicon.utils.ion_arranger.hard_sphere_energy_evaluators import HardSphereElectrostaticEnergyEvaluator, \
     AtomicRadiusUtils
 from rubicon.utils.ion_arranger.semi_emprical_qm_energy_evaluator import SemiEmpricalQuatumMechanicalEnergyEvaluator
@@ -32,6 +32,7 @@ class IonPlacer():
         self.ea = inspyred.swarm.PSO(self.prng)
         self.ea.terminator = inspyred.ec.terminators.evaluation_termination
         self.ea.topology = inspyred.swarm.topologies.ring_topology
+        self.ea.observer = inspyred.ec.observers.best_observer
         self.molecule = molecule
         self.cation = cation
         self.anion = anion
@@ -172,6 +173,7 @@ class IonPlacer():
         t1 = time()
         self.final_pop = self.ea.evolve(generator=self.generate_conformers,
                                         evaluator=self.evaluate_conformers,
+
                                         pop_size=pop_size,
                                         bounder=self.bounder,
                                         maximize=False,
