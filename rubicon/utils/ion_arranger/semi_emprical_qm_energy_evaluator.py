@@ -1,5 +1,6 @@
 import copy
 import os
+import shutil
 
 from custodian import Custodian
 from monty.tempfile import ScratchDir
@@ -39,6 +40,7 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
         self.cation_species = IonPlacer.get_mol_species(ob_cation)
         self.anion_species = IonPlacer.get_mol_species(ob_anion)
         self.run_number = 1
+        self.best_energy = 0.0
 
     def calc_energy(self, cation_coords, anion_coords):
         energy = self.lower_sphere.calc_energy(cation_coords, anion_coords)
@@ -71,6 +73,9 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
             custodian_out = c.run()
             mopout = MopOutput("mol.out")
             energy = Energy(mopout.data["energies"][-1][-1], "eV").to("Ha")
+            if energy < self.best_energy:
+                self.best_energy = energy
+                shutil.copy("mol.out", os.path.join(cur_dir, "best_mol.out"))
             for run in custodian_out:
                 for correction in run['corrections']:
                     all_errors.update(correction['errors'])
