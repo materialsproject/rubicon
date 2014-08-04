@@ -226,10 +226,12 @@ def main():
                         required=True,
                         help="the file name of the aligned conformer")
     parser.add_argument("-n", "--num_iter", dest="num_iter", type=int,
-                        default=30000,
+                        default=3000,
                         help="maximum number of evaluations")
-    parser.add_argument("-s", "--size", dest="size", type=int, default=100,
+    parser.add_argument("-s", "--size", dest="size", type=int, default=15,
                         help="population size")
+    parser.add_argument("-k", "--num_neighbours", dest="num_neighbours", type=int, default=2,
+                        help="number of neighbours")
     parser.add_argument("-e", "--evaluator", dest="evaluator", type=str, default="hardsphere",
                         choices=["hardsphere", "sqm"], help="Energy Evaluator")
     options = parser.parse_args()
@@ -260,7 +262,8 @@ def main():
     placer = IonPlacer(
         obmol_molecule, obmol_cation, obmol_anion, num_cation, num_anion, energy_evaluator)
     placer.place(max_evaluations=options.num_iter,
-                 pop_size=options.size)
+                 pop_size=options.size,
+                 neighborhood_size=options.num_neighbours)
     print 'It took {:.1f} seconds to place the salt'.format(placer
                                                             .playing_time)
     write_mol(placer.best_pymatgen_mol, options.outputfile)
