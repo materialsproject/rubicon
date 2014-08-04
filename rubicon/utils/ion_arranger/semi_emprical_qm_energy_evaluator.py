@@ -32,7 +32,7 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
             mol_coords, ob_mol, ob_cation, ob_anion)
         self.upper_sphere = self._constructure_hardsphere_energy_evaluator(
             upper_covalent_radius_scale, upper_metal_radius_scale,
-            mol_coords, ob_mol, ob_cation, ob_anion)
+            mol_coords, ob_mol, ob_cation, ob_anion, isForContact=True)
         self.gravitation = self._constructure_gravitational_energy_evaluator(
             upper_covalent_radius_scale, upper_metal_radius_scale,
             mol_coords, ob_mol, ob_cation, ob_anion)
@@ -101,18 +101,18 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
 
     @staticmethod
     def _constructure_hardsphere_energy_evaluator(covalent_radius_scale, metal_radius_scale,
-                                                  mol_coords, ob_mol, ob_cation, ob_anion):
+                                                  mol_coords, ob_mol, ob_cation, ob_anion, isForContact=False):
         rad_util = AtomicRadiusUtils(covalent_radius_scale, metal_radius_scale)
         mol_radius = rad_util.get_radius(ob_mol)
         cation_radius = rad_util.get_radius(ob_cation)
         anion_radius = rad_util.get_radius(ob_anion)
         sphere = HardSphereEnergyEvaluator(
-            mol_coords, mol_radius, cation_radius, anion_radius)
+            mol_coords, mol_radius, cation_radius, anion_radius, isForContact)
         return sphere
 
     @staticmethod
     def _constructure_gravitational_energy_evaluator(covalent_radius_scale, metal_radius_scale,
-                                                  mol_coords, ob_mol, ob_cation, ob_anion):
+                                                     mol_coords, ob_mol, ob_cation, ob_anion):
         rad_util = AtomicRadiusUtils(covalent_radius_scale, metal_radius_scale)
         mol_radius = rad_util.get_radius(ob_mol)
         cation_radius = rad_util.get_radius(ob_cation)
