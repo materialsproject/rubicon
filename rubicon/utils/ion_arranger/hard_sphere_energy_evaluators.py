@@ -106,9 +106,9 @@ class HardSphereEnergyEvaluator(EnergyEvaluator):
                 energies.append(self._pair_energy(cc, self.cation_radius,
                     ac, self.anion_radius))
         if not self.isForContant:
-            energy = sum(energy)
+            energy = sum(energies)
         else:
-            energy = min(energy)
+            energy = min(energies)
         return energy
 
     @classmethod
