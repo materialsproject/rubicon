@@ -154,7 +154,7 @@ class ContactDetector(object):
         for p in frag_pair:
             ((c1s, r1s, i1), (c2s, r2s, i2)) = p
             contact = 0
-            for c1, r1, c2, r2 in zip(c1s, r1s, c2s, r2s):
+            for (c1, r1), (c2, r2) in itertools.product(zip(c1s, r1s), zip(c2s, r2s)):
                 distance = math.sqrt(sum([(x1-x2)**2 for x1, x2
                                           in zip(c1, c2)]))
                 if distance <= r1 + r2 + self.cap:
