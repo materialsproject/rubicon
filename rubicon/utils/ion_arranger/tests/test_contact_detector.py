@@ -37,7 +37,7 @@ class TestContactDetector(TestCase):
         mol_coords = IonPlacer.normalize_molecule(acetoxyq_obmol)
         self.detector = ContactDetector(mol_coords, mol_radius, cation_radius, anion_radius)
 
-    def test_is_contact(self):
+    def test_get_contact_matrix(self):
         c = [-20.0, 0.0, 0.0, 10.0, 0.0, 0.0, 1.0, 2.0]
         cation_coords, anion_coords = self.acetoxyq_natfsi_placer.decode_solution(c)
         contact_matrix = self.detector._get_contact_matrix(cation_coords, anion_coords)
@@ -76,4 +76,18 @@ class TestContactDetector(TestCase):
         self.assertEquals(3, floydAPSP[2, 3])
         self.assertEquals(2, floydAPSP[2, 4])
         self.assertEquals(1, floydAPSP[3, 4])
+
+    def test_is_contact(self):
+        c = [-20.0, 0.0, 0.0, 10.0, 0.0, 0.0, 1.0, 2.0]
+        cation_coords, anion_coords = self.acetoxyq_natfsi_placer.decode_solution(c)
+        is_contact = self.detector.is_contact(cation_coords, anion_coords)
+        self.assertFalse(is_contact)
+        c = [-20.0, 0.0, 0.0, 5.0, 0.0, 0.0, 1.0, 2.0]
+        cation_coords, anion_coords = self.acetoxyq_natfsi_placer.decode_solution(c)
+        is_contact = self.detector.is_contact(cation_coords, anion_coords)
+        self.assertFalse(is_contact)
+        c = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 2.0]
+        cation_coords, anion_coords = self.acetoxyq_natfsi_placer.decode_solution(c)
+        is_contact = self.detector.is_contact(cation_coords, anion_coords)
+        self.assertTrue(is_contact)
 

@@ -126,14 +126,17 @@ class ContactDetector(object):
         self.anion_radius = anion_radius
 
     def is_contact(self, cation_coords, anion_coords):
-        pass
+        contact_matrix = self._get_contact_matrix(cation_coords, anion_coords)
+        distance_matrix = self._get_distance_matrix(contact_matrix)
+        return np.all(distance_matrix < 1000)
 
-    def _get_distance_matrix(self, contact_matrix):
+    @classmethod
+    def _get_distance_matrix(cls, contact_matrix):
         # Find all-pairs shortest path lengths using Floyd's algorithm
         distMatrix = copy.deepcopy(contact_matrix)
         n, m = distMatrix.shape
         um = np.identity(n)
-        distMatrix[distMatrix == 0] = 999 # set zero entries to inf
+        distMatrix[distMatrix == 0] = 10001 # set zero entries to inf
         distMatrix[um == 1] = 0 # except diagonal which should be zero
         for i in range(n):
             distMatrix = np.minimum(distMatrix, distMatrix[np.newaxis, i, :] + distMatrix[:, i, np.newaxis])
