@@ -134,7 +134,7 @@ class ContactDetector(object):
         fragments.extend(zip(anion_coords, [self.anion_radius] * len(anion_coords)))
         num_frag = len(fragments)
         fragments = [(c, r, i) for i, (c, r) in enumerate(fragments)]
-        contact_matrix = np.identity(num_frag, dtype=int)
+        contact_matrix = np.zeros((num_frag, num_frag), dtype=int)
         frag_pair = itertools.combinations(fragments, r=2)
         for p in frag_pair:
             ((c1s, r1s, i1), (c2s, r2s, i2)) = p

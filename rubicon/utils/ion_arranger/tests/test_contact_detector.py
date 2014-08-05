@@ -5,6 +5,7 @@ from pymatgen.io.babelio import BabelMolAdaptor
 from pymatgen.io.qchemio import QcOutput
 from rubicon.utils.ion_arranger.hard_sphere_energy_evaluators import AtomicRadiusUtils, ContactDetector
 from rubicon.utils.ion_arranger.ion_arranger import IonPlacer
+import numpy as np
 
 __author__ = 'xiaohuiqu'
 
@@ -40,4 +41,15 @@ class TestContactDetector(TestCase):
         c = [-20.0, 0.0, 0.0, 10.0, 0.0, 0.0, 1.0, 2.0]
         cation_coords, anion_coords = self.acetoxyq_natfsi_placer.decode_solution(c)
         contact_matrix = self.detector._get_contact_matrix(cation_coords, anion_coords)
-        print contact_matrix
+        ans = np.zeros((3, 3), int)
+        self.assertEqual(str(contact_matrix), str(ans))
+        c = [-20.0, 0.0, 0.0, 5.0, 0.0, 0.0, 1.0, 2.0]
+        cation_coords, anion_coords = self.acetoxyq_natfsi_placer.decode_solution(c)
+        contact_matrix = self.detector._get_contact_matrix(cation_coords, anion_coords)
+        ans = np.array([[0, 0, 1], [0, 0, 0], [1, 0, 0]], int)
+        self.assertEqual(str(contact_matrix), str(ans))
+        c = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 2.0]
+        cation_coords, anion_coords = self.acetoxyq_natfsi_placer.decode_solution(c)
+        contact_matrix = self.detector._get_contact_matrix(cation_coords, anion_coords)
+        ans = np.array([[0, 1, 1], [1, 0, 1], [1, 1, 0]], int)
+        self.assertEqual(str(contact_matrix), str(ans))
