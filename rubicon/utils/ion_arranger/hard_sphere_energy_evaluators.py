@@ -124,6 +124,7 @@ class ContactDetector(object):
         self.mol_radius = mol_radius
         self.cation_radius = cation_radius
         self.anion_radius = anion_radius
+        self.cap = cap
 
     def is_contact(self, cation_coords, anion_coords):
         contact_matrix = self._get_contact_matrix(cation_coords, anion_coords)
@@ -156,7 +157,7 @@ class ContactDetector(object):
             for c1, r1, c2, r2 in zip(c1s, r1s, c2s, r2s):
                 distance = math.sqrt(sum([(x1-x2)**2 for x1, x2
                                           in zip(c1, c2)]))
-                if distance <= r1 + r2:
+                if distance <= r1 + r2 + self.cap:
                     contact = 1
                     break
             contact_matrix[i1, i2] = contact
