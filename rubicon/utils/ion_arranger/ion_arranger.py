@@ -128,7 +128,7 @@ class IonPlacer():
         xi = 0
         for i in range(self.num_cation):
             cc = ob.OBMol(self.cation)
-            tx, ty, tz = x[xi: xi+3]
+            tx, ty, tz = [t/AtomicRadiusUtils.angstrom2au for  t in x[xi: xi+3]]
             xi += 3
             if cation_num_atoms > 1:
                 theta = x[xi]
@@ -140,7 +140,7 @@ class IonPlacer():
             cation_coords.append(self.get_mol_coords(cc))
         for i in range(self.num_anion):
             ac = ob.OBMol(self.anion)
-            tx, ty, tz = x[xi: xi+3]
+            tx, ty, tz = [t/AtomicRadiusUtils.angstrom2au for t in x[xi: xi+3]]
             xi += 3
             if anion_num_atoms > 1:
                 theta = x[xi]
