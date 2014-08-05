@@ -182,7 +182,6 @@ class Gff(MSONable):
                     index=int(token[1])
                     atom_name=token[2]
                     gaff_name=token[-1]
-                    print gaff_name, gaff_name
                     self.atom_gaff[atom_name]=gaff_name
                     self.atom_index[index]=atom_name
                     self.atom_index_gaff[index]=gaff_name
@@ -191,7 +190,11 @@ class Gff(MSONable):
 
 
 
+
     def read_charges(self):
+        """
+        reads charges.json to read charges from GAFF atom
+        """
         filename = os.path.join(os.path.dirname(__file__),'charges.json')
         jsonfile = open(filename)
         self.charges = json.load(jsonfile, encoding="utf-8")

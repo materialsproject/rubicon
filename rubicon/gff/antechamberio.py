@@ -54,7 +54,7 @@ class AntechamberRunner():
 
     def get_ff_top_mol(self,mol,filename=None):
         """
-        run antechamber for a specified pdb file then run parmchk
+        run antechamber using pdb file then run parmchk
         to generate missing force field parameters. Store and return
         the force field and topology information in ff_mol.
 

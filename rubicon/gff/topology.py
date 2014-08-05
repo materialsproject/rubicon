@@ -3,9 +3,9 @@ from pymatgen import Molecule
 __author__ = 'navnidhirajput'
 
 
-class TopMol(Molecule):
+class TopMol(object):
 
-    atoms= 'cl'
+
 
     def __init__(self,atoms,bonds,angles,dihedrals,imdihedrals,num_bonds):
 

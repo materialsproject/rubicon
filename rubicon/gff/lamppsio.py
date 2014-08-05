@@ -33,25 +33,15 @@ class LmpInput():
         dihedral_type_list = []
         improper_type_list = []
         lines.append('LAMMPS data File\n')
-        for  mol, parm in zip(mols_in_box.mols,mols_in_box.param_list):
-            lines.append("{} {} {} {}".format('#',parm['number'],
+        for  mol, num_mols in zip(mols_in_box.mols,mols_in_box.num_mols):
+            lines.append("{} {} {} {}".format('#',num_mols,
                                               mol.site_properties["mol_name"][0],
                                               "molecules"))
 
+
         for ffmol in ffmol_list:
-            #print ffmol
             gff = ffmol.gff
-            #top = ffmol.top
             atom_type_list.extend(gff.masses.keys())
-            #print type(gff), type(top)
-            #print top.bonds
-
-            #print gff,top
-
-        #lines.append('\n')
-        #for gff, top in zip(ffmol.gff, ffmol.top):
-        #for gff, top in zip(ffmol_list.gff_list, ffmol_list.top_list):
-        #for ffmol in ffmol_list:
             atom_type_list.extend(gff.masses.keys())
             bond_type_list.extend(gff.bonds.keys())
             angle_type_list.extend(gff.angles.keys())
@@ -64,6 +54,7 @@ class LmpInput():
             for k, v in gff.dihedrals.iteritems():
                 num_dih += len(v)
         num_dihedrals_types += num_dih
+        lines.append('\n')
         lines.append("{} {}".format(num_atoms_types, "atom types"))
         lines.append("{} {}".format(num_bonds_types, "bond types"))
         lines.append("{} {}".format(num_angles_types, "angle types"))
@@ -84,23 +75,20 @@ class LmpInput():
         num_dihedrals = 0
         num_impropers = 0
         num_total_dih = 0
-        num_mol = 0
-        for ffmol in ffmol_list:
+        #num_mol = 0
+        for ffmol,num_mols in zip(ffmol_list, mols_in_box.num_mols):
             gff = ffmol.gff
             top = ffmol.top
-
-        #for gff, top, v, in zip(ffmol.gff_list, ffmol.top_list,
-#                                mols_in_box.param_list):
             top._get_ff_dihedrals(gff.dihedrals, top.dihedrals, gff.atom_gaff)
-            num_mol = v[0]
-            num_atoms += (len(top.atoms)) * num_mol
-            num_bonds += len((top.bonds) * num_mol)
-            num_angles += (len(top.angles) * num_mol)
-            num_impropers += (len(top.imdihedrals) * num_mol)
+            #num_mol = v['number']
+            num_atoms += (len(top.atoms)) * num_mols
+            num_bonds += len((top.bonds) * num_mols)
+            num_angles += (len(top.angles) * num_mols)
+            num_impropers += (len(top.imdihedrals) * num_mols)
 
             for k, n in top.topdihedralff.iteritems():
                 num_total_dih += len(n[1])
-        num_dihedrals += (num_total_dih * num_mol)
+        num_dihedrals += (num_total_dih * num_mols)
         lines.append("{} {}".format(num_atoms, "atoms"))
         lines.append("{} {}".format(num_bonds, "bonds"))
         lines.append("{} {}".format(num_angles, "angles"))
@@ -118,22 +106,22 @@ class LmpInput():
         """
         lines = []
         lines.append(
-            "{} {} {}".format(mols_in_box.param_list[0]['inside box'][0],
-                              mols_in_box.param_list[0]['inside box'][3],
+            "{} {} {}".format(mols_in_box.box_dims[0][0],
+                              mols_in_box.box_dims[0][3],
                               "xlo xhi"))
         lines.append(
-            "{} {} {}".format(mols_in_box.param_list[0]['inside box'][1],
-                              mols_in_box.param_list[0]['inside box'][4],
+            "{} {} {}".format(mols_in_box.box_dims[0][1],
+                              mols_in_box.box_dims[0][4],
                               "ylo yhi"))
         lines.append(
-            "{} {} {}{}".format(mols_in_box.param_list[0]['inside box'][2],
-                                 mols_in_box.param_list[0]['inside box'][5],
+            "{} {} {}{}".format(mols_in_box.box_dims[0][2],
+                                 mols_in_box.box_dims[0][5],
                                  "zlo zhi", '\n'))
 
         self.lines.extend(lines)
         return '\n'.join(lines)
 
-    def _set_masses(self, ffmol, mols_in_box):
+    def _set_masses(self, ffmol_list, mols_in_box):
 
         lines = []
         num_atoms = 0
@@ -141,9 +129,11 @@ class LmpInput():
         element_list = []
         #lines.append('{} {}'.format('Masses', '\n'))
         lines.append('Masses\n')
-        for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
-                                       mols_in_box.mols,
-                                       mols_in_box.param_list):
+        for ffmol, mol,num_mols in zip(ffmol_list, mols_in_box.mols,
+                                  mols_in_box.num_mols):
+            gff = ffmol.gff
+            #top = ffmol.top
+
             if gff.masses is not None:
                 for i, v in enumerate(gff.masses.values()):
                     if gff.masses.keys()[i] in element_list:
@@ -160,16 +150,19 @@ class LmpInput():
         return '\n'.join(lines)
 
 
-    def _set_pair_coeffs(self, ffmol, mols_in_box):
+    def _set_pair_coeffs(self, ffmol_list, mols_in_box):
 
         lines = []
         num_atoms = 0
         mol_index = 1
         element_list = []
         lines.append('Pair Coeffs\n')
-        for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
-                                       mols_in_box.mols,
-                                       mols_in_box.param_list):
+        for ffmol,mol in zip(ffmol_list, mols_in_box.mols):
+            gff = ffmol.gff
+            top = ffmol.top
+        # for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
+        #                                mols_in_box.mols,
+        #                                mols_in_box.param_list):
             if gff.vdws:
                 for i, v in enumerate(gff.vdws.values()):
                     if gff.vdws.keys()[i] in element_list:
@@ -187,16 +180,19 @@ class LmpInput():
         self.lines.extend(lines)
         return '\n'.join(lines)
 
-    def _set_bond_coeffs(self, ffmol, mols_in_box):
+    def _set_bond_coeffs(self, ffmol_list, mols_in_box):
 
         lines = []
         num_atoms = 0
         element_list = []
         mol_index = 1
         lines.append('Bond Coeffs\n')
-        for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
-                                       mols_in_box.mols,
-                                       mols_in_box.param_list):
+        for ffmol,mol in zip(ffmol_list, mols_in_box.mols):
+            gff = ffmol.gff
+        #     top = ffmol.top
+        # for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
+        #                                mols_in_box.mols,
+        #                                mols_in_box.param_list):
             if gff.bonds:
                 for i, v in enumerate(gff.bonds.values()):
                     lines.append(
@@ -212,16 +208,19 @@ class LmpInput():
         self.lines.extend(lines)
         return '\n'.join(lines)
 
-    def _set_angle_coeffs(self, ffmol, mols_in_box):
+    def _set_angle_coeffs(self, ffmol_list, mols_in_box):
 
         lines = []
         num_atoms = 0
         element_list = []
         mol_index = 1
         lines.append('Angle Coeffs\n')
-        for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
-                                       mols_in_box.mols,
-                                       mols_in_box.param_list):
+        for ffmol,mol in zip(ffmol_list, mols_in_box.mols):
+            gff = ffmol.gff
+            top = ffmol.top
+        # for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
+        #                                mols_in_box.mols,
+        #                                mols_in_box.param_list):
             if gff.angles:
                 for i, v in enumerate(gff.angles.values()):
                     lines.append(
@@ -240,7 +239,7 @@ class LmpInput():
         self.lines.extend(lines)
         return '\n'.join(lines)
 
-    def _set_dihedral_coeffs(self, ffmol, mols_in_box):
+    def _set_dihedral_coeffs(self, ffmol_list, mols_in_box):
 
         lines = []
         num_atoms = 0
@@ -248,9 +247,12 @@ class LmpInput():
         element_list = []
         mol_index = 1
         lines.append('Dihedral Coeffs\n')
-        for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
-                                       mols_in_box.mols,
-                                       mols_in_box.param_list):
+        for ffmol,mol in zip(ffmol_list, mols_in_box.mols):
+            gff = ffmol.gff
+            top = ffmol.top
+        # for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
+        #                                mols_in_box.mols,
+        #                                mols_in_box.param_list):
             if gff.dihedrals is not None:
                 for i, v in enumerate(gff.dihedrals.values()):
                     for func_form, d in v.iteritems():
@@ -275,15 +277,18 @@ class LmpInput():
         self.lines.extend(lines)
         return '\n'.join(lines)
 
-    def _set_improper_coeffs(self, ffmol, mols_in_box):
+    def _set_improper_coeffs(self, ffmol_list, mols_in_box):
         lines = []
         num_atoms = 0
         element_list = []
         mol_index = 1
         lines.append('Improper Coeffs\n')
-        for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
-                                       mols_in_box.mols,
-                                       mols_in_box.param_list):
+        for ffmol,mol in zip(ffmol_list, mols_in_box.mols):
+            gff = ffmol.gff
+            top = ffmol.top
+        # for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
+        #                                mols_in_box.mols,
+        #                                mols_in_box.param_list):
             if gff.imdihedrals:
                 for i, v in enumerate(gff.imdihedrals.values()):
                     lines.append('{} {}  {}  {} {} {} {} {} {} {} {}'.format
@@ -301,7 +306,7 @@ class LmpInput():
         return '\n'.join(lines)
 
 
-    def _set_atom(self, ffmol, mols_in_box):
+    def _set_atom(self, ffmol_list, mols_in_box):
         """
         set the Atoms section in lammps data file
         """
@@ -315,9 +320,13 @@ class LmpInput():
         self.box_mol_index = []
         i = 0
         mol_index = 0
-        for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
-                                       mols_in_box.mols,
-                                       mols_in_box.no):
+        for ffmol,mol,num_mols in zip(ffmol_list, mols_in_box.mols,
+                                  mols_in_box.num_mols):
+            gff = ffmol.gff
+            top = ffmol.top
+        # for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
+        #                                mols_in_box.mols,
+        #                                mols_in_box.no):
             if gff.masses is not None:
                 for m, v in enumerate(gff.masses.values()):
                     if gff.masses.keys()[m] in element_list:
@@ -326,12 +335,12 @@ class LmpInput():
                     masses_index = masses_index + 1
                     atom_type_index[gff.masses.keys()[m]] = masses_index
             num_atoms = len(mol)
-            num_this_mol = parm['number']
+            num_this_mol = num_mols
 
 
             #iterate every molecule of molecule type
-            for imol in range(num_this_mol):
-                mol_coords = mols_in_box.cart_coords[i:i + num_atoms]
+            for imol in range(num_mols):
+                mol_coords = mols_in_box.mols_coords.cart_coords[i:i + num_atoms]
                 #print mol
                 mol_index += 1
 
@@ -362,7 +371,7 @@ class LmpInput():
         return '\n'.join(lines)
 
 
-    def _set_bonds(self, ffmol, mols_in_box):
+    def _set_bonds(self, ffmol_list, mols_in_box):
         """
         set the Bonds section in lammps data file
         """
@@ -372,15 +381,19 @@ class LmpInput():
         i = 0
         mol_index = 0
         lines.append('Bonds\n')
-        for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
-                                       mols_in_box.mols,
-                                       mols_in_box.param_list):
+        for ffmol,mol,num_mols in zip(ffmol_list, mols_in_box.mols,
+                                  mols_in_box.num_mols):
+            gff = ffmol.gff
+            top = ffmol.top
+        # for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
+        #                                mols_in_box.mols,
+        #                                mols_in_box.param_list):
             if gff.bonds:
                 for m, v in enumerate(gff.bonds.values()):
                     bond_index = bond_index + 1
                     bond_type_index[gff.bonds.keys()[m]] = bond_index
-            num_this_mol = parm['number']
-            for imol in range(num_this_mol):
+            #num_this_mol = parm['number']
+            for imol in range(num_mols):
                 mol_bonds = top.bonds
                 mol_index += 1
                 for k, v in enumerate(mol_bonds):
@@ -409,7 +422,7 @@ class LmpInput():
         return '\n'.join(lines)
 
 
-    def _set_angles(self, ffmol, mols_in_box):
+    def _set_angles(self, ffmol_list, mols_in_box):
         """
         set the Angles section in lammps data file
         """
@@ -419,17 +432,21 @@ class LmpInput():
         i = 0
         mol_index = 0
         lines.append('Angles\n')
-        for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
-                                       mols_in_box.mols,
-                                       mols_in_box.param_list):
+        for ffmol,mol,num_mols in zip(ffmol_list, mols_in_box.mols,
+                                  mols_in_box.num_mols):
+            gff = ffmol.gff
+            top = ffmol.top
+        # for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
+        #                                mols_in_box.mols,
+        #                                mols_in_box.param_list):
             if gff.angles:
                 for m, v in enumerate(gff.angles.values()):
                     angle_index = angle_index + 1
                     angle_type_index[gff.angles.keys()[m]] = angle_index
                 #num_atoms = len(mol)
-            num_this_mol = parm['number']
+            #num_this_mol = parm['number']
             #iterate over first molecule
-            for imol in range(num_this_mol):
+            for imol in range(num_mols):
                 mol_angles = top.angles
                 mol_index += 1
                 #iterate over bonds in first molecule
@@ -455,7 +472,7 @@ class LmpInput():
         self.lines.extend(lines)
         return '\n'.join(lines)
 
-    def _set_dihedrals(self, ffmol, mols_in_box):
+    def _set_dihedrals(self, ffmol_list, mols_in_box):
         """
         set the Dihedrals section in lammps data file
         """
@@ -467,9 +484,13 @@ class LmpInput():
         l = 0
         mol_index = 0
         lines.append('Dihedrals\n')
-        for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
-                                       mols_in_box.mols,
-                                       mols_in_box.param_list):
+        for ffmol,mol,num_mols in zip(ffmol_list, mols_in_box.mols,
+                                  mols_in_box.num_mols):
+            gff = ffmol.gff
+            top = ffmol.top
+        # for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
+        #                                mols_in_box.mols,
+        #                                mols_in_box.param_list):
             if gff.dihedrals is not None:
                 for m, v in enumerate(gff.dihedrals.values()):
                     dihedral_index = dihedral_index + 1
@@ -478,9 +499,9 @@ class LmpInput():
 
                 top._get_ff_dihedrals(gff.dihedrals, top.dihedrals,
                                       gff.atom_gaff)
-                num_this_mol = parm['number']
+                #num_this_mol = parm['number']
                 #iterate over first molecule
-                for imol in range(num_this_mol):
+                for imol in range(num_mols):
                     mol_dihedrals = top.topdihedralff
                     mol_index += 1
                     l += 1
@@ -520,7 +541,7 @@ class LmpInput():
         return '\n'.join(lines)
 
 
-    def _set_imdihedrals(self, ffmol, mols_in_box):
+    def _set_imdihedrals(self, ffmol_list, mols_in_box):
         """
         set the Improper Dihedral section in lammps data file
         """
@@ -531,9 +552,13 @@ class LmpInput():
         j = 0
         mol_index = 0
         lines.append('Impropers\n')
-        for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
-                                       mols_in_box.mols,
-                                       mols_in_box.param_list):
+        for ffmol,mol,num_mols in zip(ffmol_list, mols_in_box.mols,
+                                  mols_in_box.num_mols):
+            gff = ffmol.gff
+            top = ffmol.top
+        # for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
+        #                                mols_in_box.mols,
+        #                                mols_in_box.param_list):
             if gff.imdihedrals is not None:
                 for m, v in enumerate(gff.imdihedrals.values()):
                     imdihedrals_index = imdihedrals_index + 1
@@ -541,9 +566,9 @@ class LmpInput():
                         gff.imdihedrals.keys()[m]] = imdihedrals_index
 
                 #iterate over types of mol
-                num_this_mol = parm['number']
+               # num_this_mol = parm['number']
                 #iterate over first molecule
-                for imol in range(num_this_mol):
+                for imol in range(num_mols):
                     mol_impropers = top.imdihedrals
                     mol_index += 1
                     #iterate over improper dihedrals in first molecule
@@ -578,26 +603,26 @@ class LmpInput():
         """
         my_lammps_list = []
         my_lammps_list.append(self._set_gff_types(self.ffmol_list, self.mols_in_box))
-        my_lammps_list.append(self._set_top_types(self.ffmol, self.mols_in_box))
+        my_lammps_list.append(self._set_top_types(self.ffmol_list, self.mols_in_box))
         my_lammps_list.append(self._set_box_dimensions(self.mols_in_box))
-        my_lammps_list.append(self._set_masses(self.ffmol, self.mols_in_box))
+        my_lammps_list.append(self._set_masses(self.ffmol_list, self.mols_in_box))
         my_lammps_list.append(
-            self._set_pair_coeffs(self.ffmol, self.mols_in_box))
+            self._set_pair_coeffs(self.ffmol_list, self.mols_in_box))
         my_lammps_list.append(
-            self._set_bond_coeffs(self.ffmol, self.mols_in_box))
+            self._set_bond_coeffs(self.ffmol_list, self.mols_in_box))
         my_lammps_list.append(
-            self._set_angle_coeffs(self.ffmol, self.mols_in_box))
+            self._set_angle_coeffs(self.ffmol_list, self.mols_in_box))
         my_lammps_list.append(
-            self._set_dihedral_coeffs(self.ffmol, self.mols_in_box))
+            self._set_dihedral_coeffs(self.ffmol_list, self.mols_in_box))
         my_lammps_list.append(
-            self._set_improper_coeffs(self.ffmol, self.mols_in_box))
-        my_lammps_list.append(self._set_atom(self.ffmol, self.mols_in_box ))
-        my_lammps_list.append(self._set_bonds(self.ffmol, self.mols_in_box ))
-        my_lammps_list.append(self._set_angles(self.ffmol, self.mols_in_box ))
+            self._set_improper_coeffs(self.ffmol_list, self.mols_in_box))
+        my_lammps_list.append(self._set_atom(self.ffmol_list, self.mols_in_box ))
+        my_lammps_list.append(self._set_bonds(self.ffmol_list, self.mols_in_box ))
+        my_lammps_list.append(self._set_angles(self.ffmol_list, self.mols_in_box ))
         my_lammps_list.append(
-            self._set_dihedrals(self.ffmol, self.mols_in_box ))
+            self._set_dihedrals(self.ffmol_list, self.mols_in_box ))
         my_lammps_list.append(
-            self._set_imdihedrals(self.ffmol, self.mols_in_box ))
+            self._set_imdihedrals(self.ffmol_list, self.mols_in_box ))
 
         return '\n'.join(my_lammps_list)
 

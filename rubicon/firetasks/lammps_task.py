@@ -1,5 +1,4 @@
 import shlex
-
 import subprocess
 from pymatgen import Molecule
 from rubicon.gff.lammpsin import DictLammpsInputSet
