@@ -135,11 +135,8 @@ class ContactDetector(object):
         um = np.identity(n)
         distMatrix[distMatrix == 0] = 999 # set zero entries to inf
         distMatrix[um == 1] = 0 # except diagonal which should be zero
-        for k in range(n):
-            for i in range(n):
-                for j in range(n):
-                    if distMatrix[i, k] + distMatrix[k, j] < distMatrix[i, j]:
-                        distMatrix[i, j] = distMatrix[i, k] + distMatrix[k, j]
+        for i in range(n):
+            distMatrix = np.minimum(distMatrix, distMatrix[np.newaxis, i, :] + distMatrix[:, i, np.newaxis])
         return distMatrix
 
     def _get_contact_matrix(self, cation_coords, anion_coords):
