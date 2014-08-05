@@ -12,7 +12,7 @@ from rubicon.io.mopacio.custodian.mopacjob import MopacJob
 from rubicon.io.mopacio.mopacio import MopOutput, MopTask
 from rubicon.utils.ion_arranger.energy_evaluator import EnergyEvaluator
 from rubicon.utils.ion_arranger.hard_sphere_energy_evaluators import HardSphereEnergyEvaluator, AtomicRadiusUtils, \
-    GravitationalEnergyEvaluator
+    GravitationalEnergyEvaluator, ContactDetector
 
 
 __author__ = 'xiaohuiqu'
@@ -30,9 +30,9 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
         self.lower_sphere = self._constructure_hardsphere_energy_evaluator(
             lower_covalent_radius_scale, lower_metal_radius_scale,
             mol_coords, ob_mol, ob_cation, ob_anion)
-        self.upper_sphere = self._constructure_hardsphere_energy_evaluator(
+        self.contact_detector = self._constructure_contact_detector(
             upper_covalent_radius_scale, upper_metal_radius_scale,
-            mol_coords, ob_mol, ob_cation, ob_anion, isForContact=True)
+            mol_coords, ob_mol, ob_cation, ob_anion)
         self.gravitation = self._constructure_gravitational_energy_evaluator(
             upper_covalent_radius_scale, upper_metal_radius_scale,
             mol_coords, ob_mol, ob_cation, ob_anion)
@@ -46,8 +46,7 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
         energy = self.lower_sphere.calc_energy(cation_coords, anion_coords)
         if energy > HardSphereEnergyEvaluator.overlap_energy * 0.9:
             return energy
-        energy = self.upper_sphere.calc_energy(cation_coords, anion_coords)
-        if energy < 1.0:
+        if not self.contact_detector.is_contact(cation_coords, anion_coords):
             return self.gravitation.calc_energy(cation_coords, anion_coords)
         mol = self._get_super_molecule(cation_coords, anion_coords)
         energy = self.run_mopac(mol)
@@ -101,14 +100,24 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
 
     @staticmethod
     def _constructure_hardsphere_energy_evaluator(covalent_radius_scale, metal_radius_scale,
-                                                  mol_coords, ob_mol, ob_cation, ob_anion, isForContact=False):
+                                                  mol_coords, ob_mol, ob_cation, ob_anion):
         rad_util = AtomicRadiusUtils(covalent_radius_scale, metal_radius_scale)
         mol_radius = rad_util.get_radius(ob_mol)
         cation_radius = rad_util.get_radius(ob_cation)
         anion_radius = rad_util.get_radius(ob_anion)
         sphere = HardSphereEnergyEvaluator(
-            mol_coords, mol_radius, cation_radius, anion_radius, isForContact)
+            mol_coords, mol_radius, cation_radius, anion_radius)
         return sphere
+
+    @staticmethod
+    def _constructure_contact_detector(covalent_radius_scale, metal_radius_scale,
+                                       mol_coords, ob_mol, ob_cation, ob_anion):
+        rad_util = AtomicRadiusUtils(covalent_radius_scale, metal_radius_scale)
+        mol_radius = rad_util.get_radius(ob_mol)
+        cation_radius = rad_util.get_radius(ob_cation)
+        anion_radius = rad_util.get_radius(ob_anion)
+        detector = ContactDetector(mol_coords, mol_radius, cation_radius, anion_radius)
+        return detector
 
     @staticmethod
     def _constructure_gravitational_energy_evaluator(covalent_radius_scale, metal_radius_scale,
