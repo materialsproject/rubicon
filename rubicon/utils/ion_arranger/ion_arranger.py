@@ -228,7 +228,7 @@ def main():
                         required=True,
                         help="the file name of the aligned conformer")
     parser.add_argument("-n", "--num_iter", dest="num_iter", type=int,
-                        default=3000,
+                        default=600,
                         help="maximum number of evaluations")
     parser.add_argument("-s", "--size", dest="size", type=int, default=15,
                         help="population size")
