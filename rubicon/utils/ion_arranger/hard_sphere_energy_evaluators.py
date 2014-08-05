@@ -1,3 +1,4 @@
+import copy
 import math
 import itertools
 from pymatgen.analysis.molecule_structure_comparator import CovalentRadius
@@ -127,6 +128,19 @@ class ContactDetector(object):
     def is_contact(self, cation_coords, anion_coords):
         pass
 
+    def _get_distance_matrix(self, contact_matrix):
+        # Find all-pairs shortest path lengths using Floyd's algorithm
+        distMatrix = copy.deepcopy(contact_matrix)
+        n, m = distMatrix.shape
+        um = np.identity(n)
+        distMatrix[distMatrix == 0] = 999 # set zero entries to inf
+        distMatrix[um == 1] = 0 # except diagonal which should be zero
+        for k in range(n):
+            for i in range(n):
+                for j in range(n):
+                    if distMatrix[i, k] + distMatrix[k, j] < distMatrix[i, j]:
+                        distMatrix[i, j] = distMatrix[i, k] + distMatrix[k, j]
+        return distMatrix
 
     def _get_contact_matrix(self, cation_coords, anion_coords):
         fragments = [(self.mol_coords, self.mol_radius)]

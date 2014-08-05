@@ -53,3 +53,27 @@ class TestContactDetector(TestCase):
         contact_matrix = self.detector._get_contact_matrix(cation_coords, anion_coords)
         ans = np.array([[0, 1, 1], [1, 0, 1], [1, 1, 0]], int)
         self.assertEqual(str(contact_matrix), str(ans))
+
+    def test_get_distance_matrix(self):
+        start = np.zeros((5, 5), int)
+        start[0, 1] = 1
+        start[1, 2] = 1
+        start[1, 4] = 1
+        start[3, 4] = 1
+        start[1, 0] = 1
+        start[2, 1] = 1
+        start[4, 1] = 1
+        start[4, 3] = 1
+        floydAPSP = self.detector._get_distance_matrix(start)
+        self.assertEqual((5, 5), floydAPSP.shape)
+        self.assertEquals(1, floydAPSP[0, 1])
+        self.assertEquals(2, floydAPSP[0, 2])
+        self.assertEquals(3, floydAPSP[0, 3])
+        self.assertEquals(2, floydAPSP[0, 4])
+        self.assertEquals(1, floydAPSP[1, 2])
+        self.assertEquals(2, floydAPSP[1, 3])
+        self.assertEquals(1, floydAPSP[1, 4])
+        self.assertEquals(3, floydAPSP[2, 3])
+        self.assertEquals(2, floydAPSP[2, 4])
+        self.assertEquals(1, floydAPSP[3, 4])
+
