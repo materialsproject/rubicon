@@ -95,6 +95,13 @@ class QChemFireWorkCreator():
                           "dft_d3_rs6": 1094,
                           "dft_d3_s8": 1682,
                           "dft_d3_3body": True}
+        elif theoretical_level.lower() == "b3lyp-d3":
+            exchange = 'b3lyp'
+            rem_params = {"dft_d": "empirical_grimme3",
+                          "dft_d3_s6": 1000,
+                          "dft_d3_rs6": 1261,
+                          "dft_d3_s8": 1703,
+                          "dft_d3_3body": True}
         else:
             exchange = theoretical_level.lower()
         method_token = [t for t in [basis_set, exchange, aux_basis, correlation, rem_params]
@@ -130,6 +137,7 @@ class QChemFireWorkCreator():
         spec['charge'] = charge
         spec['spin_multiplicity'] = spin_multiplicity
         spec['run_tags']['methods'] = method_token
+        spec["qm_method"] = method
         if priority:
             spec['_priority'] = priority
         task_name = self.molname + ' ' + state_name + ' ' + task_type
@@ -174,6 +182,7 @@ class QChemFireWorkCreator():
         spec['charge'] = charge
         spec['spin_multiplicity'] = spin_multiplicity
         spec['run_tags']['methods'] = method_token
+        spec["qm_method"] = method
         if priority:
             spec['_priority'] = priority
         task_name = self.molname + ' ' + state_name + ' ' + task_type
@@ -355,6 +364,7 @@ class QChemFireWorkCreator():
         spec['charge'] = charge
         spec['spin_multiplicity'] = spin_multiplicity
         spec['run_tags']['methods'] = method_token
+        spec["qm_method"] = qm_method
         spec['implicit_solvent'] = implicit_solvent
         task_name = self.molname + ' ' + state_name + ' ' + task_type
         from rubicon.firetasks.multistep_qchem_task \
@@ -407,6 +417,7 @@ class QChemFireWorkCreator():
         spec['charge'] = charge
         spec['spin_multiplicity'] = spin_multiplicity
         spec['run_tags']['methods'] = method_token
+        spec["qm_method"] = qm_method
         task_name = self.molname + ' ' + state_name + ' ' + task_type
         from rubicon.firetasks.multistep_qchem_task \
             import QChemSinglePointEnergyDBInsertionTask

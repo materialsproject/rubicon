@@ -143,7 +143,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
     @staticmethod
     def spawn_opt_freq_wf(mol, molname, mission, additional_user_tags,
                           priority, update_spec, charge,
-                          spin_multiplicity, grid):
+                          spin_multiplicity, grid, qm_method):
         fw_creator = QChemFireWorkCreator(
             mol=mol, molname=molname, mission=mission,
             additional_user_tags=additional_user_tags, priority=priority,
@@ -151,11 +151,11 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
         geom_fwid_cal, geom_fwid_db = -1, -2
         freq_fwid_cal, freq_fwid_db = -3, -4
         geom_fw_cal, geom_fw_db = fw_creator.geom_fw(
-            charge, spin_multiplicity, geom_fwid_cal, geom_fwid_db)
+            charge, spin_multiplicity, geom_fwid_cal, geom_fwid_db, method=qm_method)
         geom_fw_cal.spec["run_tags"]["task_type_amend"] = "imaginary " \
             "frequency elimination"
         freq_fw_cal, freq_fw_db = fw_creator.freq_fw(
-            charge, spin_multiplicity, freq_fwid_cal, freq_fwid_db)
+            charge, spin_multiplicity, freq_fwid_cal, freq_fwid_db, qm_method)
         freq_fw_cal.spec["run_tags"]["task_type_amend"] = "imaginary " \
             "frequency elimination"
         if grid:
@@ -288,18 +288,19 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                         'snlgroup_id': fw_spec['snlgroup_id'],
                         'inchi_root': fw_spec['inchi_root']}
 
-        method = img_freq_eli["methods"][img_freq_eli["current_method_id"]]
+        eli_strategy = img_freq_eli["methods"][img_freq_eli["current_method_id"]]
         charge = new_mol.charge
         spin_multiplicity = new_mol.spin_multiplicity
-        if method == "dir_dis_opt":
+        qm_method = fw_spec["qm_method"]
+        if eli_strategy == "dir_dis_opt":
             logging.info("Eliminate Imaginary Frequency By Perturbing the "
                          "Structure of Molecule")
             wf = self.spawn_opt_freq_wf(new_mol, molname, mission,
                                         additional_user_tags, priority,
                                         update_specs, charge,
                                         spin_multiplicity,
-                                        grid=None)
-        elif method == "den_dis_opt":
+                                        grid=None, qm_method=qm_method)
+        elif eli_strategy == "den_dis_opt":
             logging.info("Eliminate Imaginary Frequency By Perturbing the "
                          "Structure of Molecule, and increase the grid "
                          "density")
@@ -307,8 +308,8 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                                         additional_user_tags, priority,
                                         update_specs, charge,
                                         spin_multiplicity,
-                                        grid=(128, 302))
-        elif method == "alt_den_dis_opt":
+                                        grid=(128, 302), qm_method=qm_method)
+        elif eli_strategy == "alt_den_dis_opt":
             logging.info("Eliminate Imaginary Frequency By Perturbing the "
                          "Structure of Molecule, and increase the grid "
                          "density")
@@ -316,7 +317,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                                         additional_user_tags, priority,
                                         update_specs, charge,
                                         spin_multiplicity,
-                                        grid=(90, 590))
+                                        grid=(90, 590), qm_method=qm_method)
         else:
             raise Exception("Unknown imaginary frequency fixing method")
 
