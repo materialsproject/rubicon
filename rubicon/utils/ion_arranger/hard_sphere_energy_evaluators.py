@@ -84,16 +84,13 @@ class CoulumbEnergyEvaluator(EnergyEvaluator):
 class HardSphereEnergyEvaluator(EnergyEvaluator):
     overlap_energy = 1.0E4
 
-    def __init__(self, mol_coords, mol_radius, cation_radius, anion_radius, isForContact=False):
+    def __init__(self, mol_coords, mol_radius, cation_radius, anion_radius):
         super(HardSphereEnergyEvaluator, self).__init__(mol_coords)
         self.mol_radius = mol_radius
         self.cation_radius = cation_radius
         self.anion_radius = anion_radius
-        self.isForContant = isForContact
-
 
     def calc_energy(self, cation_coords, anion_coords):
-        energy = 0.0
         energies = []
         for frag_coords in cation_coords:
             energies.append(self._pair_energy(self.mol_coords, self.mol_radius,
@@ -105,10 +102,7 @@ class HardSphereEnergyEvaluator(EnergyEvaluator):
             for ac in anion_coords:
                 energies.append(self._pair_energy(cc, self.cation_radius,
                     ac, self.anion_radius))
-        if not self.isForContant:
-            energy = sum(energies)
-        else:
-            energy = min(energies)
+        energy = min(energies)
         return energy
 
     @classmethod
