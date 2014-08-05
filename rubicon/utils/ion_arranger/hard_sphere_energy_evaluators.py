@@ -1,9 +1,10 @@
 import math
+import itertools
 from pymatgen.analysis.molecule_structure_comparator import CovalentRadius
 from pymatgen.io.babelio import BabelMolAdaptor
 from rubicon.utils.ion_arranger.energy_evaluator import EnergyEvaluator
 import openbabel as ob
-
+import numpy as np
 
 __author__ = 'xiaohuiqu'
 
@@ -115,6 +116,39 @@ class HardSphereEnergyEvaluator(EnergyEvaluator):
                 if distance <= rad1 + rad2:
                     energy += cls.overlap_energy
         return energy
+
+class ContactDetector(object):
+    def __init__(self, mol_coords, mol_radius, cation_radius, anion_radius, cap=0.0):
+        self.mol_coords = mol_coords
+        self.mol_radius = mol_radius
+        self.cation_radius = cation_radius
+        self.anion_radius = anion_radius
+
+    def is_contact(self, cation_coords, anion_coords):
+        pass
+
+
+    def _get_contact_matrix(self, cation_coords, anion_coords):
+        fragments = [(self.mol_coords, self.mol_radius)]
+        fragments.extend(zip(cation_coords, [self.cation_radius] * len(cation_coords)))
+        fragments.extend(zip(anion_coords, [self.anion_radius] * len(anion_coords)))
+        num_frag = len(fragments)
+        fragments = [(c, r, i) for i, (c, r) in enumerate(fragments)]
+        contact_matrix = np.identity(num_frag, dtype=int)
+        frag_pair = itertools.combinations(fragments, r=2)
+        for p in frag_pair:
+            ((c1s, r1s, i1), (c2s, r2s, i2)) = p
+            contact = 0
+            for c1, r1, c2, r2 in zip(c1s, r1s, c2s, r2s):
+                distance = math.sqrt(sum([(x1-x2)**2 for x1, x2
+                                          in zip(c1, c2)]))
+                if distance <= r1 + r2:
+                    contact = 1
+                    break
+            contact_matrix[i1, i2] = contact
+            contact_matrix[i2, i1] = contact
+        return contact_matrix
+
 
 
 class GravitationalEnergyEvaluator(EnergyEvaluator):
