@@ -104,7 +104,7 @@ class HardSphereEnergyEvaluator(EnergyEvaluator):
             for ac in anion_coords:
                 energies.append(self._pair_energy(cc, self.cation_radius,
                     ac, self.anion_radius))
-        energy = min(energies)
+        energy = sum(energies)
         return energy
 
     @classmethod
