@@ -12,7 +12,7 @@ from rubicon.io.mopacio.custodian.mopacjob import MopacJob
 from rubicon.io.mopacio.mopacio import MopOutput, MopTask
 from rubicon.utils.ion_arranger.energy_evaluator import EnergyEvaluator
 from rubicon.utils.ion_arranger.hard_sphere_energy_evaluators import HardSphereEnergyEvaluator, AtomicRadiusUtils, \
-    GravitationalEnergyEvaluator, ContactDetector
+    ContactDetector, LargestContactGapEnergyEvaluator
 
 
 __author__ = 'xiaohuiqu'
@@ -20,22 +20,22 @@ __author__ = 'xiaohuiqu'
 
 class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
 
-    def __init__(self, ob_mol, ob_cation, ob_anion, total_charge=0,
+    def __init__(self, ob_mol, ob_cation, ob_anion, total_charge, num_cation, num_anion,
                  lower_covalent_radius_scale=2.0, lower_metal_radius_scale=0.8,
                  upper_covalent_radius_scale=3.0, upper_metal_radius_scale=1.5,):
         from rubicon.utils.ion_arranger.ion_arranger import IonPlacer
         mol_coords = IonPlacer.normalize_molecule(ob_mol)
         super(SemiEmpricalQuatumMechanicalEnergyEvaluator, self).__init__(mol_coords)
         self.total_charge = total_charge
-        self.lower_sphere = self._constructure_hardsphere_energy_evaluator(
+        self.lower_sphere = self._construct_hardsphere_energy_evaluator(
             lower_covalent_radius_scale, lower_metal_radius_scale,
             mol_coords, ob_mol, ob_cation, ob_anion)
-        self.contact_detector = self._constructure_contact_detector(
+        self.contact_detector = self._construct_contact_detector(
             upper_covalent_radius_scale, upper_metal_radius_scale,
             mol_coords, ob_mol, ob_cation, ob_anion)
-        self.gravitation = self._constructure_gravitational_energy_evaluator(
+        self.gravitation = self._construct_largest_cap_energy_evaluator(
             upper_covalent_radius_scale, upper_metal_radius_scale,
-            mol_coords, ob_mol, ob_cation, ob_anion)
+            num_cation, num_anion, mol_coords, ob_mol, ob_cation, ob_anion)
         self.mol_species = IonPlacer.get_mol_species(ob_mol)
         self.cation_species = IonPlacer.get_mol_species(ob_cation)
         self.anion_species = IonPlacer.get_mol_species(ob_anion)
@@ -99,8 +99,8 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
         return Molecule(super_mol_species, super_mol_coords_ang)
 
     @staticmethod
-    def _constructure_hardsphere_energy_evaluator(covalent_radius_scale, metal_radius_scale,
-                                                  mol_coords, ob_mol, ob_cation, ob_anion):
+    def _construct_hardsphere_energy_evaluator(covalent_radius_scale, metal_radius_scale,
+                                               mol_coords, ob_mol, ob_cation, ob_anion):
         rad_util = AtomicRadiusUtils(covalent_radius_scale, metal_radius_scale)
         mol_radius = rad_util.get_radius(ob_mol)
         cation_radius = rad_util.get_radius(ob_cation)
@@ -110,8 +110,8 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
         return sphere
 
     @staticmethod
-    def _constructure_contact_detector(covalent_radius_scale, metal_radius_scale,
-                                       mol_coords, ob_mol, ob_cation, ob_anion):
+    def _construct_contact_detector(covalent_radius_scale, metal_radius_scale,
+                                    mol_coords, ob_mol, ob_cation, ob_anion):
         rad_util = AtomicRadiusUtils(covalent_radius_scale, metal_radius_scale)
         mol_radius = rad_util.get_radius(ob_mol)
         cation_radius = rad_util.get_radius(ob_cation)
@@ -120,11 +120,16 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
         return detector
 
     @staticmethod
-    def _constructure_gravitational_energy_evaluator(covalent_radius_scale, metal_radius_scale,
-                                                     mol_coords, ob_mol, ob_cation, ob_anion):
+    def _construct_largest_cap_energy_evaluator(covalent_radius_scale, metal_radius_scale,
+                                                num_cation, num_anion,
+                                                mol_coords, ob_mol, ob_cation, ob_anion):
         rad_util = AtomicRadiusUtils(covalent_radius_scale, metal_radius_scale)
         mol_radius = rad_util.get_radius(ob_mol)
         cation_radius = rad_util.get_radius(ob_cation)
         anion_radius = rad_util.get_radius(ob_anion)
-        sphere = GravitationalEnergyEvaluator(mol_coords, mol_radius, cation_radius, anion_radius)
-        return sphere
+        from rubicon.utils.ion_arranger.ion_arranger import IonPlacer
+        bounder = IonPlacer.get_bounder(mol_coords, ob_cation, ob_anion, num_cation, num_anion)
+        max_cap = max(bounder.upper_bound) / AtomicRadiusUtils.angstrom2au
+        evaluator = LargestContactGapEnergyEvaluator(
+            mol_coords, mol_radius, cation_radius, anion_radius, max_cap, threshold=0.01)
+        return evaluator

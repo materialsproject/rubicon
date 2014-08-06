@@ -257,7 +257,7 @@ def main():
     hardsphere_evaluator = lambda: HardSphereElectrostaticEnergyEvaluator.from_qchem_output(
         qcout_molecule, qcout_cation, qcout_anion)
     sqm_evaluator = lambda: SemiEmpricalQuatumMechanicalEnergyEvaluator(
-        obmol_molecule, obmol_cation, obmol_anion, total_charge=0)
+        obmol_molecule, obmol_cation, obmol_anion, total_charge=0, num_cation=num_cation, num_anion=num_anion)
     evaluator_creators = {"hardsphere": hardsphere_evaluator, "sqm": sqm_evaluator}
     creator = evaluator_creators[options.evaluator]
     energy_evaluator = creator()
