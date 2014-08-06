@@ -129,7 +129,7 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
         anion_radius = rad_util.get_radius(ob_anion)
         from rubicon.utils.ion_arranger.ion_arranger import IonPlacer
         bounder = IonPlacer.get_bounder(mol_coords, ob_cation, ob_anion, num_cation, num_anion)
-        max_cap = max(bounder.upper_bound) / AtomicRadiusUtils.angstrom2au
+        max_cap = max(bounder.upper_bound) * 2.0 / AtomicRadiusUtils.angstrom2au
         evaluator = LargestContactGapEnergyEvaluator(
             mol_coords, mol_radius, cation_radius, anion_radius, max_cap, threshold=0.01)
         return evaluator
