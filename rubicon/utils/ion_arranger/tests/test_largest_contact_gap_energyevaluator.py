@@ -34,8 +34,20 @@ class TestLargestContactGapEnergyEvaluator(TestCase):
         anion_radius = rad_util.get_radius(tfsi_obmol)
         mol_coords = IonPlacer.normalize_molecule(acetoxyq_obmol)
         bounder = IonPlacer.get_bounder(mol_coords, sodium_obmol, tfsi_obmol, 1, 1)
-        max_cap = max(bounder.upper_bound)
-        self.evaluator = LargestContactGapEnergyEvaluator(mol_coords, mol_radius, cation_radius, anion_radius, )
+        max_cap = max(bounder.upper_bound) / AtomicRadiusUtils.angstrom2au
+        self.evaluator = LargestContactGapEnergyEvaluator(
+            mol_coords, mol_radius, cation_radius, anion_radius, max_cap, threshold=0.2)
 
     def test_calc_energy(self):
-        self.fail()
+        c = [-0.0, 0.0, 0.0, 20.0, 0.0, 0.0, 1.0, 2.0]
+        cation_coords, anion_coords = self.acetoxyq_natfsi_placer.decode_solution(c)
+        cap = self.evaluator.calc_energy(cation_coords, anion_coords)
+        self.assertAlmostEqual(cap, 1.92, 1)
+        c = [-20.0, 0.0, 0.0, 20.0, 0.0, 0.0, 1.0, 2.0]
+        cation_coords, anion_coords = self.acetoxyq_natfsi_placer.decode_solution(c)
+        cap = self.evaluator.calc_energy(cation_coords, anion_coords)
+        self.assertAlmostEqual(cap, 4.64, 1)
+        c = [-10.0, 0.0, 0.0, 30.0, 0.0, 0.0, 1.0, 2.0]
+        cation_coords, anion_coords = self.acetoxyq_natfsi_placer.decode_solution(c)
+        cap = self.evaluator.calc_energy(cation_coords, anion_coords)
+        self.assertAlmostEqual(cap, 11.79, 1)

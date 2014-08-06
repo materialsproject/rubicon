@@ -124,7 +124,7 @@ class ContactDetector(object):
         self.mol_radius = mol_radius
         self.cation_radius = cation_radius
         self.anion_radius = anion_radius
-        self.cap = cap
+        self.cap = cap * AtomicRadiusUtils.angstrom2au
 
     def is_contact(self, cation_coords, anion_coords):
         contact_matrix = self._get_contact_matrix(cation_coords, anion_coords)
@@ -167,9 +167,9 @@ class ContactDetector(object):
 
 class LargestContactGapEnergyEvaluator(EnergyEvaluator):
 
-    def __init__(self, mol_coords, mol_radius, cation_radius, anion_radius, max_cap, threshold=1.0E-1):
+    def __init__(self, mol_coords, mol_radius, cation_radius, anion_radius, max_cap, threshold=1.0E-2):
         super(LargestContactGapEnergyEvaluator, self).__init__(mol_coords)
-        self.max_cap = max_cap
+        self.max_cap = max_cap * AtomicRadiusUtils.angstrom2au
         self.threshold = threshold
         self.contact_detector = ContactDetector(mol_coords, mol_radius, cation_radius, anion_radius, cap=0.0)
 
@@ -189,7 +189,7 @@ class LargestContactGapEnergyEvaluator(EnergyEvaluator):
                 high = mid
             else:
                 low = mid
-        return (high + low)/2.0
+        return ((high + low)/2.0)
 
 
 class GravitationalEnergyEvaluator(EnergyEvaluator):
