@@ -9,7 +9,7 @@ from pymatgen.serializers.json_coders import MSONable
 
 class Gff(MSONable):
     """
-    A force field library. Right now reads the output file from
+    A force field library. Reads the output file from
     AntechamberRunner and populate the FF library
 
     Args:
@@ -52,6 +52,10 @@ class Gff(MSONable):
 
     @classmethod
     def from_forcefield_para(cls, filename=None):
+        """
+        reads ANTECHAMBER.FRCMOD and stores the force field parameters for
+        bonds, angles, dihedrals, improper dihedrals, van der waals and Masses
+        """
 
         bonds = dict()
         angles = dict()
@@ -92,9 +96,9 @@ class Gff(MSONable):
                         continue
                     bond_type = (line[0:2].strip(), line[3:5].strip())
                     bond_type = tuple(sorted(bond_type))
-                    bond_k_distance = float(line[7:13])
+                    bond_constant = float(line[7:13])
                     bond_distance = float(line[16:21])
-                    bonds[bond_type] = (bond_k_distance, bond_distance)
+                    bonds[bond_type] = (bond_constant, bond_distance)
 
                 if line.startswith('ANGLE'):
                     angle_section = True
@@ -109,9 +113,9 @@ class Gff(MSONable):
                     if line[0:2].strip()> line[6:8].strip():
                         angle_type=tuple(reversed(angle_type))
 
-                    angle_k_distance = float(line[11:17])
+                    angle_constant = float(line[11:17])
                     angle_distance = float(line[22:29])
-                    angles[angle_type] = (angle_k_distance, angle_distance)
+                    angles[angle_type] = (angle_constant, angle_distance)
 
 
                 if line.startswith('DIHE'):
@@ -126,10 +130,10 @@ class Gff(MSONable):
                     if dihedral_type[0] > dihedral_type[3]:
                         dihedral_type = tuple(reversed(list(dihedral_type)))
                     dihedral_func_type = (line[49:50])
-                    dihedral_k_distance = float(line[19:24])
+                    dihedral_constant = float(line[19:24])
                     dihedral_angle = float(line[31:38])
                     dihedrals[(dihedral_type)][dihedral_func_type] = (
-                    dihedral_k_distance, dihedral_angle)
+                    dihedral_constant, dihedral_angle)
 
 
                 if line.startswith('IMPROPER'):
@@ -165,6 +169,11 @@ class Gff(MSONable):
 
     def read_atom_index(self,mol,filename=None):
 
+        """
+        read ANTECHAMBER_AC.AC to store the antechamber atom name
+        and GAFF atom name in a dict
+        """
+
         with open(filename) as f:
 
             for line in f.readlines():
@@ -172,18 +181,20 @@ class Gff(MSONable):
                 if token[0]=='ATOM':
                     index=int(token[1])
                     atom_name=token[2]
-                    atom_gaff=token[9]
-                    atom_name=token[2]
                     gaff_name=token[-1]
                     self.atom_gaff[atom_name]=gaff_name
                     self.atom_index[index]=atom_name
-                    self.atom_index_gaff[index]=atom_gaff
+                    self.atom_index_gaff[index]=gaff_name
             self.atom_gaff.update(self.atom_gaff)
         self.num_types = len(set(self.atom_gaff.values()))
 
 
 
+
     def read_charges(self):
+        """
+        reads charges.json to read charges from GAFF atom
+        """
         filename = os.path.join(os.path.dirname(__file__),'charges.json')
         jsonfile = open(filename)
         self.charges = json.load(jsonfile, encoding="utf-8")
