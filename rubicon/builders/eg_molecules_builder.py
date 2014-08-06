@@ -5,11 +5,14 @@ Adapted from Dan Gunter and Wei Chen's vasp materials builder
 import copy
 import logging
 import datetime
-from pymongo import ASCENDING
 import sys
 import re
+
+from pymongo import ASCENDING
+
 from rubicon.builders import eg_shared
-from rubicon.workflows.multistep_ipea_wf import QChemFireWorkCreator
+from rubicon.utils.qchem_firework_creator import QChemFireWorkCreator
+
 
 __author__ = "Xiaohui Qu"
 __copyright__ = "Copyright 2012-2013, The Electrolyte Genome Project"

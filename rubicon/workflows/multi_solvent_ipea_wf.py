@@ -1,13 +1,16 @@
 import itertools
+
 from fireworks import Workflow
-from rubicon.workflows.multistep_ipea_wf import QChemFireWorkCreator
+
+from rubicon.utils.qchem_firework_creator import QChemFireWorkCreator
 
 
-def multi_solvent_ipea_fws(mol, name, mission, solvents, ref_charge, spin_multiplicities=(2, 1, 2),
-                           dupefinder=None, priority=1, parent_fwid=None, additional_user_tags=None):
+def multi_solvent_ipea_fws(mol, name, mission, solvents, solvent_method, ref_charge, spin_multiplicities=(2, 1, 2),
+                           dupefinder=None, priority=1, parent_fwid=None, additional_user_tags=None, qm_method=None):
     large = False
     if len(mol) > 50:
         large = True
+    energy_method, geom_method = qm_method.split("//") if qm_method else (None, None)
     fw_creator = QChemFireWorkCreator(mol=mol, molname=name, mission=mission,
                                       dupefinder=dupefinder,
                                       priority=priority, large=large, additional_user_tags=additional_user_tags)
@@ -28,7 +31,7 @@ def multi_solvent_ipea_fws(mol, name, mission, solvents, ref_charge, spin_multip
     if len(mol) > 1:
         fw_ids = zip(* [iter(range(fwid_base + 0, fwid_base + 6))] * 2)
         fws = (fw_creator.geom_fw(ch, spin, fwid_cal, fwid_db,
-                                  priority=priority+1)
+                                  priority=priority+1, method=geom_method)
                for ch, spin, (fwid_cal, fwid_db)
                in zip(charges, spin_multiplicities, fw_ids))
         (cgi_cal, cgi_db), (ngi_cal, ngi_db), (agi_cal, agi_db) = fw_ids
@@ -38,7 +41,7 @@ def multi_solvent_ipea_fws(mol, name, mission, solvents, ref_charge, spin_multip
         if not large:
             fw_ids = zip(* [iter(range(fwid_base + 6, fwid_base + 6 + 6))] * 2)
             fws = (fw_creator.freq_fw(ch, spin, fwid_cal, fwid_db,
-                                      priority=priority+1)
+                                      priority=priority+1, method=geom_method)
                    for ch, spin, (fwid_cal, fwid_db)
                    in zip(charges, spin_multiplicities, fw_ids))
             (cfi_cal, cfi_db), (nfi_cal, nfi_db), (afi_cal, afi_db) = fw_ids
@@ -59,7 +62,8 @@ def multi_solvent_ipea_fws(mol, name, mission, solvents, ref_charge, spin_multip
         fw_ids = zip(* [iter(range(fwid_start, fwid_end))] * 2)
         sp_fw_ids.append(fw_ids)
         fws = (fw_creator.sp_fw(ch, spin, fwid_cal, fwid_db,
-                                solvent_method="sm12mk", solvent=solvent)
+                                solvent=solvent, solvent_method=solvent_method,
+                                qm_method=energy_method)
                for ch, spin, (fwid_cal, fwid_db)
                in zip(charges, spin_multiplicities, fw_ids))
         links_dict.update(dict(fw_ids))
@@ -92,9 +96,6 @@ def multi_solvent_ipea_fws(mol, name, mission, solvents, ref_charge, spin_multip
     return fireworks, links_dict
 
 
-def mol_to_solvent_ipea_wf(mol, name, mission, solvents, ref_charge, spin_multiplicities=(2, 1, 2), dupefinder=None,
-                           priority=1, parent_fwid=None, additional_user_tags=None):
-    fireworks, links_dict = multi_solvent_ipea_fws(
-        mol, name, mission, solvents, ref_charge, spin_multiplicities, dupefinder, priority, parent_fwid,
-        additional_user_tags)
+def mol_to_solvent_ipea_wf(mol, name, **kwargs):
+    fireworks, links_dict = multi_solvent_ipea_fws(mol, name, **kwargs)
     return Workflow(fireworks, links_dict, name)

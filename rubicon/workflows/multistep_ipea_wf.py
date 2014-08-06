@@ -1,268 +1,19 @@
-import copy
 import itertools
-import json
-import os
-from fireworks.core.firework import Workflow, FireWork, Tracker
-from pymatgen.io.babelio import BabelMolAdaptor
-from pymatgen.io.qchemio import QcInput, QcTask
-from rubicon.dupefinders.dupefinder_eg import DupeFinderEG
-from rubicon.firetasks.qchem_task import QChemTask
+
+from fireworks.core.firework import Workflow
+
+from rubicon.utils.qchem_firework_creator import QChemFireWorkCreator
+
 
 __author__ = 'xiaohuiqu'
 
 
-class QChemFireWorkCreator():
-    def __init__(self, mol, molname, mission, additional_user_tags=None,
-                 dupefinder=None, priority=1, update_spec=None, large=False):
-        self.bs = '6-31+G*'
-        self.dft = 'B3LYP'
-        self.molname = molname
-        self.mol = mol
-        self.large = large
-        initial_inchi = self.get_inchi(mol)
-        user_tags = {'mission': mission,
-                     "molname": molname}
-        if additional_user_tags:
-            user_tags.update(additional_user_tags)
-        spec = dict()
-        spec['user_tags'] = user_tags
-        spec['_priority'] = priority
-        spec['_dupefinder'] = dupefinder.to_dict() if dupefinder \
-            else DupeFinderEG().to_dict()
-        tracker_out = Tracker("mol.qcout", nlines=20)
-        tracker_std = Tracker("mol.qclog", nlines=10)
-        tracker_joberr = Tracker("FW_job.error", nlines=20)
-        tracker_jobout = Tracker("FW_job.out", nlines=20)
-        spec["_trackers"] = [tracker_out, tracker_std, tracker_joberr,
-                             tracker_jobout]
-        spec['run_tags'] = dict()
-        spec['run_tags']['methods'] = [self.bs.lower(), self.dft.lower()]
-        spec['implicit_solvent'] = {}
-        spec['inchi'] = initial_inchi
-        spec['num_atoms'] = len(mol)
-        if update_spec:
-            spec.update(update_spec)
-        self.base_spec = lambda: copy.deepcopy(spec)
-
-    @staticmethod
-    def get_inchi(mol):
-        bb = BabelMolAdaptor(mol)
-        pbmol = bb.pybel_mol
-        return pbmol.write("inchi").strip()
-
-    @staticmethod
-    def get_state_name(charge, spin_multiplicity):
-        charge_state = {-2: "anion_2", -1: "anion", 0: "neutral", 1: "cation", 2: "cation_2"}
-        spin_state = {1: "singlet", 2: "doublet", 3: "triplet"}
-        return spin_state[spin_multiplicity] + " " + charge_state[charge]
-
-    def geom_fw(self, charge, spin_multiplicity, fw_id_cal, fw_id_db,
-                priority=None):
-        task_type = "geometry optimization"
-        state_name = self.get_state_name(charge, spin_multiplicity)
-        title = self.molname + " " + state_name + " " + self.dft + " " + \
-            self.bs + " " + task_type
-        if self.large:
-            title = self.molname + " " + state_name + " PBE-D3/6-31+G* " + \
-                task_type
-            qctask = QcTask(self.mol, charge=charge,
-                            spin_multiplicity=spin_multiplicity,
-                            jobtype="opt", title=title,
-                            exchange='pbe', correlation='pbe',
-                            basis_set=self.bs,
-                            rem_params={"DFT_D": "EMPIRICAL_GRIMME3",
-                                        "DFT_D3_S6": 1000,
-                                        "DFT_D3_RS6": 1217,
-                                        "DFT_D3_S8": 722,
-                                        "DFT_D3_3BODY": False})
-            qctask.set_geom_max_iterations(200)
-            qctask.set_scf_algorithm_and_iterations(iterations=100)
-            qctask.scale_geom_opt_threshold(gradient=1.0,
-                                            displacement=10.0,
-                                            energy=10.0)
-        else:
-            qctask = QcTask(self.mol, charge=charge,
-                            spin_multiplicity=spin_multiplicity,
-                            jobtype="opt", title=title,
-                            exchange=self.dft, basis_set=self.bs)
-        qcinp = QcInput([qctask])
-        spec = self.base_spec()
-        spec["qcinp"] = qcinp.to_dict
-        spec['task_type'] = task_type
-        spec['charge'] = charge
-        spec['spin_multiplicity'] = spin_multiplicity
-        if priority:
-            spec['_priority'] = priority
-        task_name = self.molname + ' ' + state_name + ' ' + task_type
-        from rubicon.firetasks.multistep_qchem_task \
-            import QChemGeomOptDBInsertionTask
-        fw_geom_cal = FireWork([QChemTask()],
-                               spec=spec, name=task_name, fw_id=fw_id_cal)
-        spec_db = copy.deepcopy(spec)
-        del spec_db['_dupefinder']
-        spec_db['_allow_fizzled_parents'] = True
-        spec_db['task_type'] = task_type + ' DB Insertion'
-        del spec_db["_trackers"][:2]
-        task_name_db = task_name + " DB Insertion"
-        fw_geom_db = FireWork([QChemGeomOptDBInsertionTask()],
-                              spec=spec_db, name=task_name_db, fw_id=fw_id_db)
-
-        return fw_geom_cal, fw_geom_db
-
-    def freq_fw(self, charge, spin_multiplicity, fw_id_cal, fw_id_db,
-                priority=None):
-        task_type = "vibrational frequency"
-        state_name = self.get_state_name(charge, spin_multiplicity)
-        title = self.molname + " " + state_name + " " + self.dft + " " +\
-            self.bs + " " + task_type
-        if self.large:
-            title = self.molname + " " + state_name + " PBE-D3/6-31+G* " + \
-                task_type
-            qctask = QcTask(self.mol, charge=charge,
-                            spin_multiplicity=spin_multiplicity,
-                            jobtype="freq", title=title,
-                            exchange='pbe', correlation='pbe',
-                            basis_set=self.bs,
-                            rem_params={"DFT_D": "EMPIRICAL_GRIMME3",
-                                        "DFT_D3_S6": 1000,
-                                        "DFT_D3_RS6": 1217,
-                                        "DFT_D3_S8": 722,
-                                        "DFT_D3_3BODY": False})
-            qctask.set_scf_algorithm_and_iterations(iterations=100)
-        else:
-            qctask = QcTask(self.mol, charge=charge,
-                            spin_multiplicity=spin_multiplicity,
-                            jobtype="freq", title=title,
-                            exchange=self.dft, basis_set=self.bs)
-        qcinp = QcInput([qctask])
-        spec = self.base_spec()
-        spec["qcinp"] = qcinp.to_dict
-        spec['task_type'] = task_type
-        spec['charge'] = charge
-        spec['spin_multiplicity'] = spin_multiplicity
-        if priority:
-            spec['_priority'] = priority
-        task_name = self.molname + ' ' + state_name + ' ' + task_type
-        from rubicon.firetasks.multistep_qchem_task \
-            import QChemFrequencyDBInsertionTask
-        fw_freq_cal = FireWork([QChemTask()],
-                               spec=spec, name=task_name, fw_id=fw_id_cal)
-        spec_db = copy.deepcopy(spec)
-        del spec_db['_dupefinder']
-        spec_db['_allow_fizzled_parents'] = True
-        spec_db['task_type'] = task_type + ' DB Insertion'
-        del spec_db["_trackers"][:2]
-        task_name_db = task_name + " DB Insertion"
-        fw_freq_db = FireWork([QChemFrequencyDBInsertionTask()],
-                              spec=spec_db, name=task_name_db, fw_id=fw_id_db)
-        return fw_freq_cal, fw_freq_db
-
-    def sp_fw(self, charge, spin_multiplicity, fw_id_cal, fw_id_db,
-              solvent_method="ief-pcm", solvent="water", priority=None):
-        spec = self.base_spec()
-        if priority:
-            spec['_priority'] = priority
-        task_type = "single point energy"
-        state_name = self.get_state_name(charge, spin_multiplicity)
-        title = self.molname + " " + state_name + " " + self.dft + " " + \
-            self.bs + " " + task_type
-        title += "\n Gas Phase"
-        qctask_vac = QcTask(self.mol, charge=charge,
-                            spin_multiplicity=spin_multiplicity,
-                            jobtype="sp", title=title,
-                            exchange=self.dft, basis_set=self.bs,
-                            rem_params={"CHELPG": True})
-        if not self.large:
-            qctask_vac.set_dft_grid(128, 302)
-            qctask_vac.set_integral_threshold(12)
-            qctask_vac.set_scf_convergence_threshold(8)
-        else:
-            qctask_vac.set_scf_algorithm_and_iterations(iterations=100)
-
-        title = " Solution Phase, {}".format(solvent)
-        qctask_sol = QcTask(self.mol, charge=charge,
-                            spin_multiplicity=spin_multiplicity,
-                            jobtype="sp", title=title,
-                            exchange=self.dft, basis_set=self.bs)
-        qctask_sol.set_scf_initial_guess(guess="read")
-        implicit_solvent = dict()
-        implicit_solvent['solvent_name'] = solvent
-        if solvent_method.lower() in ['cpcm', 'ief-pcm']:
-            if solvent_method.lower() == 'ief-pcm':
-                solvent_theory = 'ssvpe'
-            else:
-                solvent_theory = 'cpcm'
-            qctask_sol.use_pcm(solvent_params={"Dielectric": 78.3553},
-                               pcm_params={'Theory': solvent_theory})
-            implicit_solvent['model'] = solvent_method.lower()
-            implicit_solvent['dielectric_constant'] = 78.3553
-            implicit_solvent['radii'] = 'uff'
-            implicit_solvent['vdwscale'] = 1.1
-        elif solvent_method.lower() == 'cosmo':
-            qctask_sol.use_cosmo()
-            implicit_solvent['model'] = 'cosmo'
-            implicit_solvent['dielectric_constant'] = 78.3553
-        elif solvent_method.lower() in ['sm12mk', 'sm12chelpg', 'sm12',
-                                        'sm8']:
-            implicit_solvent['model'] = solvent_method.lower()
-            smx_data_file = os.path.join(os.path.dirname(__file__),
-                                         "../utils/data", "smx_data.json")
-            with open(smx_data_file) as f:
-                smx_data = json.load(f)
-            if solvent not in smx_data["builtin_solvent"]:
-                smx_solvent = "other"
-                if solvent not in smx_data["custom_solvent"]:
-                    raise Exception("Don't know the SMx parameters for "
-                                    "solvent '{}'".format(solvent))
-                implicit_solvent['solvent_data'] = \
-                    smx_data["custom_solvent"][solvent]
-            else:
-                smx_solvent = solvent
-            rem_options = dict(solvent_method=solvent_method.lower(),
-                               smx_solvent=smx_solvent.lower())
-            qctask_sol.params['rem'].update(rem_options)
-            implicit_solvent['smx_solvent'] = smx_solvent
-        else:
-            raise Exception("Don't know how to setup solvent model '{}'".
-                            format(solvent_method))
-        if not self.large:
-            qctask_sol.set_dft_grid(128, 302)
-            qctask_sol.set_integral_threshold(12)
-            qctask_sol.set_scf_convergence_threshold(8)
-        else:
-            qctask_sol.set_scf_algorithm_and_iterations(iterations=100)
-            if solvent_method.lower() in ['cpcm', 'ief-pcm']:
-                qctask_sol.params['pcm'].update({"hpoints": 194,
-                                                 "heavypoints": 194})
-
-        qcinp = QcInput([qctask_vac, qctask_sol])
-        spec["qcinp"] = qcinp.to_dict
-        spec['task_type'] = task_type
-        spec['charge'] = charge
-        spec['spin_multiplicity'] = spin_multiplicity
-
-        spec['implicit_solvent'] = implicit_solvent
-        task_name = self.molname + ' ' + state_name + ' ' + task_type
-        from rubicon.firetasks.multistep_qchem_task \
-            import QChemSinglePointEnergyDBInsertionTask
-        fw_sp_cal = FireWork([QChemTask()],
-                             spec=spec, name=task_name, fw_id=fw_id_cal)
-        spec_db = copy.deepcopy(spec)
-        del spec_db['_dupefinder']
-        spec_db['_allow_fizzled_parents'] = True
-        spec_db['task_type'] = task_type + ' DB Insertion'
-        del spec_db["_trackers"][:2]
-        task_name_db = task_name + " DB Insertion"
-        fw_sp_db = FireWork([QChemSinglePointEnergyDBInsertionTask()],
-                            spec=spec_db, name=task_name_db, fw_id=fw_id_db)
-        return fw_sp_cal, fw_sp_db
-
-
-def multistep_ipea_fws(mol, name, mission, ref_charge, spin_multiplicities=(2, 1, 2), dupefinder=None, priority=1,
-                       parent_fwid=None, additional_user_tags=None):
+def multistep_ipea_fws(mol, name, mission, solvent, solvent_method, ref_charge, spin_multiplicities=(2, 1, 2), dupefinder=None, priority=1,
+                       parent_fwid=None, additional_user_tags=None, qm_method=None, check_large=True):
     large = False
-    if len(mol) > 50:
+    if len(mol) > 50 and check_large:
         large = True
+    energy_method, geom_method = qm_method.split("//") if qm_method else (None, None)
     fw_creator = QChemFireWorkCreator(
         mol=mol, molname=name, mission=mission, dupefinder=dupefinder, priority=priority, large=large,
         additional_user_tags=additional_user_tags)
@@ -282,7 +33,7 @@ def multistep_ipea_fws(mol, name, mission, ref_charge, spin_multiplicities=(2, 1
     charges = [ref_charge + i for i in (-1, 0, 1)]
     if len(mol) > 1:
         fw_ids = zip(* [iter(range(fwid_base + 0, fwid_base + 6))] * 2)
-        fws = (fw_creator.geom_fw(ch, spin, fwid_cal, fwid_db)
+        fws = (fw_creator.geom_fw(ch, spin, fwid_cal, fwid_db, method=geom_method)
                for ch, spin, (fwid_cal, fwid_db)
                in zip(charges, spin_multiplicities, fw_ids))
         (cgi_cal, cgi_db), (ngi_cal, ngi_db), (agi_cal, agi_db) = fw_ids
@@ -291,7 +42,7 @@ def multistep_ipea_fws(mol, name, mission, ref_charge, spin_multiplicities=(2, 1
 
         if not large:
             fw_ids = zip(* [iter(range(fwid_base + 6, fwid_base + 6 + 6))] * 2)
-            fws = (fw_creator.freq_fw(ch, spin, fwid_cal, fwid_db)
+            fws = (fw_creator.freq_fw(ch, spin, fwid_cal, fwid_db, method=geom_method)
                    for ch, spin, (fwid_cal, fwid_db)
                    in zip(charges, spin_multiplicities, fw_ids))
             (cfi_cal, cfi_db), (nfi_cal, nfi_db), (afi_cal, afi_db) = fw_ids
@@ -302,7 +53,8 @@ def multistep_ipea_fws(mol, name, mission, ref_charge, spin_multiplicities=(2, 1
                                agi_db: afi_cal})
 
     fw_ids = zip(* [iter(range(fwid_base + 12, fwid_base + 12 + 6))] * 2)
-    fws = (fw_creator.sp_fw(ch, spin, fwid_cal, fwid_db)
+    fws = (fw_creator.sp_fw(ch, spin, fwid_cal, fwid_db, solvent=solvent, solvent_method=solvent_method,
+                            qm_method=energy_method)
            for ch, spin, (fwid_cal, fwid_db)
            in zip(charges, spin_multiplicities, fw_ids))
     (cspi_cal, cspi_db), (nspi_cal, nspi_db), (aspi_cal, aspi_db) = fw_ids
@@ -327,9 +79,6 @@ def multistep_ipea_fws(mol, name, mission, ref_charge, spin_multiplicities=(2, 1
     return fireworks, links_dict
 
 
-def mol_to_ipea_wf(mol, name, mission, ref_charge, spin_multiplicities=(2, 1, 2),
-                   dupefinder=None, priority=1, parent_fwid=None, additional_user_tags=None):
-    fireworks, links_dict = multistep_ipea_fws(
-        mol, name, mission, ref_charge, spin_multiplicities, dupefinder, priority, parent_fwid,
-        additional_user_tags)
+def mol_to_ipea_wf(mol, name, **kwargs):
+    fireworks, links_dict = multistep_ipea_fws(mol, name, **kwargs)
     return Workflow(fireworks, links_dict, name)

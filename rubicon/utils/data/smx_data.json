@@ -44,6 +44,33 @@
             "SolG": 43.47,
             "SolH": 0.0,
             "SolN": 1.433
+        },
+        "ethylmethylcarbonate": {
+            "Dielec": 3.0,
+            "SolA": 0.00,
+            "SolB": 0.749,
+            "SolC": 0.0,
+            "SolG": 18.0,
+            "SolH": 0.0,
+            "SolN": 1.378
+        },
+        "propylenecarbonate": {
+            "Dielec": 64.9,
+            "SolA": 0.00,
+            "SolB": 0.730,
+            "SolC": 0.0,
+            "SolG": 29.13,
+            "SolH": 0.0,
+            "SolN": 1.421
+        },
+        "ethylenecarbonate": {
+            "Dielec": 90.0,
+            "SolA": 0.0,
+            "SolB": 0.735,
+            "SolC": 0.0,
+            "SolG": 20.2,
+            "SolH": 0.0,
+            "SolN": 1.415
         }
     },
     "builtin_solvent": [
