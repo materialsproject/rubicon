@@ -165,6 +165,32 @@ class ContactDetector(object):
         return contact_matrix
 
 
+class LargestContactGapEnergyEvaluator(EnergyEvaluator):
+
+    def __init__(self, mol_coords, mol_radius, cation_radius, anion_radius, max_cap, threshold=1.0E-1):
+        super(LargestContactGapEnergyEvaluator, self).__init__(mol_coords)
+        self.max_cap = max_cap
+        self.threshold = threshold
+        self.contact_detector = ContactDetector(mol_coords, mol_radius, cation_radius, anion_radius, cap=0.0)
+
+    def calc_energy(self, cation_coords, anion_coords):
+        low = 0.0
+        high = self.max_cap
+        self.contact_detector.cap = high
+        if not self.contact_detector.is_contact(cation_coords, anion_coords):
+            return float("NaN")
+        self.contact_detector.cap = low
+        if self.contact_detector.is_contact(cation_coords, anion_coords):
+            return low
+        while high - low > self.threshold:
+            mid = (low + high)/2.0
+            self.contact_detector.cap = mid
+            if self.contact_detector.is_contact(cation_coords, anion_coords):
+                high = mid
+            else:
+                low = mid
+        return (high + low)/2.0
+
 
 class GravitationalEnergyEvaluator(EnergyEvaluator):
 
