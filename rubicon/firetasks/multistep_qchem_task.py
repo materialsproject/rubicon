@@ -55,37 +55,37 @@ def get_basic_update_specs(fw_spec, d):
         update_specs["mixed_aux_basis"] = aux_basis
     return update_specs
 
+def standard_parsing_db_insertion(fw_spec):
+    if '_fizzled_parents' in fw_spec and not 'prev_qchem_dir' in fw_spec:
+        prev_dir = fw_spec['_fizzled_parents'][0]['launches'][0][
+            'launch_dir']
+    else:
+        prev_dir = fw_spec['prev_qchem_dir']
+    db_dir = os.environ['DB_LOC']
+    db_path = os.path.join(db_dir, 'tasks_db.json')
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger('QChemDrone')
+    logger.setLevel(logging.INFO)
+    sh = logging.StreamHandler(stream=sys.stdout)
+    sh.setLevel(getattr(logging, 'INFO'))
+    logger.addHandler(sh)
+    with open(db_path) as f:
+        db_creds = json.load(f)
+    drone = DeltaSCFQChemToDbTaskDrone(
+        host=db_creds['host'], port=db_creds['port'],
+        database=db_creds['database'], user=db_creds['admin_user'],
+        password=db_creds['admin_password'],
+        collection=db_creds['collection'])
+    qcout_path = get_eg_file_loc(os.path.abspath(os.path.join(
+        prev_dir, "mol.qcout")))
+    t_id, d = drone.assimilate(qcout_path, fw_spec=fw_spec)
+    return d, qcout_path,  t_id
+
 class QChemGeomOptDBInsertionTask(FireTaskBase, FWSerializable):
     _fw_name = "QChem Geometry Optimization DB Insertion Task"
 
     def run_task(self, fw_spec):
-        if '_fizzled_parents' in fw_spec and not 'prev_qchem_dir' in fw_spec:
-            prev_dir = fw_spec['_fizzled_parents'][0]['launches'][0][
-                'launch_dir']
-        else:
-            prev_dir = fw_spec['prev_qchem_dir']
-
-        db_dir = os.environ['DB_LOC']
-        db_path = os.path.join(db_dir, 'tasks_db.json')
-
-        logging.basicConfig(level=logging.INFO)
-        logger = logging.getLogger('QChemDrone')
-        logger.setLevel(logging.INFO)
-        sh = logging.StreamHandler(stream=sys.stdout)
-        sh.setLevel(getattr(logging, 'INFO'))
-        logger.addHandler(sh)
-
-        with open(db_path) as f:
-            db_creds = json.load(f)
-        drone = DeltaSCFQChemToDbTaskDrone(
-            host=db_creds['host'], port=db_creds['port'],
-            database=db_creds['database'], user=db_creds['admin_user'],
-            password=db_creds['admin_password'],
-            collection=db_creds['collection'])
-        qcout_path = get_eg_file_loc(os.path.abspath(os.path.join(
-            prev_dir, "mol.qcout")))
-        t_id, d = drone.assimilate(qcout_path, fw_spec=fw_spec)
-
+        d, qcout_path, t_id = standard_parsing_db_insertion(fw_spec)
         update_specs = get_basic_update_specs(fw_spec, d)
 
         if d["state"] == "successful":
@@ -114,33 +114,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
     molecule_perturb_scale = 0.3
 
     def run_task(self, fw_spec):
-        if '_fizzled_parents' in fw_spec and not 'prev_qchem_dir' in fw_spec:
-            prev_dir = fw_spec['_fizzled_parents'][0]['launches'][0][
-                'launch_dir']
-        else:
-            prev_dir = fw_spec['prev_qchem_dir']
-
-        db_dir = os.environ['DB_LOC']
-        db_path = os.path.join(db_dir, 'tasks_db.json')
-
-        logging.basicConfig(level=logging.INFO)
-        logger = logging.getLogger('QChemDrone')
-        logger.setLevel(logging.INFO)
-        sh = logging.StreamHandler(stream=sys.stdout)
-        sh.setLevel(getattr(logging, 'INFO'))
-        logger.addHandler(sh)
-
-        with open(db_path) as f:
-            db_creds = json.load(f)
-        drone = DeltaSCFQChemToDbTaskDrone(
-            host=db_creds['host'], port=db_creds['port'],
-            database=db_creds['database'], user=db_creds['admin_user'],
-            password=db_creds['admin_password'],
-            collection=db_creds['collection'])
-        qcout_path = get_eg_file_loc(os.path.abspath(os.path.join(
-            prev_dir, "mol.qcout")))
-        t_id, d = drone.assimilate(qcout_path, fw_spec=fw_spec)
-
+        d, qcout_path, t_id = standard_parsing_db_insertion(fw_spec)
         update_specs = get_basic_update_specs(fw_spec, d)
 
         if d["state"] == "successful":
@@ -342,33 +316,7 @@ class QChemSinglePointEnergyDBInsertionTask(FireTaskBase, FWSerializable):
     _fw_name = "NWChem Single Point Energy DB Insertion Task"
 
     def run_task(self, fw_spec):
-        if '_fizzled_parents' in fw_spec and not 'prev_qchem_dir' in fw_spec:
-            prev_dir = fw_spec['_fizzled_parents'][0]['launches'][0][
-                'launch_dir']
-        else:
-            prev_dir = fw_spec['prev_qchem_dir']
-
-        db_dir = os.environ['DB_LOC']
-        db_path = os.path.join(db_dir, 'tasks_db.json')
-
-        logging.basicConfig(level=logging.INFO)
-        logger = logging.getLogger('QChemDrone')
-        logger.setLevel(logging.INFO)
-        sh = logging.StreamHandler(stream=sys.stdout)
-        sh.setLevel(getattr(logging, 'INFO'))
-        logger.addHandler(sh)
-
-        with open(db_path) as f:
-            db_creds = json.load(f)
-        drone = DeltaSCFQChemToDbTaskDrone(
-            host=db_creds['host'], port=db_creds['port'],
-            database=db_creds['database'], user=db_creds['admin_user'],
-            password=db_creds['admin_password'],
-            collection=db_creds['collection'])
-        qcout_path = get_eg_file_loc(os.path.abspath(os.path.join(
-            prev_dir, "mol.qcout")))
-        t_id, d = drone.assimilate(qcout_path, fw_spec=fw_spec)
-
+        d, qcout_path, t_id = standard_parsing_db_insertion(fw_spec)
         update_specs = get_basic_update_specs(fw_spec, d)
 
         if d["state"] == "successful":
