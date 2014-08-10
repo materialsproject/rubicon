@@ -60,7 +60,7 @@ def md_relax_fws(mol, name, mission, qm_method, high_temperature=323.15, low_tem
     temperatures = list(itertools.chain([high_temperature, low_temperature] * md_runs))
     md_fw_ids = zip(*[iter(range(fwid_base + 4, fwid_base + 4 + md_runs * 2 * 2))]*2)
     md_fws = []
-    for (md_cal_fwid, md_db_fwid), temperature in md_fw_ids, temperatures:
+    for (md_cal_fwid, md_db_fwid), temperature in zip(md_fw_ids, temperatures):
         fw_md = fw_creator.aimd_fw(charge, spin_multiplicity, md_cal_fwid, md_db_fwid, md_steps, time_step_au,
                                    temperature, priority, qm_method)
 
