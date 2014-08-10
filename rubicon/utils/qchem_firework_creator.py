@@ -476,6 +476,7 @@ class QChemFireWorkCreator():
         spec['charge'] = charge
         spec['spin_multiplicity'] = spin_multiplicity
         spec['run_tags']['methods'] = method_token
+        spec['run_tags']['rem_params'] = rem_params
         spec["qm_method"] = qm_method
         task_name = self.molname + ' ' + state_name + ' ' + task_type
         from rubicon.firetasks.multistep_qchem_task \
