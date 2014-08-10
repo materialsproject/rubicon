@@ -45,14 +45,14 @@ class QChemTask(FireTaskBase, FWSerializable):
                 if isinstance(qj.mol, Molecule):
                     qj.mol = copy.deepcopy(mol)
         mol = qcinp.jobs[0].mol
-        if "mixed_basis" in fw_spec:
+        if "mixed_basis" in fw_spec["run_tags"]:
             for qj in qcinp.jobs:
                 if qj.params["rem"]["jobtype"] != "sp":
-                    qj.set_basis_set(fw_spec["mixed_basis"])
+                    qj.set_basis_set(fw_spec["run_tags"]["mixed_basis"])
         if "mixed_aux_basis" in fw_spec:
             for qj in qcinp.jobs:
                 if qj.params["rem"]["jobtype"] != "sp":
-                    qj.set_aux_basis_set(fw_spec["mixed_aux_basis"])
+                    qj.set_aux_basis_set(fw_spec["run_tags"]["mixed_aux_basis"])
 
         carver_name_pattern = re.compile("c[0-9]{4}-ib")
         fw_data = FWData()

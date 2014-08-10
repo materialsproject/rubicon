@@ -29,10 +29,12 @@ def get_basic_update_specs(fw_spec, d):
                     'egsnl': d["snl_final"],
                     'snlgroup_id': d["snlgroup_id_final"],
                     'inchi_root': fw_spec["inchi_root"]}
-    if "mixed_basis" in fw_spec:
-        update_specs["mixed_basis"] = fw_spec["mixed_basis"]
+    mixed_basis = None
+    mixed_aux_basis = None
+    if "mixed_basis" in fw_spec["run_tags"]:
+        mixed_basis = fw_spec["run_tags"]["mixed_basis"]
     if "mixed_aux_basis" in fw_spec:
-        update_specs["mixed_aux_basis"] = fw_spec["mixed_aux_basis"]
+        mixed_aux_basis = fw_spec["run_tags"]["mixed_aux_basis"]
     if "_mixed_basis_set_generator" in fw_spec:
         bs_generator = fw_spec["_mixed_basis_set_generator"]
         if not isinstance(bs_generator, AtomicChargeMixedBasisSetGenerator):
@@ -41,8 +43,7 @@ def get_basic_update_specs(fw_spec, d):
         if not ("scf" in d["calculations"] and "nbo" in d["calculations"]["scf"]):
             raise ValueError("An vacuum single point caculation is require to use mixed basis set generator")
         charges = d["calculations"]["scf"]["nbo"]
-        basis = bs_generator.get_basis(mol, charges)
-        update_specs["mixed_basis"] = basis
+        mixed_basis = bs_generator.get_basis(mol, charges)
     if "_mixed_aux_basis_set_generator" in fw_spec:
         aux_bs_generator = fw_spec["_mixed_aux_basis_set_generator"]
         if not isinstance(aux_bs_generator, AtomicChargeMixedBasisSetGenerator):
@@ -51,8 +52,14 @@ def get_basic_update_specs(fw_spec, d):
         if not ("scf" in d["calculations"] and "nbo" in d["calculations"]["scf"]):
             raise ValueError("An vacuum single point caculation is require to use mixed auxiliary basis set generator")
         charges = d["calculations"]["scf"]["nbo"]
-        aux_basis = aux_bs_generator.get_basis(mol, charges)
-        update_specs["mixed_aux_basis"] = aux_basis
+        mixed_aux_basis = aux_bs_generator.get_basis(mol, charges)
+    if mixed_basis or mixed_aux_basis:
+        run_tags = fw_spec["run_tags"]
+        if mixed_basis:
+            run_tags["mixed_basis"] = mixed_basis
+        if mixed_aux_basis:
+            run_tags["mixed_aux_basis"] = mixed_aux_basis
+        fw_spec["run_tags"] = run_tags
     return update_specs
 
 def standard_parsing_db_insertion(fw_spec):
@@ -331,3 +338,29 @@ class QChemSinglePointEnergyDBInsertionTask(FireTaskBase, FWSerializable):
                 update_spec=dict({'defuse_reason': 'SCF failed',
                                   'offending_fwid': offending_fwid},
                                  **update_specs))
+
+
+class QChemAIMDDBInsertionTask(FireTaskBase, FWSerializable):
+    _fw_name = "QChem Ab Initio Molecule Dynamics DB Insertion Task"
+
+    def run_task(self, fw_spec):
+        d, qcout_path, t_id = standard_parsing_db_insertion(fw_spec)
+        update_specs = get_basic_update_specs(fw_spec, d)
+
+        if d["state"] == "successful":
+            return FWAction(
+                stored_data={'task_id': t_id},
+                update_spec=update_specs)
+        else:
+            if d['state'] == 'rejected' and \
+                            d['reject_reason'] == 'structural change':
+                defuse_reason = 'structural change'
+            else:
+                defuse_reason = d.get("errors", "unknown")
+            offending_fwid = get_defuse_causing_qchem_fwid(qcout_path)
+            return FWAction(
+                stored_data={'task_id': t_id},
+                update_spec=dict({'defuse_reason': defuse_reason,
+                                  'offending_fwid': offending_fwid},
+                                 **update_specs),
+                defuse_children=True)

@@ -191,6 +191,8 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
                 suffix = "" if d["solvent_method"] == "NA" \
                     else "_" + d["solvent_method"]
                 data_dict["scf" + suffix] = d
+            elif d["jobtype"] == "aimd":
+                data_dict["amid"] = d
 
         data = data_dict
 
