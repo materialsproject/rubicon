@@ -456,6 +456,8 @@ class QChemFireWorkCreator():
         title = self.molname + " " + state_name + " " + qm_method + " " + task_type
         exchange, correlation, basis_set,  aux_basis, rem_params, method_token = self. \
             get_exchange_correlation_basis_auxbasis_remparams(qm_method)
+        if rem_params is None:
+            rem_params = dict()
         rem_params["aimd_method"] = "bomd"
         rem_params["time_step"] = time_step
         rem_params["aimd_steps"] = num_steps
