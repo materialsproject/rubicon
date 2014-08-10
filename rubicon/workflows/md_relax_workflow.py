@@ -8,8 +8,8 @@ __author__ = 'xiaohuiqu'
 fs_to_au = 1.0E-15 / 2.418884326505E-17
 
 def md_relax_fws(mol, name, mission, qm_method, high_temperature=323.15, low_temperature=273.15,
-                 md_steps= 500, time_step=1.0, md_runs=3,
-                 dupefinder=None, priority=1,
+                 md_steps=500, time_step=1.0, md_runs=3, normal_basis="6-31G*", diffuse_basis="6-31+G*",
+                 charge_threshold=-0.5, dupefinder=None, priority=1,
                  parent_fwid=None, additional_user_tags=None):
     """
 
@@ -29,7 +29,7 @@ def md_relax_fws(mol, name, mission, qm_method, high_temperature=323.15, low_tem
     :return:
     """
     time_step_au = int(time_step * fs_to_au)
-    mixed_basis_generator = AtomicChargeMixedBasisSetGenerator()
+    mixed_basis_generator = AtomicChargeMixedBasisSetGenerator(charge_threshold, normal_basis, diffuse_basis)
     charge = mol.charge
     spin_multiplicity = mol.spin_multiplicity
     fw_creator = QChemFireWorkCreator(mol=mol, molname=name, mission=mission,
