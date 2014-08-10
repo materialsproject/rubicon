@@ -51,7 +51,8 @@ def md_relax_fws(mol, name, mission, qm_method, high_temperature=323.15, low_tem
     fws.extend(fw_sp1)
     links_dict[sp1_cal_fwid] = sp1_db_fwid
     if parent_fwid:
-        links_dict[parent_fwid] = sp1_cal_fwid
+        for pfw_id in parent_fwid:
+            links_dict[pfw_id] = sp1_cal_fwid
 
     geom1_cal_fwid, geom1_db_fwid = fwid_base + 2, fwid_base + 3
     fw_geom1 = fw_creator.geom_fw(
