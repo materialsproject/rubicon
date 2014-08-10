@@ -1,3 +1,4 @@
+import copy
 import itertools
 from fireworks import Workflow
 from rubicon.utils.atomic_charge_mixed_basis_set_generator import AtomicChargeMixedBasisSetGenerator
@@ -61,8 +62,16 @@ def md_relax_fws(mol, name, mission, qm_method, high_temperature=323.15, low_tem
     links_dict[geom1_cal_fwid] = geom1_db_fwid
     links_dict[sp1_db_fwid] = geom1_cal_fwid
 
+    sp2_cal_fwid, sp2_db_fwid = fwid_base + 4, fwid_base + 5
+    fw_sp2 = fw_creator.vacuum_only_sp_fw(charge, spin_multiplicity, sp2_cal_fwid, sp2_db_fwid, priority, qm_method,
+                                          population_method="nbo",
+                                          mixed_basis_generator=copy.deepcopy(mixed_basis_generator))
+    fws.extend(fw_sp2)
+    links_dict[sp2_cal_fwid] = sp2_db_fwid
+    links_dict[geom1_db_fwid] = sp2_cal_fwid
+
     temperatures = list(itertools.chain([high_temperature, low_temperature] * md_runs))
-    md_fw_ids = zip(*[iter(range(fwid_base + 4, fwid_base + 4 + md_runs * 2 * 2))]*2)
+    md_fw_ids = zip(*[iter(range(fwid_base + 6, fwid_base + 6 + md_runs * 2 * 2))]*2)
     md_fws = []
     for (md_cal_fwid, md_db_fwid), temperature in zip(md_fw_ids, temperatures):
         fw_md = fw_creator.aimd_fw(charge, spin_multiplicity, md_cal_fwid, md_db_fwid, md_steps, time_step_au,
@@ -72,7 +81,7 @@ def md_relax_fws(mol, name, mission, qm_method, high_temperature=323.15, low_tem
         fws.extend(fw_md)
         links_dict[md_cal_fwid] = md_db_fwid
         links_dict[md_cal_fwid - 1] = md_cal_fwid
-    links_dict[geom1_db_fwid] = md_fw_ids[0][0]
+    links_dict[sp2_cal_fwid] = md_fw_ids[0][0]
     last_md_fwid = md_fw_ids[-1][-1]
 
     geom2_cal_fwid, geom2_db_fwid = last_md_fwid + 1, last_md_fwid + 2
