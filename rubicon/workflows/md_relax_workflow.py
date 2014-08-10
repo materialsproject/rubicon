@@ -81,7 +81,7 @@ def md_relax_fws(mol, name, mission, qm_method, high_temperature=323.15, low_tem
         fws.extend(fw_md)
         links_dict[md_cal_fwid] = md_db_fwid
         links_dict[md_cal_fwid - 1] = md_cal_fwid
-    links_dict[sp2_cal_fwid] = md_fw_ids[0][0]
+    links_dict[sp2_db_fwid] = md_fw_ids[0][0]
     last_md_fwid = md_fw_ids[-1][-1]
 
     geom2_cal_fwid, geom2_db_fwid = last_md_fwid + 1, last_md_fwid + 2
