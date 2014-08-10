@@ -50,12 +50,15 @@ def md_relax_fws(mol, name, mission, qm_method, high_temperature=323.15, low_tem
                                           population_method="nbo", mixed_basis_generator=mixed_basis_generator)
     fws.extend(fw_sp1)
     links_dict[sp1_cal_fwid] = sp1_db_fwid
+    if parent_fwid:
+        links_dict[parent_fwid] = sp1_cal_fwid
 
     geom1_cal_fwid, geom1_db_fwid = fwid_base + 2, fwid_base + 3
     fw_geom1 = fw_creator.geom_fw(
         charge, spin_multiplicity, geom1_cal_fwid, geom1_db_fwid, priority, qm_method, task_type_prefix="pre-md")
     fws.extend(fw_geom1)
     links_dict[geom1_cal_fwid] = geom1_db_fwid
+    links_dict[sp1_db_fwid] = geom1_cal_fwid
 
     temperatures = list(itertools.chain([high_temperature, low_temperature] * md_runs))
     md_fw_ids = zip(*[iter(range(fwid_base + 4, fwid_base + 4 + md_runs * 2 * 2))]*2)
