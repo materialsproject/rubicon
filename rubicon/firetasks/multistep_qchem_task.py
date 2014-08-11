@@ -38,7 +38,7 @@ def get_basic_update_specs(fw_spec, d):
         mixed_aux_basis = fw_spec["run_tags"]["mixed_aux_basis"]
     if "_mixed_basis_set_generator" in fw_spec:
         bs_generator_dict = fw_spec["_mixed_basis_set_generator"]
-        mol = d["molecule_final"]
+        mol = Molecule.from_dict(d["molecule_final"])
         if not ("scf" in d["calculations"] and "nbo" in d["calculations"]["scf"]["charges"]):
             raise ValueError("An vacuum single point caculation is require to use mixed basis set generator")
         charges = d["calculations"]["scf"]["charges"]["nbo"]
@@ -46,7 +46,7 @@ def get_basic_update_specs(fw_spec, d):
         mixed_basis = bs_generator.get_basis(mol, charges)
     if "_mixed_aux_basis_set_generator" in fw_spec:
         aux_bs_generator_dict = fw_spec["_mixed_aux_basis_set_generator"]
-        mol = d["molecule_final"]
+        mol = Molecule.from_dict(d["molecule_final"])
         if not ("scf" in d["calculations"] and "nbo" in d["calculations"]["scf"]["charges"]):
             raise ValueError("An vacuum single point caculation is require to use mixed auxiliary basis set generator")
         charges = d["calculations"]["scf"]["charges"]["nbo"]
