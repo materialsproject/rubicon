@@ -33,8 +33,8 @@ class AtomicChargeMixedBasisSetGenerator(FWSerializable):
 
     def __init__(self, charge_threshold=-0.5, normal_basis_set="6-31G*", diffuse_basis_set="6-31+G*"):
         self.charge_threshold = charge_threshold
-        self.normal_basis_set = normal_basis_set
-        self.diffuse_basis_set = diffuse_basis_set
+        self.normal_basis_set = normal_basis_set.lower()
+        self.diffuse_basis_set = diffuse_basis_set.lower()
 
     def get_basis(self, mol, charges):
         if not isinstance(mol, Molecule):
