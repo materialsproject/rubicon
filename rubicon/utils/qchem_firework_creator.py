@@ -451,7 +451,7 @@ class QChemFireWorkCreator():
         spec = self.base_spec()
         if priority:
             spec['_priority'] = priority
-        task_type = "Ab Initio Molecule Dynamics"
+        task_type = "ab initio molecule dynamics"
         state_name = self.get_state_name(charge, spin_multiplicity)
         title = self.molname + " " + state_name + " " + qm_method + " " + task_type
         exchange, correlation, basis_set,  aux_basis, rem_params, method_token = self. \
