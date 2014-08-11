@@ -25,3 +25,11 @@ class TestAtomicChargeMixedBasisSetGenerator(TestCase):
                ('H', '6-31G*'), ('H', '6-31G*'), ('C', '6-31G*'), ('C', '6-31G*'),
                ('H', '6-31G*'), ('N', '6-31+G*'), ('N', '6-31+G*'), ('H', '6-31G*')]
         self.assertEqual(basis, ans)
+
+    def test_to_and_from_dict(self):
+        g1 = AtomicChargeMixedBasisSetGenerator(
+            charge_threshold=-0.2, normal_basis_set="cc-PVDZ", diffuse_basis_set="aug-cc-PVDZ")
+        g2 = AtomicChargeMixedBasisSetGenerator.from_dict(g1.to_dict())
+        self.assertEqual(g2.charge_threshold, -0.2)
+        self.assertEqual(g2.normal_basis_set, "cc-PVDZ")
+        self.assertEqual(g2.diffuse_basis_set, "aug-cc-PVDZ")
