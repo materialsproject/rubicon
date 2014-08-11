@@ -24,6 +24,7 @@ from rubicon.utils.qchem_firework_creator import QChemFireWorkCreator
 
 __author__ = 'xiaohuiqu'
 
+
 def get_basic_update_specs(fw_spec, d):
     update_specs = {'mol': d["molecule_final"],
                     'egsnl': d["snl_final"],
@@ -36,22 +37,20 @@ def get_basic_update_specs(fw_spec, d):
     if "mixed_aux_basis" in fw_spec:
         mixed_aux_basis = fw_spec["run_tags"]["mixed_aux_basis"]
     if "_mixed_basis_set_generator" in fw_spec:
-        bs_generator = fw_spec["_mixed_basis_set_generator"]
-        if not isinstance(bs_generator, AtomicChargeMixedBasisSetGenerator):
-            raise ValueError("the basis set generator must be a AtomicChargeMixedBasisSetGenerator object")
+        bs_generator_dict = fw_spec["_mixed_basis_set_generator"]
         mol = d["molecule_final"]
-        if not ("scf" in d["calculations"] and "nbo" in d["calculations"]["scf"]):
+        if not ("scf" in d["calculations"] and "nbo" in d["calculations"]["scf"]["charges"]):
             raise ValueError("An vacuum single point caculation is require to use mixed basis set generator")
-        charges = d["calculations"]["scf"]["nbo"]
+        charges = d["calculations"]["scf"]["charges"]["nbo"]
+        bs_generator = AtomicChargeMixedBasisSetGenerator.from_dict(bs_generator_dict)
         mixed_basis = bs_generator.get_basis(mol, charges)
     if "_mixed_aux_basis_set_generator" in fw_spec:
-        aux_bs_generator = fw_spec["_mixed_aux_basis_set_generator"]
-        if not isinstance(aux_bs_generator, AtomicChargeMixedBasisSetGenerator):
-            raise ValueError("the auxiliary basis set generator must be a AtomicChargeMixedBasisSetGenerator object")
+        aux_bs_generator_dict = fw_spec["_mixed_aux_basis_set_generator"]
         mol = d["molecule_final"]
-        if not ("scf" in d["calculations"] and "nbo" in d["calculations"]["scf"]):
+        if not ("scf" in d["calculations"] and "nbo" in d["calculations"]["scf"]["charges"]):
             raise ValueError("An vacuum single point caculation is require to use mixed auxiliary basis set generator")
-        charges = d["calculations"]["scf"]["nbo"]
+        charges = d["calculations"]["scf"]["charges"]["nbo"]
+        aux_bs_generator = AtomicChargeMixedBasisSetGenerator(aux_bs_generator_dict)
         mixed_aux_basis = aux_bs_generator.get_basis(mol, charges)
     if mixed_basis or mixed_aux_basis:
         run_tags = fw_spec["run_tags"]
@@ -61,6 +60,7 @@ def get_basic_update_specs(fw_spec, d):
             run_tags["mixed_aux_basis"] = mixed_aux_basis
         fw_spec["run_tags"] = run_tags
     return update_specs
+
 
 def standard_parsing_db_insertion(fw_spec):
     if '_fizzled_parents' in fw_spec and not 'prev_qchem_dir' in fw_spec:
@@ -88,6 +88,7 @@ def standard_parsing_db_insertion(fw_spec):
     t_id, d = drone.assimilate(qcout_path, fw_spec=fw_spec)
     return d, qcout_path,  t_id
 
+
 class QChemGeomOptDBInsertionTask(FireTaskBase, FWSerializable):
     _fw_name = "QChem Geometry Optimization DB Insertion Task"
 
@@ -102,10 +103,8 @@ class QChemGeomOptDBInsertionTask(FireTaskBase, FWSerializable):
         else:
             if d['state'] == 'rejected' and \
                     d['reject_reason'] == 'structural change':
-                inchi_root = d['snlgroup_id_final']
                 defuse_reason = 'structural change'
             else:
-                inchi_root = fw_spec['inchi_root']
                 defuse_reason = d.get("errors", "unknown")
             offending_fwid = get_defuse_causing_qchem_fwid(qcout_path)
             return FWAction(
@@ -353,7 +352,7 @@ class QChemAIMDDBInsertionTask(FireTaskBase, FWSerializable):
                 update_spec=update_specs)
         else:
             if d['state'] == 'rejected' and \
-                            d['reject_reason'] == 'structural change':
+                    d['reject_reason'] == 'structural change':
                 defuse_reason = 'structural change'
             else:
                 defuse_reason = d.get("errors", "unknown")
