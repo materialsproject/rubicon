@@ -73,6 +73,8 @@ class QChemTask(FireTaskBase, FWSerializable):
         elif carver_name_pattern.match(socket.gethostname()):
         # mendel compute nodes
             qc_exe = shlex.split("qchem -np {}".format(min(8, len(mol))))
+        elif "macqu" in socket.gethostname().lower():
+            qc_exe = shlex.split("qchem -nt 2")
         else:
             qc_exe = ["qchem"]
 
