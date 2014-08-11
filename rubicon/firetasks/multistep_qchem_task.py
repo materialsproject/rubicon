@@ -58,7 +58,7 @@ def get_basic_update_specs(fw_spec, d):
             run_tags["mixed_basis"] = mixed_basis
         if mixed_aux_basis:
             run_tags["mixed_aux_basis"] = mixed_aux_basis
-        fw_spec["run_tags"] = run_tags
+        update_specs["run_tags"] = run_tags
     return update_specs
 
 
