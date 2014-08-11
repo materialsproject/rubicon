@@ -8,7 +8,7 @@ __author__ = 'xiaohuiqu'
 
 fs_to_au = 1.0E-15 / 2.418884326505E-17
 
-def md_relax_fws(mol, name, mission, qm_method, high_temperature=323.15, low_temperature=273.15,
+def md_relax_fws(mol, name, mission, qm_method, high_temperature=323, low_temperature=273,
                  md_steps=500, time_step=1.0, md_runs=3, normal_basis="6-31G*", diffuse_basis="6-31+G*",
                  charge_threshold=-0.5, dupefinder=None, priority=1,
                  parent_fwid=None, additional_user_tags=None):
@@ -70,7 +70,7 @@ def md_relax_fws(mol, name, mission, qm_method, high_temperature=323.15, low_tem
     links_dict[sp2_cal_fwid] = sp2_db_fwid
     links_dict[geom1_db_fwid] = sp2_cal_fwid
 
-    temperatures = list(itertools.chain([high_temperature, low_temperature] * md_runs))
+    temperatures = list(itertools.chain([int(high_temperature), int(low_temperature)] * md_runs))
     md_fw_ids = zip(*[iter(range(fwid_base + 6, fwid_base + 6 + md_runs * 2 * 2))]*2)
     md_fws = []
     for (md_cal_fwid, md_db_fwid), temperature in zip(md_fw_ids, temperatures):
