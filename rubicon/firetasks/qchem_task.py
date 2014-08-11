@@ -124,7 +124,9 @@ class QChemTask(FireTaskBase, FWSerializable):
                        'egsnl': fw_spec['egsnl'],
                        'snlgroup_id': fw_spec['snlgroup_id'],
                        'inchi_root': fw_spec['inchi_root']}
-        if 'mol' in fw_spec:
-            update_spec['mol'] = fw_spec['mol']
+        propagate_keys = ['egsnl', 'snlgroup_id', 'inchi_root',
+                          'mixed_basis', 'mixed_aux_basis', 'mol']
+        for k in propagate_keys:
+            update_spec[k] = fw_spec[k]
 
         return FWAction(stored_data=stored_data, update_spec=update_spec)

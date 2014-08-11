@@ -32,10 +32,10 @@ def get_basic_update_specs(fw_spec, d):
                     'inchi_root': fw_spec["inchi_root"]}
     mixed_basis = None
     mixed_aux_basis = None
-    if "mixed_basis" in fw_spec["run_tags"]:
-        mixed_basis = fw_spec["run_tags"]["mixed_basis"]
+    if "mixed_basis" in fw_spec:
+        mixed_basis = fw_spec["mixed_basis"]
     if "mixed_aux_basis" in fw_spec:
-        mixed_aux_basis = fw_spec["run_tags"]["mixed_aux_basis"]
+        mixed_aux_basis = fw_spec["mixed_aux_basis"]
     if "_mixed_basis_set_generator" in fw_spec:
         bs_generator_dict = fw_spec["_mixed_basis_set_generator"]
         mol = Molecule.from_dict(d["molecule_final"])
@@ -53,12 +53,9 @@ def get_basic_update_specs(fw_spec, d):
         aux_bs_generator = AtomicChargeMixedBasisSetGenerator(aux_bs_generator_dict)
         mixed_aux_basis = aux_bs_generator.get_basis(mol, charges)
     if mixed_basis or mixed_aux_basis:
-        run_tags = fw_spec["run_tags"]
-        if mixed_basis:
-            run_tags["mixed_basis"] = mixed_basis
-        if mixed_aux_basis:
-            run_tags["mixed_aux_basis"] = mixed_aux_basis
-        update_specs["run_tags"] = run_tags
+        update_specs["mixed_basis"] = mixed_basis
+    if mixed_aux_basis:
+        update_specs["mixed_aux_basis"] = mixed_basis
     return update_specs
 
 
