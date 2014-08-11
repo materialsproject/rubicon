@@ -120,10 +120,7 @@ class QChemTask(FireTaskBase, FWSerializable):
 
         stored_data = {'error_list': list(all_errors)}
         update_spec = {'prev_qchem_dir': prev_qchem_dir,
-                       'prev_task_type': fw_spec['task_type'],
-                       'egsnl': fw_spec['egsnl'],
-                       'snlgroup_id': fw_spec['snlgroup_id'],
-                       'inchi_root': fw_spec['inchi_root']}
+                       'prev_task_type': fw_spec['task_type']}
         propagate_keys = ['egsnl', 'snlgroup_id', 'inchi_root',
                           'mixed_basis', 'mixed_aux_basis', 'mol']
         for k in propagate_keys:
