@@ -411,7 +411,7 @@ class QChemFireWorkCreator():
         qctask_vac = QcTask(self.mol, charge=charge, spin_multiplicity=spin_multiplicity,
                             jobtype="sp", title=title, exchange=exchange, correlation=correlation,
                             basis_set=basis_set, aux_basis_set=aux_basis, rem_params=rem_params)
-        if not self.large:
+        if (not self.large) and (mixed_basis_generator is None and mixed_aux_basis_generator is None):
             qctask_vac.set_dft_grid(128, 302)
             qctask_vac.set_integral_threshold(12)
             qctask_vac.set_scf_convergence_threshold(8)
