@@ -33,9 +33,9 @@ def md_relax_fws(mol, name, mission, qm_method, high_temperature=323, low_temper
     mixed_basis_generator = AtomicChargeMixedBasisSetGenerator(charge_threshold, normal_basis, diffuse_basis)
     charge = mol.charge
     spin_multiplicity = mol.spin_multiplicity
-    fw_creator = QChemFireWorkCreator(mol=mol, molname=name, mission=mission,
-                                      dupefinder=dupefinder,
-                                      priority=priority, additional_user_tags=additional_user_tags)
+    large = len(mol) > 50
+    fw_creator = QChemFireWorkCreator(mol=mol, molname=name, mission=mission, dupefinder=dupefinder,
+                                      priority=priority, additional_user_tags=additional_user_tags, large=large)
     fwid_base = 1
     if parent_fwid:
         if not (isinstance(parent_fwid, int) or isinstance(parent_fwid, list)):
