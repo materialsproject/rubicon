@@ -394,7 +394,7 @@ class QChemFireWorkCreator():
             spec['_priority'] = priority
         task_type = "vacuum only single point energy"
         if mixed_basis_generator or mixed_aux_basis_generator:
-            population_method = "nbo"
+            population_method = population_method if population_method else "nbo"
             task_type = "atomic charge"
         state_name = self.get_state_name(charge, spin_multiplicity)
         title = self.molname + " " + state_name + " " + qm_method + " " + task_type
@@ -408,6 +408,8 @@ class QChemFireWorkCreator():
                 rem_params["nbo"] = 1
             elif population_method.lower() == "chelpg":
                 rem_params["chelpg"] = True
+            elif population_method.lower() == "hirshfeld":
+                rem_params["hirshfeld"] = True
         qctask_vac = QcTask(self.mol, charge=charge, spin_multiplicity=spin_multiplicity,
                             jobtype="sp", title=title, exchange=exchange, correlation=correlation,
                             basis_set=basis_set, aux_basis_set=aux_basis, rem_params=rem_params)

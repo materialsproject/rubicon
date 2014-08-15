@@ -39,17 +39,27 @@ def get_basic_update_specs(fw_spec, d):
     if "_mixed_basis_set_generator" in fw_spec:
         bs_generator_dict = fw_spec["_mixed_basis_set_generator"]
         mol = Molecule.from_dict(d["molecule_final"])
-        if not ("scf" in d["calculations"] and "nbo" in d["calculations"]["scf"]["charges"]):
+        pop_method = None
+        if "scf" in d["calculations"]:
+            if "nbo" in d["calculations"]["scf"]["charges"]:
+                pop_method = "nbo"
+            elif "hirshfeld" in d["calculations"]["scf"]["charges"]:
+                pop_method = "hirshfeld"
+        if pop_method is None:
             raise ValueError("An vacuum single point caculation is require to use mixed basis set generator")
-        charges = d["calculations"]["scf"]["charges"]["nbo"]
+        charges = d["calculations"]["scf"]["charges"][pop_method]
         bs_generator = AtomicChargeMixedBasisSetGenerator.from_dict(bs_generator_dict)
         mixed_basis = bs_generator.get_basis(mol, charges)
     if "_mixed_aux_basis_set_generator" in fw_spec:
-        aux_bs_generator_dict = fw_spec["_mixed_aux_basis_set_generator"]
-        mol = Molecule.from_dict(d["molecule_final"])
-        if not ("scf" in d["calculations"] and "nbo" in d["calculations"]["scf"]["charges"]):
+        pop_method = None
+        if "scf" in d["calculations"]:
+            if "nbo" in d["calculations"]["scf"]["charges"]:
+                pop_method = "nbo"
+            elif "hirshfeld" in d["calculations"]["scf"]["charges"]:
+                pop_method = "hirshfeld"
+        if pop_method is None:
             raise ValueError("An vacuum single point caculation is require to use mixed auxiliary basis set generator")
-        charges = d["calculations"]["scf"]["charges"]["nbo"]
+        charges = d["calculations"]["scf"]["charges"][pop_method]
         aux_bs_generator = AtomicChargeMixedBasisSetGenerator(aux_bs_generator_dict)
         mixed_aux_basis = aux_bs_generator.get_basis(mol, charges)
     if mixed_basis or mixed_aux_basis:

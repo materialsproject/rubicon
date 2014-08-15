@@ -48,7 +48,7 @@ def md_relax_fws(mol, name, mission, qm_method, high_temperature=323, low_temper
 
     sp1_cal_fwid, sp1_db_fwid = fwid_base + 0, fwid_base + 1
     fw_sp1 = fw_creator.vacuum_only_sp_fw(charge, spin_multiplicity, sp1_cal_fwid, sp1_db_fwid, priority, qm_method,
-                                          population_method="nbo", mixed_basis_generator=mixed_basis_generator)
+                                          population_method="hirshfeld", mixed_basis_generator=mixed_basis_generator)
     fws.extend(fw_sp1)
     links_dict[sp1_cal_fwid] = sp1_db_fwid
     if parent_fwid:
@@ -64,7 +64,7 @@ def md_relax_fws(mol, name, mission, qm_method, high_temperature=323, low_temper
 
     sp2_cal_fwid, sp2_db_fwid = fwid_base + 4, fwid_base + 5
     fw_sp2 = fw_creator.vacuum_only_sp_fw(charge, spin_multiplicity, sp2_cal_fwid, sp2_db_fwid, priority, qm_method,
-                                          population_method="nbo",
+                                          population_method="hirshfeld",
                                           mixed_basis_generator=copy.deepcopy(mixed_basis_generator))
     fws.extend(fw_sp2)
     links_dict[sp2_cal_fwid] = sp2_db_fwid
