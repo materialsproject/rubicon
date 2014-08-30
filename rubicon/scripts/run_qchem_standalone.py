@@ -143,6 +143,7 @@ def main():
             qctask_freq.spin_multiplicity = spin_multiplicity
             qctask_opt = copy.deepcopy(qctask_freq)
             qctask_opt.params["rem"]["jobtype"] = "opt"
+            qctask_opt.params["rem"].pop("scf_guess", None)
             qctask_opt.mol = new_mol
             qcinp = QcInput([qctask_opt, qctask_freq])
             eli_file_1 = base_filename + "_eli_img_1.qcinp"
@@ -162,6 +163,7 @@ def main():
                 qctask_freq.spin_multiplicity = spin_multiplicity
                 qctask_opt = copy.deepcopy(qctask_freq)
                 qctask_opt.params["rem"]["jobtype"] = "opt"
+                qctask_opt.params["rem"].pop("scf_guess", None)
                 qctask_opt.mol = new_mol
                 qcinp = QcInput([qctask_opt, qctask_freq])
                 for j in qcinp.jobs:
@@ -187,6 +189,7 @@ def main():
                     qctask_freq.spin_multiplicity = spin_multiplicity
                     qctask_opt = copy.deepcopy(qctask_freq)
                     qctask_opt.params["rem"]["jobtype"] = "opt"
+                    qctask_opt.params["rem"].pop("scf_guess", None)
                     qctask_opt.mol = new_mol
                     qcinp = QcInput([qctask_opt, qctask_freq])
                     for j in qcinp.jobs:
