@@ -242,6 +242,7 @@ def main():
     qcout_anion = QcOutput(options.anion)
     total_charge_cation = qcout_cation.data[0]["molecules"][-1].charge
     total_charge_anion = qcout_anion.data[0]["molecules"][-1].charge
+    total_charge_mol = qcout_molecule.data[0]["molecules"][-1].charge
     num_lcm = lcm(total_charge_cation, -total_charge_anion)
     num_cation = num_lcm/total_charge_cation
     num_anion = num_lcm/-total_charge_anion
@@ -257,7 +258,7 @@ def main():
     hardsphere_evaluator = lambda: HardSphereElectrostaticEnergyEvaluator.from_qchem_output(
         qcout_molecule, qcout_cation, qcout_anion)
     sqm_evaluator = lambda: SemiEmpricalQuatumMechanicalEnergyEvaluator(
-        obmol_molecule, obmol_cation, obmol_anion, total_charge=0, num_cation=num_cation, num_anion=num_anion)
+        obmol_molecule, obmol_cation, obmol_anion, total_charge=total_charge_mol, num_cation=num_cation, num_anion=num_anion)
     evaluator_creators = {"hardsphere": hardsphere_evaluator, "sqm": sqm_evaluator}
     creator = evaluator_creators[options.evaluator]
     energy_evaluator = creator()
