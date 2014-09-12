@@ -62,7 +62,7 @@ def snl_to_eg_wf(snl, parameters=None):
             ref_charge=ref_charge, spin_multiplicities=spin_multiplicities, dupefinder=DupeFinderEG(),
             priority=priority, parent_fwid=1, additional_user_tags=user_tags, qm_method=qm_method)
     elif workflow_type == 'solvation energy':
-        solvents = parameters.get('solvents', "water")
+        solvents = parameters.get('solvents', default_solvents)
         fws_tasks, connections = solvation_energy_fws(
             mol=snl.structure, name=molname, mission=mission, solvents=solvents, solvent_method=solvent_method,
             dupefinder=DupeFinderEG(), priority=priority, parent_fwid=1, additional_user_tags=user_tags,
