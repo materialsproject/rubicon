@@ -40,6 +40,8 @@ def run_qchem(filename):
         qc_exe = shlex.split("qchem -np {}".format(min(8, len(mol))))
         half_cpus_cmd = shlex.split("qchem -np {}".format(min(4, len(mol))))
         openmp_cmd = shlex.split("qchem -seq -nt 8")
+    elif "MacQu" in socket.gethostname():
+        qc_exe = shlex.split("qchem -nt 2")
     else:
         qc_exe = ["qchem"]
 
