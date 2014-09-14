@@ -1,5 +1,6 @@
 import datetime
-from pymatgen import Composition, PMGJSONDecoder, Structure, Molecule
+from monty.json import MontyDecoder
+from pymatgen import Composition, Structure, Molecule
 from pymatgen.analysis.molecule_matcher import \
     MoleculeMatcher, InchiMolAtomMapper
 from pymatgen.io.babelio import BabelMolAdaptor
@@ -84,7 +85,7 @@ class EGStructureNL(StructureNL):
     @staticmethod
     def from_dict(d):
         a = d["about"]
-        dec = PMGJSONDecoder()
+        dec = MontyDecoder()
 
         created_at = dec.process_decoded(a["created_at"]) if "created_at" in a \
             else None
