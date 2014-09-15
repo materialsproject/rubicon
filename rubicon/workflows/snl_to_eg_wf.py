@@ -19,7 +19,7 @@ def snl_to_eg_wf(snl, parameters=None):
     mission = parameters.get('mission', 'Electron Genome Production')
     priority = snl_priority * 2  # once we start a job, keep going!
 
-    f = Composition.from_formula(snl.structure.composition.reduced_formula).\
+    f = Composition(snl.structure.composition.reduced_formula).\
         alphabetical_formula
     molname = parameters.get("nick_name", f)
 
