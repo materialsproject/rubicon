@@ -124,7 +124,7 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
                 docs_available = True
             d = self.build_molecule_solvated_properties(docs)
             if d and len(d) > 0:
-                molecule['solvated_properties'][solvent] = d
+                molecule['solvated_properties'][solvent.replace(".", "_")] = d
         if not docs_available:
             return 1
         if len(molecule['solvated_properties']) == 0:
