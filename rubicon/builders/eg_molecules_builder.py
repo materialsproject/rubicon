@@ -113,12 +113,14 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         solvents = self._c.tasks.find(query, fields=TaskKeys.fields).distinct(
             "implicit_solvent.solvent_name"
         )
+        solvent_model = "ief-pcm"
         molecule = dict()
         molecule['charge'] = self.ref_charge
         docs_available = False
         molecule['solvated_properties'] = dict()
         for solvent in solvents:
             query['implicit_solvent.solvent_name'] = solvent
+            query['implicit_solvent.model'] = solvent_model
             docs = list(self._c.tasks.find(query, fields=TaskKeys.fields))
             if docs:
                 docs_available = True
