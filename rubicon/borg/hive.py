@@ -354,8 +354,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
     def from_dict(cls, d):
         return cls(**d["init_args"])
 
-    @property
-    def to_dict(self):
+    def as_dict(self):
         init_args = {"host": self.host, "port": self.port,
                      "database": self.database, "user": self.user,
                      "password": self.password,

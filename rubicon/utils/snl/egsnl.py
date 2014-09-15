@@ -76,7 +76,7 @@ class EGStructureNL(StructureNL):
 
     @property
     def to_dict(self):
-        m_dict = super(EGStructureNL, self).to_dict
+        m_dict = super(EGStructureNL, self).as_dict()
         m_dict.update(self.snl_autometa)
         m_dict['snl_id'] = self.snl_id
         m_dict['snlgroup_key'] = self.snlgroup_key
@@ -105,14 +105,14 @@ class EGStructureNL(StructureNL):
     @staticmethod
     def from_snl(snl, snl_id, pointgroup):
         # make a copy of SNL
-        snl2 = StructureNL.from_dict(snl.to_dict)
+        snl2 = StructureNL.from_dict(snl.as_dict())
         if '_electrolytegenome' not in snl2.data:
             snl2.data['_electrolytegenome'] = {}
 
         snl2.data['_electrolytegenome']['snl_id'] = snl_id
         snl2.data['_electrolytegenome']['pointgroup'] = pointgroup
 
-        return EGStructureNL.from_dict(snl2.to_dict)
+        return EGStructureNL.from_dict(snl2.as_dict())
 
 
 class SNLGroup():
