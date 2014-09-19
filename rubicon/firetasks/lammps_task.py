@@ -1,6 +1,8 @@
 import shlex
 import subprocess
 from pymatgen import Molecule
+from pymatgen.packmol.packmol import PackmolRunner
+from rubicon.gff.boxmol import BoxMol
 from rubicon.gff.lammpsin import DictLammpsInputSet
 from rubicon.gff.lamppsio import LmpInput
 from rubicon.gff.antechamberio import AntechamberRunner
@@ -28,8 +30,6 @@ class WritelammpsInputTask(FireTaskBase):
             {"user_incar_settings": ...}.
     """
 
-    ##required_params = ["molecules"]
-    #optional_params = []
     _fw_name = "Lammps Input Writer"
 
 
@@ -37,13 +37,19 @@ class WritelammpsInputTask(FireTaskBase):
         mols_dict = fw_spec["molecules"]
         mols = [Molecule.from_dict(m) for m in mols_dict]
         ffmol = AntechamberRunner(mols)
-        gff_list, top_list = ffmol.get_ff_top_mol(mols,'mol.pdb')
-        mols_in_box = PackmolRunner(mols, [{"number":1,"inside box":[0.,0.,0.,40.,40.,40.]},{"number":1},{"number":1}])
-        data_lammps=LmpInput(ffmol,mols_in_box)
+        ffmol_list = []
+        for mol in mols:
+            acr = AntechamberRunner(mol)
+            ffmol_list.append(acr.get_ff_top_mol(mol,'mol.pdb'))
+
+        pmr = PackmolRunner(mols, [{"number":1,"inside box":[0.,0.,0.,40.,40.,40.]},{"number":1},{"number":1}])
+        mols_coord = pmr.run()
+        boxmol= BoxMol.from_packmol(pmr, mols_coord)
+        data_lammps=LmpInput(ffmol_list, boxmol)
         data_lammps.write_lammps_data('mol_data.lammps')
         control_lammps = DictLammpsInputSet()
-        control_lammps.get_lammps_control('Lammps.json',ensemble='npt',temp=350)
+        control_lammps.get_lammps_control('Lammps.json',ensemble='nvt',temp=350)
         control_lammps.write_lampps_control('mol_control.lammps')
-        subprocess.check_call(shlex.split("lmp_mac <  mol_control.lammps"))
-        #subprocess.check_call(shlex.split("lmp_hopper <  mol_control.lammps"))
+        #subprocess.check_call(shlex.split("lmp_mac <  mol_control.lammps"))
+        subprocess.check_call(shlex.split("lmp_hopper <  mol_control.lammps"))
 
