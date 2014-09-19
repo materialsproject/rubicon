@@ -10,6 +10,7 @@ from pymatgen.io.qchemio import QcTask, QcInput
 from rubicon.dupefinders.dupefinder_eg import DupeFinderEG
 from rubicon.firetasks.qchem_task import QChemTask
 from rubicon.utils.atomic_charge_mixed_basis_set_generator import AtomicChargeMixedBasisSetGenerator
+from rubicon.workflows.bsse_wf import BSSEFragments
 
 __author__ = 'xiaohuiqu'
 
@@ -386,13 +387,20 @@ class QChemFireWorkCreator():
 
     def vacuum_only_sp_fw(self, charge, spin_multiplicity, fw_id_cal, fw_id_db,
                           priority=None, qm_method=None, population_method=None,
-                          mixed_basis_generator=None, mixed_aux_basis_generator=None):
+                          mixed_basis_generator=None, mixed_aux_basis_generator=None,
+                          super_mol_snlgroup_id=None, ghost_atoms=None, bs_overlap=False):
         if not qm_method:
             qm_method = "B3LYP/6-31+G*"
         spec = self.base_spec()
         if priority:
             spec['_priority'] = priority
-        task_type = "vacuum only single point energy"
+        if super_mol_snlgroup_id:
+            if ghost_atoms:
+                task_type = "bsse overlapped fragment"
+            else:
+                task_type = "bsse isolated fragment"
+        else:
+            task_type = "vacuum only single point energy"
         if mixed_basis_generator or mixed_aux_basis_generator:
             population_method = population_method if population_method else "nbo"
             task_type = "atomic charge"
@@ -410,9 +418,11 @@ class QChemFireWorkCreator():
                 rem_params["chelpg"] = True
             elif population_method.lower() == "hirshfeld":
                 rem_params["hirshfeld"] = True
+        ga = ghost_atoms if bs_overlap else None
         qctask_vac = QcTask(self.mol, charge=charge, spin_multiplicity=spin_multiplicity,
                             jobtype="sp", title=title, exchange=exchange, correlation=correlation,
-                            basis_set=basis_set, aux_basis_set=aux_basis, rem_params=rem_params)
+                            basis_set=basis_set, aux_basis_set=aux_basis, rem_params=rem_params,
+                            ghost_atoms=ga)
         if (not self.large) and (mixed_basis_generator is None and mixed_aux_basis_generator is None):
             qctask_vac.set_dft_grid(128, 302)
             qctask_vac.set_integral_threshold(12)
@@ -427,6 +437,11 @@ class QChemFireWorkCreator():
         spec['spin_multiplicity'] = spin_multiplicity
         spec['run_tags']['methods'] = method_token
         spec["qm_method"] = qm_method
+        if super_mol_snlgroup_id:
+            spec["run_tags"]["super_mol_snlgroup_id"] = super_mol_snlgroup_id
+        if ghost_atoms:
+            spec["run_tags"]["ghost_atoms"] = sorted(set(ghost_atoms))
+            spec["run_tags"]["bsse_fragment_type"] = BSSEFragments.OVERLAPPED if bs_overlap else BSSEFragments.ISOLATED
         if mixed_basis_generator:
             spec["_mixed_basis_set_generator"] = mixed_basis_generator
         if mixed_aux_basis_generator:

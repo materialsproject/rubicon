@@ -12,14 +12,17 @@ from pymatgen import Molecule
 from pymatgen.analysis.molecule_structure_comparator import \
     MoleculeStructureComparator
 from pymatgen.io.qchemio import QcInput
+from pymongo import MongoClient
 
 from rubicon.borg.hive import DeltaSCFQChemToDbTaskDrone
+from rubicon.dupefinders.dupefinder_eg import DupeFinderEG
 from rubicon.utils.atomic_charge_mixed_basis_set_generator import AtomicChargeMixedBasisSetGenerator
 from rubicon.utils.eg_wf_utils import get_eg_file_loc, \
     get_defuse_causing_qchem_fwid
 from rubicon.utils.snl.egsnl import EGStructureNL
 from rubicon.utils.snl.egsnl_mongo import EGSNLMongoAdapter
 from rubicon.utils.qchem_firework_creator import QChemFireWorkCreator
+from rubicon.workflows.bsse_wf import bsse_wf, BSSEFragments
 
 
 __author__ = 'xiaohuiqu'
@@ -51,6 +54,7 @@ def get_basic_update_specs(fw_spec, d):
         bs_generator = AtomicChargeMixedBasisSetGenerator.from_dict(bs_generator_dict)
         mixed_basis = bs_generator.get_basis(mol, charges)
     if "_mixed_aux_basis_set_generator" in fw_spec:
+        aux_bs_generator_dict = fw_spec["_mixed_aux_basis_set_generator"]
         pop_method = None
         if "scf" in d["calculations"]:
             if "nbo" in d["calculations"]["scf"]["charges"]:
@@ -324,6 +328,20 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
         return FWAction(stored_data={'task_id': t_id}, detours=wf,
                         update_spec=update_specs)
 
+def get_bsse_update_specs(fw_spec, d):
+    if "super_mol_snlgroup_id" in fw_spec["run_tags"]:
+        ghost_atoms = fw_spec["run_tags"]["ghost_atoms"]
+        fragment_type = fw_spec["run_tags"]["bsse_fragment_type"]
+        fragment_key = BasisSetSuperpositionErrorCalculationTask.get_fragment_key(ghost_atoms, fragment_type)
+        fragment_dict = dict()
+        fragment_dict["task_id"] = [d["task_id"]]
+        fragment_dict["energy"] = d["calculations"]["scf"]["energies"][-1][-1]
+        fragment_dict["ghost_atoms"] = ghost_atoms
+        fragment_dict["fragment_type"] = fragment_type
+        fragment_dict["super_mol_snlgroup_id"] = fw_spec["run_tags"]["super_mol_snlgroup_id"]
+        return {fragment_key: fragment_dict}
+    else:
+        return {}
 
 class QChemSinglePointEnergyDBInsertionTask(FireTaskBase, FWSerializable):
     _fw_name = "NWChem Single Point Energy DB Insertion Task"
@@ -333,6 +351,8 @@ class QChemSinglePointEnergyDBInsertionTask(FireTaskBase, FWSerializable):
         update_specs = get_basic_update_specs(fw_spec, d)
 
         if d["state"] == "successful":
+            bsse_specs = get_bsse_update_specs(fw_spec, d)
+            update_specs.update(bsse_specs)
             return FWAction(
                 stored_data={'task_id': t_id},
                 update_spec=update_specs)
@@ -370,3 +390,127 @@ class QChemAIMDDBInsertionTask(FireTaskBase, FWSerializable):
                                   'offending_fwid': offending_fwid},
                                  **update_specs),
                 defuse_children=True)
+
+
+class BasisSetSuperpositionErrorCalculationTask(FireTaskBase, FWSerializable):
+    _fw_name = "BSSE Calculation Task"
+
+    def run_task(self, fw_spec):
+        fragments_dict = fw_spec["fragments"]
+        fragments = BSSEFragments.from_dict(fragments_dict)
+        fragments_dict = dict()
+        bsse = 0.0
+        for frag in fragments:
+            fragment_name = self.get_fragment_name(frag.ghost_atoms)
+            fragments_dict[fragment_name] = dict()
+            ov_fragment_key = self.get_fragment_key(frag.ghost_atoms, BSSEFragments.OVERLAPPED)
+            fragments_dict[fragment_name][BSSEFragments.OVERLAPPED] = fw_spec[ov_fragment_key]
+            ov_energy = fragments_dict[fragment_name][BSSEFragments.OVERLAPPED]["energy"]
+            iso_fragment_key = self.get_fragment_key(frag.ghost_atoms, BSSEFragments.ISOLATED)
+            fragments_dict[fragment_name][BSSEFragments.ISOLATED] = fw_spec[iso_fragment_key]
+            fragments_dict[fragment_name]["charge"] = frag.charge
+            fragments_dict[fragment_name]["spin_multiplicity"] = frag.spin_multiplicity
+            iso_energy = fragments_dict[fragment_name][BSSEFragments.ISOLATED]["energy"]
+            fragments_dict[fragment_name]["fragment_bsse"] = ov_energy - iso_energy
+            bsse += fragments_dict[fragment_name]["fragment_bsse"]
+        result_dict = dict()
+        result_dict["fragments_result"] = fragments_dict
+        result_dict["fragments_def"] = fw_spec["fragments"]
+        result_dict["bsse"] = bsse
+        result_dict["mol"] = fw_spec["mol"]
+        result_dict["egsnl"] = fw_spec["egsnl"]
+        result_dict["snlgroup_id"] = fw_spec["snlgroup_id"]
+        result_dict["user_tags"] = fw_spec["user_tags"]
+        result_dict["qm_method"] = fw_spec["qm_method"]
+        result_dict["charge"] = fw_spec["charge"]
+        result_dict["spin_multiplicity"] = fw_spec["spin_multiplicity"]
+        result_dict["inchi_root"] = fw_spec["inchi_root"]
+        result_dict['task_type'] = "BSSE Counterpoise Correction"
+        t_id = self._insert_doc(result_dict, fw_spec)
+        return FWAction(
+            stored_data={'task_id': t_id},
+            update_spec={"mol": fw_spec["mol"],
+                         "egsnl": fw_spec["egsnl"],
+                         "snlgroup_id": fw_spec["snlgroup_id"],
+                         "inchi_root": fw_spec["inchi_root"]})
+
+    @classmethod
+    def _insert_doc(cls, d, fw_spec=None, update_duplicates=True):
+        db_dir = os.environ['DB_LOC']
+        db_path = os.path.join(db_dir, 'tasks_db.json')
+        logging.basicConfig(level=logging.INFO)
+        logger = logging.getLogger('QChemDrone')
+        logger.setLevel(logging.INFO)
+        sh = logging.StreamHandler(stream=sys.stdout)
+        sh.setLevel(getattr(logging, 'INFO'))
+        logger.addHandler(sh)
+        with open(db_path) as f:
+            db_creds = json.load(f)
+        conn = MongoClient(db_creds['host'], db_creds['port'],)
+        db = conn[db_creds['database']]
+        db.authenticate(db_creds['admin_user'], db_creds['admin_password'])
+        coll = db[db_creds['collection']]
+
+        result = coll.find_one({"super_mol_snlgroup_id": fw_spec["super_mol_snlgroup_id"],
+                                "fragments_def": fw_spec["fragments"]},
+                               fields=["task_id", "super_mol_snlgroup_id", "fragments_def"])
+        if result is None or update_duplicates:
+            d["last_updated"] = datetime.datetime.today()
+            if result is None:
+                if ("task_id" not in d) or (not d["task_id"]):
+                    id_num = db.counter.find_and_modify(
+                        query={"_id": "mol_taskid"},
+                        update={"$inc": {"c": 1}}
+                    )["c"]
+                    d["task_id"] = "mol-" + str(id_num)
+                    d["task_id_deprecated"] = id_num
+                logger.info("Inserting BSSE for snlgroup {} with taskid = {}"
+                            .format(d["super_mol_snlgroup_id"], d["task_id"]))
+            elif update_duplicates:
+                d["task_id"] = result["task_id"]
+                logger.info("Updating BSSE for snlgroup {} with taskid = {}"
+                            .format(d["super_mol_snlgroup_id"], d["task_id"]))
+            coll.update({"super_mol_snlgroup_id": fw_spec["super_mol_snlgroup_id"],
+                         "fragments_def": fw_spec["fragments"]},
+                        {"$set": d},
+                        upsert=True)
+            return d["task_id"]
+        else:
+            logger.info("Skipping duplicate snlgrup {}".format(d["super_mol_snlgroup_id"]))
+        conn.close()
+        if "task_id" in d:
+            return d["task_id"]
+        elif "task_id" in result:
+            return result["task_id"]
+        else:
+            return None
+
+    @classmethod
+    def get_fragment_name(cls, ghost_atoms):
+        return "ga_" + "-".join([str(i) for i in sorted(set(ghost_atoms))])
+
+    @classmethod
+    def get_fragment_key(cls, ghost_atoms, fragment_type):
+        return "{}_fragment_{}".format(fragment_type, cls.get_fragment_name(ghost_atoms))
+
+class CounterpoiseCorrectionGenerationTask(FireTaskBase, FWSerializable):
+    _fw_name = "Counterpoise Generation Task"
+
+    def run_task(self, fw_spec):
+        molname = fw_spec["user_tags"]["molname"]
+        mission = fw_spec["user_tags"]["mission"]
+        super_mol_snlgroup_id = fw_spec["snlgroup_id"]
+        charge = fw_spec["charge"]
+        spin_multiplicity = fw_spec["spin_multiplicity"]
+        inchi_root = fw_spec["inchi_root"]
+        egsnl = fw_spec["egsnl"]
+        qm_method = fw_spec["qm_method"]
+        fragments_dict = fw_spec["fragments"]
+        fragments = BSSEFragments.from_dict(fragments_dict)
+        priority = fw_spec.get('_priority', 1)
+        dupefinder = fw_spec.get('_dupefinder', DupeFinderEG())
+        cc_wf = bsse_wf(super_mol=egsnl, name=molname, super_mol_snlgroup_id=super_mol_snlgroup_id,
+                        super_mol_charge=charge, super_mol_spin_multiplicity=spin_multiplicity,
+                        super_mol_inchi_root=inchi_root, qm_method=qm_method, fragments=fragments, mission=mission,
+                        dupefinder=dupefinder, priority=priority)
+        return FWAction(detours=cc_wf)
