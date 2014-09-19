@@ -1,9 +1,11 @@
+import copy
 import math
+import itertools
 from pymatgen.analysis.molecule_structure_comparator import CovalentRadius
 from pymatgen.io.babelio import BabelMolAdaptor
 from rubicon.utils.ion_arranger.energy_evaluator import EnergyEvaluator
 import openbabel as ob
-
+import numpy as np
 
 __author__ = 'xiaohuiqu'
 
@@ -84,16 +86,13 @@ class CoulumbEnergyEvaluator(EnergyEvaluator):
 class HardSphereEnergyEvaluator(EnergyEvaluator):
     overlap_energy = 1.0E4
 
-    def __init__(self, mol_coords, mol_radius, cation_radius, anion_radius, isForContact=False):
+    def __init__(self, mol_coords, mol_radius, cation_radius, anion_radius):
         super(HardSphereEnergyEvaluator, self).__init__(mol_coords)
         self.mol_radius = mol_radius
         self.cation_radius = cation_radius
         self.anion_radius = anion_radius
-        self.isForContant = isForContact
-
 
     def calc_energy(self, cation_coords, anion_coords):
-        energy = 0.0
         energies = []
         for frag_coords in cation_coords:
             energies.append(self._pair_energy(self.mol_coords, self.mol_radius,
@@ -105,10 +104,7 @@ class HardSphereEnergyEvaluator(EnergyEvaluator):
             for ac in anion_coords:
                 energies.append(self._pair_energy(cc, self.cation_radius,
                     ac, self.anion_radius))
-        if not self.isForContant:
-            energy = sum(energies)
-        else:
-            energy = min(energies)
+        energy = sum(energies)
         return energy
 
     @classmethod
@@ -121,6 +117,79 @@ class HardSphereEnergyEvaluator(EnergyEvaluator):
                 if distance <= rad1 + rad2:
                     energy += cls.overlap_energy
         return energy
+
+class ContactDetector(object):
+    def __init__(self, mol_coords, mol_radius, cation_radius, anion_radius, cap=0.0):
+        self.mol_coords = mol_coords
+        self.mol_radius = mol_radius
+        self.cation_radius = cation_radius
+        self.anion_radius = anion_radius
+        self.cap = cap * AtomicRadiusUtils.angstrom2au
+
+    def is_contact(self, cation_coords, anion_coords):
+        contact_matrix = self._get_contact_matrix(cation_coords, anion_coords)
+        distance_matrix = self._get_distance_matrix(contact_matrix)
+        return np.all(distance_matrix < 1000)
+
+    @classmethod
+    def _get_distance_matrix(cls, contact_matrix):
+        # Find all-pairs shortest path lengths using Floyd's algorithm
+        distMatrix = copy.deepcopy(contact_matrix)
+        n, m = distMatrix.shape
+        um = np.identity(n)
+        distMatrix[distMatrix == 0] = 10001 # set zero entries to inf
+        distMatrix[um == 1] = 0 # except diagonal which should be zero
+        for i in range(n):
+            distMatrix = np.minimum(distMatrix, distMatrix[np.newaxis, i, :] + distMatrix[:, i, np.newaxis])
+        return distMatrix
+
+    def _get_contact_matrix(self, cation_coords, anion_coords):
+        fragments = [(self.mol_coords, self.mol_radius)]
+        fragments.extend(zip(cation_coords, [self.cation_radius] * len(cation_coords)))
+        fragments.extend(zip(anion_coords, [self.anion_radius] * len(anion_coords)))
+        num_frag = len(fragments)
+        fragments = [(c, r, i) for i, (c, r) in enumerate(fragments)]
+        contact_matrix = np.zeros((num_frag, num_frag), dtype=int)
+        frag_pair = itertools.combinations(fragments, r=2)
+        for p in frag_pair:
+            ((c1s, r1s, i1), (c2s, r2s, i2)) = p
+            contact = 0
+            for (c1, r1), (c2, r2) in itertools.product(zip(c1s, r1s), zip(c2s, r2s)):
+                distance = math.sqrt(sum([(x1-x2)**2 for x1, x2
+                                          in zip(c1, c2)]))
+                if distance <= r1 + r2 + self.cap:
+                    contact = 1
+                    break
+            contact_matrix[i1, i2] = contact
+            contact_matrix[i2, i1] = contact
+        return contact_matrix
+
+
+class LargestContactGapEnergyEvaluator(EnergyEvaluator):
+
+    def __init__(self, mol_coords, mol_radius, cation_radius, anion_radius, max_cap, threshold=1.0E-2):
+        super(LargestContactGapEnergyEvaluator, self).__init__(mol_coords)
+        self.max_cap = max_cap * AtomicRadiusUtils.angstrom2au
+        self.threshold = threshold
+        self.contact_detector = ContactDetector(mol_coords, mol_radius, cation_radius, anion_radius, cap=0.0)
+
+    def calc_energy(self, cation_coords, anion_coords):
+        low = 0.0
+        high = self.max_cap
+        self.contact_detector.cap = high
+        if not self.contact_detector.is_contact(cation_coords, anion_coords):
+            return float("NaN")
+        self.contact_detector.cap = low
+        if self.contact_detector.is_contact(cation_coords, anion_coords):
+            return low
+        while high - low > self.threshold:
+            mid = (low + high)/2.0
+            self.contact_detector.cap = mid
+            if self.contact_detector.is_contact(cation_coords, anion_coords):
+                high = mid
+            else:
+                low = mid
+        return ((high + low)/2.0)
 
 
 class GravitationalEnergyEvaluator(EnergyEvaluator):

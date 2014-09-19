@@ -41,42 +41,42 @@ class IonPlacer():
         self.mol_coords = self.normalize_molecule(self.molecule)
         self.normalize_molecule(self.cation)
         self.normalize_molecule(self.anion)
-        self.bounder = None
-        self.set_bounder()
+        self.bounder = self.get_bounder(self.mol_coords, cation, anion, num_cation, num_anion)
         self.best_pymatgen_mol = None
         self.playing_time = None
         self.energy_evaluator = energy_evaluator
 
-    def set_bounder(self):
+    @classmethod
+    def get_bounder(cls, mol_coords, ob_cation, ob_anion, num_cation, num_anion):
         lower_bound = []
         upper_bound = []
-        cation_num_atoms = self.cation.NumAtoms()
-        anion_num_atoms = self.anion.NumAtoms()
+        cation_num_atoms = ob_cation.NumAtoms()
+        anion_num_atoms = ob_anion.NumAtoms()
         mol_radius = max([math.sqrt(sum([x**2 for x in c]))
-                          for c in self.mol_coords])
-        cation_coords = self.get_mol_coords(self.cation)
+                          for c in mol_coords])
+        cation_coords = cls.get_mol_coords(ob_cation)
         cation_radius = max([math.sqrt(sum([x**2 for x in c]))
                              for c in cation_coords])
-        anion_coords = self.get_mol_coords(self.anion)
+        anion_coords = cls.get_mol_coords(ob_anion)
         anion_radius = max([math.sqrt(sum([x**2 for x in c]))
                             for c in anion_coords])
-        max_length = 2 * (mol_radius + cation_radius * self.num_cation +
-                          anion_radius * self.num_anion)
-        x_min = max_length + 5.0 * (self.num_cation + self.num_anion)
-        for i in range(self.num_cation):
+        max_length = 2 * (mol_radius + cation_radius * num_cation +
+                          anion_radius * num_anion)
+        x_min = max_length + 5.0 * (num_cation + num_anion)
+        for i in range(num_cation):
             lower_bound.extend([-x_min] * 3)
             upper_bound.extend([x_min] * 3)
             if cation_num_atoms > 1:
                 lower_bound.extend([0.0, -math.pi])
                 upper_bound.extend([math.pi, math.pi])
-        for i in range(self.num_anion):
+        for i in range(num_anion):
             lower_bound.extend([-x_min] * 3)
             upper_bound.extend([x_min] * 3)
             if anion_num_atoms > 1:
                 lower_bound.extend([0.0, -math.pi])
                 upper_bound.extend([math.pi, math.pi])
-        self.bounder = inspyred.ec.Bounder(lower_bound, upper_bound)
-        return self.bounder
+        bounder = inspyred.ec.Bounder(lower_bound, upper_bound)
+        return bounder
 
     @staticmethod
     def normalize_molecule(mol):
@@ -128,7 +128,7 @@ class IonPlacer():
         xi = 0
         for i in range(self.num_cation):
             cc = ob.OBMol(self.cation)
-            tx, ty, tz = x[xi: xi+3]
+            tx, ty, tz = [t/AtomicRadiusUtils.angstrom2au for  t in x[xi: xi+3]]
             xi += 3
             if cation_num_atoms > 1:
                 theta = x[xi]
@@ -140,7 +140,7 @@ class IonPlacer():
             cation_coords.append(self.get_mol_coords(cc))
         for i in range(self.num_anion):
             ac = ob.OBMol(self.anion)
-            tx, ty, tz = x[xi: xi+3]
+            tx, ty, tz = [t/AtomicRadiusUtils.angstrom2au for t in x[xi: xi+3]]
             xi += 3
             if anion_num_atoms > 1:
                 theta = x[xi]
@@ -228,7 +228,7 @@ def main():
                         required=True,
                         help="the file name of the aligned conformer")
     parser.add_argument("-n", "--num_iter", dest="num_iter", type=int,
-                        default=3000,
+                        default=600,
                         help="maximum number of evaluations")
     parser.add_argument("-s", "--size", dest="size", type=int, default=15,
                         help="population size")
@@ -242,6 +242,7 @@ def main():
     qcout_anion = QcOutput(options.anion)
     total_charge_cation = qcout_cation.data[0]["molecules"][-1].charge
     total_charge_anion = qcout_anion.data[0]["molecules"][-1].charge
+    total_charge_mol = qcout_molecule.data[0]["molecules"][-1].charge
     num_lcm = lcm(total_charge_cation, -total_charge_anion)
     num_cation = num_lcm/total_charge_cation
     num_anion = num_lcm/-total_charge_anion
@@ -257,7 +258,7 @@ def main():
     hardsphere_evaluator = lambda: HardSphereElectrostaticEnergyEvaluator.from_qchem_output(
         qcout_molecule, qcout_cation, qcout_anion)
     sqm_evaluator = lambda: SemiEmpricalQuatumMechanicalEnergyEvaluator(
-        obmol_molecule, obmol_cation, obmol_anion, total_charge=0)
+        obmol_molecule, obmol_cation, obmol_anion, total_charge=total_charge_mol, num_cation=num_cation, num_anion=num_anion)
     evaluator_creators = {"hardsphere": hardsphere_evaluator, "sqm": sqm_evaluator}
     creator = evaluator_creators[options.evaluator]
     energy_evaluator = creator()

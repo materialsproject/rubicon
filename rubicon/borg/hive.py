@@ -191,6 +191,8 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
                 suffix = "" if d["solvent_method"] == "NA" \
                     else "_" + d["solvent_method"]
                 data_dict["scf" + suffix] = d
+            elif d["jobtype"] == "aimd":
+                data_dict["amid"] = d
 
         data = data_dict
 
@@ -257,7 +259,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
                 d['snlgroup_id_initial'] = fw_spec['snlgroup_id']
                 d['inchi_root'] = fw_spec['inchi_root']
                 d['inchi_initial'] = fw_spec['inchi']
-                if "geometry optimization" in d['task_type']:
+                if "geometry optimization" in d['task_type'] or "molecule dynamics" in d['task_type']:
                     new_s = Molecule.from_dict(d["molecule_final"])
                     old_snl = EGStructureNL.from_dict(d['snl_initial'])
                     history = old_snl.history
@@ -352,8 +354,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
     def from_dict(cls, d):
         return cls(**d["init_args"])
 
-    @property
-    def to_dict(self):
+    def as_dict(self):
         init_args = {"host": self.host, "port": self.port,
                      "database": self.database, "user": self.user,
                      "password": self.password,
