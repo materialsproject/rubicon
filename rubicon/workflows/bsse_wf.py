@@ -131,7 +131,8 @@ def bsse_fws(super_mol_egsnl, name, super_mol_snlgroup_id, super_mol_charge, sup
             for p_fwid in parent_fwid:
                 links_dict[p_fwid] = fw_iso_cal_id
     user_tags = {"molname": name, "mission": mission}
-    user_tags.update(additional_user_tags)
+    if additional_user_tags:
+        user_tags.update(additional_user_tags)
     bsse_spec = {"mol": super_mol,
                  "fragments": fragments,
                  "snlgroup_id": super_mol_snlgroup_id,
