@@ -22,7 +22,6 @@ from rubicon.utils.eg_wf_utils import get_eg_file_loc, \
 from rubicon.utils.snl.egsnl import EGStructureNL
 from rubicon.utils.snl.egsnl_mongo import EGSNLMongoAdapter
 from rubicon.utils.qchem_firework_creator import QChemFireWorkCreator
-from rubicon.workflows.bsse_wf import bsse_wf, BSSEFragments
 
 
 __author__ = 'xiaohuiqu'
@@ -397,6 +396,7 @@ class BasisSetSuperpositionErrorCalculationTask(FireTaskBase, FWSerializable):
 
     def run_task(self, fw_spec):
         fragments_dict = fw_spec["fragments"]
+        from rubicon.workflows.bsse_wf import BSSEFragments
         fragments = BSSEFragments.from_dict(fragments_dict)
         fragments_dict = dict()
         bsse = 0.0
@@ -506,6 +506,7 @@ class CounterpoiseCorrectionGenerationTask(FireTaskBase, FWSerializable):
         egsnl = fw_spec["egsnl"]
         qm_method = fw_spec["qm_method"]
         fragments_dict = fw_spec["fragments"]
+        from rubicon.workflows.bsse_wf import bsse_wf, BSSEFragments
         fragments = BSSEFragments.from_dict(fragments_dict)
         priority = fw_spec.get('_priority', 1)
         dupefinder = fw_spec.get('_dupefinder', DupeFinderEG())

@@ -2,15 +2,16 @@
 import copy
 import json
 import os
+import math
+
 from fireworks import FireWork
 from fireworks.core.firework import Tracker
-import math
 from pymatgen.io.babelio import BabelMolAdaptor
 from pymatgen.io.qchemio import QcTask, QcInput
+
 from rubicon.dupefinders.dupefinder_eg import DupeFinderEG
 from rubicon.firetasks.qchem_task import QChemTask
-from rubicon.utils.atomic_charge_mixed_basis_set_generator import AtomicChargeMixedBasisSetGenerator
-from rubicon.workflows.bsse_wf import BSSEFragments
+
 
 __author__ = 'xiaohuiqu'
 
@@ -441,6 +442,7 @@ class QChemFireWorkCreator():
             spec["run_tags"]["super_mol_snlgroup_id"] = super_mol_snlgroup_id
         if ghost_atoms:
             spec["run_tags"]["ghost_atoms"] = sorted(set(ghost_atoms))
+            from rubicon.workflows.bsse_wf import BSSEFragments
             spec["run_tags"]["bsse_fragment_type"] = BSSEFragments.OVERLAPPED if bs_overlap else BSSEFragments.ISOLATED
         if mixed_basis_generator:
             spec["_mixed_basis_set_generator"] = mixed_basis_generator
