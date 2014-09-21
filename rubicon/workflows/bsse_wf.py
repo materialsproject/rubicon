@@ -107,8 +107,9 @@ def bsse_fws(super_mol_egsnl, name, super_mol_snlgroup_id, super_mol_charge, sup
         fws.extend(fws_ov)
         db_fwids.append(fw_ov_db_id)
         links_dict[fw_ov_cal_id] = fw_ov_db_id
-        for p_fwid in parent_fwid:
-            links_dict[p_fwid] = fw_ov_cal_id
+        if parent_fwid:
+            for p_fwid in parent_fwid:
+                links_dict[p_fwid] = fw_ov_cal_id
 
         sub_mol = get_sub_mol(super_mol, frag)
         fw_iso_creator = QChemFireWorkCreator(mol=sub_mol, molname=frag_name, mission=mission, dupefinder=dupefinder,
@@ -124,8 +125,11 @@ def bsse_fws(super_mol_egsnl, name, super_mol_snlgroup_id, super_mol_charge, sup
         fws.extend(fws_iso)
         db_fwids.append(fw_iso_db_id)
         links_dict[fw_iso_cal_id] = fw_iso_db_id
-        for p_fwid in parent_fwid:
-            links_dict[p_fwid] = fw_iso_cal_id
+        if parent_fwid:
+            for p_fwid in parent_fwid:
+                links_dict[p_fwid] = fw_ov_cal_id
+            for p_fwid in parent_fwid:
+                links_dict[p_fwid] = fw_iso_cal_id
     user_tags = {"molname": name, "mission": mission}
     user_tags.update(additional_user_tags)
     bsse_spec = {"mol": super_mol,
