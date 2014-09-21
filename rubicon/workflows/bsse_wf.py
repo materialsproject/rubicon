@@ -143,6 +143,6 @@ def bsse_fws(super_mol_egsnl, name, super_mol_snlgroup_id, super_mol_charge, sup
     fws.append(fw_bsse)
     return fws, links_dict
 
-def bsse_wf(mol, name, **kwargs):
-    fws, links_dict = bsse_fws(mol, name, **kwargs)
+def bsse_wf(super_mol, name, **kwargs):
+    fws, links_dict = bsse_fws(super_mol, name, **kwargs)
     return Workflow(fws, links_dict, name)
