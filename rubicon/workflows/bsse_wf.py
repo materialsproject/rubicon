@@ -1,4 +1,4 @@
-from fireworks.core.firework import FireWork, Workflow
+from fireworks.core.firework import Firework, Workflow
 from fireworks.utilities.fw_serializers import FWSerializable
 from pymatgen.core.structure import Molecule
 from rubicon.firetasks.multistep_qchem_task import BasisSetSuperpositionErrorCalculationTask, \
@@ -70,7 +70,7 @@ def counterpoise_correction_generation_fw(molname, charge, spin_multiplicity, qm
         fwid_base = max(parent_fwid) + 1
     current_fwid = fwid_base
     links_dict = dict()
-    fw_cp = FireWork([CounterpoiseCorrectionGenerationTask()],
+    fw_cp = Firework([CounterpoiseCorrectionGenerationTask()],
                      spec=fw_spec, name=molname + " Counterpoise Correction Generation", fw_id=current_fwid)
     for p_fwid in parent_fwid:
         links_dict[p_fwid] = current_fwid
@@ -142,7 +142,7 @@ def bsse_fws(super_mol_egsnl, name, super_mol_snlgroup_id, super_mol_charge, sup
                  "charge": super_mol_charge,
                  "spin_multiplicity": super_mol_spin_multiplicity,
                  "inchi_root": super_mol_inchi_root}
-    fw_bsse = FireWork([BasisSetSuperpositionErrorCalculationTask()],
+    fw_bsse = Firework([BasisSetSuperpositionErrorCalculationTask()],
                        spec=bsse_spec, name=name+" BSSE Calculation", fw_id=current_fwid)
     for i in db_fwids:
         links_dict[i] = current_fwid

@@ -1,4 +1,4 @@
-from fireworks.core.firework import FireWork, Workflow
+from fireworks.core.firework import Firework, Workflow
 from fireworks.utilities.fw_utilities import get_slug
 from pymatgen import Composition
 from rubicon.dupefinders.dupefinder_eg import DupeFinderEG
@@ -33,7 +33,7 @@ def snl_to_eg_wf(snl, parameters=None):
         spec['force_egsnl'] = snl.to_dict
         spec['force_snlgroup_id'] = parameters['snlgroup_id']
         del spec['snl']
-    fws_all.append(FireWork(tasks, spec,
+    fws_all.append(Firework(tasks, spec,
                    name=get_slug(molname + ' -- Add to SNL database'),
                    fw_id=1))
 
