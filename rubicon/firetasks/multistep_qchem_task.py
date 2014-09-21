@@ -177,7 +177,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                     if j.params["rem"]["jobtype"] == "opt":
                         j.scale_geom_opt_threshold(0.1, 0.1, 0.1)
                         j.set_geom_max_iterations(100)
-                fw.spec["qcinp"] = qcinp.to_dict
+                fw.spec["qcinp"] = qcinp.as_dict
                 fw.spec["run_tags"]["grid"] = grid
         wf = Workflow([geom_fw_cal, geom_fw_db, freq_fw_cal, freq_fw_db],
                       links_dict={geom_fwid_db: freq_fwid_cal,
@@ -256,7 +256,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
             return FWAction(
                 stored_data={'task_id': t_id},
                 defuse_children=True,
-                update_spec=dict({'perturbed_mol': new_mol.to_dict,
+                update_spec=dict({'perturbed_mol': new_mol.as_dict(),
                                   'defuse_reason': "structural change in imaginary "
                                                    "frequency elimination",
                                   'offending_fwid': offending_fwid},
@@ -286,8 +286,8 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
         sma = EGSNLMongoAdapter.auto_load()
         egsnl, snlgroup_id = sma.add_snl(
             new_snl, snlgroup_guess=d['snlgroup_id_initial'])
-        update_specs = {'mol': new_mol.to_dict,
-                        'egsnl': egsnl.to_dict,
+        update_specs = {'mol': new_mol.as_dict(),
+                        'egsnl': egsnl.as_dict(),
                         'snlgroup_id': fw_spec['snlgroup_id'],
                         'inchi_root': fw_spec['inchi_root']}
 

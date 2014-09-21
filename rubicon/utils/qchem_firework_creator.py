@@ -432,7 +432,7 @@ class QChemFireWorkCreator():
             qctask_vac.set_scf_algorithm_and_iterations(iterations=100)
 
         qcinp = QcInput([qctask_vac])
-        spec["qcinp"] = qcinp.to_dict
+        spec["qcinp"] = qcinp.as_dict()
         spec['task_type'] = task_type
         spec['charge'] = charge
         spec['spin_multiplicity'] = spin_multiplicity
