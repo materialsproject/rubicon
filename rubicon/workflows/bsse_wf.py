@@ -4,6 +4,7 @@ from pymatgen.core.structure import Molecule
 from rubicon.firetasks.multistep_qchem_task import BasisSetSuperpositionErrorCalculationTask, \
     CounterpoiseCorrectionGenerationTask
 from rubicon.utils.qchem_firework_creator import QChemFireWorkCreator
+from rubicon.utils.snl.egsnl import EGStructureNL
 
 __author__ = 'xiaohuiqu'
 
@@ -79,7 +80,7 @@ def counterpoise_correction_generation_fw(molname, charge, spin_multiplicity, qm
 def bsse_fws(super_mol_egsnl, name, super_mol_snlgroup_id, super_mol_charge, super_mol_spin_multiplicity,
              super_mol_inchi_root, qm_method, fragments, mission, dupefinder=None, priority=1,
              parent_fwid=None, additional_user_tags=None):
-    super_mol = super_mol_egsnl.structure
+    super_mol = EGStructureNL.from_dict(super_mol_egsnl).structure
     fwid_base = 1
     if parent_fwid:
         if not (isinstance(parent_fwid, int) or isinstance(parent_fwid, list)):
