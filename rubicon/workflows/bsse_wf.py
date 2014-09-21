@@ -22,6 +22,11 @@ class BSSEFragments(FWSerializable):
             if not isinstance(atom, int):
                 raise ValueError("Each element of ghost atoms must be an integer")
 
+    @staticmethod
+    def get_host_atoms(frag_atoms, mol):
+        all_atoms = set(range(len(mol)))
+        return sorted(all_atoms - set(frag_atoms))
+
     def to_dict(self):
         return {"@module": self.__class__.__module__,
                 "@class": self.__class__.__name__,
