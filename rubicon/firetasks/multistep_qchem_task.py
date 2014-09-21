@@ -505,9 +505,9 @@ class CounterpoiseCorrectionGenerationTask(FireTaskBase, FWSerializable):
         inchi_root = fw_spec["inchi_root"]
         egsnl = fw_spec["egsnl"]
         qm_method = fw_spec["qm_method"]
-        fragments_dict = fw_spec["fragments"]
+        fragment_dicts = fw_spec["fragments"]
         from rubicon.workflows.bsse_wf import bsse_wf, BSSEFragments
-        fragments = BSSEFragments.from_dict(fragments_dict)
+        fragments = [BSSEFragments.from_dict(d) for d in fragment_dicts]
         priority = fw_spec.get('_priority', 1)
         dupefinder = fw_spec.get('_dupefinder', DupeFinderEG())
         cc_wf = bsse_wf(super_mol=egsnl, name=molname, super_mol_snlgroup_id=super_mol_snlgroup_id,
