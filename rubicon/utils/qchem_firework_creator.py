@@ -4,7 +4,7 @@ import json
 import os
 import math
 
-from fireworks import FireWork
+from fireworks import Firework
 from fireworks.core.firework import Tracker
 from pymatgen.io.babelio import BabelMolAdaptor
 from pymatgen.io.qchemio import QcTask, QcInput
@@ -148,7 +148,7 @@ class QChemFireWorkCreator():
         task_name = self.molname + ' ' + state_name + ' ' + task_type
         from rubicon.firetasks.multistep_qchem_task \
             import QChemGeomOptDBInsertionTask
-        fw_geom_cal = FireWork([QChemTask()],
+        fw_geom_cal = Firework([QChemTask()],
                                spec=spec, name=task_name, fw_id=fw_id_cal)
         spec_db = copy.deepcopy(spec)
         del spec_db['_dupefinder']
@@ -156,7 +156,7 @@ class QChemFireWorkCreator():
         spec_db['task_type'] = task_type + ' DB Insertion'
         del spec_db["_trackers"][:2]
         task_name_db = task_name + " DB Insertion"
-        fw_geom_db = FireWork([QChemGeomOptDBInsertionTask()],
+        fw_geom_db = Firework([QChemGeomOptDBInsertionTask()],
                               spec=spec_db, name=task_name_db, fw_id=fw_id_db)
 
         return fw_geom_cal, fw_geom_db
@@ -193,7 +193,7 @@ class QChemFireWorkCreator():
         task_name = self.molname + ' ' + state_name + ' ' + task_type
         from rubicon.firetasks.multistep_qchem_task \
             import QChemFrequencyDBInsertionTask
-        fw_freq_cal = FireWork([QChemTask()],
+        fw_freq_cal = Firework([QChemTask()],
                                spec=spec, name=task_name, fw_id=fw_id_cal)
         spec_db = copy.deepcopy(spec)
         del spec_db['_dupefinder']
@@ -201,7 +201,7 @@ class QChemFireWorkCreator():
         spec_db['task_type'] = task_type + ' DB Insertion'
         del spec_db["_trackers"][:2]
         task_name_db = task_name + " DB Insertion"
-        fw_freq_db = FireWork([QChemFrequencyDBInsertionTask()],
+        fw_freq_db = Firework([QChemFrequencyDBInsertionTask()],
                               spec=spec_db, name=task_name_db, fw_id=fw_id_db)
         return fw_freq_cal, fw_freq_db
 
@@ -374,7 +374,7 @@ class QChemFireWorkCreator():
         task_name = self.molname + ' ' + state_name + ' ' + task_type
         from rubicon.firetasks.multistep_qchem_task \
             import QChemSinglePointEnergyDBInsertionTask
-        fw_sp_cal = FireWork([QChemTask()],
+        fw_sp_cal = Firework([QChemTask()],
                              spec=spec, name=task_name, fw_id=fw_id_cal)
         spec_db = copy.deepcopy(spec)
         del spec_db['_dupefinder']
@@ -382,7 +382,7 @@ class QChemFireWorkCreator():
         spec_db['task_type'] = task_type + ' DB Insertion'
         del spec_db["_trackers"][:2]
         task_name_db = task_name + " DB Insertion"
-        fw_sp_db = FireWork([QChemSinglePointEnergyDBInsertionTask()],
+        fw_sp_db = Firework([QChemSinglePointEnergyDBInsertionTask()],
                             spec=spec_db, name=task_name_db, fw_id=fw_id_db)
         return fw_sp_cal, fw_sp_db
 
@@ -451,7 +451,7 @@ class QChemFireWorkCreator():
         task_name = self.molname + ' ' + state_name + ' ' + task_type
         from rubicon.firetasks.multistep_qchem_task \
             import QChemSinglePointEnergyDBInsertionTask
-        fw_sp_cal = FireWork([QChemTask()],
+        fw_sp_cal = Firework([QChemTask()],
                              spec=spec, name=task_name, fw_id=fw_id_cal)
         spec_db = copy.deepcopy(spec)
         del spec_db['_dupefinder']
@@ -459,7 +459,7 @@ class QChemFireWorkCreator():
         spec_db['task_type'] = task_type + ' DB Insertion'
         del spec_db["_trackers"][:2]
         task_name_db = task_name + " DB Insertion"
-        fw_sp_db = FireWork([QChemSinglePointEnergyDBInsertionTask()],
+        fw_sp_db = Firework([QChemSinglePointEnergyDBInsertionTask()],
                             spec=spec_db, name=task_name_db, fw_id=fw_id_db)
         return fw_sp_cal, fw_sp_db
 
@@ -500,7 +500,7 @@ class QChemFireWorkCreator():
         task_name = self.molname + ' ' + state_name + ' ' + task_type
         from rubicon.firetasks.multistep_qchem_task \
             import QChemAIMDDBInsertionTask
-        fw_sp_cal = FireWork([QChemTask()],
+        fw_sp_cal = Firework([QChemTask()],
                              spec=spec, name=task_name, fw_id=fw_id_cal)
         spec_db = copy.deepcopy(spec)
         del spec_db['_dupefinder']
@@ -508,6 +508,6 @@ class QChemFireWorkCreator():
         spec_db['task_type'] = task_type + ' DB Insertion'
         del spec_db["_trackers"][:2]
         task_name_db = task_name + " DB Insertion"
-        fw_sp_db = FireWork([QChemAIMDDBInsertionTask()],
+        fw_sp_db = Firework([QChemAIMDDBInsertionTask()],
                             spec=spec_db, name=task_name_db, fw_id=fw_id_db)
         return fw_sp_cal, fw_sp_db
