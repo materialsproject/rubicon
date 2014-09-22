@@ -448,7 +448,8 @@ class BasisSetSuperpositionErrorCalculationTask(FireTaskBase, FWSerializable):
             db_creds = json.load(f)
         conn = MongoClient(db_creds['host'], db_creds['port'],)
         db = conn[db_creds['database']]
-        db.authenticate(db_creds['admin_user'], db_creds['admin_password'])
+        if db_creds['admin_user']:
+            db.authenticate(db_creds['admin_user'], db_creds['admin_password'])
         coll = db[db_creds['collection']]
 
         result = coll.find_one({"super_mol_snlgroup_id": fw_spec["super_mol_snlgroup_id"],
