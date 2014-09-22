@@ -389,7 +389,8 @@ class QChemFireWorkCreator():
     def vacuum_only_sp_fw(self, charge, spin_multiplicity, fw_id_cal, fw_id_db,
                           priority=None, qm_method=None, population_method=None,
                           mixed_basis_generator=None, mixed_aux_basis_generator=None,
-                          super_mol_snlgroup_id=None, super_mol_egsnl=None, ghost_atoms=None, bs_overlap=False):
+                          super_mol_snlgroup_id=None, super_mol_egsnl=None,
+                          super_mol_inchi_root=None, ghost_atoms=None, bs_overlap=False):
         if not qm_method:
             qm_method = "B3LYP/6-31+G*"
         spec = self.base_spec()
@@ -440,6 +441,7 @@ class QChemFireWorkCreator():
             spec["run_tags"]["super_mol_snlgroup_id"] = super_mol_snlgroup_id
             spec["snlgroup_id"] = super_mol_snlgroup_id
             spec["egsnl"] = super_mol_egsnl
+            spec["inchi_root"] = super_mol_inchi_root
         if ghost_atoms:
             spec["run_tags"]["ghost_atoms"] = sorted(set(ghost_atoms))
             from rubicon.workflows.bsse_wf import BSSEFragments
