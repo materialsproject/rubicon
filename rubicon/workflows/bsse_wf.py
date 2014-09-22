@@ -47,7 +47,7 @@ def get_sub_mol(mol, frag):
     return sub_mol
 
 def counterpoise_correction_generation_fw(molname, charge, spin_multiplicity, qm_method, fragments,
-                       mission, dupefinder=None, priority=1, parent_fwid=None, additional_user_tags=None):
+                       mission, priority=1, parent_fwid=None, additional_user_tags=None):
     fw_spec = dict()
     fw_spec["user_tags"] = dict()
     fw_spec["user_tags"]["molname"] = molname
@@ -58,8 +58,6 @@ def counterpoise_correction_generation_fw(molname, charge, spin_multiplicity, qm
     fw_spec["spin_multiplicity"] = spin_multiplicity
     if priority:
         fw_spec['_priority'] = priority
-    if dupefinder:
-        fw_spec['_dupefinder'] = dupefinder
     fw_spec["user_tags"].update(additional_user_tags)
     fwid_base = 1
     if parent_fwid:

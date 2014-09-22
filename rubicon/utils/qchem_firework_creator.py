@@ -440,6 +440,7 @@ class QChemFireWorkCreator():
         spec["qm_method"] = qm_method
         if super_mol_snlgroup_id:
             spec["run_tags"]["super_mol_snlgroup_id"] = super_mol_snlgroup_id
+            spec["snlgroup_id"] = super_mol_snlgroup_id
         if ghost_atoms:
             spec["run_tags"]["ghost_atoms"] = sorted(set(ghost_atoms))
             from rubicon.workflows.bsse_wf import BSSEFragments

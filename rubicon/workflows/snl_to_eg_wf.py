@@ -95,7 +95,7 @@ def snl_to_eg_wf(snl, parameters=None):
         fragments = parameters.get("fragments", None)
         fws_tasks, connections = counterpoise_correction_generation_fw(
             molname=molname, charge=charge, spin_multiplicity=spin_multiplicity, qm_method=qm_method,
-            fragments=fragments, mission=mission, dupefinder=None, priority=priority, parent_fwid=1,
+            fragments=fragments, mission=mission, priority=priority, parent_fwid=1,
             additional_user_tags=user_tags)
     else:
         raise ValueError('Workflow "{}" is not supported yet'.
