@@ -104,6 +104,7 @@ def bsse_fws(super_mol_egsnl, name, super_mol_snlgroup_id, super_mol_charge, sup
         fws_ov = fw_ov_creator.vacuum_only_sp_fw(frag.charge, frag.spin_multiplicity, fw_ov_cal_id, fw_ov_db_id,
                                                  priority=priority, qm_method=qm_method,
                                                  super_mol_snlgroup_id=super_mol_snlgroup_id,
+                                                 super_mol_egsnl=super_mol_egsnl,
                                                  ghost_atoms=frag.ghost_atoms, bs_overlap=True)
         fws.extend(fws_ov)
         db_fwids.append(fw_ov_db_id)
@@ -122,6 +123,7 @@ def bsse_fws(super_mol_egsnl, name, super_mol_snlgroup_id, super_mol_charge, sup
         fws_iso = fw_iso_creator.vacuum_only_sp_fw(frag.charge, frag.spin_multiplicity, fw_iso_cal_id, fw_iso_db_id,
                                                    priority=priority, qm_method=qm_method,
                                                    super_mol_snlgroup_id=super_mol_snlgroup_id,
+                                                   super_mol_egsnl=super_mol_egsnl,
                                                    ghost_atoms=frag.ghost_atoms, bs_overlap=False)
         fws.extend(fws_iso)
         db_fwids.append(fw_iso_db_id)
