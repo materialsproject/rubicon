@@ -73,7 +73,7 @@ class EGSNLMongoAdapter(FWSerializable):
         return egsnl, snlgroup.snlgroup_id
 
     def add_egsnl(self, egsnl, force_new=False, snlgroup_guess=None):
-        snl_d = egsnl.to_dict
+        snl_d = egsnl.as_dict()
         snl_d['snl_timestamp'] = datetime.datetime.utcnow().isoformat()
         self.snl.insert(snl_d)
         return self.build_groups(egsnl, force_new, snlgroup_guess)
@@ -84,7 +84,7 @@ class EGSNLMongoAdapter(FWSerializable):
                 format((egsnl.snl_id, snlgroup.snlgroup_id))
             if not testing_mode:
                 self.snlgroups.update({'snlgroup_id': snlgroup.snlgroup_id},
-                                      snlgroup.to_dict)
+                                      snlgroup.as_dict())
             return True
         return False
 
@@ -116,7 +116,7 @@ class EGSNLMongoAdapter(FWSerializable):
             snlgroup_id = self._get_next_snlgroup_id()
             snlgroup = SNLGroup(snlgroup_id, egsnl)
             if not testing_mode:
-                self.snlgroups.insert(snlgroup.to_dict)
+                self.snlgroups.insert(snlgroup.as_dict())
 
         return snlgroup, not match_found
 
@@ -131,10 +131,10 @@ class EGSNLMongoAdapter(FWSerializable):
                              'switch!')
 
         new_group = SNLGroup(snlgroup_id, canonical_egsnl, all_snl_ids)
-        self.snlgroups.update({'snlgroup_id': snlgroup_id}, new_group.to_dict)
+        self.snlgroups.update({'snlgroup_id': snlgroup_id}, new_group.as_dict())
 
 
-    def to_dict(self):
+    def as_dict(self):
         """
         Note: usernames/passwords are exported as unencrypted Strings!
         """
