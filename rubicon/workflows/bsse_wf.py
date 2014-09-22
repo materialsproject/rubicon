@@ -105,6 +105,7 @@ def bsse_fws(super_mol_egsnl, name, super_mol_snlgroup_id, super_mol_charge, sup
                                                  priority=priority, qm_method=qm_method,
                                                  super_mol_snlgroup_id=super_mol_snlgroup_id,
                                                  super_mol_egsnl=super_mol_egsnl,
+                                                 super_mol_inchi_root=super_mol_inchi_root,
                                                  ghost_atoms=frag.ghost_atoms, bs_overlap=True)
         fws.extend(fws_ov)
         db_fwids.append(fw_ov_db_id)
@@ -124,6 +125,7 @@ def bsse_fws(super_mol_egsnl, name, super_mol_snlgroup_id, super_mol_charge, sup
                                                    priority=priority, qm_method=qm_method,
                                                    super_mol_snlgroup_id=super_mol_snlgroup_id,
                                                    super_mol_egsnl=super_mol_egsnl,
+                                                   super_mol_inchi_root=super_mol_inchi_root,
                                                    ghost_atoms=frag.ghost_atoms, bs_overlap=False)
         fws.extend(fws_iso)
         db_fwids.append(fw_iso_db_id)
