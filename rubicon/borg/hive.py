@@ -200,16 +200,16 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
              "folder": os.path.basename(os.path.dirname(os.path.abspath(
                  path))),
              "calculations": data,
-             "molecule_initial": initial_mol.to_dict,
-             "molecule_final": mol.to_dict,
+             "molecule_initial": initial_mol.as_dict(),
+             "molecule_final": mol.as_dict(),
              "pointgroup": sch_symbol,
              "pretty_formula": comp.reduced_formula,
              "reduced_cell_formula_abc": comp.alphabetical_formula,
              "formula": comp.formula,
              "charge": charge,
              "spin_multiplicity": spin_mult,
-             "composition": comp.to_dict,
-             "elements": list(comp.to_dict.keys()),
+             "composition": comp.as_dict(),
+             "elements": list(comp.as_dict().keys()),
              "nelements": len(comp),
              "smiles": smiles, "can": can,
              "inchi_final": inchi_final,
@@ -282,7 +282,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
                     # add snl
                     egsnl, snlgroup_id = sma.add_snl(
                         new_snl, snlgroup_guess=d['snlgroup_id_initial'])
-                    d['snl_final'] = egsnl.to_dict
+                    d['snl_final'] = egsnl.as_dicit()
                     d['snlgroup_id_final'] = snlgroup_id
                 else:
                     d['snl_final'] = fw_spec['egsnl']
