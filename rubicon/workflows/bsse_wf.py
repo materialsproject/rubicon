@@ -79,7 +79,7 @@ def counterpoise_correction_generation_fw(molname, charge, spin_multiplicity, qm
 
 def bsse_fws(super_mol_egsnl, name, super_mol_snlgroup_id, super_mol_charge, super_mol_spin_multiplicity,
              super_mol_inchi_root, qm_method, fragments, mission, dupefinder=None, priority=1,
-             parent_fwid=None, additional_user_tags=None):
+             parent_fwid=None, additional_user_tags=None, is_spawnned=False):
     super_mol = EGStructureNL.from_dict(super_mol_egsnl).structure
     fwid_base = 1
     if parent_fwid:
@@ -88,6 +88,9 @@ def bsse_fws(super_mol_egsnl, name, super_mol_snlgroup_id, super_mol_charge, sup
         parent_fwid = parent_fwid if isinstance(parent_fwid, list) \
             else [parent_fwid]
         fwid_base = max(parent_fwid) + 1
+    if is_spawnned:
+        fwid_base = -1
+    fwid_incr_factor = 1 if not is_spawnned else -1
     fws = []
     db_fwids = []
     links_dict = dict()
@@ -97,9 +100,9 @@ def bsse_fws(super_mol_egsnl, name, super_mol_snlgroup_id, super_mol_charge, sup
         fw_ov_creator = QChemFireWorkCreator(mol=super_mol, molname=frag_name, mission=mission, dupefinder=dupefinder,
                                              priority=priority, additional_user_tags=additional_user_tags)
         fw_ov_cal_id = current_fwid
-        current_fwid += 1
+        current_fwid += fwid_incr_factor
         fw_ov_db_id = current_fwid
-        current_fwid += 1
+        current_fwid += fwid_incr_factor
         fws_ov = fw_ov_creator.vacuum_only_sp_fw(frag.charge, frag.spin_multiplicity, fw_ov_cal_id, fw_ov_db_id,
                                                  priority=priority, qm_method=qm_method,
                                                  super_mol_snlgroup_id=super_mol_snlgroup_id,
@@ -115,9 +118,9 @@ def bsse_fws(super_mol_egsnl, name, super_mol_snlgroup_id, super_mol_charge, sup
         fw_iso_creator = QChemFireWorkCreator(mol=sub_mol, molname=frag_name, mission=mission, dupefinder=dupefinder,
                                               priority=priority, additional_user_tags=additional_user_tags)
         fw_iso_cal_id = current_fwid
-        current_fwid += 1
+        current_fwid += fwid_incr_factor
         fw_iso_db_id = current_fwid
-        current_fwid += 1
+        current_fwid += fwid_incr_factor
         fws_iso = fw_iso_creator.vacuum_only_sp_fw(frag.charge, frag.spin_multiplicity, fw_iso_cal_id, fw_iso_db_id,
                                                    priority=priority, qm_method=qm_method,
                                                    super_mol_snlgroup_id=super_mol_snlgroup_id,

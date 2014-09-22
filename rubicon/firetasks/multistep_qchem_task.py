@@ -513,5 +513,6 @@ class CounterpoiseCorrectionGenerationTask(FireTaskBase, FWSerializable):
         cc_wf = bsse_wf(super_mol=egsnl, name=molname, super_mol_snlgroup_id=super_mol_snlgroup_id,
                         super_mol_charge=charge, super_mol_spin_multiplicity=spin_multiplicity,
                         super_mol_inchi_root=inchi_root, qm_method=qm_method, fragments=fragments, mission=mission,
-                        dupefinder=dupefinder, priority=priority)
+                        dupefinder=dupefinder, priority=priority, is_spawnned=True)
+
         return FWAction(detours=cc_wf)
