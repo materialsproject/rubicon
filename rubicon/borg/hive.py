@@ -233,7 +233,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
             d['structure_changed'] = cls._check_structure_change(
                 initial_mol, mol, path)
         else:
-            d['structure_changed'] = True
+            d['structure_changed'] = False
         if d['structure_changed']:
             d['state'] = 'rejected'
             d['reject_reason'] = 'structural change'
