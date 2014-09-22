@@ -395,9 +395,9 @@ class BasisSetSuperpositionErrorCalculationTask(FireTaskBase, FWSerializable):
     _fw_name = "BSSE Calculation Task"
 
     def run_task(self, fw_spec):
-        fragments_dict = fw_spec["fragments"]
+        fragment_dicts = fw_spec["fragments"]
         from rubicon.workflows.bsse_wf import BSSEFragments
-        fragments = BSSEFragments.from_dict(fragments_dict)
+        fragments = [BSSEFragments.from_dict(d) for d in fragment_dicts]
         fragments_dict = dict()
         bsse = 0.0
         for frag in fragments:
