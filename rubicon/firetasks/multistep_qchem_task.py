@@ -452,7 +452,7 @@ class BasisSetSuperpositionErrorCalculationTask(FireTaskBase, FWSerializable):
             db.authenticate(db_creds['admin_user'], db_creds['admin_password'])
         coll = db[db_creds['collection']]
 
-        result = coll.find_one({"super_mol_snlgroup_id": fw_spec["super_mol_snlgroup_id"],
+        result = coll.find_one({"super_mol_snlgroup_id": fw_spec["snlgroup_id"],
                                 "fragments_def": fw_spec["fragments"]},
                                fields=["task_id", "super_mol_snlgroup_id", "fragments_def"])
         if result is None or update_duplicates:
@@ -466,12 +466,12 @@ class BasisSetSuperpositionErrorCalculationTask(FireTaskBase, FWSerializable):
                     d["task_id"] = "mol-" + str(id_num)
                     d["task_id_deprecated"] = id_num
                 logger.info("Inserting BSSE for snlgroup {} with taskid = {}"
-                            .format(d["super_mol_snlgroup_id"], d["task_id"]))
+                            .format(d["snlgroup_id"], d["task_id"]))
             elif update_duplicates:
                 d["task_id"] = result["task_id"]
                 logger.info("Updating BSSE for snlgroup {} with taskid = {}"
                             .format(d["super_mol_snlgroup_id"], d["task_id"]))
-            coll.update({"super_mol_snlgroup_id": fw_spec["super_mol_snlgroup_id"],
+            coll.update({"super_mol_snlgroup_id": fw_spec["snlgroup_id"],
                          "fragments_def": fw_spec["fragments"]},
                         {"$set": d},
                         upsert=True)
