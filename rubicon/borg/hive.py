@@ -171,12 +171,15 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
         pga = PointGroupAnalyzer(mol)
         sch_symbol = pga.sch_symbol
         stationary_type = None
+        has_structure_changing_job = False
         for d in data:
             # noinspection PyTypeChecker
             if d["jobtype"] == "opt":
                 data_dict["geom_opt"] = d
+                has_structure_changing_job = True
             elif d["jobtype"] == "freq":
                 data_dict["freq"] = d
+                has_structure_changing_job = True
                 # noinspection PyTypeChecker
                 if not d["has_error"]:
                     if d['frequencies'][0]["frequency"] < -0.00:
@@ -193,6 +196,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
                 data_dict["scf" + suffix] = d
             elif d["jobtype"] == "aimd":
                 data_dict["amid"] = d
+                has_structure_changing_job = True
 
         data = data_dict
 
@@ -225,8 +229,11 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
                 d['inchi_changed'] = True
             else:
                 d['inchi_changed'] = False
-        d['structure_changed'] = cls._check_structure_change(
-            initial_mol, mol, path)
+        if has_structure_changing_job:
+            d['structure_changed'] = cls._check_structure_change(
+                initial_mol, mol, path)
+        else:
+            d['structure_changed'] = True
         if d['structure_changed']:
             d['state'] = 'rejected'
             d['reject_reason'] = 'structural change'
