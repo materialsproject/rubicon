@@ -163,7 +163,6 @@ class Gff(MSONable):
                     sigma = float(line[14:20])
                     epsilon = abs(float(line[22:28]))
                     vdws[vdw_type] = (sigma, epsilon)
-
             return Gff(bonds,angles,dihedrals,imdihedrals,vdws,masses,None)
 
 
@@ -171,11 +170,10 @@ class Gff(MSONable):
 
         """
         read ANTECHAMBER_AC.AC to store the antechamber atom name
-        and GAFF atom name in a dict
+        and GAFF atom name and index of atoms in a dict
         """
 
         with open(filename) as f:
-
             for line in f.readlines():
                 token = line.split()
                 if token[0]=='ATOM':
@@ -200,8 +198,8 @@ class Gff(MSONable):
         self.charges = json.load(jsonfile, encoding="utf-8")
 
 
-    @property
-    def to_dict(self):
+
+    def as_dict(self):
         return {"@module": self.__class__.__module__,
                 "@class": self.__class__.__name__,
                 "bonds": self.bonds,

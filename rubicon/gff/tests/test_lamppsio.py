@@ -81,7 +81,7 @@ class TestLmpInput(TestCase):
         cls.ffmol = AntechamberRunner(mols)
         cls.gff_list, top_list = cls.ffmol.get_ff_top_mol(mols,'mol.pdb')
         #cls.mols_in_box = PackmolRunner(mols, [{"number":1,"inside box":[0.,0.,0.,40.,40.,40.]},{"number":1},{"number":1}])
-        # mols_in_box_dict={"mols":[m.to_dict for m in cls.mols_in_box.mols],"param_list":cls.mols_in_box.param_list}
+        # mols_in_box_dict={"mols":[m.as_dict for m in cls.mols_in_box.mols],"param_list":cls.mols_in_box.param_list}
         # with open("packmol_data.json",'w') as f:
         #     json.dump(mols_in_box_dict,f,indent=4)
         with open("packmol_data.json") as f :

@@ -14,13 +14,7 @@ class BoxMol:
                  [p["number"] for p in pmr.param_list],
                  [p['inside box'] for p in pmr.param_list],
                  mols_coords)
-        # bm.mols = pmr.mols
-        # bm.num_mols = pmr.param_list['number']
-        # bm.box_dims = pmr.param_list['inside box']
-        # bm.param_list = pmr.param_list
-        # bm.mols_coords = mols_coords
         return bm
-
 
     @classmethod
     def from_YongRunner(cls, pmr, mols_in_box):
@@ -31,7 +25,7 @@ class BoxMol:
         return bm
 
     @classmethod
-    def form_coords(cls, species, coords):
+    def from_coords(cls, species, coords):
         bm = cls()
         mols = [Molecule(s,c) for s, c in species, coords]
         bm.mols = mols
