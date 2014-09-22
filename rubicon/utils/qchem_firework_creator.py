@@ -396,10 +396,7 @@ class QChemFireWorkCreator():
         if priority:
             spec['_priority'] = priority
         if super_mol_snlgroup_id:
-            if ghost_atoms:
-                task_type = "bsse overlapped fragment"
-            else:
-                task_type = "bsse isolated fragment"
+            task_type = "bsse {} fragment".format(BSSEFragments.OVERLAPPED if bs_overlap else BSSEFragments.ISOLATED)
         else:
             task_type = "vacuum only single point energy"
         if mixed_basis_generator or mixed_aux_basis_generator:
