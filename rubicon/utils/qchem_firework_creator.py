@@ -396,6 +396,7 @@ class QChemFireWorkCreator():
         if priority:
             spec['_priority'] = priority
         if super_mol_snlgroup_id:
+            from rubicon.workflows.bsse_wf import BSSEFragments
             task_type = "bsse {} fragment".format(BSSEFragments.OVERLAPPED if bs_overlap else BSSEFragments.ISOLATED)
         else:
             task_type = "vacuum only single point energy"
