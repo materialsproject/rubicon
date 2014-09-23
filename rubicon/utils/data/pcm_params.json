@@ -11,5 +11,6 @@
     "ethylenecarbonate": {"dielectric": 90.0, "solvent_probe_radius": 2.38},
     "acetonitrile": {"dielectric": 37.0, "solvent_probe_radius": 2.20},
     "dmso": {"dielectric": 46.0, "solvent_probe_radius": 2.44},
-    "thf": {"dielectric": 7.6, "solvent_probe_radius": 2.54}
+    "thf": {"dielectric": 7.6, "solvent_probe_radius": 2.54},
+    "diethylcarbonate": {"dielectric": 2.8, "solvent_probe_radius": 2.91}
 }
