@@ -66,7 +66,7 @@ if __name__ == '__main__':
     n1c = Molecule(["C", "C", "H", "C", "H", "N", "N", "C", "H", "H", "H", "C", "H", "H", "C", "H", "H", "H", "C", "H", "H", "H"], coords_n1c,site_properties={"mol_name":["N1C"]*len(coords_n1c)})
     pc = Molecule(["C", "C", "O", "H", "H", "C", "O", "O", "C", "H", "H", "H", "H"], coords_pc,site_properties={"mol_name":["PC"]*len(coords_pc)})
 
-    fw = FireWork([task1], spec={"molecules": [tfn.to_dict,n1c.to_dict,pc.to_dict]})
+    fw = FireWork([task1], spec={"molecules": [tfn.as_dict(),n1c.as_dict(),pc.as_dict()]})
     wf = Workflow([fw])
 
     lp = LaunchPad.auto_load()

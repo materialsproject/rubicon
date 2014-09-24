@@ -12,8 +12,11 @@ from pymatgen import Molecule
 from pymatgen.analysis.molecule_structure_comparator import \
     MoleculeStructureComparator
 from pymatgen.io.qchemio import QcInput
+from pymongo import MongoClient
 
 from rubicon.borg.hive import DeltaSCFQChemToDbTaskDrone
+from rubicon.dupefinders.dupefinder_eg import DupeFinderEG
+from rubicon.utils.atomic_charge_mixed_basis_set_generator import AtomicChargeMixedBasisSetGenerator
 from rubicon.utils.eg_wf_utils import get_eg_file_loc, \
     get_defuse_causing_qchem_fwid
 from rubicon.utils.snl.egsnl import EGStructureNL
@@ -24,62 +27,101 @@ from rubicon.utils.qchem_firework_creator import QChemFireWorkCreator
 __author__ = 'xiaohuiqu'
 
 
+def get_basic_update_specs(fw_spec, d):
+    update_specs = {'mol': d["molecule_final"],
+                    'egsnl': d["snl_final"],
+                    'snlgroup_id': d["snlgroup_id_final"],
+                    'inchi_root': fw_spec["inchi_root"]}
+    mixed_basis = None
+    mixed_aux_basis = None
+    if "mixed_basis" in fw_spec:
+        mixed_basis = fw_spec["mixed_basis"]
+    if "mixed_aux_basis" in fw_spec:
+        mixed_aux_basis = fw_spec["mixed_aux_basis"]
+    if "_mixed_basis_set_generator" in fw_spec:
+        bs_generator_dict = fw_spec["_mixed_basis_set_generator"]
+        mol = Molecule.from_dict(d["molecule_final"])
+        pop_method = None
+        if "scf" in d["calculations"]:
+            if "nbo" in d["calculations"]["scf"]["charges"]:
+                pop_method = "nbo"
+            elif "hirshfeld" in d["calculations"]["scf"]["charges"]:
+                pop_method = "hirshfeld"
+        if pop_method is None:
+            raise ValueError("An vacuum single point caculation is require to use mixed basis set generator")
+        charges = d["calculations"]["scf"]["charges"][pop_method]
+        bs_generator = AtomicChargeMixedBasisSetGenerator.from_dict(bs_generator_dict)
+        mixed_basis = bs_generator.get_basis(mol, charges)
+    if "_mixed_aux_basis_set_generator" in fw_spec:
+        aux_bs_generator_dict = fw_spec["_mixed_aux_basis_set_generator"]
+        pop_method = None
+        if "scf" in d["calculations"]:
+            if "nbo" in d["calculations"]["scf"]["charges"]:
+                pop_method = "nbo"
+            elif "hirshfeld" in d["calculations"]["scf"]["charges"]:
+                pop_method = "hirshfeld"
+        if pop_method is None:
+            raise ValueError("An vacuum single point caculation is require to use mixed auxiliary basis set generator")
+        charges = d["calculations"]["scf"]["charges"][pop_method]
+        aux_bs_generator = AtomicChargeMixedBasisSetGenerator(aux_bs_generator_dict)
+        mixed_aux_basis = aux_bs_generator.get_basis(mol, charges)
+    if mixed_basis or mixed_aux_basis:
+        update_specs["mixed_basis"] = mixed_basis
+    if mixed_aux_basis:
+        update_specs["mixed_aux_basis"] = mixed_basis
+    return update_specs
+
+
+def standard_parsing_db_insertion(fw_spec):
+    if '_fizzled_parents' in fw_spec and not 'prev_qchem_dir' in fw_spec:
+        prev_dir = fw_spec['_fizzled_parents'][0]['launches'][0][
+            'launch_dir']
+    else:
+        prev_dir = fw_spec['prev_qchem_dir']
+    db_dir = os.environ['DB_LOC']
+    db_path = os.path.join(db_dir, 'tasks_db.json')
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger('QChemDrone')
+    logger.setLevel(logging.INFO)
+    sh = logging.StreamHandler(stream=sys.stdout)
+    sh.setLevel(getattr(logging, 'INFO'))
+    logger.addHandler(sh)
+    with open(db_path) as f:
+        db_creds = json.load(f)
+    drone = DeltaSCFQChemToDbTaskDrone(
+        host=db_creds['host'], port=db_creds['port'],
+        database=db_creds['database'], user=db_creds['admin_user'],
+        password=db_creds['admin_password'],
+        collection=db_creds['collection'])
+    qcout_path = get_eg_file_loc(os.path.abspath(os.path.join(
+        prev_dir, "mol.qcout")))
+    t_id, d = drone.assimilate(qcout_path, fw_spec=fw_spec)
+    return d, qcout_path,  t_id
+
+
 class QChemGeomOptDBInsertionTask(FireTaskBase, FWSerializable):
     _fw_name = "QChem Geometry Optimization DB Insertion Task"
 
     def run_task(self, fw_spec):
-        if '_fizzled_parents' in fw_spec and not 'prev_qchem_dir' in fw_spec:
-            prev_dir = fw_spec['_fizzled_parents'][0]['launches'][0][
-                'launch_dir']
-        else:
-            prev_dir = fw_spec['prev_qchem_dir']
-
-        db_dir = os.environ['DB_LOC']
-        db_path = os.path.join(db_dir, 'tasks_db.json')
-
-        logging.basicConfig(level=logging.INFO)
-        logger = logging.getLogger('QChemDrone')
-        logger.setLevel(logging.INFO)
-        sh = logging.StreamHandler(stream=sys.stdout)
-        sh.setLevel(getattr(logging, 'INFO'))
-        logger.addHandler(sh)
-
-        with open(db_path) as f:
-            db_creds = json.load(f)
-        drone = DeltaSCFQChemToDbTaskDrone(
-            host=db_creds['host'], port=db_creds['port'],
-            database=db_creds['database'], user=db_creds['admin_user'],
-            password=db_creds['admin_password'],
-            collection=db_creds['collection'])
-        qcout_path = get_eg_file_loc(os.path.abspath(os.path.join(
-            prev_dir, "mol.qcout")))
-        t_id, d = drone.assimilate(qcout_path, fw_spec=fw_spec)
+        d, qcout_path, t_id = standard_parsing_db_insertion(fw_spec)
+        update_specs = get_basic_update_specs(fw_spec, d)
 
         if d["state"] == "successful":
             return FWAction(
                 stored_data={'task_id': t_id},
-                update_spec={
-                    'mol': d["molecule_final"],
-                    'egsnl': d["snl_final"],
-                    'snlgroup_id': d["snlgroup_id_final"],
-                    'inchi_root': fw_spec["inchi_root"]})
+                update_spec=update_specs)
         else:
             if d['state'] == 'rejected' and \
                     d['reject_reason'] == 'structural change':
-                inchi_root = d['snlgroup_id_final']
                 defuse_reason = 'structural change'
             else:
-                inchi_root = fw_spec['inchi_root']
                 defuse_reason = d.get("errors", "unknown")
             offending_fwid = get_defuse_causing_qchem_fwid(qcout_path)
             return FWAction(
                 stored_data={'task_id': t_id},
-                update_spec={'mol': d["molecule_final"],
-                             'egsnl': d["snl_final"],
-                             'snlgroup_id': d["snlgroup_id_final"],
-                             'inchi_root': inchi_root,
-                             'defuse_reason': defuse_reason,
-                             'offending_fwid': offending_fwid},
+                update_spec=dict({'defuse_reason': defuse_reason,
+                                  'offending_fwid': offending_fwid},
+                                 **update_specs),
                 defuse_children=True)
 
 
@@ -88,42 +130,14 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
     molecule_perturb_scale = 0.3
 
     def run_task(self, fw_spec):
-        if '_fizzled_parents' in fw_spec and not 'prev_qchem_dir' in fw_spec:
-            prev_dir = fw_spec['_fizzled_parents'][0]['launches'][0][
-                'launch_dir']
-        else:
-            prev_dir = fw_spec['prev_qchem_dir']
-
-        db_dir = os.environ['DB_LOC']
-        db_path = os.path.join(db_dir, 'tasks_db.json')
-
-        logging.basicConfig(level=logging.INFO)
-        logger = logging.getLogger('QChemDrone')
-        logger.setLevel(logging.INFO)
-        sh = logging.StreamHandler(stream=sys.stdout)
-        sh.setLevel(getattr(logging, 'INFO'))
-        logger.addHandler(sh)
-
-        with open(db_path) as f:
-            db_creds = json.load(f)
-        drone = DeltaSCFQChemToDbTaskDrone(
-            host=db_creds['host'], port=db_creds['port'],
-            database=db_creds['database'], user=db_creds['admin_user'],
-            password=db_creds['admin_password'],
-            collection=db_creds['collection'])
-        qcout_path = get_eg_file_loc(os.path.abspath(os.path.join(
-            prev_dir, "mol.qcout")))
-        t_id, d = drone.assimilate(qcout_path, fw_spec=fw_spec)
+        d, qcout_path, t_id = standard_parsing_db_insertion(fw_spec)
+        update_specs = get_basic_update_specs(fw_spec, d)
 
         if d["state"] == "successful":
             if d['stationary_type'] == 'minimum':
                 return FWAction(
                     stored_data={'task_id': t_id},
-                    update_spec={
-                        'mol': d["molecule_final"],
-                        'egsnl': d["snl_final"],
-                        'snlgroup_id': d["snlgroup_id_final"],
-                        'inchi_root': fw_spec["inchi_root"]})
+                    update_spec=update_specs)
             else:
                 return self.img_freq_action(fw_spec, d, t_id, qcout_path)
         else:
@@ -132,13 +146,9 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
             return FWAction(
                 stored_data={'task_id': t_id},
                 defuse_children=True,
-                update_spec={
-                    'mol': d["molecule_final"],
-                    'egsnl': d["snl_final"],
-                    'snlgroup_id': d["snlgroup_id_final"],
-                    'inchi_root': fw_spec["inchi_root"],
-                    'defuse_reason': defuse_reason,
-                    'offending_fwid': offending_fwid})
+                update_spec=dict({'defuse_reason': defuse_reason,
+                                  'offending_fwid': offending_fwid},
+                                 **update_specs))
 
     @staticmethod
     def spawn_opt_freq_wf(mol, molname, mission, additional_user_tags,
@@ -167,7 +177,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                     if j.params["rem"]["jobtype"] == "opt":
                         j.scale_geom_opt_threshold(0.1, 0.1, 0.1)
                         j.set_geom_max_iterations(100)
-                fw.spec["qcinp"] = qcinp.to_dict
+                fw.spec["qcinp"] = qcinp.as_dict
                 fw.spec["run_tags"]["grid"] = grid
         wf = Workflow([geom_fw_cal, geom_fw_db, freq_fw_cal, freq_fw_db],
                       links_dict={geom_fwid_db: freq_fwid_cal,
@@ -221,20 +231,17 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
             img_freq_eli = {"methods": ["dir_dis_opt", "den_dis_opt",
                                         "alt_den_dis_opt"],
                             "current_method_id": 0}
-
+        update_specs = get_basic_update_specs(fw_spec, d)
         if img_freq_eli['current_method_id'] >= len(img_freq_eli['methods']):
             logging.error("Failed to eliminate imaginary frequency")
             offending_fwid = get_defuse_causing_qchem_fwid(qcout_path)
             return FWAction(
                 stored_data={'task_id': t_id},
                 defuse_children=True,
-                update_spec={'mol': d["molecule_final"],
-                             'egsnl': fw_spec['egsnl'],
-                             'snlgroup_id': fw_spec['snlgroup_id'],
-                             'inchi_root': fw_spec["inchi_root"],
-                             'defuse_reason': "imaginary frequency "
-                                              "elimination failed",
-                             'offending_fwid': offending_fwid})
+                update_spec=dict({'defuse_reason': "imaginary frequency "
+                                                   "elimination failed",
+                                  'offending_fwid': offending_fwid},
+                                 **update_specs))
 
         new_mol = self.perturb_molecule(d)
         old_mol = Molecule.from_dict(d['molecule_final'])
@@ -249,15 +256,11 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
             return FWAction(
                 stored_data={'task_id': t_id},
                 defuse_children=True,
-                update_spec={
-                    'mol': d["molecule_final"],
-                    'perturbed_mol': new_mol.to_dict,
-                    'egsnl': fw_spec['egsnl'],
-                    'snlgroup_id': fw_spec['snlgroup_id'],
-                    'inchi_root': fw_spec["inchi_root"],
-                    'defuse_reason': "structural change in imaginary "
-                                     "frequency elimination",
-                    'offending_fwid': offending_fwid})
+                update_spec=dict({'perturbed_mol': new_mol.as_dict(),
+                                  'defuse_reason': "structural change in imaginary "
+                                                   "frequency elimination",
+                                  'offending_fwid': offending_fwid},
+                                 **update_specs))
         molname = d['user_tags']['molname']
         mission = d['user_tags']['mission']
         additional_user_tags = {"img_freq_eli": img_freq_eli}
@@ -283,8 +286,8 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
         sma = EGSNLMongoAdapter.auto_load()
         egsnl, snlgroup_id = sma.add_snl(
             new_snl, snlgroup_guess=d['snlgroup_id_initial'])
-        update_specs = {'mol': new_mol.to_dict,
-                        'egsnl': egsnl.to_dict,
+        update_specs = {'mol': new_mol.as_dict(),
+                        'egsnl': egsnl.as_dict(),
                         'snlgroup_id': fw_spec['snlgroup_id'],
                         'inchi_root': fw_spec['inchi_root']}
 
@@ -324,55 +327,193 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
         return FWAction(stored_data={'task_id': t_id}, detours=wf,
                         update_spec=update_specs)
 
+def get_bsse_update_specs(fw_spec, d):
+    if "super_mol_snlgroup_id" in fw_spec["run_tags"]:
+        ghost_atoms = fw_spec["run_tags"]["ghost_atoms"]
+        fragment_type = fw_spec["run_tags"]["bsse_fragment_type"]
+        fragment_key = BasisSetSuperpositionErrorCalculationTask.get_fragment_key(ghost_atoms, fragment_type)
+        fragment_dict = dict()
+        fragment_dict["task_id"] = [d["task_id"]]
+        fragment_dict["energy"] = d["calculations"]["scf"]["energies"][-1][-1]
+        fragment_dict["ghost_atoms"] = ghost_atoms
+        fragment_dict["fragment_type"] = fragment_type
+        fragment_dict["super_mol_snlgroup_id"] = fw_spec["run_tags"]["super_mol_snlgroup_id"]
+        return {fragment_key: fragment_dict}
+    else:
+        return {}
 
 class QChemSinglePointEnergyDBInsertionTask(FireTaskBase, FWSerializable):
     _fw_name = "NWChem Single Point Energy DB Insertion Task"
 
     def run_task(self, fw_spec):
-        if '_fizzled_parents' in fw_spec and not 'prev_qchem_dir' in fw_spec:
-            prev_dir = fw_spec['_fizzled_parents'][0]['launches'][0][
-                'launch_dir']
-        else:
-            prev_dir = fw_spec['prev_qchem_dir']
+        d, qcout_path, t_id = standard_parsing_db_insertion(fw_spec)
+        update_specs = get_basic_update_specs(fw_spec, d)
 
+        if d["state"] == "successful":
+            bsse_specs = get_bsse_update_specs(fw_spec, d)
+            update_specs.update(bsse_specs)
+            return FWAction(
+                stored_data={'task_id': t_id},
+                update_spec=update_specs)
+        else:
+            offending_fwid = get_defuse_causing_qchem_fwid(qcout_path)
+            return FWAction(
+                stored_data={'task_id': t_id},
+                defuse_children=True,
+                update_spec=dict({'defuse_reason': 'SCF failed',
+                                  'offending_fwid': offending_fwid},
+                                 **update_specs))
+
+
+class QChemAIMDDBInsertionTask(FireTaskBase, FWSerializable):
+    _fw_name = "QChem Ab Initio Molecule Dynamics DB Insertion Task"
+
+    def run_task(self, fw_spec):
+        d, qcout_path, t_id = standard_parsing_db_insertion(fw_spec)
+        update_specs = get_basic_update_specs(fw_spec, d)
+
+        if d["state"] == "successful":
+            return FWAction(
+                stored_data={'task_id': t_id},
+                update_spec=update_specs)
+        else:
+            if d['state'] == 'rejected' and \
+                    d['reject_reason'] == 'structural change':
+                defuse_reason = 'structural change'
+            else:
+                defuse_reason = d.get("errors", "unknown")
+            offending_fwid = get_defuse_causing_qchem_fwid(qcout_path)
+            return FWAction(
+                stored_data={'task_id': t_id},
+                update_spec=dict({'defuse_reason': defuse_reason,
+                                  'offending_fwid': offending_fwid},
+                                 **update_specs),
+                defuse_children=True)
+
+
+class BasisSetSuperpositionErrorCalculationTask(FireTaskBase, FWSerializable):
+    _fw_name = "BSSE Calculation Task"
+
+    def run_task(self, fw_spec):
+        fragment_dicts = fw_spec["fragments"]
+        from rubicon.workflows.bsse_wf import BSSEFragments
+        fragments = [BSSEFragments.from_dict(d) for d in fragment_dicts]
+        fragments_dict = dict()
+        bsse = 0.0
+        for frag in fragments:
+            fragment_name = self.get_fragment_name(frag.ghost_atoms)
+            fragments_dict[fragment_name] = dict()
+            ov_fragment_key = self.get_fragment_key(frag.ghost_atoms, BSSEFragments.OVERLAPPED)
+            fragments_dict[fragment_name][BSSEFragments.OVERLAPPED] = fw_spec[ov_fragment_key]
+            ov_energy = fragments_dict[fragment_name][BSSEFragments.OVERLAPPED]["energy"]
+            iso_fragment_key = self.get_fragment_key(frag.ghost_atoms, BSSEFragments.ISOLATED)
+            fragments_dict[fragment_name][BSSEFragments.ISOLATED] = fw_spec[iso_fragment_key]
+            fragments_dict[fragment_name]["charge"] = frag.charge
+            fragments_dict[fragment_name]["spin_multiplicity"] = frag.spin_multiplicity
+            iso_energy = fragments_dict[fragment_name][BSSEFragments.ISOLATED]["energy"]
+            fragments_dict[fragment_name]["fragment_bsse"] = ov_energy - iso_energy
+            bsse += fragments_dict[fragment_name]["fragment_bsse"]
+        result_dict = dict()
+        result_dict["fragments_result"] = fragments_dict
+        result_dict["fragments_def"] = fw_spec["fragments"]
+        result_dict["bsse"] = bsse
+        result_dict["mol"] = fw_spec["mol"]
+        result_dict["egsnl"] = fw_spec["egsnl"]
+        result_dict["snlgroup_id"] = fw_spec["snlgroup_id"]
+        result_dict["user_tags"] = fw_spec["user_tags"]
+        result_dict["qm_method"] = fw_spec["qm_method"]
+        result_dict["charge"] = fw_spec["charge"]
+        result_dict["spin_multiplicity"] = fw_spec["spin_multiplicity"]
+        result_dict["inchi_root"] = fw_spec["inchi_root"]
+        result_dict['task_type'] = "BSSE Counterpoise Correction"
+        t_id = self._insert_doc(result_dict, fw_spec)
+        return FWAction(
+            stored_data={'task_id': t_id},
+            update_spec={"mol": fw_spec["mol"],
+                         "egsnl": fw_spec["egsnl"],
+                         "snlgroup_id": fw_spec["snlgroup_id"],
+                         "inchi_root": fw_spec["inchi_root"]})
+
+    @classmethod
+    def _insert_doc(cls, d, fw_spec=None, update_duplicates=True):
         db_dir = os.environ['DB_LOC']
         db_path = os.path.join(db_dir, 'tasks_db.json')
-
         logging.basicConfig(level=logging.INFO)
         logger = logging.getLogger('QChemDrone')
         logger.setLevel(logging.INFO)
         sh = logging.StreamHandler(stream=sys.stdout)
         sh.setLevel(getattr(logging, 'INFO'))
         logger.addHandler(sh)
-
         with open(db_path) as f:
             db_creds = json.load(f)
-        drone = DeltaSCFQChemToDbTaskDrone(
-            host=db_creds['host'], port=db_creds['port'],
-            database=db_creds['database'], user=db_creds['admin_user'],
-            password=db_creds['admin_password'],
-            collection=db_creds['collection'])
-        qcout_path = get_eg_file_loc(os.path.abspath(os.path.join(
-            prev_dir, "mol.qcout")))
-        t_id, d = drone.assimilate(qcout_path, fw_spec=fw_spec)
+        conn = MongoClient(db_creds['host'], db_creds['port'],)
+        db = conn[db_creds['database']]
+        if db_creds['admin_user']:
+            db.authenticate(db_creds['admin_user'], db_creds['admin_password'])
+        coll = db[db_creds['collection']]
 
-        if d["state"] == "successful":
-            return FWAction(
-                stored_data={'task_id': t_id},
-                update_spec={
-                    'mol': d["molecule_final"],
-                    'egsnl': d['snl_final'],
-                    'snlgroup_id': d['snlgroup_id_final'],
-                    'inchi_root': fw_spec["inchi_root"]})
+        result = coll.find_one({"super_mol_snlgroup_id": fw_spec["snlgroup_id"],
+                                "fragments_def": fw_spec["fragments"]},
+                               fields=["task_id", "super_mol_snlgroup_id", "fragments_def"])
+        if result is None or update_duplicates:
+            d["last_updated"] = datetime.datetime.today()
+            if result is None:
+                if ("task_id" not in d) or (not d["task_id"]):
+                    id_num = db.counter.find_and_modify(
+                        query={"_id": "mol_taskid"},
+                        update={"$inc": {"c": 1}}
+                    )["c"]
+                    d["task_id"] = "mol-" + str(id_num)
+                    d["task_id_deprecated"] = id_num
+                logger.info("Inserting BSSE for snlgroup {} with taskid = {}"
+                            .format(d["snlgroup_id"], d["task_id"]))
+            elif update_duplicates:
+                d["task_id"] = result["task_id"]
+                logger.info("Updating BSSE for snlgroup {} with taskid = {}"
+                            .format(d["super_mol_snlgroup_id"], d["task_id"]))
+            coll.update({"super_mol_snlgroup_id": fw_spec["snlgroup_id"],
+                         "fragments_def": fw_spec["fragments"]},
+                        {"$set": d},
+                        upsert=True)
+            return d["task_id"]
         else:
-            offending_fwid = get_defuse_causing_qchem_fwid(qcout_path)
-            return FWAction(
-                stored_data={'task_id': t_id},
-                defuse_children=True,
-                update_spec={
-                    'mol': d["molecule_final"],
-                    'egsnl': d['snl_final'],
-                    'snlgroup_id': d['snlgroup_id_final'],
-                    'inchi_root': fw_spec["inchi_root"],
-                    'defuse_reason': 'SCF failed',
-                    'offending_fwid': offending_fwid})
+            logger.info("Skipping duplicate snlgrup {}".format(d["super_mol_snlgroup_id"]))
+        conn.close()
+        if "task_id" in d:
+            return d["task_id"]
+        elif "task_id" in result:
+            return result["task_id"]
+        else:
+            return None
+
+    @classmethod
+    def get_fragment_name(cls, ghost_atoms):
+        return "ga_" + "-".join([str(i) for i in sorted(set(ghost_atoms))])
+
+    @classmethod
+    def get_fragment_key(cls, ghost_atoms, fragment_type):
+        return "{}_fragment_{}".format(fragment_type, cls.get_fragment_name(ghost_atoms))
+
+class CounterpoiseCorrectionGenerationTask(FireTaskBase, FWSerializable):
+    _fw_name = "Counterpoise Generation Task"
+
+    def run_task(self, fw_spec):
+        molname = fw_spec["user_tags"]["molname"]
+        mission = fw_spec["user_tags"]["mission"]
+        super_mol_snlgroup_id = fw_spec["snlgroup_id"]
+        charge = fw_spec["charge"]
+        spin_multiplicity = fw_spec["spin_multiplicity"]
+        inchi_root = fw_spec["inchi_root"]
+        egsnl = fw_spec["egsnl"]
+        qm_method = fw_spec["qm_method"]
+        fragment_dicts = fw_spec["fragments"]
+        from rubicon.workflows.bsse_wf import bsse_wf, BSSEFragments
+        fragments = [BSSEFragments.from_dict(d) for d in fragment_dicts]
+        priority = fw_spec.get('_priority', 1)
+        dupefinder = fw_spec.get('_dupefinder', DupeFinderEG())
+        cc_wf = bsse_wf(super_mol=egsnl, name=molname, super_mol_snlgroup_id=super_mol_snlgroup_id,
+                        super_mol_charge=charge, super_mol_spin_multiplicity=spin_multiplicity,
+                        super_mol_inchi_root=inchi_root, qm_method=qm_method, fragments=fragments, mission=mission,
+                        dupefinder=dupefinder, priority=priority, is_spawnned=True)
+
+        return FWAction(detours=cc_wf)

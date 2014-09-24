@@ -45,6 +45,14 @@ class QChemTask(FireTaskBase, FWSerializable):
                 if isinstance(qj.mol, Molecule):
                     qj.mol = copy.deepcopy(mol)
         mol = qcinp.jobs[0].mol
+        if "mixed_basis" in fw_spec:
+            for qj in qcinp.jobs:
+                if qj.params["rem"]["jobtype"] != "sp":
+                    qj.set_basis_set(fw_spec["mixed_basis"])
+        if "mixed_aux_basis" in fw_spec:
+            for qj in qcinp.jobs:
+                if qj.params["rem"]["jobtype"] != "sp":
+                    qj.set_aux_basis_set(fw_spec["mixed_aux_basis"])
 
         carver_name_pattern = re.compile("c[0-9]{4}-ib")
         fw_data = FWData()
@@ -65,6 +73,8 @@ class QChemTask(FireTaskBase, FWSerializable):
         elif carver_name_pattern.match(socket.gethostname()):
         # mendel compute nodes
             qc_exe = shlex.split("qchem -np {}".format(min(8, len(mol))))
+        elif "macqu" in socket.gethostname().lower():
+            qc_exe = shlex.split("qchem -nt 2")
         else:
             qc_exe = ["qchem"]
 
@@ -112,12 +122,11 @@ class QChemTask(FireTaskBase, FWSerializable):
 
         stored_data = {'error_list': list(all_errors)}
         update_spec = {'prev_qchem_dir': prev_qchem_dir,
-                       'prev_task_type': fw_spec['task_type'],
-                       'egsnl': fw_spec['egsnl'],
-                       'snlgroup_id': fw_spec['snlgroup_id'],
-                       'run_tags': fw_spec['run_tags'],
-                       'inchi_root': fw_spec['inchi_root']}
-        if 'mol' in fw_spec:
-            update_spec['mol'] = fw_spec['mol']
+                       'prev_task_type': fw_spec['task_type']}
+        propagate_keys = ['egsnl', 'snlgroup_id', 'inchi_root',
+                          'mixed_basis', 'mixed_aux_basis', 'mol']
+        for k in propagate_keys:
+            if k in fw_spec:
+                update_spec[k] = fw_spec[k]
 
         return FWAction(stored_data=stored_data, update_spec=update_spec)

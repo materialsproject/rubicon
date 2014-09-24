@@ -1,5 +1,6 @@
 import datetime
-from pymatgen import Composition, PMGJSONDecoder, Structure, Molecule
+from monty.json import MontyDecoder
+from pymatgen import Composition, Structure, Molecule
 from pymatgen.analysis.molecule_matcher import \
     MoleculeMatcher, InchiMolAtomMapper
 from pymatgen.io.babelio import BabelMolAdaptor
@@ -75,7 +76,7 @@ class EGStructureNL(StructureNL):
 
     @property
     def to_dict(self):
-        m_dict = super(EGStructureNL, self).to_dict
+        m_dict = super(EGStructureNL, self).as_dict()
         m_dict.update(self.snl_autometa)
         m_dict['snl_id'] = self.snl_id
         m_dict['snlgroup_key'] = self.snlgroup_key
@@ -84,7 +85,7 @@ class EGStructureNL(StructureNL):
     @staticmethod
     def from_dict(d):
         a = d["about"]
-        dec = PMGJSONDecoder()
+        dec = MontyDecoder()
 
         created_at = dec.process_decoded(a["created_at"]) if "created_at" in a \
             else None
@@ -104,14 +105,14 @@ class EGStructureNL(StructureNL):
     @staticmethod
     def from_snl(snl, snl_id, pointgroup):
         # make a copy of SNL
-        snl2 = StructureNL.from_dict(snl.to_dict)
+        snl2 = StructureNL.from_dict(snl.as_dict())
         if '_electrolytegenome' not in snl2.data:
             snl2.data['_electrolytegenome'] = {}
 
         snl2.data['_electrolytegenome']['snl_id'] = snl_id
         snl2.data['_electrolytegenome']['pointgroup'] = pointgroup
 
-        return EGStructureNL.from_dict(snl2.to_dict)
+        return EGStructureNL.from_dict(snl2.as_dict())
 
 
 class SNLGroup():
@@ -132,8 +133,7 @@ class SNLGroup():
         self.canonical_structure = canonical_snl.structure
         self.snl_autometa = get_meta_from_structure(self.canonical_structure)
 
-    @property
-    def to_dict(self):
+    def as_dict(self):
         d = self.snl_autometa
         d['created_at'] = self.created_at
         d['updated_at'] = self.updated_at

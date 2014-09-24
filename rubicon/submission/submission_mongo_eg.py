@@ -78,7 +78,7 @@ class SubmissionMongoAdapterEG(object):
     def submit_snl(self, snl, submitter_email, parameters=None):
         parameters = parameters if parameters else {}
 
-        d = snl.to_dict
+        d = snl.as_dict()
         d['submitter_email'] = submitter_email
         d['parameters'] = parameters
         d['state'] = 'SUBMITTED'
@@ -89,7 +89,7 @@ class SubmissionMongoAdapterEG(object):
         if 'is_valid' not in d:
             d.update(get_meta_from_structure(snl.structure))
 
-        d.update(snl.structure.to_dict)
+        d.update(snl.structure.as_dict())
 
         self.jobs.insert(d)
         return d['submission_id']

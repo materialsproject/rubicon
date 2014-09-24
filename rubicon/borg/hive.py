@@ -171,12 +171,15 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
         pga = PointGroupAnalyzer(mol)
         sch_symbol = pga.sch_symbol
         stationary_type = None
+        has_structure_changing_job = False
         for d in data:
             # noinspection PyTypeChecker
             if d["jobtype"] == "opt":
                 data_dict["geom_opt"] = d
+                has_structure_changing_job = True
             elif d["jobtype"] == "freq":
                 data_dict["freq"] = d
+                has_structure_changing_job = True
                 # noinspection PyTypeChecker
                 if not d["has_error"]:
                     if d['frequencies'][0]["frequency"] < -0.00:
@@ -191,6 +194,9 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
                 suffix = "" if d["solvent_method"] == "NA" \
                     else "_" + d["solvent_method"]
                 data_dict["scf" + suffix] = d
+            elif d["jobtype"] == "aimd":
+                data_dict["amid"] = d
+                has_structure_changing_job = True
 
         data = data_dict
 
@@ -198,16 +204,16 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
              "folder": os.path.basename(os.path.dirname(os.path.abspath(
                  path))),
              "calculations": data,
-             "molecule_initial": initial_mol.to_dict,
-             "molecule_final": mol.to_dict,
+             "molecule_initial": initial_mol.as_dict(),
+             "molecule_final": mol.as_dict(),
              "pointgroup": sch_symbol,
              "pretty_formula": comp.reduced_formula,
              "reduced_cell_formula_abc": comp.alphabetical_formula,
              "formula": comp.formula,
              "charge": charge,
              "spin_multiplicity": spin_mult,
-             "composition": comp.to_dict,
-             "elements": list(comp.to_dict.keys()),
+             "composition": comp.as_dict(),
+             "elements": list(comp.as_dict().keys()),
              "nelements": len(comp),
              "smiles": smiles, "can": can,
              "inchi_final": inchi_final,
@@ -223,8 +229,11 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
                 d['inchi_changed'] = True
             else:
                 d['inchi_changed'] = False
-        d['structure_changed'] = cls._check_structure_change(
-            initial_mol, mol, path)
+        if has_structure_changing_job:
+            d['structure_changed'] = cls._check_structure_change(
+                initial_mol, mol, path)
+        else:
+            d['structure_changed'] = False
         if d['structure_changed']:
             d['state'] = 'rejected'
             d['reject_reason'] = 'structural change'
@@ -257,7 +266,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
                 d['snlgroup_id_initial'] = fw_spec['snlgroup_id']
                 d['inchi_root'] = fw_spec['inchi_root']
                 d['inchi_initial'] = fw_spec['inchi']
-                if "geometry optimization" in d['task_type']:
+                if "geometry optimization" in d['task_type'] or "molecule dynamics" in d['task_type']:
                     new_s = Molecule.from_dict(d["molecule_final"])
                     old_snl = EGStructureNL.from_dict(d['snl_initial'])
                     history = old_snl.history
@@ -280,7 +289,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
                     # add snl
                     egsnl, snlgroup_id = sma.add_snl(
                         new_snl, snlgroup_guess=d['snlgroup_id_initial'])
-                    d['snl_final'] = egsnl.to_dict
+                    d['snl_final'] = egsnl.as_dicit()
                     d['snlgroup_id_final'] = snlgroup_id
                 else:
                     d['snl_final'] = fw_spec['egsnl']
@@ -352,8 +361,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
     def from_dict(cls, d):
         return cls(**d["init_args"])
 
-    @property
-    def to_dict(self):
+    def as_dict(self):
         init_args = {"host": self.host, "port": self.port,
                      "database": self.database, "user": self.user,
                      "password": self.password,

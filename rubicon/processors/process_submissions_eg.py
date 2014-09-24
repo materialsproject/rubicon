@@ -11,7 +11,7 @@ from rubicon.workflows.snl_to_eg_wf import snl_to_eg_wf
 
 
 class SubmissionProcessorEG():
-    MAX_SITES = 200
+    MAX_SITES = 500
 
     # This is run on the server end
     def __init__(self, sma, launchpad):

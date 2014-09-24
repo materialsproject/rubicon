@@ -40,6 +40,8 @@ def run_qchem(filename):
         qc_exe = shlex.split("qchem -np {}".format(min(8, len(mol))))
         half_cpus_cmd = shlex.split("qchem -np {}".format(min(4, len(mol))))
         openmp_cmd = shlex.split("qchem -seq -nt 8")
+    elif "MacQu" in socket.gethostname():
+        qc_exe = shlex.split("qchem -nt 2")
     else:
         qc_exe = ["qchem"]
 
@@ -143,6 +145,7 @@ def main():
             qctask_freq.spin_multiplicity = spin_multiplicity
             qctask_opt = copy.deepcopy(qctask_freq)
             qctask_opt.params["rem"]["jobtype"] = "opt"
+            qctask_opt.params["rem"].pop("scf_guess", None)
             qctask_opt.mol = new_mol
             qcinp = QcInput([qctask_opt, qctask_freq])
             eli_file_1 = base_filename + "_eli_img_1.qcinp"
@@ -162,6 +165,7 @@ def main():
                 qctask_freq.spin_multiplicity = spin_multiplicity
                 qctask_opt = copy.deepcopy(qctask_freq)
                 qctask_opt.params["rem"]["jobtype"] = "opt"
+                qctask_opt.params["rem"].pop("scf_guess", None)
                 qctask_opt.mol = new_mol
                 qcinp = QcInput([qctask_opt, qctask_freq])
                 for j in qcinp.jobs:
@@ -187,6 +191,7 @@ def main():
                     qctask_freq.spin_multiplicity = spin_multiplicity
                     qctask_opt = copy.deepcopy(qctask_freq)
                     qctask_opt.params["rem"]["jobtype"] = "opt"
+                    qctask_opt.params["rem"].pop("scf_guess", None)
                     qctask_opt.mol = new_mol
                     qcinp = QcInput([qctask_opt, qctask_freq])
                     for j in qcinp.jobs:

@@ -36,6 +36,7 @@ class AntechamberRunner():
         """
         generate pdb file for a given molecule
         """
+        print molecule
         write_mol(molecule, filename)
 
 
