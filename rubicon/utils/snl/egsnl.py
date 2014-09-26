@@ -133,8 +133,7 @@ class SNLGroup():
         self.canonical_structure = canonical_snl.structure
         self.snl_autometa = get_meta_from_structure(self.canonical_structure)
 
-    @property
-    def to_dict(self):
+    def as_dict(self):
         d = self.snl_autometa
         d['created_at'] = self.created_at
         d['updated_at'] = self.updated_at

@@ -1,9 +1,10 @@
-from fireworks.core.firework import FireWork, Workflow
+from fireworks.core.firework import Firework, Workflow
 from fireworks.utilities.fw_utilities import get_slug
 from pymatgen import Composition
 from rubicon.dupefinders.dupefinder_eg import DupeFinderEG
 from rubicon.firetasks.egsnl_tasks import AddEGSNLTask
 from rubicon.utils.snl.egsnl import EGStructureNL, get_meta_from_structure
+from rubicon.workflows.bsse_wf import counterpoise_correction_generation_fw
 from rubicon.workflows.md_relax_workflow import md_relax_fws
 from rubicon.workflows.multi_solvent_ipea_wf import multi_solvent_ipea_fws
 from rubicon.workflows.multistep_ipea_wf import multistep_ipea_fws
@@ -32,7 +33,7 @@ def snl_to_eg_wf(snl, parameters=None):
         spec['force_egsnl'] = snl.to_dict
         spec['force_snlgroup_id'] = parameters['snlgroup_id']
         del spec['snl']
-    fws_all.append(FireWork(tasks, spec,
+    fws_all.append(Firework(tasks, spec,
                    name=get_slug(molname + ' -- Add to SNL database'),
                    fw_id=1))
 
@@ -80,7 +81,7 @@ def snl_to_eg_wf(snl, parameters=None):
         time_step = parameters.get("time_step", 1.0)
         md_runs = parameters.get("md_runs", 3)
         normal_basis = parameters.get("normal_basis", "6-31G*")
-        diffuse_basis =  parameters.get("diffuse_basis", "6-31+G*")
+        diffuse_basis = parameters.get("diffuse_basis", "6-31+G*")
         charge_threshold = parameters.get("charge_threshold", -0.5)
         fws_tasks, connections = md_relax_fws(
             mol=snl.structure, name=molname, mission=mission, qm_method=qm_method,
@@ -88,6 +89,14 @@ def snl_to_eg_wf(snl, parameters=None):
             time_step=time_step, md_runs=md_runs, normal_basis=normal_basis, diffuse_basis=diffuse_basis,
             charge_threshold=charge_threshold, dupefinder=DupeFinderEG(), priority=priority,
             parent_fwid=1, additional_user_tags=user_tags)
+    elif workflow_type == "bsse":
+        charge = snl.structure.charge
+        spin_multiplicity = snl.structure.spin_multiplicity
+        fragments = parameters.get("fragments", None)
+        fws_tasks, connections = counterpoise_correction_generation_fw(
+            molname=molname, charge=charge, spin_multiplicity=spin_multiplicity, qm_method=qm_method,
+            fragments=fragments, mission=mission, priority=priority, parent_fwid=1,
+            additional_user_tags=user_tags)
     else:
         raise ValueError('Workflow "{}" is not supported yet'.
                          format(workflow_type))
