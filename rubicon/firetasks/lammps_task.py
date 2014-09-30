@@ -52,5 +52,6 @@ class WritelammpsInputTask(FireTaskBase):
         control_lammps.write_lampps_control('mol_control.lammps')
         #subprocess.check_call(shlex.split("lmp_mac <  mol_control.lammps"))
         #subprocess.check_call(shlex.split("lmp_hopper <  mol_control.lammps"))
-        subprocess.check_call(shlex.split("aprun -n 48 lmp_hopper < mol_control.lammps"))
+        with open("mol_control.lammps") as f:
+            subprocess.check_call(shlex.split("aprun -n 48 lmp_hopper"), stdin=f)
 
