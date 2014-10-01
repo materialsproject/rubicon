@@ -163,6 +163,7 @@ class Gff(MSONable):
                     sigma = float(line[14:20])
                     epsilon = abs(float(line[22:28]))
                     vdws[vdw_type] = (sigma, epsilon)
+
             return Gff(bonds,angles,dihedrals,imdihedrals,vdws,masses,None)
 
 
