@@ -1,4 +1,4 @@
-from pymatgen.packmol.lammpsio import LammpsLog
+
 
 __author__ = 'navnidhirajput'
 
@@ -6,7 +6,14 @@ import shlex
 import subprocess
 from monty import logging
 from pymatgen import Molecule
-from pymatgen.packmol.packmol import PackmolRunner
+try:
+    # just a walkaround before the packmol is merged to master branch
+    # after packmol is merged to master branch, the try...catch block
+    # should be removed
+    from pymatgen.packmol.packmol import PackmolRunner
+    from pymatgen.packmol.lammpsio import LammpsLog
+except:
+    pass
 from rubicon.gff.boxmol import BoxMol
 from rubicon.gff.lammpsin import DictLammpsInputSet
 from rubicon.gff.lamppsio import LmpInput
