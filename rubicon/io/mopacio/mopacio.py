@@ -143,11 +143,10 @@ class MopTask(MSONable):
                                              x=site.x, y=site.y, z=site.z))
         return lines
 
-    @property
-    def to_dict(self):
+    def as_dict(self):
         return {"@module": self.__class__.__module__,
                 "@class": self.__class__.__name__,
-                "molecule": self.mol.to_dict,
+                "molecule": self.mol.as_dict(),
                 "keywords": self.keywords,
                 "title": self.title}
 
@@ -190,7 +189,7 @@ class MopTask(MSONable):
         keywords = cls._parse_keywords(lines[0:1])
         title = lines[1: 3]
         mol = cls._parse_molecule(lines[3:])
-        d = {"keywords": keywords, "title": title, "molecule": mol.to_dict,
+        d = {"keywords": keywords, "title": title, "molecule": mol.as_dict(),
              "@module": cls.__module__, "@class": cls.__name__}
         return MopTask.from_dict(d)
 

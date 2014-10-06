@@ -63,5 +63,5 @@ if __name__ == '__main__':
         snl_texts = [StructureNL(mol, "Xiaohui Qu <xqu@lbl.gov>", remarks=cas) for (mol, cas) in pmg_mols]
         for snl in snl_texts:
             with open(dirname + "/" + snl.remarks[0] + ".snl", 'w') as f:
-                json.dump(snl.to_dict, f, indent=4)
+                json.dump(snl.as_dict(), f, indent=4)
     print "Done"

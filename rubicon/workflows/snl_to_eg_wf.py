@@ -30,7 +30,7 @@ def snl_to_eg_wf(snl, parameters=None):
             'snl': snl.as_dict(),
             '_priority': snl_priority}
     if 'snlgroup_id' in parameters and isinstance(snl, EGStructureNL):
-        spec['force_egsnl'] = snl.to_dict
+        spec['force_egsnl'] = snl.as_dict()
         spec['force_snlgroup_id'] = parameters['snlgroup_id']
         del spec['snl']
     fws_all.append(Firework(tasks, spec,

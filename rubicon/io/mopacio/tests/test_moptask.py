@@ -22,20 +22,20 @@ class TestMopTask(TestCase):
 
     def elementary_io_verify(self, moptask):
         self.to_and_from_dict_verify(moptask)
-        self.from_string_verify(str(moptask), moptask.to_dict)
+        self.from_string_verify(str(moptask), moptask.as_dict())
 
     def to_and_from_dict_verify(self, moptask):
         """
         Helper function. This function should be called in each specific test.
         """
-        d1 = moptask.to_dict
+        d1 = moptask.as_dict()
         mop2 = MopTask.from_dict(d1)
-        d2 = mop2.to_dict
+        d2 = mop2.as_dict()
         self.assertEqual(d1, d2)
 
     def from_string_verify(self, contents, ref_dict):
         moptask = MopTask.from_string(contents)
-        d2 = moptask.to_dict
+        d2 = moptask.as_dict()
         self.assertEqual(ref_dict, d2)
 
     def test_str(self):
@@ -103,7 +103,7 @@ class TestMopOutput(TestCase):
 
     def test_parse_structures(self):
         moo = MopOutput(os.path.join(test_dir, "ch3cl_ef.out"))
-        ans_mol1 = """Molecule Summary (H9 C4 O3 N1)
+        ans_mol1 = """Molecule Summary (H9 C4 N1 O3)
 Reduced Formula: H9C4NO3
 Charge = 0, Spin Mult = 1
 Sites (17)
@@ -125,7 +125,7 @@ Sites (17)
 16 H    -3.863300     0.327900    -1.464000
 17 H     0.271500     2.195900    -0.650900"""
         self.assertEqual(ans_mol1, str(moo.data["molecules"][0]))
-        ans_mol2 = """Molecule Summary (H9 C4 O3 N1)
+        ans_mol2 = """Molecule Summary (H9 C4 N1 O3)
 Reduced Formula: H9C4NO3
 Charge = 0, Spin Mult = 1
 Sites (17)
