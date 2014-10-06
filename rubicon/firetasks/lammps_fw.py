@@ -1,7 +1,7 @@
 from fireworks import  Workflow, LaunchPad
 from fireworks.core.firework import Firework
 from pymatgen import Molecule
-from rubicon.firetasks.lammps_task import WritelammpsInputTask
+from rubicon.firetasks.lammps_input_task import WritelammpsInputTask
 
 __author__ = 'navnidhirajput'
 
