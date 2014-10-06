@@ -75,7 +75,7 @@
             "possible attributes":["step","vol","temp", "press", "ke", "pe",
             "etotal", "enthalpy", "evdwl", "ecoul", "epair", "ebond", "eangle",
             "edihed", "eimp", "emol", "elong", "etail", "lx", "ly", "lz", "xy",
-            "xz", "yz"]
+            "xz", "yz", "pxy","pxz", "pyz", "pxx","pyy", "pzz", "density"]
 
         },
          "thermo": {

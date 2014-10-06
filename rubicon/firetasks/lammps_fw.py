@@ -8,6 +8,7 @@ __author__ = 'navnidhirajput'
 
 if __name__ == '__main__':
     task1 = WritelammpsInputTask()
+    #task2 = WritelammpsOutputTask()
 
     coords_n1c=[[4.522,   8.999,   5.512],
            [6.666,   9.383,   5.971],
