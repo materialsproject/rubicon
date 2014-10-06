@@ -137,7 +137,7 @@ class QChemFireWorkCreator():
                                             energy=10.0)
         qcinp = QcInput([qctask])
         spec = self.base_spec()
-        spec["qcinp"] = qcinp.to_dict
+        spec["qcinp"] = qcinp.as_dict()
         spec['task_type'] = task_type
         spec['charge'] = charge
         spec['spin_multiplicity'] = spin_multiplicity
@@ -182,7 +182,7 @@ class QChemFireWorkCreator():
             qctask.set_scf_algorithm_and_iterations(iterations=100)
         qcinp = QcInput([qctask])
         spec = self.base_spec()
-        spec["qcinp"] = qcinp.to_dict
+        spec["qcinp"] = qcinp.as_dict()
         spec['task_type'] = task_type
         spec['charge'] = charge
         spec['spin_multiplicity'] = spin_multiplicity
@@ -366,7 +366,7 @@ class QChemFireWorkCreator():
         implicit_solvent = self.set_solvent_method(qctask_sol, solvent, solvent_method, use_vdW_surface)
 
         qcinp = QcInput([qctask_vac, qctask_sol])
-        spec["qcinp"] = qcinp.to_dict
+        spec["qcinp"] = qcinp.as_dict()
         spec['task_type'] = task_type
         spec['charge'] = charge
         spec['spin_multiplicity'] = spin_multiplicity
@@ -494,7 +494,7 @@ class QChemFireWorkCreator():
         qctask_vac.set_scf_algorithm_and_iterations(iterations=100)
 
         qcinp = QcInput([qctask_vac])
-        spec["qcinp"] = qcinp.to_dict
+        spec["qcinp"] = qcinp.as_dict()
         spec['task_type'] = task_type
         spec['charge'] = charge
         spec['spin_multiplicity'] = spin_multiplicity
