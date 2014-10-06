@@ -134,7 +134,7 @@ class EGSNLMongoAdapter(FWSerializable):
         self.snlgroups.update({'snlgroup_id': snlgroup_id}, new_group.as_dict())
 
 
-    def as_dict(self):
+    def to_dict(self):
         """
         Note: usernames/passwords are exported as unencrypted Strings!
         """
