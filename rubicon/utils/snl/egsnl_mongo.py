@@ -1,7 +1,7 @@
 import datetime
 import os
 from fireworks.utilities.fw_serializers import FWSerializable
-from pymatgen.symmetry.pointgroup import PointGroupAnalyzer
+from pymatgen.symmetry.analyzer import PointGroupAnalyzer
 from pymongo import MongoClient, DESCENDING
 from rubicon.utils.snl.egsnl import EGStructureNL, SNLGroup
 
