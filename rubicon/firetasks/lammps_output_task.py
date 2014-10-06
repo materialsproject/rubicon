@@ -118,14 +118,16 @@ class WritelammpsOutputTask(FireTaskBase):
     # print task2.run_task(spec={"molecules": [tfn.as_dict(),n1c.as_dict(),pc.as_dict()]})
 
 
-test_yong = LammpsLog.from_file('mol.log')
-docs = test_yong.llog
+if __name__ == '__main__':
+    # only execute the following if using the current file as a command
+    test_yong = LammpsLog.from_file('mol.log')
+    docs = test_yong.llog
 
-db_dir = shlex.os.environ['DB_LOC']
-db_path = shlex.os.path.join(db_dir, 'tasks_db.json')
+    db_dir = shlex.os.environ['DB_LOC']
+    db_path = shlex.os.path.join(db_dir, 'tasks_db.json')
 
-# if db.counter.find({"_id": "mol_taskid"}).count() == 0:
-#         db.counter.insert({"_id": "mol_taskid", "c": 1})
-#             conn.close()
+    # if db.counter.find({"_id": "mol_taskid"}).count() == 0:
+    #         db.counter.insert({"_id": "mol_taskid", "c": 1})
+    #             conn.close()
 
-docs["task_id"] = 348
+    docs["task_id"] = 348
