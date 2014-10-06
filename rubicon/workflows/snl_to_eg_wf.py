@@ -30,7 +30,7 @@ def snl_to_eg_wf(snl, parameters=None):
             'snl': snl.as_dict(),
             '_priority': snl_priority}
     if 'snlgroup_id' in parameters and isinstance(snl, EGStructureNL):
-        spec['force_egsnl'] = snl.to_dict
+        spec['force_egsnl'] = snl.as_dict()
         spec['force_snlgroup_id'] = parameters['snlgroup_id']
         del spec['snl']
     fws_all.append(Firework(tasks, spec,
@@ -46,6 +46,7 @@ def snl_to_eg_wf(snl, parameters=None):
     spin_multiplicities = parameters.get('spin_multiplicities', (2, 1, 2))
     user_tags = {"initial_charge": ref_charge}
     solvent_method = parameters.get("solvent_method", "ief-pcm")
+    use_vdW_surface = parameters.get("use_vdW_surface", False)
     qm_method = parameters.get("qm_method", None)
     population_method = parameters.get("population_method", None)
     check_large = parameters.get("check_large", True)
@@ -53,6 +54,7 @@ def snl_to_eg_wf(snl, parameters=None):
         solvent = parameters.get('solvent', "water")
         fws_tasks, connections = multistep_ipea_fws(
             mol=snl.structure, name=molname, mission=mission, solvent=solvent, solvent_method=solvent_method,
+            use_vdW_surface=use_vdW_surface,
             ref_charge=ref_charge, spin_multiplicities=spin_multiplicities, dupefinder=DupeFinderEG(),
             priority=priority, parent_fwid=1, additional_user_tags=user_tags, qm_method=qm_method,
             check_large=check_large)
@@ -60,18 +62,21 @@ def snl_to_eg_wf(snl, parameters=None):
         solvents = parameters.get('solvents', default_solvents)
         fws_tasks, connections = multi_solvent_ipea_fws(
             mol=snl.structure, name=molname, mission=mission, solvents=solvents, solvent_method=solvent_method,
+            use_vdW_surface=use_vdW_surface,
             ref_charge=ref_charge, spin_multiplicities=spin_multiplicities, dupefinder=DupeFinderEG(),
             priority=priority, parent_fwid=1, additional_user_tags=user_tags, qm_method=qm_method)
     elif workflow_type == 'solvation energy':
         solvents = parameters.get('solvents', default_solvents)
         fws_tasks, connections = solvation_energy_fws(
             mol=snl.structure, name=molname, mission=mission, solvents=solvents, solvent_method=solvent_method,
+            use_vdW_surface=use_vdW_surface,
             dupefinder=DupeFinderEG(), priority=priority, parent_fwid=1, additional_user_tags=user_tags,
             qm_method=qm_method)
     elif workflow_type == "single point energy":
         solvent = parameters.get('solvent', "water")
         fws_tasks, connections = single_point_energy_fws(
             mol=snl.structure, name=molname, mission=mission, solvent=solvent, solvent_method=solvent_method,
+            use_vdW_surface=use_vdW_surface,
             qm_method=qm_method, pop_method=population_method, dupefinder=DupeFinderEG(),
             priority=priority, parent_fwid=1, additional_user_tags=user_tags)
     elif workflow_type == "md relax":

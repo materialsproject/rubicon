@@ -74,8 +74,7 @@ class EGStructureNL(StructureNL):
     def snlgroup_key(self):
         return self.snl_autometa['inchi']
 
-    @property
-    def to_dict(self):
+    def as_dict(self):
         m_dict = super(EGStructureNL, self).as_dict()
         m_dict.update(self.snl_autometa)
         m_dict['snl_id'] = self.snl_id
@@ -138,7 +137,7 @@ class SNLGroup():
         d['created_at'] = self.created_at
         d['updated_at'] = self.updated_at
         d['snlgroup_id'] = self.snlgroup_id
-        d['canonical_snl'] = self.canonical_snl.to_dict
+        d['canonical_snl'] = self.canonical_snl.as_dict()
         d['all_snl_ids'] = self.all_snl_ids
         d['num_snl'] = len(self.all_snl_ids)
 

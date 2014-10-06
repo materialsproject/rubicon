@@ -5,7 +5,7 @@ from fireworks import Workflow
 from rubicon.utils.qchem_firework_creator import QChemFireWorkCreator
 
 
-def multi_solvent_ipea_fws(mol, name, mission, solvents, solvent_method, ref_charge, spin_multiplicities=(2, 1, 2),
+def multi_solvent_ipea_fws(mol, name, mission, solvents, solvent_method, use_vdW_surface, ref_charge, spin_multiplicities=(2, 1, 2),
                            dupefinder=None, priority=1, parent_fwid=None, additional_user_tags=None, qm_method=None):
     large = False
     if len(mol) > 50:
@@ -62,7 +62,7 @@ def multi_solvent_ipea_fws(mol, name, mission, solvents, solvent_method, ref_cha
         fw_ids = zip(* [iter(range(fwid_start, fwid_end))] * 2)
         sp_fw_ids.append(fw_ids)
         fws = (fw_creator.sp_fw(ch, spin, fwid_cal, fwid_db,
-                                solvent=solvent, solvent_method=solvent_method,
+                                solvent=solvent, use_vdW_surface=use_vdW_surface, solvent_method=solvent_method,
                                 qm_method=energy_method)
                for ch, spin, (fwid_cal, fwid_db)
                in zip(charges, spin_multiplicities, fw_ids))

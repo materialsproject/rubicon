@@ -11,7 +11,7 @@ from pymatgen import Molecule
 from pymatgen.analysis.molecule_structure_comparator import \
     MoleculeStructureComparator
 from pymatgen.io.qchemio import QcOutput
-from pymatgen.symmetry.pointgroup import PointGroupAnalyzer
+from pymatgen.symmetry.analyzer import PointGroupAnalyzer
 from rubicon.utils.snl.egsnl import EGStructureNL
 from rubicon.utils.snl.egsnl_mongo import EGSNLMongoAdapter
 
@@ -289,7 +289,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
                     # add snl
                     egsnl, snlgroup_id = sma.add_snl(
                         new_snl, snlgroup_guess=d['snlgroup_id_initial'])
-                    d['snl_final'] = egsnl.as_dicit()
+                    d['snl_final'] = egsnl.as_dict()
                     d['snlgroup_id_final'] = snlgroup_id
                 else:
                     d['snl_final'] = fw_spec['egsnl']

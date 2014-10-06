@@ -172,8 +172,8 @@ class SubmissionMongoAdapterEG(object):
         d['state'] = 'SUBMITTED'
         d['reaction_id'] = self._get_next_reaction_id()
         d['submitted_at'] = datetime.datetime.utcnow().isoformat()
-        d["reactant_snls"] = [s[0].to_dict for s in reactant_snls]
-        d["product_snls"] = [s[0].to_dict for s in product_snls]
+        d["reactant_snls"] = [s[0].as_dict() for s in reactant_snls]
+        d["product_snls"] = [s[0].as_dict() for s in product_snls]
         d['all_inchis'] = all_inchis
         d['reactant_inchis'] = reactant_inchis
         d['product_inchis'] = product_inchis
@@ -211,7 +211,7 @@ class SubmissionMongoAdapterEG(object):
             infos.append(dict([(p, j[p]) for p in props]))
         return infos
 
-    def to_dict(self):
+    def as_dict(self):
         """
         Note: usernames/passwords are exported as unencrypted Strings!
         """
@@ -242,12 +242,12 @@ class SubmissionMongoAdapterEG(object):
         :param f_format: the format to output to (default json)
         """
         if f_format == 'json':
-            return json.dumps(self.to_dict(),
+            return json.dumps(self.as_dict(),
                               default=DATETIME_HANDLER,
                               **kwargs)
         elif f_format == 'yaml':
             # start with the JSON format, and convert to YAML
-            return yaml.dump(self.to_dict(), default_flow_style=YAML_STYLE,
+            return yaml.dump(self.as_dict(), default_flow_style=YAML_STYLE,
                              allow_unicode=True)
         else:
             raise ValueError('Unsupported format {}'.format(f_format))

@@ -22,6 +22,6 @@ class AddEGSNLTask(FireTaskBase, FWSerializable):
         pbmol = bb.pybel_mol
         inchi_root = pbmol.write("inchi").strip()
 
-        return FWAction(update_spec={'egsnl': egsnl.to_dict,
+        return FWAction(update_spec={'egsnl': egsnl.as_dict(),
                                      'snlgroup_id': snlgroup_id,
                                      'inchi_root': inchi_root})
