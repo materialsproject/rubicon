@@ -8,7 +8,7 @@ from rubicon.utils.qchem_firework_creator import QChemFireWorkCreator
 __author__ = 'xiaohuiqu'
 
 
-def solvation_energy_fws(mol, name, mission, solvents, solvent_method, dupefinder=None, priority=1, parent_fwid=None,
+def solvation_energy_fws(mol, name, mission, solvents, solvent_method, use_vdW_surface, dupefinder=None, priority=1, parent_fwid=None,
                          additional_user_tags=None, qm_method=None):
     large = False
     if len(mol) > 50:
@@ -55,7 +55,7 @@ def solvation_energy_fws(mol, name, mission, solvents, solvent_method, dupefinde
                                   fwid_base + 4 + num_solvents*2))] * 2)
     sp_fws = (fw_creator.sp_fw(
               charge=0, spin_multiplicity=1, fw_id_cal=fwid_cal,
-              fw_id_db=fwid_db, solvent_method=solvent_method, solvent=solvent,
+              fw_id_db=fwid_db, solvent_method=solvent_method, use_vdW_surface=use_vdW_surface, solvent=solvent,
               qm_method=energy_method)
               for (fwid_cal, fwid_db), solvent in zip(sp_fw_ids, solvents))
     sp_cal_ids, sp_db_ids = zip(*sp_fw_ids)

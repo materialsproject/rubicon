@@ -8,7 +8,7 @@ from rubicon.utils.qchem_firework_creator import QChemFireWorkCreator
 __author__ = 'xiaohuiqu'
 
 
-def multistep_ipea_fws(mol, name, mission, solvent, solvent_method, ref_charge, spin_multiplicities=(2, 1, 2), dupefinder=None, priority=1,
+def multistep_ipea_fws(mol, name, mission, solvent, solvent_method, use_vdW_surface, ref_charge, spin_multiplicities=(2, 1, 2), dupefinder=None, priority=1,
                        parent_fwid=None, additional_user_tags=None, qm_method=None, check_large=True):
     large = False
     if len(mol) > 50 and check_large:
@@ -54,6 +54,7 @@ def multistep_ipea_fws(mol, name, mission, solvent, solvent_method, ref_charge, 
 
     fw_ids = zip(* [iter(range(fwid_base + 12, fwid_base + 12 + 6))] * 2)
     fws = (fw_creator.sp_fw(ch, spin, fwid_cal, fwid_db, solvent=solvent, solvent_method=solvent_method,
+                            use_vdW_surface=use_vdW_surface,
                             qm_method=energy_method)
            for ch, spin, (fwid_cal, fwid_db)
            in zip(charges, spin_multiplicities, fw_ids))
