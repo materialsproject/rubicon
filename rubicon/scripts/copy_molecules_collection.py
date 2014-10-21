@@ -56,14 +56,14 @@ def transform_molecule_doc(mol1):
                      "ief-pcm_at_surface0_00",
                      "ief-pcm_at_surface",
                      "ief-pcm"]:
-        for k, v in mol1["solvated_properties"].keys():
+        for k in mol1["solvated_properties"].keys():
             if prefer_k in k:
                 solname = k
                 break
         if solname:
             break
     else:
-        for k, v in mol1["solvated_properties"].keys():
+        for k in mol1["solvated_properties"].keys():
             solname = k
             break
     if solname:
