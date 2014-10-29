@@ -25,18 +25,19 @@ def snl_to_eg_wf(snl, parameters=None):
         alphabetical_formula
     molname = parameters.get("nick_name", f)
 
-    # add the SNL to the SNL DB and figure out duplicate group
-    tasks = [AddEGSNLTask()]
-    spec = {'task_type': 'Add to SNL database',
-            'snl': snl.as_dict(),
-            '_priority': snl_priority}
-    if 'snlgroup_id' in parameters and isinstance(snl, EGStructureNL):
-        spec['force_egsnl'] = snl.as_dict()
-        spec['force_snlgroup_id'] = parameters['snlgroup_id']
-        del spec['snl']
-    fws_all.append(Firework(tasks, spec,
-                   name=get_slug(molname + ' -- Add to SNL database'),
-                   fw_id=1))
+    if "reaction_id" not in parameters:
+        # add the SNL to the SNL DB and figure out duplicate group
+        tasks = [AddEGSNLTask()]
+        spec = {'task_type': 'Add to SNL database',
+                'snl': snl.as_dict(),
+                '_priority': snl_priority}
+        if 'snlgroup_id' in parameters and isinstance(snl, EGStructureNL):
+            spec['force_egsnl'] = snl.as_dict()
+            spec['force_snlgroup_id'] = parameters['snlgroup_id']
+            del spec['snl']
+        fws_all.append(Firework(tasks, spec,
+                       name=get_slug(molname + ' -- Add to SNL database'),
+                       fw_id=1))
 
     default_solvents = ['diglym', 'acetonitrile', 'dmso', 'thf',
                         'dimethylamine', 'dimethoxyethane',
@@ -98,10 +99,10 @@ def snl_to_eg_wf(snl, parameters=None):
     elif workflow_type == "equilibrium constant":
         solvent = parameters.get('solvent', "water")
         reaction_id = parameters.get('reaction_id')
-        equilibrium_constant_fws(
+        fws_tasks, connections = equilibrium_constant_fws(
             mission=mission, solvent=solvent, solvent_method=solvent_method, use_vdw_surface=use_vdw_surface,
             qm_method=qm_method, reaction_id=reaction_id, dupefinder=DupeFinderEG(), priority=priority,
-            parent_fwid=1, additional_user_tags=user_tags, depend_on_parent=True)
+            parent_fwid=1, additional_user_tags=user_tags, depend_on_parent=False)
     elif workflow_type == "bsse":
         charge = snl.structure.charge
         spin_multiplicity = snl.structure.spin_multiplicity

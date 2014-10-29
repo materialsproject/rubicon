@@ -2,12 +2,16 @@ import json
 import logging
 import os
 import sys
-from fireworks import Workflow
 
+from fireworks import Workflow, Firework
+from fireworks.utilities.fw_utilities import get_slug
 from pymatgen.matproj.snl import StructureNL
+
 from pymongo import MongoClient
 
-from rubicon.workflows.bsse_wf import counterpoise_correction_generation_fw, BSSEFragment
+from rubicon.firetasks.egsnl_tasks import AddEGSNLTask
+from rubicon.workflows.bsse_wf import counterpoise_correction_generation_fw
+
 from rubicon.workflows.single_point_energy_wf import single_point_energy_fws
 
 
@@ -75,25 +79,47 @@ def equilibrium_constant_fws(mission, solvent, solvent_method, use_vdw_surface, 
             reactant_fragments + product_fragments:
         mol = snl.structure
         mol.set_charge_and_spin(charge, spin)
+
+        snl_tasks = [AddEGSNLTask()]
+        snl_spec = {'task_type': 'Add to SNL database',
+                    'snl': snl.as_dict(),
+                    '_priority': priority}
+        priority *= 2  # once we start a job, keep going!
+
+        snl_fw = Firework(snl_tasks, snl_spec, name=get_slug(nick_name + ' -- Add to SNL database'),
+                          fw_id=current_fwid)
+        fws.append(snl_fw)
+
         sp_fws, sp_links_dict = single_point_energy_fws(
             mol, name=nick_name, mission=mission, solvent=solvent, solvent_method=solvent_method,
             use_vdW_surface=use_vdw_surface, qm_method=qm_method, pop_method=None, dupefinder=dupefinder,
-            priority=priority, parent_fwid=current_fwid, additional_user_tags=additional_user_tags,
-            depend_on_parent_fw=False)
+            priority=priority, parent_fwid=snl_fw.fw_id, additional_user_tags=additional_user_tags,
+            depend_on_parent_fw=True)
         fws.extend(sp_fws)
+        sp_children = set()
+        sp_parents = set()
         for k, v2 in sp_links_dict:
             v1 = links_dict.get(k, [])
             links_dict[k] = v1 + v2
-        current_fwid = max([fw.fw_id for fw in sp_fws]) + 1
+            if isinstance(k, list):
+                sp_parents |= set(k)
+            else:
+                sp_parents.add(k)
+            if isinstance(v2, list):
+                sp_children |= set(v2)
+            else:
+                sp_children.add(v2)
+        sp_last_fwids = list(sp_children - sp_parents)
 
-        sp_fws, sp_links_dict = counterpoise_correction_generation_fw(
+        bsse_fws, bsse_links_dict = counterpoise_correction_generation_fw(
             molname=nick_name, charge=charge, spin_multiplicity=spin, qm_method=bsse_qm_method, fragments=fragments,
-            mission=mission, priority=priority, parent_fwid=current_fwid, additional_user_tags=additional_user_tags)
-        fws.extend(sp_fws)
-        for k, v2 in sp_links_dict:
+            mission=mission, priority=priority, parent_fwid=sp_last_fwids,
+            additional_user_tags=additional_user_tags)
+        fws.extend(bsse_fws)
+        for k, v2 in bsse_links_dict:
             v1 = links_dict.get(k, [])
             links_dict[k] = v1 + v2
-        current_fwid = max([fw.fw_id for fw in sp_fws]) + 1
+        current_fwid = max([fw.fw_id for fw in bsse_fws]) + 1
 
     if depend_on_parent:
         all_fwids = [fw.fw_id for fw in fws]
