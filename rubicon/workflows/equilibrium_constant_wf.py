@@ -8,6 +8,7 @@ from fireworks.utilities.fw_utilities import get_slug
 from pymatgen.matproj.snl import StructureNL
 
 from pymongo import MongoClient
+import yaml
 
 from rubicon.firetasks.egsnl_tasks import AddEGSNLTask
 from rubicon.workflows.bsse_wf import counterpoise_correction_generation_fw
@@ -20,7 +21,7 @@ __author__ = 'xiaohuiqu'
 
 def get_reactions_collection():
     db_dir = os.environ['DB_LOC']
-    db_path = os.path.join(db_dir, 'tasks_db.json')
+    db_path = os.path.join(db_dir, 'submission_db.yaml')
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger('QChemDrone')
     logger.setLevel(logging.INFO)
@@ -28,11 +29,11 @@ def get_reactions_collection():
     sh.setLevel(getattr(logging, 'INFO'))
     logger.addHandler(sh)
     with open(db_path) as f:
-        db_creds = json.load(f)
+        db_creds = yaml.load(f)
     conn = MongoClient(db_creds['host'], db_creds['port'])
-    db = conn[db_creds['database']]
-    if db_creds['admin_user']:
-        db.authenticate(db_creds['admin_user'], db_creds['admin_password'])
+    db = conn[db_creds['db']]
+    if db_creds['username']:
+        db.authenticate(db_creds['username'], db_creds['password'])
     coll = db['reactions']
     return coll
 
@@ -47,6 +48,7 @@ def equilibrium_constant_fws(mission, solvent, solvent_method, use_vdw_surface, 
     else:
         bsse_qm_method = energy_method
     coll = get_reactions_collection()
+    print "reaction_id:", reaction_id, coll.count()
     reaction_doc = coll.find_one({"reaction_id": reaction_id})
     reactant_snls = [StructureNL.from_dict(s) for s in reaction_doc["reactant_snls"]]
     product_snls = [StructureNL.from_dict(s) for s in reaction_doc["product_snls"]]
