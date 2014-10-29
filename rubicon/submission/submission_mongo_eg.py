@@ -173,8 +173,8 @@ class SubmissionMongoAdapterEG(object):
         d['product_charges'] = product_charges
         d['reactant_spin_multiplicities'] = reactant_spin_multiplicities
         d['product_spin_multiplicities'] = product_spin_multiplicities
-        d['reactant_fragments'] = reactant_fragments
-        d['product_fragments'] = product_fragments
+        d['reactant_fragments'] = [[frag.to_dict() for frag in specie] for specie in reactant_fragments]
+        d['product_fragments'] = [[frag.to_dict() for frag in specie] for specie in product_fragments]
         self.reactions.insert(d)
         dummy_snl = StructureNL.from_dict(d["reactant_snls"][0])
         parameters['reaction_id'] = d['reaction_id']
