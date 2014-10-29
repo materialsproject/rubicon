@@ -48,7 +48,6 @@ def equilibrium_constant_fws(mission, solvent, solvent_method, use_vdw_surface, 
     else:
         bsse_qm_method = energy_method
     coll = get_reactions_collection()
-    print "reaction_id:", reaction_id, coll.count()
     reaction_doc = coll.find_one({"reaction_id": reaction_id})
     reactant_snls = [StructureNL.from_dict(s) for s in reaction_doc["reactant_snls"]]
     product_snls = [StructureNL.from_dict(s) for s in reaction_doc["product_snls"]]
@@ -74,11 +73,11 @@ def equilibrium_constant_fws(mission, solvent, solvent_method, use_vdw_surface, 
     links_dict = dict()
 
     for snl, nick_name, charge, spin, fragments in \
-            reactant_snls + product_snls, \
-            reactant_nicknames + product_nicknames, \
-            reactant_charges + product_charges, \
-            reactant_spin_multiplicities + product_spin_multiplicities, \
-            reactant_fragments + product_fragments:
+            zip(reactant_snls + product_snls,
+                reactant_nicknames + product_nicknames,
+                reactant_charges + product_charges,
+                reactant_spin_multiplicities + product_spin_multiplicities,
+                reactant_fragments + product_fragments):
         mol = snl.structure
         mol.set_charge_and_spin(charge, spin)
 
