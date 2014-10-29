@@ -4,6 +4,7 @@ import datetime
 import json
 import os
 from pymatgen.io.babelio import BabelMolAdaptor
+from pymatgen.matproj.snl import StructureNL
 from pymongo import MongoClient
 import yaml
 from rubicon.utils.snl.egsnl import get_meta_from_structure
@@ -122,7 +123,6 @@ class SubmissionMongoAdapterEG(object):
                 product_element_count[element] += n
         if reaction_element_count != product_element_count:
             raise Exception("Number of atoms is inconsistant in reactant and product")
-        params = copy.deepcopy(parameters)
         reactant_inchis = []
         product_inchis = []
         num_reactants = []
@@ -176,6 +176,9 @@ class SubmissionMongoAdapterEG(object):
         d['reactant_fragments'] = reactant_fragments
         d['product_fragments'] = product_fragments
         self.reactions.insert(d)
+        dummy_snl = StructureNL.from_dict(d["reactant_snls"][0])
+        parameters['reaction_id'] = d['reaction_id']
+        self.submit_snl(dummy_snl, submitter_email, parameters)
         return d['reaction_id']
 
     def resubmit(self, submission_id):

@@ -5,6 +5,7 @@ from rubicon.dupefinders.dupefinder_eg import DupeFinderEG
 from rubicon.firetasks.egsnl_tasks import AddEGSNLTask
 from rubicon.utils.snl.egsnl import EGStructureNL, get_meta_from_structure
 from rubicon.workflows.bsse_wf import counterpoise_correction_generation_fw
+from rubicon.workflows.equilibrium_constant_wf import equilibrium_constant_fws
 from rubicon.workflows.md_relax_workflow import md_relax_fws
 from rubicon.workflows.multi_solvent_ipea_wf import multi_solvent_ipea_fws
 from rubicon.workflows.multistep_ipea_wf import multistep_ipea_fws
@@ -46,7 +47,7 @@ def snl_to_eg_wf(snl, parameters=None):
     spin_multiplicities = parameters.get('spin_multiplicities', (2, 1, 2))
     user_tags = {"initial_charge": ref_charge}
     solvent_method = parameters.get("solvent_method", "ief-pcm")
-    use_vdW_surface = parameters.get("use_vdW_surface", False)
+    use_vdw_surface = parameters.get("use_vdW_surface", False)
     qm_method = parameters.get("qm_method", None)
     population_method = parameters.get("population_method", None)
     check_large = parameters.get("check_large", True)
@@ -54,7 +55,7 @@ def snl_to_eg_wf(snl, parameters=None):
         solvent = parameters.get('solvent', "water")
         fws_tasks, connections = multistep_ipea_fws(
             mol=snl.structure, name=molname, mission=mission, solvent=solvent, solvent_method=solvent_method,
-            use_vdW_surface=use_vdW_surface,
+            use_vdW_surface=use_vdw_surface,
             ref_charge=ref_charge, spin_multiplicities=spin_multiplicities, dupefinder=DupeFinderEG(),
             priority=priority, parent_fwid=1, additional_user_tags=user_tags, qm_method=qm_method,
             check_large=check_large)
@@ -62,21 +63,21 @@ def snl_to_eg_wf(snl, parameters=None):
         solvents = parameters.get('solvents', default_solvents)
         fws_tasks, connections = multi_solvent_ipea_fws(
             mol=snl.structure, name=molname, mission=mission, solvents=solvents, solvent_method=solvent_method,
-            use_vdW_surface=use_vdW_surface,
+            use_vdW_surface=use_vdw_surface,
             ref_charge=ref_charge, spin_multiplicities=spin_multiplicities, dupefinder=DupeFinderEG(),
             priority=priority, parent_fwid=1, additional_user_tags=user_tags, qm_method=qm_method)
     elif workflow_type == 'solvation energy':
         solvents = parameters.get('solvents', default_solvents)
         fws_tasks, connections = solvation_energy_fws(
             mol=snl.structure, name=molname, mission=mission, solvents=solvents, solvent_method=solvent_method,
-            use_vdW_surface=use_vdW_surface,
+            use_vdW_surface=use_vdw_surface,
             dupefinder=DupeFinderEG(), priority=priority, parent_fwid=1, additional_user_tags=user_tags,
             qm_method=qm_method)
     elif workflow_type == "single point energy":
         solvent = parameters.get('solvent', "water")
         fws_tasks, connections = single_point_energy_fws(
             mol=snl.structure, name=molname, mission=mission, solvent=solvent, solvent_method=solvent_method,
-            use_vdW_surface=use_vdW_surface,
+            use_vdW_surface=use_vdw_surface,
             qm_method=qm_method, pop_method=population_method, dupefinder=DupeFinderEG(),
             priority=priority, parent_fwid=1, additional_user_tags=user_tags)
     elif workflow_type == "md relax":
@@ -94,6 +95,13 @@ def snl_to_eg_wf(snl, parameters=None):
             time_step=time_step, md_runs=md_runs, normal_basis=normal_basis, diffuse_basis=diffuse_basis,
             charge_threshold=charge_threshold, dupefinder=DupeFinderEG(), priority=priority,
             parent_fwid=1, additional_user_tags=user_tags)
+    elif workflow_type == "equilibrium constant":
+        solvent = parameters.get('solvent', "water")
+        reaction_id = parameters.get('reaction_id')
+        equilibrium_constant_fws(
+            mission=mission, solvent=solvent, solvent_method=solvent_method, use_vdw_surface=use_vdw_surface,
+            qm_method=qm_method, reaction_id=reaction_id, dupefinder=DupeFinderEG(), priority=priority,
+            parent_fwid=1, additional_user_tags=user_tags, depend_on_parent=True)
     elif workflow_type == "bsse":
         charge = snl.structure.charge
         spin_multiplicity = snl.structure.spin_multiplicity

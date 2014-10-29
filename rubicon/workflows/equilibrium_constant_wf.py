@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import sys
+from fireworks import Workflow
 
 from pymatgen.matproj.snl import StructureNL
 from pymongo import MongoClient
@@ -31,7 +32,8 @@ def get_reactions_collection():
     coll = db['reactions']
     return coll
 
-def equilibrium_constant_fws(name, mission, solvent, solvent_method, use_vdW_surface, qm_method, reaction_id,
+
+def equilibrium_constant_fws(mission, solvent, solvent_method, use_vdw_surface, qm_method, reaction_id,
                              dupefinder=None, priority=1, parent_fwid=None, additional_user_tags=None,
                              depend_on_parent=False):
     energy_method, sol_qm_method, geom_method = qm_method.split("//")
@@ -65,16 +67,17 @@ def equilibrium_constant_fws(name, mission, solvent, solvent_method, use_vdW_sur
     fws = []
     links_dict = dict()
 
-    for snl, nick_name, charge, spin, fragments in reactant_snls + product_snls, \
-                                        reactant_nicknames + product_nicknames, \
-                                        reactant_charges + product_charges, \
-                                        reactant_spin_multiplicities+ product_spin_multiplicities, \
-                                        reactant_fragments + product_fragments:
+    for snl, nick_name, charge, spin, fragments in \
+            reactant_snls + product_snls, \
+            reactant_nicknames + product_nicknames, \
+            reactant_charges + product_charges, \
+            reactant_spin_multiplicities + product_spin_multiplicities, \
+            reactant_fragments + product_fragments:
         mol = snl.structure
         mol.set_charge_and_spin(charge, spin)
         sp_fws, sp_links_dict = single_point_energy_fws(
             mol, name=nick_name, mission=mission, solvent=solvent, solvent_method=solvent_method,
-            use_vdW_surface=use_vdW_surface, qm_method=qm_method, pop_method=None, dupefinder=dupefinder,
+            use_vdW_surface=use_vdw_surface, qm_method=qm_method, pop_method=None, dupefinder=dupefinder,
             priority=priority, parent_fwid=current_fwid, additional_user_tags=additional_user_tags,
             depend_on_parent_fw=False)
         fws.extend(sp_fws)
@@ -98,3 +101,9 @@ def equilibrium_constant_fws(name, mission, solvent, solvent_method, use_vdW_sur
             links_dict[p_fwid] = all_fwids
 
     return fws, links_dict
+
+
+def mol_to_equilibrium_constant_wf(mol, name, **kwargs):
+    fireworks, links_dict = equilibrium_constant_fws(
+        mol, name, **kwargs)
+    return Workflow(fireworks, links_dict, name)
