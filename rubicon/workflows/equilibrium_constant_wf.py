@@ -99,9 +99,10 @@ def equilibrium_constant_fws(mission, solvent, solvent_method, use_vdw_surface, 
         fws.extend(sp_fws)
         sp_children = set()
         sp_parents = set()
-        for k, v2 in sp_links_dict:
+        for k, v2 in sp_links_dict.items():
             v1 = links_dict.get(k, [])
-            links_dict[k] = v1 + v2
+            links_dict[k] = list((set(v1) if isinstance(v1, list) else {v1}) |
+                                 (set(v2) if isinstance(v2, list) else {v2}))
             if isinstance(k, list):
                 sp_parents |= set(k)
             else:
@@ -117,9 +118,10 @@ def equilibrium_constant_fws(mission, solvent, solvent_method, use_vdw_surface, 
             mission=mission, priority=priority, parent_fwid=sp_last_fwids,
             additional_user_tags=additional_user_tags)
         fws.extend(bsse_fws)
-        for k, v2 in bsse_links_dict:
+        for k, v2 in bsse_links_dict.items():
             v1 = links_dict.get(k, [])
-            links_dict[k] = v1 + v2
+            links_dict[k] = list((set(v1) if isinstance(v1, list) else {v1}) |
+                                 (set(v2) if isinstance(v2, list) else {v2}))
         current_fwid = max([fw.fw_id for fw in bsse_fws]) + 1
 
     if depend_on_parent:
