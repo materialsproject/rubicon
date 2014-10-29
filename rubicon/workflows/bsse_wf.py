@@ -9,7 +9,7 @@ from rubicon.utils.snl.egsnl import EGStructureNL
 __author__ = 'xiaohuiqu'
 
 
-class BSSEFragments(FWSerializable):
+class BSSEFragment(FWSerializable):
     OVERLAPPED = "overlapped"
     ISOLATED = "isolated"
 
@@ -37,7 +37,7 @@ class BSSEFragments(FWSerializable):
 
     @classmethod
     def from_dict(cls, m_dict):
-        return BSSEFragments(m_dict["charge"], m_dict["spin_multiplicity"], m_dict["ghost_atoms"])
+        return BSSEFragment(m_dict["charge"], m_dict["spin_multiplicity"], m_dict["ghost_atoms"])
 
 
 def get_sub_mol(mol, frag):

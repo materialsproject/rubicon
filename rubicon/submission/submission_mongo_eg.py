@@ -94,7 +94,7 @@ class SubmissionMongoAdapterEG(object):
         self.jobs.insert(d)
         return d['submission_id']
 
-    def submit_reaction(self, reactant_snls, product_snls, submitter_email, parameters=None):
+    def submit_reaction(self, reactant_snls, product_snls, reactant_fragments, product_fragments, submitter_email, parameters=None):
         """
             Submit a reaction. This task will be separated to several single point energy calculations, and submitted
             as individual molecule.
@@ -102,6 +102,8 @@ class SubmissionMongoAdapterEG(object):
             Args:
                 reactant_snls: List of tuple(snl, count, nickname).
                 product_snls: List of tuple(snl, count, nickname).
+                reactant_fragments: BSSE fragments definition. (BSSEFragment)
+                product_fragments: BSSE fragments definition. (BSSEFragment)
                 submitter_email: Email.
                 parameters: dict of parameter. Expected parameters are 1) method: QChem theoretival method. e.g.
                     B3LYP-XDM/6-31+G*; 2) solvent: implicit solvent in energy calcuation. e.g. THF; ...
@@ -121,20 +123,6 @@ class SubmissionMongoAdapterEG(object):
         if reaction_element_count != product_element_count:
             raise Exception("Number of atoms is inconsistant in reactant and product")
         params = copy.deepcopy(parameters)
-        if "workflow" not in params:
-            params["workflow"] = "single point energy"
-        reactant_submission_ids = []
-        for snl, n, nick_name in reactant_snls:
-            params_t = copy.deepcopy(params)
-            params_t["nick_name"] = nick_name
-            submission_id = self.submit_snl(snl, submitter_email, params_t)
-            reactant_submission_ids.append(submission_id)
-        product_submission_ids = []
-        for snl, n, nick_name in product_snls:
-            params_t = copy.deepcopy(params)
-            params_t["nick_name"] = nick_name
-            submission_id = self.submit_snl(snl, submitter_email, params_t)
-            product_submission_ids.append(submission_id)
         reactant_inchis = []
         product_inchis = []
         num_reactants = []
@@ -179,14 +167,14 @@ class SubmissionMongoAdapterEG(object):
         d['product_inchis'] = product_inchis
         d['num_reactants'] = num_reactants
         d['num_products'] = num_products
-        d['reactant_submission_ids'] = reactant_submission_ids
-        d['product_submission_ids'] = product_submission_ids
         d['reactant_nicknames'] = reactant_nicknames
         d['product_nicknames'] = product_nicknames
         d['reactant_charges'] = reactant_charges
         d['product_charges'] = product_charges
         d['reactant_spin_multiplicities'] = reactant_spin_multiplicities
         d['product_spin_multiplicities'] = product_spin_multiplicities
+        d['reactant_fragments'] = reactant_fragments
+        d['product_fragments'] = product_fragments
         self.reactions.insert(d)
         return d['reaction_id']
 

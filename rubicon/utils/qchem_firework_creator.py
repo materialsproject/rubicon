@@ -399,8 +399,8 @@ class QChemFireWorkCreator():
         if priority:
             spec['_priority'] = priority
         if super_mol_snlgroup_id:
-            from rubicon.workflows.bsse_wf import BSSEFragments
-            task_type = "bsse {} fragment".format(BSSEFragments.OVERLAPPED if bs_overlap else BSSEFragments.ISOLATED)
+            from rubicon.workflows.bsse_wf import BSSEFragment
+            task_type = "bsse {} fragment".format(BSSEFragment.OVERLAPPED if bs_overlap else BSSEFragment.ISOLATED)
         else:
             task_type = "vacuum only single point energy"
         if mixed_basis_generator or mixed_aux_basis_generator:
@@ -446,8 +446,8 @@ class QChemFireWorkCreator():
             spec["inchi_root"] = super_mol_inchi_root
         if ghost_atoms:
             spec["run_tags"]["ghost_atoms"] = sorted(set(ghost_atoms))
-            from rubicon.workflows.bsse_wf import BSSEFragments
-            spec["run_tags"]["bsse_fragment_type"] = BSSEFragments.OVERLAPPED if bs_overlap else BSSEFragments.ISOLATED
+            from rubicon.workflows.bsse_wf import BSSEFragment
+            spec["run_tags"]["bsse_fragment_type"] = BSSEFragment.OVERLAPPED if bs_overlap else BSSEFragment.ISOLATED
         if mixed_basis_generator:
             spec["_mixed_basis_set_generator"] = mixed_basis_generator
         if mixed_aux_basis_generator:
