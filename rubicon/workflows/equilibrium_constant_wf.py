@@ -52,8 +52,8 @@ def equilibrium_constant_fws(mission, solvent, solvent_method, use_vdw_surface, 
     product_charges = reaction_doc['product_charges']
     reactant_spin_multiplicities = reaction_doc['reactant_spin_multiplicities']
     product_spin_multiplicities = reaction_doc['product_spin_multiplicities']
-    reactant_fragments = [BSSEFragment.from_dict(frag) for frag in reaction_doc['reactant_fragments']]
-    product_fragments = [BSSEFragment.from_dict(frag) for frag in reaction_doc['product_fragments']]
+    reactant_fragments = reaction_doc['reactant_fragments']
+    product_fragments = reaction_doc['product_fragments']
 
     fwid_base = 1
     if parent_fwid:
