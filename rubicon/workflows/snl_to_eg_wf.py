@@ -102,7 +102,7 @@ def snl_to_eg_wf(snl, parameters=None):
         fws_tasks, connections = equilibrium_constant_fws(
             mission=mission, solvent=solvent, solvent_method=solvent_method, use_vdw_surface=use_vdw_surface,
             qm_method=qm_method, reaction_id=reaction_id, dupefinder=DupeFinderEG(), priority=priority,
-            parent_fwid=1, additional_user_tags=user_tags, depend_on_parent=False)
+            parent_fwid=None, additional_user_tags=user_tags, depend_on_parent=False)
     elif workflow_type == "bsse":
         charge = snl.structure.charge
         spin_multiplicity = snl.structure.spin_multiplicity
