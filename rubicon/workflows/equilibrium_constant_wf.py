@@ -29,10 +29,10 @@ def get_reactions_collection():
     logger.addHandler(sh)
     with open(db_path) as f:
         db_creds = json.load(f)
-    conn = MongoClient(db_creds['host'], db_creds['port'],)
-    db = conn[db_creds['db']]
-    if db_creds['username']:
-        db.authenticate(db_creds['username'], db_creds['password'])
+    conn = MongoClient(db_creds['host'], db_creds['port'])
+    db = conn[db_creds['database']]
+    if db_creds['admin_user']:
+        db.authenticate(db_creds['admin_user'], db_creds['admin_password'])
     coll = db['reactions']
     return coll
 
