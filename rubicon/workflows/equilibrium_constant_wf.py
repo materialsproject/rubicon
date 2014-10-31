@@ -95,7 +95,7 @@ def equilibrium_constant_fws(mission, solvent, solvent_method, use_vdw_surface, 
             mol, name=nick_name, mission=mission, solvent=solvent, solvent_method=solvent_method,
             use_vdW_surface=use_vdw_surface, qm_method=qm_method, pop_method=None, dupefinder=dupefinder,
             priority=priority, parent_fwid=snl_fw.fw_id, additional_user_tags=additional_user_tags,
-            depend_on_parent_fw=True)
+            depend_on_parent_fw=True, large=True)
         fws.extend(sp_fws)
         sp_children = set()
         sp_parents = set()
@@ -116,7 +116,7 @@ def equilibrium_constant_fws(mission, solvent, solvent_method, use_vdw_surface, 
         bsse_fws, bsse_links_dict = counterpoise_correction_generation_fw(
             molname=nick_name, charge=charge, spin_multiplicity=spin, qm_method=bsse_qm_method, fragments=fragments,
             mission=mission, priority=priority, parent_fwid=sp_last_fwids,
-            additional_user_tags=additional_user_tags)
+            additional_user_tags=additional_user_tags, large=True)
         fws.extend(bsse_fws)
         for k, v2 in bsse_links_dict.items():
             v1 = links_dict.get(k, [])

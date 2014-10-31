@@ -7,10 +7,11 @@ __author__ = 'xiaohuiqu'
 
 
 def single_point_energy_fws(mol, name, mission, solvent, solvent_method, use_vdW_surface, qm_method, pop_method, dupefinder=None, priority=1,
-                            parent_fwid=None, additional_user_tags=None, depend_on_parent_fw=True):
-    large = False
-    if len(mol) > 50:
-        large = True
+                            parent_fwid=None, additional_user_tags=None, depend_on_parent_fw=True, large=None):
+    if large is None:
+        large = False
+        if len(mol) > 50:
+            large = True
     energy_method, sol_qm_method, geom_method = qm_method.split("//")
     charge = mol.charge
     spin_multiplicity = mol.spin_multiplicity

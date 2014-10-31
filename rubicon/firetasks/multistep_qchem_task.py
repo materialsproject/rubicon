@@ -507,6 +507,7 @@ class CounterpoiseCorrectionGenerationTask(FireTaskBase, FWSerializable):
         egsnl = fw_spec["egsnl"]
         qm_method = fw_spec["qm_method"]
         fragment_dicts = fw_spec["fragments"]
+        large = fw_spec["large"]
         from rubicon.workflows.bsse_wf import bsse_wf, BSSEFragment
         fragments = [BSSEFragment.from_dict(d) for d in fragment_dicts]
         priority = fw_spec.get('_priority', 1)
@@ -514,6 +515,6 @@ class CounterpoiseCorrectionGenerationTask(FireTaskBase, FWSerializable):
         cc_wf = bsse_wf(super_mol=egsnl, name=molname, super_mol_snlgroup_id=super_mol_snlgroup_id,
                         super_mol_charge=charge, super_mol_spin_multiplicity=spin_multiplicity,
                         super_mol_inchi_root=inchi_root, qm_method=qm_method, fragments=fragments, mission=mission,
-                        dupefinder=dupefinder, priority=priority, is_spawnned=True)
+                        dupefinder=dupefinder, priority=priority, is_spawnned=True, large=large)
 
         return FWAction(detours=cc_wf)
