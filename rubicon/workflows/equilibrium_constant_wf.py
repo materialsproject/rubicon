@@ -43,7 +43,7 @@ def equilibrium_constant_fws(mission, solvent, solvent_method, use_vdw_surface, 
                              depend_on_parent=False):
     energy_method, sol_qm_method, geom_method = qm_method.split("//")
     if '||' in energy_method:
-        sp_qm_method, bsse_qm_method = energy_method.split("//")
+        sp_qm_method, bsse_qm_method = energy_method.split("||")
         qm_method = "//".join([energy_method, sol_qm_method, geom_method])
     else:
         bsse_qm_method = energy_method
