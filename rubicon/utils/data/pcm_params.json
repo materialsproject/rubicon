@@ -11,5 +11,8 @@
     "acetonitrile": {"dielectric": 37.0, "solvent_probe_radius": 2.20},
     "dmso": {"dielectric": 46.0, "solvent_probe_radius": 2.44},
     "thf": {"dielectric": 7.6, "solvent_probe_radius": 2.54},
-    "diethylcarbonate": {"dielectric": 2.8, "solvent_probe_radius": 2.91}
+    "diethylcarbonate": {"dielectric": 2.8, "solvent_probe_radius": 2.91},
+    "dimethylformamide": {"dielectric": 36.7, "solvent_probe_radius": 2.50},
+    "diethylether": {"dielectric": 4.34, "solvent_probe_radius": 2.76},
+    "methyltetrahydrofuran": {"dielectric": 6.97, "solvent_probe_radius": 2.74}
 }
