@@ -6,6 +6,7 @@ TODO: Modify module doc.
 
 from __future__ import division
 from monty.io import zopen
+from monty.json import jsanitize
 from monty.os.path import zpath
 from pymatgen import Molecule
 from pymatgen.analysis.molecule_structure_comparator import \
@@ -30,7 +31,6 @@ import datetime
 from pymongo import MongoClient
 
 from pymatgen.apps.borg.hive import AbstractDrone
-from pymatgen.util.io_utils import clean_json
 from pymatgen.io.babelio import BabelMolAdaptor
 from pymatgen.io.xyzio import XYZ
 
@@ -247,7 +247,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
         if "state" not in d:
             d["state"] = "successful"
 
-        return clean_json(d)
+        return jsanitize(d)
 
     @staticmethod
     def update_tags(fw_spec, d, task_id):

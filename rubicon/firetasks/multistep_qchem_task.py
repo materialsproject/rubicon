@@ -396,21 +396,21 @@ class BasisSetSuperpositionErrorCalculationTask(FireTaskBase, FWSerializable):
 
     def run_task(self, fw_spec):
         fragment_dicts = fw_spec["fragments"]
-        from rubicon.workflows.bsse_wf import BSSEFragments
-        fragments = [BSSEFragments.from_dict(d) for d in fragment_dicts]
+        from rubicon.workflows.bsse_wf import BSSEFragment
+        fragments = [BSSEFragment.from_dict(d) for d in fragment_dicts]
         fragments_dict = dict()
         bsse = 0.0
         for frag in fragments:
             fragment_name = self.get_fragment_name(frag.ghost_atoms)
             fragments_dict[fragment_name] = dict()
-            ov_fragment_key = self.get_fragment_key(frag.ghost_atoms, BSSEFragments.OVERLAPPED)
-            fragments_dict[fragment_name][BSSEFragments.OVERLAPPED] = fw_spec[ov_fragment_key]
-            ov_energy = fragments_dict[fragment_name][BSSEFragments.OVERLAPPED]["energy"]
-            iso_fragment_key = self.get_fragment_key(frag.ghost_atoms, BSSEFragments.ISOLATED)
-            fragments_dict[fragment_name][BSSEFragments.ISOLATED] = fw_spec[iso_fragment_key]
+            ov_fragment_key = self.get_fragment_key(frag.ghost_atoms, BSSEFragment.OVERLAPPED)
+            fragments_dict[fragment_name][BSSEFragment.OVERLAPPED] = fw_spec[ov_fragment_key]
+            ov_energy = fragments_dict[fragment_name][BSSEFragment.OVERLAPPED]["energy"]
+            iso_fragment_key = self.get_fragment_key(frag.ghost_atoms, BSSEFragment.ISOLATED)
+            fragments_dict[fragment_name][BSSEFragment.ISOLATED] = fw_spec[iso_fragment_key]
             fragments_dict[fragment_name]["charge"] = frag.charge
             fragments_dict[fragment_name]["spin_multiplicity"] = frag.spin_multiplicity
-            iso_energy = fragments_dict[fragment_name][BSSEFragments.ISOLATED]["energy"]
+            iso_energy = fragments_dict[fragment_name][BSSEFragment.ISOLATED]["energy"]
             fragments_dict[fragment_name]["fragment_bsse"] = ov_energy - iso_energy
             bsse += fragments_dict[fragment_name]["fragment_bsse"]
         result_dict = dict()
@@ -507,13 +507,14 @@ class CounterpoiseCorrectionGenerationTask(FireTaskBase, FWSerializable):
         egsnl = fw_spec["egsnl"]
         qm_method = fw_spec["qm_method"]
         fragment_dicts = fw_spec["fragments"]
-        from rubicon.workflows.bsse_wf import bsse_wf, BSSEFragments
-        fragments = [BSSEFragments.from_dict(d) for d in fragment_dicts]
+        large = fw_spec["large"]
+        from rubicon.workflows.bsse_wf import bsse_wf, BSSEFragment
+        fragments = [BSSEFragment.from_dict(d) for d in fragment_dicts]
         priority = fw_spec.get('_priority', 1)
         dupefinder = fw_spec.get('_dupefinder', DupeFinderEG())
         cc_wf = bsse_wf(super_mol=egsnl, name=molname, super_mol_snlgroup_id=super_mol_snlgroup_id,
                         super_mol_charge=charge, super_mol_spin_multiplicity=spin_multiplicity,
                         super_mol_inchi_root=inchi_root, qm_method=qm_method, fragments=fragments, mission=mission,
-                        dupefinder=dupefinder, priority=priority, is_spawnned=True)
+                        dupefinder=dupefinder, priority=priority, is_spawnned=True, large=large)
 
         return FWAction(detours=cc_wf)
