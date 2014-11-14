@@ -342,7 +342,7 @@ class LmpInput():
             #iterate every molecule of molecule type
             for imol in range(num_mols):
                 mol_coords = mols_in_box.mols_coords.cart_coords[i:i + num_atoms]
-                #print mol
+
                 mol_index += 1
 
                 d = {}
@@ -365,6 +365,7 @@ class LmpInput():
                              k + 1],
                          mol.site_properties["mol_name"][0]))
                     d[gff.atom_index[k + 1]] = k + i + 1
+
                 self.box_mol_index.append(d)
                 i += num_atoms
         lines.append('\n')
@@ -489,9 +490,6 @@ class LmpInput():
                                   mols_in_box.num_mols):
             gff = ffmol.gff
             top = ffmol.top
-        # for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
-        #                                mols_in_box.mols,
-        #                                mols_in_box.param_list):
             if gff.dihedrals is not None:
                 for m, v in enumerate(gff.dihedrals.values()):
                     dihedral_index = dihedral_index + 1
@@ -500,8 +498,6 @@ class LmpInput():
 
                 top._get_ff_dihedrals(gff.dihedrals, top.dihedrals,
                                       gff.atom_gaff)
-                #num_this_mol = parm['number']
-                #iterate over first molecule
                 for imol in range(num_mols):
                     mol_dihedrals = top.topdihedralff
                     mol_index += 1
@@ -522,19 +518,20 @@ class LmpInput():
                             dihedral_label = tuple(
                                 reversed(list(dihedral_label)))
                         for func_form, d in v[1].iteritems():
+                            #print l,top.dihedrals[l]
                             j += 1
                             lines.append(
-                                '{}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {}  {} {}'
+                                '{}  {}  {}  {}  {}  {}  {}  {}  {}'
                                 .format(j, dihedral_type_index[dihedral_label],
                                         self.box_mol_index[mol_index - 1][A],
                                         self.box_mol_index[mol_index - 1][B],
                                         self.box_mol_index[mol_index - 1][C],
                                         self.box_mol_index[mol_index - 1][D],
                                         '#', mol_index,
-                                        top.dihedrals[l][0],
-                                        top.dihedrals[l][1],
-                                        top.dihedrals[l][2],
-                                        top.dihedrals[l][3],
+                                        #top.dihedrals[l][0],
+                                        #top.dihedrals[l][1],
+                                        #top.dihedrals[l][2],
+                                        #top.dihedrals[l][3],
                                         mol.site_properties["mol_name"][0]))
                     i += len(top.dihedrals)
         lines.append('\n')
