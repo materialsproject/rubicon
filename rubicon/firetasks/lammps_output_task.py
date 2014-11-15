@@ -1,3 +1,4 @@
+
 from pymatgen.packmol.lammpsio import LammpsLog
 from pymongo import MongoClient
 
@@ -7,7 +8,14 @@ import shlex
 import subprocess
 from monty import logging, json
 from pymatgen import Molecule
-from pymatgen.packmol.packmol import PackmolRunner
+try:
+    # just a walkaround before the packmol is merged to master branch
+    # after packmol is merged to master branch, the try...catch block
+    # should be removed
+    from pymatgen.packmol.packmol import PackmolRunner
+    from pymatgen.packmol.lammpsio import LammpsLog
+except:
+    pass
 from rubicon.gff.boxmol import BoxMol
 from rubicon.gff.lammpsin import DictLammpsInputSet
 from rubicon.gff.lamppsio import LmpInput
@@ -44,7 +52,7 @@ class WritelammpsOutputTask(FireTaskBase):
         db = conn[db_creds['database']]
         if db_creds['admin_user']:
             db.authenticate(db_creds['admin_user'], db_creds['admin_password'])
-        coll = db[lammps_data]
+       # coll = db[lammps_data]
         conn.close()
 
 
@@ -61,13 +69,15 @@ class WritelammpsOutputTask(FireTaskBase):
 
 
 
-test_yong = LammpsLog.from_file('mol.log')
-docs = test_yong.llog
+if __name__ == '__main__':
+    # only execute the following if using the current file as a command
+    parse_lammps = LammpsLog.from_file('mol.log')
+    docs = parse_lammps.llog
+    docs["task_id"] = 348
 
 
+    # if db.counter.find({"_id": "mol_taskid"}).count() == 0:
+    #         db.counter.insert({"_id": "mol_taskid", "c": 1})
+    #             conn.close()
 
-# if db.counter.find({"_id": "mol_taskid"}).count() == 0:
-#         db.counter.insert({"_id": "mol_taskid", "c": 1})
-#             conn.close()
 
-docs["task_id"] = 348
