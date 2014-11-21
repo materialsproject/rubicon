@@ -8,7 +8,7 @@ __author__ = 'navnidhirajput'
 
 if __name__ == '__main__':
     task1 = WritelammpsInputTask()
-    #task2 = WritelammpsOutputTask()
+
 
     coords_n1c=[[4.522,   8.999,   5.512],
            [6.666,   9.383,   5.971],
@@ -64,11 +64,93 @@ if __name__ == '__main__':
                [5.668,   4.219,   9.986],
                [6.692,   5.074,   9.850],
                [6.947,   5.614,  11.049]]
+
+    coords_acn=[[-4.452,  -0.223,  -0.000],
+               [-3.389,   0.780,   0.000],
+               [-4.367,  -0.861,   0.889],
+               [-4.375,  -0.852,  -0.896],
+               [-5.433,   0.268,   0.007],
+               [-2.545,   1.577,   0.000]]
+
+    coords_mg=[[0.000,  0.000,  0.000]]
+    coords_al=[[0.000,  0.000,  0.000]]
+    coords_cl=[[0.000,  0.000,  0.000]]
+    coords_thf=[[-1.088,   2.692  -1.000],
+                [-0.728,  -0.308,  -1.000],
+                [0.692,  -0.308,   4.000],
+                [-1.378,   1.692,  -3.000],
+                [-0.748,  -0.308,   3.000],
+                [1.122,   0.692,  -2.000],
+                [0.712,   0.692,  -3.000],
+                [1.302,  -3.308,  -3.000],
+                [0.032,  -3.308,   0.000],
+                [2.042,  -2.308,   3.000],
+                [1.312,   2.692,   2.000],
+                [-1.998,  -0.308,  -2.000],
+                [-1.278,   1.692,   3.000]]
+
+
+
+
+    coords_tfsi=[[8.570,  13.900,  10.430],
+            [ 8.020,  15.350,  10.640],
+            [ 6.840,  15.410,  11.470],
+            [ 9.020,  16.380,  10.790],
+            [ 7.330,  15.680,   8.940],
+            [ 6.600,  14.670,   8.470],
+            [ 8.280,  15.890,   8.030],
+            [ 6.540,  16.750,   8.900],
+            [ 9.440,  13.090,  11.410],
+            [ 9.330,  11.670,  11.100],
+            [ 9.350,  13.420,  12.810],
+            [11.180,  13.520,  10.920],
+            [11.490,  13.050,   9.710],
+            [11.450,  14.810,  10.890],
+            [12.080,  12.980,  11.740]]
+
+    coords_diglyme=[[  1.023,   0.136,  -0.063],
+                [  0.506,  1.443,   0.126],
+                [  2.441,   0.089,  -0.070],
+                [ -1.013,   1.345,   0.112],
+                [  2.854,  -1.361,  -0.280],
+                [ -1.529,   2.651,   0.301],
+                [  4.270,  -1.407,  -0.287],
+                [ -2.943,   2.693,   0.307],
+                [  4.781,  -2.713,  -0.476],
+                [  0.846,   2.116,  -0.677],
+                [  0.846,   1.860,   1.087],
+                [  2.847,   0.460,   0.884],
+                [  2.847,   0.715,  -0.880],
+                [ -1.353,  0.671,   0.915],
+                [ -1.353,   0.927,  -0.849],
+                [ 2.447,  -1.733,  -1.235],
+                [ 2.447,  -1.988,   0.530],
+                [-3.232,   3.736,   0.459],
+                [-3.359,  2.080,   1.123 ],
+                [-3.359,   2.337,  -0.649 ],
+                [5.871,  -2.635,  -0.465 ],
+                [4.458,  -3.133,  -1.442 ],
+                [4.459,  -3.390,   0.331 ]]
+
+
+
+
     tfn = Molecule(["O", "F", "C", "S", "O", "F", "N", "O", "F", "S", "O", "F", "F", "C", "F"], coords_tfn,site_properties={"mol_name":["TFN"]*len(coords_tfn)})
     n1c = Molecule(["C", "C", "H", "C", "H", "N", "N", "C", "H", "H", "H", "C", "H", "H", "C", "H", "H", "H", "C", "H", "H", "H"], coords_n1c,site_properties={"mol_name":["N1C"]*len(coords_n1c)})
     pc = Molecule(["C", "C", "O", "H", "H", "C", "O", "O", "C", "H", "H", "H", "H"], coords_pc,site_properties={"mol_name":["PC"]*len(coords_pc)})
+    acn = Molecule(["C", "C", "H", "H", "H", "N"], coords_acn,site_properties={"mol_name":["ACN"]*len(coords_acn)})
+    mg = Molecule(["Mg"], coords_mg,site_properties={"mol_name":["MAG"]*len(coords_mg)})
+    al = Molecule(["Al"], coords_al,site_properties={"mol_name":["ALU"]*len(coords_al)})
+    cl = Molecule(["Cl"], coords_cl,site_properties={"mol_name":["CHL"]*len(coords_cl)})
+    thf = Molecule(["C","C","C","H","H","C","H","H","O","H","H","H","H"], coords_thf,site_properties={"mol_name":["THF"]*len(coords_thf)})
+    tfsi = Molecule(["N","S","O","O","C","F","F","F","S","O","O","C","F","F","F"], coords_tfsi,site_properties={"mol_name":["tfsi"]*len(coords_tfsi)})
+    diglyme = Molecule(["O","C","C","C","C","O","O","C","C","H","H","H","H","H","H","H","H","H","H","H","H","H","H"], coords_diglyme,site_properties={"mol_name":["diglyme"]*len(coords_diglyme)})
 
-    fw = Firework([task1], spec={"molecules": [tfn.as_dict(),n1c.as_dict(),pc.as_dict()]})
+
+
+    #fw = Firework([task1], spec={"molecules": [tfn.as_dict(),n1c.as_dict(),pc.as_dict()]})
+#    fw = Firework([task1], spec={"molecules": [mg.as_dict(),tfsi.as_dict(),diglyme.as_dict()]})
+    fw = Firework([task1], spec={"molecules": [acn.as_dict()]})
     wf = Workflow([fw])
 
     lp = LaunchPad.auto_load()

@@ -36,8 +36,8 @@ class AntechamberRunner():
         """
         generate pdb file for a given molecule
         """
-        print molecule
         write_mol(molecule, filename)
+
 
 
     def _run_parmchk(self, filename='ANTECHAMBER_AC.AC'):
@@ -69,7 +69,7 @@ class AntechamberRunner():
         scratch = tempfile.gettempdir()
 
         with ScratchDir(scratch,
-                        copy_to_current_on_exit=False) as d:
+                        copy_to_current_on_exit= False) as d:
 
             self._convert_to_pdb(mol, 'mol.pdb')
             command = (
