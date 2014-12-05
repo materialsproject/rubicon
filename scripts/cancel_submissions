@@ -1,0 +1,5 @@
+#!/usr/bin/env python
+
+import rubicon.scripts.cancel_submissions as cancel_submissions
+
+cancel_submissions.main()

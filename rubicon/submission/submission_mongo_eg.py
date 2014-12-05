@@ -1,8 +1,8 @@
 from collections import defaultdict
-import copy
 import datetime
 import json
 import os
+import dateutil.parser
 from pymatgen.io.babelio import BabelMolAdaptor
 from pymatgen.matproj.snl import StructureNL
 from pymongo import MongoClient
@@ -193,6 +193,26 @@ class SubmissionMongoAdapterEG(object):
         # set state to 'cancelled'
         # in the SubmissionProcessor, detect this state and defuse the FW
         raise NotImplementedError()
+
+    def set_job_state_to_cancel(self, submission_id):
+        self.jobs.update({'submission_id': submission_id},
+                         {'$set': {'state': 'CANCELLED'}})
+
+    def get_submission_ids_after(self, dt):
+        '''
+        Return the submission id after a time point
+        :param dt: a datetime object after which point you want to get
+        :return: a list of IDs
+        '''
+        job_docs = self.jobs.find({}, fields=["submission_id",
+                                              "submitted_at",
+                                              "parameters.nick_name"])
+        ids = []
+        for j in job_docs:
+            submission_dt = dateutil.parser.parse(j['submitted_at'])
+            if submission_dt > dt:
+                ids.append(j['submission_id'])
+        return ids
 
     def get_states(self, crit):
         props = ['state', 'state_details', 'task_dict', 'submission_id',
