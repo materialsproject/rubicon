@@ -1,5 +1,3 @@
-
-from pymatgen.packmol.lammpsio import LammpsLog
 from pymongo import MongoClient
 
 __author__ = 'navnidhirajput'
@@ -12,8 +10,10 @@ try:
     # just a walkaround before the packmol is merged to master branch
     # after packmol is merged to master branch, the try...catch block
     # should be removed
-    from pymatgen.packmol.packmol import PackmolRunner
-    from pymatgen.packmol.lammpsio import LammpsLog
+    import pymatgen
+    if 'packmol' in pymatgen.__dict__:
+        from pymatgen.packmol.packmol import PackmolRunner
+        from pymatgen.packmol.lammpsio import LammpsLog
 except:
     pass
 from rubicon.gff.boxmol import BoxMol
