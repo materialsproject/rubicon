@@ -179,6 +179,8 @@ class LmpInput():
                                                    mol.site_properties["mol_name"][0]))
                     num_atoms = num_atoms + 1
             mol_index += 1
+        if len(lines)==1:
+            return ''
         lines.append('\n')
         self.lines.extend(lines)
         return '\n'.join(lines)
@@ -207,6 +209,8 @@ class LmpInput():
                                                        mol.site_properties["mol_name"][0]))
                     num_atoms = num_atoms + 1
             mol_index += 1
+        if len(lines)==1:
+            return ''
         lines.append('\n')
         self.lines.extend(lines)
         return '\n'.join(lines)
@@ -238,6 +242,8 @@ class LmpInput():
                                                          mol.site_properties["mol_name"][0]))
                     num_atoms = num_atoms + 1
             mol_index += 1
+        if len(lines)==1:
+            return ''
         lines.append('\n')
         self.lines.extend(lines)
         return '\n'.join(lines)
@@ -276,6 +282,8 @@ class LmpInput():
                               mol_index,
                               mol.site_properties["mol_name"][0]))
             mol_index += 1
+        if len(lines)==1:
+            return ''
         lines.append('\n')
         self.lines.extend(lines)
         return '\n'.join(lines)
@@ -423,6 +431,8 @@ class LmpInput():
                                       1],
                                   mol.site_properties["mol_name"][0]))
                 i += len(top.bonds)
+        if len(lines)==1:
+            return ''
         lines.append('\n')
         self.lines.extend(lines)
         return '\n'.join(lines)
@@ -474,6 +484,8 @@ class LmpInput():
                             mol.site_properties["mol_name"][0]))
 
                 i += len(top.angles)
+        if len(lines)==1:
+            return ''
         lines.append('\n')
         self.lines.extend(lines)
         return '\n'.join(lines)
@@ -538,6 +550,8 @@ class LmpInput():
                                         #top.dihedrals[l][3],
                                         mol.site_properties["mol_name"][0]))
                     i += len(top.dihedrals)
+        if len(lines)==1:
+            return ''
         lines.append('\n')
         self.lines.extend(lines)
         return '\n'.join(lines)
