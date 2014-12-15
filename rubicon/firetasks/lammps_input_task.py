@@ -6,7 +6,9 @@ try:
     # just a walkaround before the packmol is merged to master branch
     # after packmol is merged to master branch, the try...catch block
     # should be removed
-    from pymatgen.packmol.packmol import PackmolRunner
+    import pymatgen
+    if 'packmol' in pymatgen.__dict__:
+        from pymatgen.packmol.packmol import PackmolRunner
 except:
     pass
 from rubicon.gff.boxmol import BoxMol

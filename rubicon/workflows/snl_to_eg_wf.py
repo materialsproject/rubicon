@@ -47,6 +47,8 @@ def snl_to_eg_wf(snl, parameters=None):
     ref_charge = parameters.get('ref_charge', 0)
     spin_multiplicities = parameters.get('spin_multiplicities', (2, 1, 2))
     user_tags = {"initial_charge": ref_charge}
+    if 'derivation_name' in parameters:
+        user_tags['derivation_name'] = parameters['derivation_name']
     solvent_method = parameters.get("solvent_method", "ief-pcm")
     use_vdw_surface = parameters.get("use_vdW_surface", False)
     qm_method = parameters.get("qm_method", None)

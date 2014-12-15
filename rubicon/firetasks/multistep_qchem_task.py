@@ -177,7 +177,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                     if j.params["rem"]["jobtype"] == "opt":
                         j.scale_geom_opt_threshold(0.1, 0.1, 0.1)
                         j.set_geom_max_iterations(100)
-                fw.spec["qcinp"] = qcinp.as_dict
+                fw.spec["qcinp"] = qcinp.as_dict()
                 fw.spec["run_tags"]["grid"] = grid
         wf = Workflow([geom_fw_cal, geom_fw_db, freq_fw_cal, freq_fw_db],
                       links_dict={geom_fwid_db: freq_fwid_cal,
