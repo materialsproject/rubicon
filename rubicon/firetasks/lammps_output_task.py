@@ -52,8 +52,10 @@ class WritelammpsOutputTask(FireTaskBase):
         db = conn[db_creds['database']]
         if db_creds['admin_user']:
             db.authenticate(db_creds['admin_user'], db_creds['admin_password'])
-       # coll = db[lammps_data]
-        conn.close()
+        #coll = db[db_creds['collection']]
+        #coll.update("molecule_id":fw_spec["grou_id"],
+        #coll = db[lammps_data]
+        #conn.close()
 
 
         # parsing code
