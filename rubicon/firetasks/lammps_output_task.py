@@ -17,7 +17,7 @@ try:
 except:
     pass
 from rubicon.gff.boxmol import BoxMol
-from rubicon.gff.lammpsin import DictLammpsInputSet
+from rubicon.gff.lammps_control import DictLammpsInputSet
 from rubicon.gff.lammps_data import LmpInput
 from rubicon.gff.antechamberio import AntechamberRunner
 
