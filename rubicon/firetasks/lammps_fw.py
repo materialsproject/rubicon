@@ -149,8 +149,8 @@ if __name__ == '__main__':
 
 
     #fw = Firework([task1], spec={"molecules": [tfn.as_dict(),n1c.as_dict(),pc.as_dict()]})
-    fw = Firework([task1], spec={"molecules": [mg.as_dict(),tfsi.as_dict(),diglyme.as_dict()]})
-    #fw = Firework([task1], spec={"molecules": [acn.as_dict()]})
+    #fw = Firework([task1], spec={"molecules": [mg.as_dict(),tfsi.as_dict(),diglyme.as_dict()]})
+    fw = Firework([task1], spec={"molecules": [acn.as_dict()]})
     wf = Workflow([fw])
 
     lp = LaunchPad.auto_load()

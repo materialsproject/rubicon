@@ -2,15 +2,16 @@ import shlex
 import subprocess
 from monty import logging
 from pymatgen import Molecule
-try:
-    # just a walkaround before the packmol is merged to master branch
-    # after packmol is merged to master branch, the try...catch block
-    # should be removed
-    import pymatgen
-    if True and 'packmol' in pymatgen.__dict__:
-        from pymatgen.packmol.packmol import PackmolRunner
-except:
-    pass
+from pymatgen.packmol.packmol import PackmolRunner
+# try:
+#     # just a walkaround before the packmol is merged to master branch
+#     # after packmol is merged to master branch, the try...catch block
+#     # should be removed
+#     import pymatgen
+#     if True and 'packmol' in pymatgen.__dict__:
+#         from pymatgen.packmol.packmol import PackmolRunner
+# except:
+#     pass
 from rubicon.gff.boxmol import BoxMol
 from rubicon.gff.lammps_control import DictLammpsInputSet
 from rubicon.gff.lammps_data import LmpInput
@@ -51,8 +52,8 @@ class WritelammpsInputTask(FireTaskBase):
             ffmol_list.append(acr.get_ff_top_mol(mol,'mol.pdb'))
 
         #pmr = PackmolRunner(mols, [{"number":6,"inside box":[0.,0.,0.,70.,70.,70.]},{"number":12},{"number":48},{"number":2538}])
-        pmr = PackmolRunner(mols, [{"number":15,"inside box":[0.,0.,0.,50.,50.,50.]},{"number":30},{"number":232}])
-        #pmr = PackmolRunner(mols, [{"number":100,"inside box":[0.,0.,0.,50.,50.,50.]}])
+        #pmr = PackmolRunner(mols, [{"number":15,"inside box":[0.,0.,0.,50.,50.,50.]},{"number":30},{"number":232}])
+        pmr = PackmolRunner(mols, [{"number":100,"inside box":[0.,0.,0.,50.,50.,50.]}])
         mols_coord = pmr.run()
         boxmol= BoxMol.from_packmol(pmr, mols_coord)
         data_lammps=LmpInput(ffmol_list, boxmol)
