@@ -7,7 +7,7 @@ try:
     # after packmol is merged to master branch, the try...catch block
     # should be removed
     import pymatgen
-    if 'packmol' in pymatgen.__dict__:
+    if True and 'packmol' in pymatgen.__dict__:
         from pymatgen.packmol.packmol import PackmolRunner
 except:
     pass

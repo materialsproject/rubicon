@@ -1,31 +1,31 @@
 from pymongo import MongoClient
-
-__author__ = 'navnidhirajput'
-
 import shlex
 import subprocess
 from monty import logging, json
 from pymatgen import Molecule
-try:
-    # just a walkaround before the packmol is merged to master branch
-    # after packmol is merged to master branch, the try...catch block
-    # should be removed
-    import pymatgen
-    if 'packmol' in pymatgen.__dict__:
-        from pymatgen.packmol.packmol import PackmolRunner
-        from pymatgen.packmol.lammpsio import LammpsLog
-except:
-    pass
-from rubicon.gff.boxmol import BoxMol
-from rubicon.gff.lammps_control import DictLammpsInputSet
-from rubicon.gff.lammps_data import LmpInput
-from rubicon.gff.antechamberio import AntechamberRunner
-
+from pymatgen.packmol.packmol import PackmolRunner
+from pymatgen.packmol.lammpsio import LammpsLog
+from fireworks import FireTaskBase, explicit_serialize, Firework, Workflow
 
 __author__ = 'navnidhirajput'
 
 
-from fireworks import FireTaskBase, explicit_serialize, Firework, Workflow
+
+# try:
+#     # just a walkaround before the packmol is merged to master branch
+#     # after packmol is merged to master branch, the try...catch block
+#     # should be removed
+#     import pymatgen
+#     if 'packmol' in pymatgen.__dict__:
+#         from pymatgen.packmol.packmol import PackmolRunner
+#         from pymatgen.packmol.lammpsio import LammpsLog
+# except:
+#     pass
+
+
+
+__author__ = 'navnidhirajput'
+
 
 
 @explicit_serialize
@@ -52,8 +52,8 @@ class WritelammpsOutputTask(FireTaskBase):
         db = conn[db_creds['database']]
         if db_creds['admin_user']:
             db.authenticate(db_creds['admin_user'], db_creds['admin_password'])
-        coll = db[db_creds['collection']]
-        coll.update()
+        #coll = db[db_creds['collection']]
+        #coll.update()
         #coll = db[lammps_data]
         #conn.close()
 
@@ -72,14 +72,18 @@ class WritelammpsOutputTask(FireTaskBase):
 
 
 if __name__ == '__main__':
-    # only execute the following if using the current file as a command
     parse_lammps = LammpsLog.from_file('mol.log')
     docs = parse_lammps.llog
-    docs["task_id"] = 348
+
+    print docs.keys()
+    print docs["etail"]
+
+
 
 
     # if db.counter.find({"_id": "mol_taskid"}).count() == 0:
     #         db.counter.insert({"_id": "mol_taskid", "c": 1})
+
     #             conn.close()
 
 
