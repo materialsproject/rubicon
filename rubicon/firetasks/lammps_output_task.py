@@ -18,7 +18,7 @@ except:
     pass
 from rubicon.gff.boxmol import BoxMol
 from rubicon.gff.lammpsin import DictLammpsInputSet
-from rubicon.gff.lamppsio import LmpInput
+from rubicon.gff.lammps_data import LmpInput
 from rubicon.gff.antechamberio import AntechamberRunner
 
 
@@ -52,8 +52,8 @@ class WritelammpsOutputTask(FireTaskBase):
         db = conn[db_creds['database']]
         if db_creds['admin_user']:
             db.authenticate(db_creds['admin_user'], db_creds['admin_password'])
-        #coll = db[db_creds['collection']]
-        #coll.update("molecule_id":fw_spec["grou_id"],
+        coll = db[db_creds['collection']]
+        coll.update()
         #coll = db[lammps_data]
         #conn.close()
 
