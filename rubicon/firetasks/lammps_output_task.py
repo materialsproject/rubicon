@@ -1,7 +1,7 @@
+import json
 from pymongo import MongoClient
 import shlex
-import subprocess
-from monty import logging, json
+
 from pymatgen import Molecule
 from pymatgen.packmol.packmol import PackmolRunner
 from pymatgen.packmol.lammpsio import LammpsLog

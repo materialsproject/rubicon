@@ -46,15 +46,16 @@ class WritelammpsInputTask(FireTaskBase):
     def run_task(self, fw_spec):
         mols_dict = fw_spec["molecules"]
         mols = [Molecule.from_dict(m) for m in mols_dict]
+        print mols
         ffmol_list = []
         for mol in mols:
             acr = AntechamberRunner(mol)
             ffmol_list.append(acr.get_ff_top_mol(mol,'mol.pdb'))
 
-        #pmr = PackmolRunner(mol, [{"number":6,"inside box":[0.,0.,0.,70.,70.,70.]},{"number":12},{"number":48},{"number":2538}])
-        #pmr = PackmolRunner(mol, [{"number":15,"inside box":[0.,0.,0.,50.,50.,50.]},{"number":30},{"number":232}])
-        pmr = PackmolRunner(mols, [{"number":15},{"number":30},{"number":232}])
-        #pmr = PackmolRunner(mol, [{"number":100,"inside box":[0.,0.,0.,50.,50.,50.]}])
+        #pmr = PackmolRunner(mols, [{"number":6,"inside box":[0.,0.,0.,70.,70.,70.]},{"number":12},{"number":48},{"number":2538}])
+        #pmr = PackmolRunner(mols, [{"number":15,"inside box":[0.,0.,0.,50.,50.,50.]},{"number":30},{"number":232}])
+        #pmr = PackmolRunner(mols, [{"number":15},{"number":30},{"number":232}])
+        pmr = PackmolRunner(mols, [{"number":100,"inside box":[0.,0.,0.,50.,50.,50.]}])
         mols_coord = pmr.run()
         boxmol= BoxMol.from_packmol(pmr, mols_coord)
         data_lammps=LmpInput(ffmol_list, boxmol)
@@ -65,5 +66,7 @@ class WritelammpsInputTask(FireTaskBase):
 
         with open("mol_control.lammps") as f:
             subprocess.check_call(shlex.split("aprun -n 48 lmp_hopper"), stdin=f)
+
+
 
 

@@ -359,6 +359,10 @@ class LmpInput():
 
                 d = {}
                 for k, v in enumerate(mol_coords):
+                    #print mol.site_properties["mol_name"][0][gff.atom_index[
+                    #         k + 1]]
+                    #print gff.charges[mol.site_properties["mol_name"][0]][gff.atom_index[
+                    #         k + 1]]
                     lines.append(
                         '{}  {}  {}  {}  {}  {} {} {}  {} {} {} {}'.format(k + i + 1,
                          mol_index,
@@ -377,6 +381,7 @@ class LmpInput():
                              k + 1],
                          mol.site_properties["mol_name"][0]))
                     d[gff.atom_index[k + 1]] = k + i + 1
+
 
                 self.box_mol_index.append(d)
                 i += num_atoms
