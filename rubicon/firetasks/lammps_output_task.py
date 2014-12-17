@@ -43,7 +43,7 @@ class WritelammpsOutputTask(FireTaskBase):
     _fw_name = "Lammps Output Writer"
 
 
-    def _insert_doc(self, fw_spec = None, update_duplicates = True):
+    def _insert_doc(self, fw_spec = None):
         db_dir = shlex.os.environ['DB_LOC']
         db_path = shlex.os.path.join(db_dir, 'tasks_db.json')
         with open(db_path) as f:
@@ -52,38 +52,17 @@ class WritelammpsOutputTask(FireTaskBase):
         db = conn[db_creds['database']]
         if db_creds['admin_user']:
             db.authenticate(db_creds['admin_user'], db_creds['admin_password'])
-        #coll = db[db_creds['collection']]
-        #coll.update()
-        #coll = db[lammps_data]
-        #conn.close()
+            coll = db[db_creds['lammps_output']]
+        parse_lammps = LammpsLog.from_file('mol.log')
+        docs = parse_lammps.llog
+        coll.insert(docs)
+        #coll.update(docs)
 
-
-        # parsing code
-        #qcout = QcOutput(zpath(path))
-
-                    #dn update/insertion code
-                    # coll.update({"super_mol_snlgroup_id": fw_spec["snlgroup_id"],
-                    #      "fragments_def": fw_spec["fragments"]},
-                    #     {"$set": d},
-                    #     upsert=True)
-        llog=LammpsLog()
-        print llog.avgs
-
-
-
-if __name__ == '__main__':
-    parse_lammps = LammpsLog.from_file('mol.log')
-    docs = parse_lammps.llog
-
-    print docs.keys()
-    print docs["etail"]
+    def run_task(self, fw_spec):
+        self._insert_doc()
 
 
 
 
-    # if db.counter.find({"_id": "mol_taskid"}).count() == 0:
-    #         db.counter.insert({"_id": "mol_taskid", "c": 1})
-
-    #             conn.close()
 
 
