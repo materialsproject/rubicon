@@ -2,9 +2,14 @@ import json
 from pymongo import MongoClient
 import shlex
 
-from pymatgen import Molecule
-from pymatgen.packmol.packmol import PackmolRunner
-from pymatgen.packmol.lammpsio import LammpsLog
+try:
+    # just a walkaround before the packmol is merged to master branch
+    # after packmol is merged to master branch, the try...catch block
+    # should be removed
+    from pymatgen.packmol.packmol import PackmolRunner
+    from pymatgen.packmol.lammpsio import LammpsLog
+except:
+    pass
 from fireworks import FireTaskBase, explicit_serialize, Firework, Workflow
 
 __author__ = 'navnidhirajput'
