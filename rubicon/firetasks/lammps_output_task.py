@@ -52,7 +52,7 @@ class WritelammpsOutputTask(FireTaskBase):
         db = conn[db_creds['database']]
         if db_creds['admin_user']:
             db.authenticate(db_creds['admin_user'], db_creds['admin_password'])
-            coll = db[db_creds['lammps_output']]
+            coll = db['lammps_output']
         parse_lammps = LammpsLog.from_file('mol.log')
         docs = parse_lammps.llog
         coll.insert(docs)
