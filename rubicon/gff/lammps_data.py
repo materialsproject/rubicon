@@ -14,6 +14,7 @@ class LmpInput():
         self.lines = []
         self.mols_in_box = mols_in_box
         self.ffmol_list = ffmol_list
+        self.num_improper_dihedrals = None
 
     def _set_gff_types(self, ffmol_list, mols_in_box):
 
@@ -62,6 +63,7 @@ class LmpInput():
         lines.append("{} {}".format((num_dihedrals_types), "dihedral types"))
         lines.append(
             "{} {}{}".format(num_impropers_types, "improper types",'\n'))
+        self.num_improper_dihedrals = num_impropers_types
         self.lines.extend(lines)
         return '\n'.join(lines)
 
@@ -177,6 +179,8 @@ class LmpInput():
                                                    mol.site_properties["mol_name"][0]))
                     num_atoms = num_atoms + 1
             mol_index += 1
+        if len(lines)==1:
+            return ''
         lines.append('\n')
         self.lines.extend(lines)
         return '\n'.join(lines)
@@ -205,6 +209,8 @@ class LmpInput():
                                                        mol.site_properties["mol_name"][0]))
                     num_atoms = num_atoms + 1
             mol_index += 1
+        if len(lines)==1:
+            return ''
         lines.append('\n')
         self.lines.extend(lines)
         return '\n'.join(lines)
@@ -236,6 +242,8 @@ class LmpInput():
                                                          mol.site_properties["mol_name"][0]))
                     num_atoms = num_atoms + 1
             mol_index += 1
+        if len(lines)==1:
+            return ''
         lines.append('\n')
         self.lines.extend(lines)
         return '\n'.join(lines)
@@ -274,6 +282,8 @@ class LmpInput():
                               mol_index,
                               mol.site_properties["mol_name"][0]))
             mol_index += 1
+        if len(lines)==1:
+            return ''
         lines.append('\n')
         self.lines.extend(lines)
         return '\n'.join(lines)
@@ -302,6 +312,8 @@ class LmpInput():
                          mol.site_properties["mol_name"][0]))
                     num_atoms = num_atoms + 1
             mol_index += 1
+        if len(lines)==1:
+            return ''
         lines.append('\n')
         self.lines.extend(lines)
         return '\n'.join(lines)
@@ -347,6 +359,10 @@ class LmpInput():
 
                 d = {}
                 for k, v in enumerate(mol_coords):
+                    #print mol.site_properties["mol_name"][0][gff.atom_index[
+                    #         k + 1]]
+                    #print gff.charges[mol.site_properties["mol_name"][0]][gff.atom_index[
+                    #         k + 1]]
                     lines.append(
                         '{}  {}  {}  {}  {}  {} {} {}  {} {} {} {}'.format(k + i + 1,
                          mol_index,
@@ -365,6 +381,7 @@ class LmpInput():
                              k + 1],
                          mol.site_properties["mol_name"][0]))
                     d[gff.atom_index[k + 1]] = k + i + 1
+
 
                 self.box_mol_index.append(d)
                 i += num_atoms
@@ -419,6 +436,8 @@ class LmpInput():
                                       1],
                                   mol.site_properties["mol_name"][0]))
                 i += len(top.bonds)
+        if len(lines)==1:
+            return ''
         lines.append('\n')
         self.lines.extend(lines)
         return '\n'.join(lines)
@@ -470,6 +489,8 @@ class LmpInput():
                             mol.site_properties["mol_name"][0]))
 
                 i += len(top.angles)
+        if len(lines)==1:
+            return ''
         lines.append('\n')
         self.lines.extend(lines)
         return '\n'.join(lines)
@@ -534,6 +555,8 @@ class LmpInput():
                                         #top.dihedrals[l][3],
                                         mol.site_properties["mol_name"][0]))
                     i += len(top.dihedrals)
+        if len(lines)==1:
+            return ''
         lines.append('\n')
         self.lines.extend(lines)
         return '\n'.join(lines)
@@ -549,6 +572,8 @@ class LmpInput():
         i = 0
         j = 0
         mol_index = 0
+
+
         lines.append('Impropers\n')
         for ffmol,mol,num_mols in zip(ffmol_list, mols_in_box.mols,
                                   mols_in_box.num_mols):
@@ -591,6 +616,9 @@ class LmpInput():
                                     top.imdihedrals[k][3],
                                     mol.site_properties["mol_name"][0]))
                     i += len(top.imdihedrals)
+        if len(lines)==1:
+            return ''
+        print len(top.imdihedrals)
         lines.append('\n')
         self.lines.extend(lines)
         return '\n'.join(lines)

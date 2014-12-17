@@ -2,18 +2,19 @@ import shlex
 import subprocess
 from monty import logging
 from pymatgen import Molecule
-try:
-    # just a walkaround before the packmol is merged to master branch
-    # after packmol is merged to master branch, the try...catch block
-    # should be removed
-    import pymatgen
-    if 'packmol' in pymatgen.__dict__:
-        from pymatgen.packmol.packmol import PackmolRunner
-except:
-    pass
+from pymatgen.packmol.packmol import PackmolRunner
+# try:
+#     # just a walkaround before the packmol is merged to master branch
+#     # after packmol is merged to master branch, the try...catch block
+#     # should be removed
+#     import pymatgen
+#     if True and 'packmol' in pymatgen.__dict__:
+#         from pymatgen.packmol.packmol import PackmolRunner
+# except:
+#     pass
 from rubicon.gff.boxmol import BoxMol
-from rubicon.gff.lammpsin import DictLammpsInputSet
-from rubicon.gff.lamppsio import LmpInput
+from rubicon.gff.lammps_control import DictLammpsInputSet
+from rubicon.gff.lammps_data import LmpInput
 from rubicon.gff.antechamberio import AntechamberRunner
 
 
@@ -45,6 +46,7 @@ class WritelammpsInputTask(FireTaskBase):
     def run_task(self, fw_spec):
         mols_dict = fw_spec["molecules"]
         mols = [Molecule.from_dict(m) for m in mols_dict]
+        print mols
         ffmol_list = []
         for mol in mols:
             acr = AntechamberRunner(mol)
@@ -52,6 +54,7 @@ class WritelammpsInputTask(FireTaskBase):
 
         #pmr = PackmolRunner(mols, [{"number":6,"inside box":[0.,0.,0.,70.,70.,70.]},{"number":12},{"number":48},{"number":2538}])
         #pmr = PackmolRunner(mols, [{"number":15,"inside box":[0.,0.,0.,50.,50.,50.]},{"number":30},{"number":232}])
+        #pmr = PackmolRunner(mols, [{"number":15},{"number":30},{"number":232}])
         pmr = PackmolRunner(mols, [{"number":100,"inside box":[0.,0.,0.,50.,50.,50.]}])
         mols_coord = pmr.run()
         boxmol= BoxMol.from_packmol(pmr, mols_coord)
@@ -63,5 +66,7 @@ class WritelammpsInputTask(FireTaskBase):
 
         with open("mol_control.lammps") as f:
             subprocess.check_call(shlex.split("aprun -n 48 lmp_hopper"), stdin=f)
+
+
 
 

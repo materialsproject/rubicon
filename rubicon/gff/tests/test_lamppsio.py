@@ -5,7 +5,7 @@ import unittest
 from pymatgen import Molecule
 from pymatgen.packmol.packmol import PackmolRunner
 from rubicon.gff.antechamberio import AntechamberRunner
-from rubicon.gff.lamppsio import LmpInput
+from rubicon.gff.lammps_data import LmpInput
 
 __author__ = 'navnidhirajput'
 
