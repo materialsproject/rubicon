@@ -198,6 +198,8 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
                 docs["neutral"]["calculations"][scf_name]["energies"][-1][-1] \
                 - \
                 docs["anion"]["calculations"][scf_name]["energies"][-1][-1]
+        if "IP" in molecule and "EA" in molecule:
+            molecule["electrochemical_window_width"] = molecule["IP"] - molecule["EA"]
         molecule['electrode_potentials'] = dict()
         if solution_phase:
             if 'IP' in molecule:

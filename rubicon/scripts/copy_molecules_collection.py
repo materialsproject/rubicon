@@ -72,6 +72,9 @@ def transform_molecule_doc(mol1):
                 mol2["IE"] = mol1["solvated_properties"][solname]["IP"]
             if "EA" in mol1["solvated_properties"][solname]:
                 mol2["EA"] = mol1["solvated_properties"][solname]["EA"]
+            if "electrochemical_window_width" in mol1["solvated_properties"][solname]:
+                mol2["electrochemical_window_width"] = mol1["solvated_properties"][
+                    solname]["electrochemical_window_width"]
 
     mol2["svg"] = mol1["svg"]
     return mol2
