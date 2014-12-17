@@ -98,7 +98,7 @@ def copy_collections():
             logging.info("INSERT molecule \"{}\"".format(molname))
             coll_dest.insert(mol_web)
 
-if __name__ == '__main__':
+def main():
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger('CopyMolecules')
     logger.setLevel(logging.INFO)
@@ -106,3 +106,6 @@ if __name__ == '__main__':
     sh.setLevel(getattr(logging, 'INFO'))
     logger.addHandler(sh)
     copy_collections()
+
+if __name__ == '__main__':
+    main()
