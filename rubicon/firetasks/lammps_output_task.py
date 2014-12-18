@@ -1,6 +1,7 @@
 import json
 from pymongo import MongoClient
 import shlex
+import numpy
 
 from pymatgen import Molecule
 from pymatgen.packmol.packmol import PackmolRunner
@@ -55,6 +56,7 @@ class WritelammpsOutputTask(FireTaskBase):
             coll = db['lammps_output']
         parse_lammps = LammpsLog.from_file('mol.log')
         docs = parse_lammps.llog
+        docs = {k: list(v) if isinstance(v, numpy.ndarray) else v for k, v in docs.items()}
         coll.insert(docs)
         #coll.update(docs)
 
