@@ -1,17 +1,13 @@
 import shlex
 import subprocess
-from monty import logging
 from pymatgen import Molecule
-from pymatgen.packmol.packmol import PackmolRunner
-# try:
-#     # just a walkaround before the packmol is merged to master branch
-#     # after packmol is merged to master branch, the try...catch block
-#     # should be removed
-#     import pymatgen
-#     if True and 'packmol' in pymatgen.__dict__:
-#         from pymatgen.packmol.packmol import PackmolRunner
-# except:
-#     pass
+try:
+    # just a walkaround before the packmol is merged to master branch
+    # after packmol is merged to master branch, the try...catch block
+    # should be removed
+    from pymatgen.packmol.packmol import PackmolRunner
+except:
+    pass
 from rubicon.gff.boxmol import BoxMol
 from rubicon.gff.lammps_control import DictLammpsInputSet
 from rubicon.gff.lammps_data import LmpInput

@@ -1,0 +1,8 @@
+#/usr/bin/env python
+
+__author__ = 'xiaohuiqu'
+
+import rubicon.scripts.copy_molecules_collection
+
+if __name__ == '__main__':
+    rubicon.scripts.copy_molecules_collection.main()
