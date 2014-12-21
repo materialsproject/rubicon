@@ -361,6 +361,7 @@ class LmpInput():
                 for k, v in enumerate(mol_coords):
                     #print mol.site_properties["mol_name"][0][gff.atom_index[
                     #         k + 1]]
+                    print gff.atom_index[k+1]
                     print gff.charges[mol.site_properties["mol_name"][0]][gff.atom_index[
                              k + 1]]
                     lines.append(
