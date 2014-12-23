@@ -55,7 +55,7 @@ class WritelammpsInputTask(FireTaskBase):
         #pmr = PackmolRunner(mols, [{"number":100,"inside box":[0.,0.,0.,50.,50.,50.]}])
         mols_coord = pmr.run()
         boxmol= BoxMol.from_packmol(pmr, mols_coord)
-        print "boxmol",boxmol
+        print "boxmol",boxmol.mols
         data_lammps=LmpInput(ffmol_list, boxmol)
         data_lammps.write_lammps_data('mol_data.lammps')
         control_lammps = DictLammpsInputSet()
