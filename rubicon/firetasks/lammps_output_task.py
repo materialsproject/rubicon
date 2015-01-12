@@ -46,7 +46,7 @@ class WritelammpsOutputTask(FireTaskBase):
 
     """
 
-    _fw_name = "Lammps Output Writer"
+    # _fw_name = "Lammps Output Writer"
 
 
     # def _insert_doc(self, fw_spec = None):
