@@ -30,7 +30,7 @@ __author__ = 'navnidhirajput'
 
 
 
-__author__ = 'navnidhirajput'
+
 
 
 
@@ -46,10 +46,11 @@ class WritelammpsOutputTask(FireTaskBase):
 
     """
 
-    # _fw_name = "Lammps Output Writer"
+    _fw_name = "Lammps Output Writer"
 
 
-    # def _insert_doc(self, fw_spec = None):
+    def _insert_doc(self, fw_spec = None):
+        print "firework"
     #     db_dir = shlex.os.environ['DB_LOC']
     #     db_path = shlex.os.path.join(db_dir, 'tasks_db.json')
     #     with open(db_path) as f:
@@ -65,8 +66,8 @@ class WritelammpsOutputTask(FireTaskBase):
     #     coll.insert(docs)
     #     #coll.update(docs)
     #
-    # def run_task(self, fw_spec):
-    #     self._insert_doc()
+    def run_task(self, fw_spec):
+        self._insert_doc()
 
 
 
