@@ -69,7 +69,7 @@ class AntechamberRunner():
         scratch = tempfile.gettempdir()
 
         with ScratchDir(scratch,
-                        copy_to_current_on_exit= True) as d:
+                        copy_to_current_on_exit= False) as d:
 
             self._convert_to_pdb(mol, 'mol.pdb')
             command = (
