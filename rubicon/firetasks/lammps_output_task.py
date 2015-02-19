@@ -1,6 +1,7 @@
 import json
 from pymongo import MongoClient
 import shlex
+import numpy
 
 try:
     # just a walkaround before the packmol is merged to master branch
@@ -29,7 +30,7 @@ __author__ = 'navnidhirajput'
 
 
 
-__author__ = 'navnidhirajput'
+
 
 
 
@@ -60,8 +61,9 @@ class WritelammpsOutputTask(FireTaskBase):
             coll = db['lammps_output']
         parse_lammps = LammpsLog.from_file('mol.log')
         docs = parse_lammps.llog
+        docs = {k: list(v) if isinstance(v, numpy.ndarray) else v for k, v in docs.items()}
         coll.insert(docs)
-        #coll.update(docs)
+        coll.update(docs)
 
     def run_task(self, fw_spec):
         self._insert_doc()
