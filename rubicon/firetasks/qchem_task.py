@@ -66,6 +66,8 @@ class QChemTask(FireTaskBase, FWSerializable):
                 half_cpus_cmd = shlex.split("qchem -np {}".format(
                     min(6, len(mol))))
             else:
+                nodelist = ",".join(fw_data.NODE_LIST)
+                os.environ["QCNODE"] = nodelist
                 qc_exe = shlex.split("qchem -np {}".format(
                     min(fw_data.SUB_NPROCS/2, len(mol))))
                 half_cpus_cmd = shlex.split("qchem -np {}".format(
