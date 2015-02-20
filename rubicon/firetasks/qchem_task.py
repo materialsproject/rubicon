@@ -57,9 +57,7 @@ class QChemTask(FireTaskBase, FWSerializable):
         carver_name_pattern = re.compile("c[0-9]{4}-ib")
         fw_data = FWData()
         half_cpus_cmd = shlex.split("qchem -np 12")
-        if "PBS_JOBID" in os.environ and \
-                ("hopque" in os.environ["PBS_JOBID"] or
-                    "edique" in os.environ["PBS_JOBID"]):
+        if "PBS_JOBID" in os.environ and "edique" in os.environ["PBS_JOBID"]:
         # hopper or edison compute nodes
             if (not fw_data.MULTIPROCESSING) or (fw_data.SUB_NPROCS is None):
                 qc_exe = shlex.split("qchem -np {}".format(min(12, len(mol))))
@@ -72,6 +70,18 @@ class QChemTask(FireTaskBase, FWSerializable):
                     min(fw_data.SUB_NPROCS/2, len(mol))))
                 half_cpus_cmd = shlex.split("qchem -np {}".format(
                     min(fw_data.SUB_NPROCS/4, len(mol))))
+        elif "PBS_JOBID" in os.environ and "hopque" in os.environ["PBS_JOBID"]:
+            if (not fw_data.MULTIPROCESSING) or (fw_data.SUB_NPROCS is None):
+                qc_exe = shlex.split("qchem -np {}".format(min(24, len(mol))))
+                half_cpus_cmd = shlex.split("qchem -np {}".format(
+                    min(12, len(mol))))
+            else:
+                nodelist = ",".join(fw_data.NODE_LIST)
+                os.environ["QCNODE"] = nodelist
+                qc_exe = shlex.split("qchem -np {}".format(
+                    min(fw_data.SUB_NPROCS, len(mol))))
+                half_cpus_cmd = shlex.split("qchem -np {}".format(
+                    min(fw_data.SUB_NPROCS/2, len(mol))))
         elif carver_name_pattern.match(socket.gethostname()):
         # mendel compute nodes
             qc_exe = shlex.split("qchem -np {}".format(min(8, len(mol))))
