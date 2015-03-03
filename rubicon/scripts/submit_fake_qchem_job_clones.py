@@ -40,7 +40,7 @@ def main():
         with zopen(zpath(fw_json_filename)) as f:
             fw_dict = json.load(f)
         print "{percent:4.2%} completed, processing directory {d:s}, molecule name {molname:s}," \
-              " mission {mission:s}".format(percent=i/num_dirs, d=sd, molname=fw_dict['spec']['user_tags']['molname'],
+              " mission {mission:s}".format(percent=i/float(num_dirs), d=sd, molname=fw_dict['spec']['user_tags']['molname'],
                                             mission=fw_dict['spec']['user_tags']['mission'])
 
         molname = fw_dict['spec']['user_tags']['molname']
