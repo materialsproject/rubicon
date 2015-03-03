@@ -66,6 +66,7 @@ def main():
                            'charge': fw_dict['spec']['charge'],
                            'spin_multiplicity': fw_dict['spec']['spin_multiplicity'],
                            'num_atoms': fw_dict['spec']['num_atoms'],
+                           'user_tags': fw_dict['spec']['user_tags'],
                            'mol': fw_dict['spec']['mol'],
                            'inchi': fw_dict['spec']['inchi'],
                            '_dupefinder': fw_dict['spec']['_dupefinder'],
