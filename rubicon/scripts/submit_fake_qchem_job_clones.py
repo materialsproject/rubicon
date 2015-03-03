@@ -5,6 +5,7 @@ from fireworks import Firework, Workflow, LaunchPad
 from fireworks.utilities.fw_utilities import get_slug
 from monty.io import zopen
 from monty.os.path import zpath
+from pymatgen import Molecule
 from pymatgen.matproj.snl import StructureNL
 from rubicon.firetasks.egsnl_tasks import AddEGSNLTask
 from rubicon.firetasks.fake_run_qchem_task import FakeRunQChemTask
@@ -44,7 +45,7 @@ def main():
 
         molname = fw_dict['spec']['user_tags']['molname']
         egsnl_tasks = [AddEGSNLTask()]
-        mol = fw_dict['spec']['mol']
+        mol = Molecule.from_dict(fw_dict['spec']['mol'])
         snl = StructureNL(mol, "Xiaohui Qu <xqu@lbl.gov>", "Electrolyte Genome")
         egsnl_task_spec = {'task_type': 'Add to SNL database',
                            'snl': snl.as_dict(),
