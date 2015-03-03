@@ -57,7 +57,7 @@ def main():
                                 fw_id=snl_fw_id))
 
         fake_qchem_tasks = [FakeRunQChemTask()]
-        src_qchem_dir = os.getcwd()
+        src_qchem_dir = sd
         fake_qchem_spec = {'_priority': fw_priority * 2,
                            'src_qchem_dir': src_qchem_dir,
                            'run_tags': fw_dict['spec']['run_tags'],
