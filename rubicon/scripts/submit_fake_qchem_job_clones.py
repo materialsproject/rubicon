@@ -21,9 +21,14 @@ def main():
                         help="the directory contains all the QChem jobs to be pretended to run again")
     parser.add_argument("-p", "--priority", dest="priority", type=int, default=100,
                         help="the FireWorks priority")
+    parser.add_argument("-b", "--batch_size", dest="batch_size", type=int, default=100,
+                        help="the number of FireWorks in a Workflow")
     options = parser.parse_args()
 
     fw_priority = options.priority
+    batch_size = options.batch_size
+
+    lp = LaunchPad.auto_load()
 
     src_dir = os.path.abspath(options.directory)
     src_dir_sub_dirs = glob.glob(os.path.join(src_dir, "*"))
@@ -31,6 +36,8 @@ def main():
     current_fwid = 1
     links_dict = dict()
     fws_all = []
+    num_fw_in_current_batch = 0
+    batch_num = 1
     for i, sd in enumerate(src_dir_sub_dirs):
         if not os.path.isdir(sd):
             continue
@@ -89,9 +96,18 @@ def main():
                                 fw_id=fake_qchem_fw_id))
         links_dict[snl_fw_id] = fake_qchem_fw_id
 
-    wf = Workflow(fws_all, links_dict, "Read Previous QChem Jobs")
-    lp = LaunchPad.auto_load()
-    lp.add_wf(wf)
+        num_fw_in_current_batch += 1
+        if num_fw_in_current_batch >= 100:
+            wf = Workflow(fws_all, links_dict, "Read Previous QChem Jobs Id-{}".format(batch_num))
+            lp.add_wf(wf)
+            batch_num += 1
+            links_dict = dict()
+            fws_all = []
+            num_fw_in_current_batch = 0
+
+    if num_fw_in_current_batch > 0:
+        wf = Workflow(fws_all, links_dict, "Read Previous QChem Jobs")
+        lp.add_wf(wf)
 
 
 if __name__ == '__main__':
