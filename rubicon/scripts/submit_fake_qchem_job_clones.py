@@ -40,7 +40,8 @@ def main():
         with zopen(zpath(fw_json_filename)) as f:
             fw_dict = json.load(f)
         print "{percent:4.2%} completed, processing directory {d:s}, molecule name {molname:s}," \
-              " mission {mission:s}".format(percent=i/float(num_dirs), d=sd, molname=fw_dict['spec']['user_tags']['molname'],
+              " mission {mission:s}".format(percent=i/float(num_dirs), d=sd,
+                                            molname=fw_dict['spec']['user_tags']['molname'],
                                             mission=fw_dict['spec']['user_tags']['mission'])
 
         molname = fw_dict['spec']['user_tags']['molname']
@@ -52,6 +53,7 @@ def main():
         snl = StructureNL(mol, "Xiaohui Qu <xqu@lbl.gov>", "Electrolyte Genome")
         egsnl_task_spec = {'task_type': 'Add to SNL database',
                            'snl': snl.as_dict(),
+                           '_category': 'Parse Previous QChem Job',
                            '_priority': fw_priority}
         snl_fw_id = current_fwid
         current_fwid += 1
@@ -63,6 +65,7 @@ def main():
         src_qchem_dir = sd
         fake_qchem_spec = {'_priority': fw_priority * 2,
                            'src_qchem_dir': src_qchem_dir,
+                           '_category': 'Parse Previous QChem Job',
                            'run_tags': fw_dict['spec']['run_tags'],
                            'implicit_solvent': fw_dict['spec']['implicit_solvent'],
                            'task_type': fw_dict['spec']['task_type'],
