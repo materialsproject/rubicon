@@ -58,18 +58,18 @@ class QChemTask(FireTaskBase, FWSerializable):
         fw_data = FWData()
         half_cpus_cmd = shlex.split("qchem -np 12")
         if "PBS_JOBID" in os.environ and "edique" in os.environ["PBS_JOBID"]:
-        # hopper or edison compute nodes
+        # edison compute nodes
             if (not fw_data.MULTIPROCESSING) or (fw_data.SUB_NPROCS is None):
-                qc_exe = shlex.split("qchem -np {}".format(min(12, len(mol))))
+                qc_exe = shlex.split("qchem -np {}".format(min(24, len(mol))))
                 half_cpus_cmd = shlex.split("qchem -np {}".format(
-                    min(6, len(mol))))
+                    min(12, len(mol))))
             else:
                 nodelist = ",".join(fw_data.NODE_LIST)
                 os.environ["QCNODE"] = nodelist
                 qc_exe = shlex.split("qchem -np {}".format(
-                    min(fw_data.SUB_NPROCS/2, len(mol))))
+                    min(fw_data.SUB_NPROCS, len(mol))))
                 half_cpus_cmd = shlex.split("qchem -np {}".format(
-                    min(fw_data.SUB_NPROCS/4, len(mol))))
+                    min(fw_data.SUB_NPROCS/2, len(mol))))
         elif "PBS_JOBID" in os.environ and "hopque" in os.environ["PBS_JOBID"]:
             if (not fw_data.MULTIPROCESSING) or (fw_data.SUB_NPROCS is None):
                 qc_exe = shlex.split("qchem -np {}".format(min(24, len(mol))))
