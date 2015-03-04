@@ -329,7 +329,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
 
 def get_bsse_update_specs(fw_spec, d):
     if "super_mol_snlgroup_id" in fw_spec["run_tags"]:
-        ghost_atoms = fw_spec["run_tags"]["ghost_atoms"]
+        ghost_atoms = fw_spec["run_tags"].get("ghost_atoms", list())
         fragment_type = fw_spec["run_tags"]["bsse_fragment_type"]
         fragment_key = BasisSetSuperpositionErrorCalculationTask.get_fragment_key(ghost_atoms, fragment_type)
         fragment_dict = dict()
