@@ -45,7 +45,10 @@ def main():
 
         molname = fw_dict['spec']['user_tags']['molname']
         egsnl_tasks = [AddEGSNLTask()]
-        mol = Molecule.from_dict(fw_dict['spec']['mol'])
+        if 'mol' in fw_dict:
+            mol = Molecule.from_dict(fw_dict['spec']['mol'])
+        else:
+            mol = Molecule.from_dict(fw_dict['spec']['qcinp']['jobs'][0]['molecule'])
         snl = StructureNL(mol, "Xiaohui Qu <xqu@lbl.gov>", "Electrolyte Genome")
         egsnl_task_spec = {'task_type': 'Add to SNL database',
                            'snl': snl.as_dict(),
@@ -67,7 +70,7 @@ def main():
                            'spin_multiplicity': fw_dict['spec']['spin_multiplicity'],
                            'num_atoms': fw_dict['spec']['num_atoms'],
                            'user_tags': fw_dict['spec']['user_tags'],
-                           'mol': fw_dict['spec']['mol'],
+                           'mol': mol.as_dict(),
                            'inchi': fw_dict['spec']['inchi'],
                            '_dupefinder': fw_dict['spec']['_dupefinder'],
                            'qcinp': fw_dict['spec']['qcinp'],
