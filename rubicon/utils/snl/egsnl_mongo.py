@@ -27,6 +27,9 @@ class EGSNLMongoAdapter(FWSerializable):
         self._update_indices()
 
     def _reset(self):
+        if "prod" in self.database.name:
+            print "PROD database is not supposed to reset, please changed the code to reset"
+            exit()
         self.restart_id_assigner_at(1, 1)
         self.snl.remove()
         self.snlgroups.remove()
