@@ -28,19 +28,23 @@ class TestContactDetector(TestCase):
         pymatgen_tfsi = tfsi_qcout.data[0]["molecules"][-1]
         # noinspection PyProtectedMember
         tfsi_obmol = BabelMolAdaptor(pymatgen_tfsi)._obmol
+        fragments = [sodium_obmol, tfsi_obmol]
+        nums_fragments = [1, 1]
         self.acetoxyq_natfsi_placer = IonPlacer(
-            acetoxyq_obmol, sodium_obmol, tfsi_obmol, 1, 1, None)
+            acetoxyq_obmol, fragments, nums_fragments, None)
         rad_util = AtomicRadiusUtils(covalent_radius_scale=3.0, metal_radius_scale=1.5)
         mol_radius = rad_util.get_radius(acetoxyq_obmol)
         cation_radius = rad_util.get_radius(sodium_obmol)
         anion_radius = rad_util.get_radius(tfsi_obmol)
         mol_coords = IonPlacer.normalize_molecule(acetoxyq_obmol)
-        self.detector = ContactDetector(mol_coords, mol_radius, cation_radius, anion_radius)
+        fragments_atom_radius = [cation_radius, anion_radius]
+        nums_fragments = [1, 1]
+        self.detector = ContactDetector(mol_coords, mol_radius, fragments_atom_radius, nums_fragments)
 
     def test_get_contact_matrix(self):
         c = [-20.0, 0.0, 0.0, 10.0, 0.0, 0.0, 1.0, 2.0]
-        cation_coords, anion_coords = self.acetoxyq_natfsi_placer.decode_solution(c)
-        contact_matrix = self.detector._get_contact_matrix(cation_coords, anion_coords)
+        fragments_coords = self.acetoxyq_natfsi_placer.decode_solution(c)
+        contact_matrix = self.detector._get_contact_matrix(fragments_coords)
         ans = np.zeros((3, 3), int)
         self.assertEqual(str(contact_matrix), str(ans))
         c = [-20.0, 0.0, 0.0, 5.0, 0.0, 0.0, 1.0, 2.0]
