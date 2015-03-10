@@ -38,10 +38,16 @@ class SubmissionMongoAdapterEG(object):
         self._update_indices()
 
     def _reset(self):
+        if "prod" in self.database.name:
+            print "PROD database is not supposed to reset, please changed the code to reset"
+            exit()
         self._restart_id_assigner_at(1)
         self.jobs.remove()
 
     def _reset_reactions_collection(self):
+        if "prod" in self.database.name:
+            print "PROD database is not supposed to reset, please changed the code to reset"
+            exit()
         self._restart_reaction_id_assigner_at(1)
         self.reactions.remove()
 
