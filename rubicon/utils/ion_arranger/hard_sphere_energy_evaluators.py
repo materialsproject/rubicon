@@ -96,7 +96,7 @@ class HardSphereEnergyEvaluator(EnergyEvaluator):
             components.append(tuple([coords, rad]))
         energy = 0.0
         for (coords1, rad1), (coords2, rad2) in \
-                itertools.combinations(components):
+                itertools.combinations(components, 2):
             energy += self._pair_energy(coords1, rad1, coords2, rad2)
         return energy
 
