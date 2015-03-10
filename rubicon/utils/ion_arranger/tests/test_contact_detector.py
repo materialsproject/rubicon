@@ -42,19 +42,19 @@ class TestContactDetector(TestCase):
         self.detector = ContactDetector(mol_coords, mol_radius, fragments_atom_radius, nums_fragments)
 
     def test_get_contact_matrix(self):
-        c = [-20.0, 0.0, 0.0, 10.0, 0.0, 0.0, 1.0, 2.0]
+        c = [-40.0, 0.0, 0.0, 20.0, 0.0, 0.0, 1.0, 2.0]
         fragments_coords = self.acetoxyq_natfsi_placer.decode_solution(c)
         contact_matrix = self.detector._get_contact_matrix(fragments_coords)
         ans = np.zeros((3, 3), int)
         self.assertEqual(str(contact_matrix), str(ans))
         c = [-20.0, 0.0, 0.0, 5.0, 0.0, 0.0, 1.0, 2.0]
-        cation_coords, anion_coords = self.acetoxyq_natfsi_placer.decode_solution(c)
-        contact_matrix = self.detector._get_contact_matrix(cation_coords, anion_coords)
+        fragments_coords = self.acetoxyq_natfsi_placer.decode_solution(c)
+        contact_matrix = self.detector._get_contact_matrix(fragments_coords)
         ans = np.array([[0, 0, 1], [0, 0, 0], [1, 0, 0]], int)
         self.assertEqual(str(contact_matrix), str(ans))
         c = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 2.0]
-        cation_coords, anion_coords = self.acetoxyq_natfsi_placer.decode_solution(c)
-        contact_matrix = self.detector._get_contact_matrix(cation_coords, anion_coords)
+        fragments_coords = self.acetoxyq_natfsi_placer.decode_solution(c)
+        contact_matrix = self.detector._get_contact_matrix(fragments_coords)
         ans = np.array([[0, 1, 1], [1, 0, 1], [1, 1, 0]], int)
         self.assertEqual(str(contact_matrix), str(ans))
 
@@ -83,15 +83,15 @@ class TestContactDetector(TestCase):
 
     def test_is_contact(self):
         c = [-20.0, 0.0, 0.0, 10.0, 0.0, 0.0, 1.0, 2.0]
-        cation_coords, anion_coords = self.acetoxyq_natfsi_placer.decode_solution(c)
-        is_contact = self.detector.is_contact(cation_coords, anion_coords)
+        fragments_coords = self.acetoxyq_natfsi_placer.decode_solution(c)
+        is_contact = self.detector.is_contact(fragments_coords)
         self.assertFalse(is_contact)
         c = [-20.0, 0.0, 0.0, 5.0, 0.0, 0.0, 1.0, 2.0]
-        cation_coords, anion_coords = self.acetoxyq_natfsi_placer.decode_solution(c)
-        is_contact = self.detector.is_contact(cation_coords, anion_coords)
+        fragments_coords = self.acetoxyq_natfsi_placer.decode_solution(c)
+        is_contact = self.detector.is_contact(fragments_coords)
         self.assertFalse(is_contact)
         c = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 2.0]
-        cation_coords, anion_coords = self.acetoxyq_natfsi_placer.decode_solution(c)
-        is_contact = self.detector.is_contact(cation_coords, anion_coords)
+        fragments_coords = self.acetoxyq_natfsi_placer.decode_solution(c)
+        is_contact = self.detector.is_contact(fragments_coords)
         self.assertTrue(is_contact)
 
