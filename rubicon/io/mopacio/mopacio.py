@@ -3,6 +3,7 @@
 """
 This module implements input and output processing from MOPAC
 """
+from __future__ import unicode_literals
 import copy
 from textwrap import TextWrapper
 from monty.io import zopen
