@@ -253,7 +253,7 @@ def main():
             # noinspection PyProtectedMember
             fragments.append(BabelMolAdaptor.from_file(frag_file, file_format)._obmol)
         energy_evaluator = SemiEmpricalQuatumMechanicalEnergyEvaluator(molecule, fragments, options.nums_fragments,
-                                                                       total_charge=1.0)
+                                                                       total_charge=options.charge)
     placer = IonPlacer(molecule=molecule, fragments=fragments, nums_fragments=options.nums_fragments,
                        energy_evaluator=energy_evaluator)
     placer.place(max_evaluations=options.iterations,
