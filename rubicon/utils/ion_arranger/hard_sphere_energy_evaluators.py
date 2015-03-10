@@ -92,7 +92,7 @@ class HardSphereEnergyEvaluator(EnergyEvaluator):
     def calc_energy(self, fragments_coords):
         components = []
         components.append(tuple([self.mol_coords, self.mol_radius]))
-        for coords, ch, rad in zip(fragments_coords, self.fragments_atom_radius):
+        for coords, rad in zip(fragments_coords, self.fragments_atom_radius):
             components.append(tuple([coords, rad]))
         energy = 0.0
         for (coords1, rad1), (coords2, rad2) in \
