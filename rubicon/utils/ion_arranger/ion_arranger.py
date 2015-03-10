@@ -261,7 +261,8 @@ def main():
                  neighborhood_size=options.num_neighbours)
     print 'It took {:.1f} seconds to place the salt'.format(placer
                                                             .playing_time)
-    write_mol(placer.best_pymatgen_mol, options.outputfile)
+
+    placer.best_pymatgen_mol.to("xyz", options.outputfile)
 
 if __name__ == '__main__':
     main()
