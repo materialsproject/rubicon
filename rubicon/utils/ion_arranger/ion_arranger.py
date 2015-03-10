@@ -246,10 +246,10 @@ def main():
     else:
         # noinspection PyProtectedMember
         molecule = BabelMolAdaptor.from_file(options.molecule,
-                                             os.path.splitext(options.molecule)[1:])._obmol
+                                             os.path.splitext(options.molecule)[1][1:])._obmol
         fragments = []
         for frag_file in options.fragments:
-            file_format = os.path.splitext(frag_file)[1:]
+            file_format = os.path.splitext(frag_file)[1][1:]
             # noinspection PyProtectedMember
             fragments.append(BabelMolAdaptor.from_file(frag_file, file_format)._obmol)
         energy_evaluator = SemiEmpricalQuatumMechanicalEnergyEvaluator()
