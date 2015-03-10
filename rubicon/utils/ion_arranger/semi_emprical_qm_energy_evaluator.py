@@ -3,6 +3,8 @@ import os
 import shutil
 
 from custodian import Custodian
+import itertools
+import math
 from monty.tempfile import ScratchDir
 from pymatgen.core.structure import Molecule
 from pymatgen.core.units import Energy
@@ -42,6 +44,23 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
         self.nums_fragments = nums_fragments
         self.run_number = 1
         self.best_energy = 0.0
+        self.memory_position_tolerance_au = 0.3 * AtomicRadiusUtils.angstrom2au
+        self.memory_positions = []
+        self.memory_size = 100
+
+
+    def query_memory_positions(self, fragments_coords):
+        for p, energy in self.memory_positions:
+            distance = max([math.sqrt(sum([(x1-x2)**2 for x1, x2 in zip(c1, c2)])) for c1, c2
+                            in zip(itertools.chain(p), itertools.chain(fragments_coords))])
+            if distance < self.memory_position_tolerance_au:
+                return energy
+        return None
+
+    def append_position_to_memory(self, fragments_coords, energy):
+        self.memory_positions.insert(0, tuple([fragments_coords, energy]))
+        if len(self.memory_positions) > self.memory_size:
+            self.memory_positions.pop()
 
     def calc_energy(self, fragments_coords):
         energy = self.lower_sphere.calc_energy(fragments_coords)
@@ -49,9 +68,14 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
             return energy
         if not self.contact_detector.is_contact(fragments_coords):
             return self.gravitation.calc_energy(fragments_coords)
-        mol = self._get_super_molecule(fragments_coords)
-        energy = self.run_mopac(mol)
-        energy = round(energy, 3)
+        memorized_energy = self.query_memory_positions(fragments_coords)
+        if memorized_energy is not None:
+            energy = memorized_energy
+        else:
+            mol = self._get_super_molecule(fragments_coords)
+            energy = self.run_mopac(mol)
+            energy = round(energy, 3)
+            self.append_position_to_memory(fragments_coords, energy)
         # coarse grained energy,
         # make potential energy surface simpler
         return energy
