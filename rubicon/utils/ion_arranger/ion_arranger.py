@@ -194,8 +194,9 @@ class IonPlacer():
             energy = self.energy_evaluator.calc_energy(fragments_coords)
             fitness.append(energy)
             all_coords.append(fragments_coords)
-        if self.is_conformer_located(zip(all_coords, fitness)):
-            self.taboo_current_solution()
+        coords_fitness = zip(all_coords, fitness)
+        if self.is_conformer_located(coords_fitness):
+            self.taboo_current_solution(coords_fitness)
         return fitness
 
     def place(self, max_evaluations=30000, pop_size=100, neighborhood_size=5):
