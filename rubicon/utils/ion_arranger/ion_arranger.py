@@ -24,7 +24,7 @@ class IonPlacer():
 
 
     def __init__(self, molecule, fragments, nums_fragments, energy_evaluator,
-                 prng=None, seed=None):
+                 prng=None, seed=None, taboo_tolerance_ang=1.0, taboo_tolerance_particle_ratio=0.5):
         self.prng = prng if prng else Random()
         self.seed = seed if seed else time()
         self.prng.seed(self.seed)
@@ -44,6 +44,8 @@ class IonPlacer():
         self.best_pymatgen_mol = None
         self.playing_time = None
         self.energy_evaluator = energy_evaluator
+        self.taboo_tolerance_au = taboo_tolerance_ang * AtomicRadiusUtils.angstrom2au
+        self.taboo_tolerance_particle_ratio = taboo_tolerance_particle_ratio
 
     @classmethod
     def get_bounder(cls, mol_coords, fragments, nums_fragments):
@@ -143,14 +145,61 @@ class IonPlacer():
         upper_bound = args['_ec'].bounder.upper_bound
         return [random.uniform(l, u) for l, u in zip(lower_bound, upper_bound)]
 
+    def taboo_current_solution(self, coords_fitness):
+        best_fitness, best_index = self._get_best_index_and_fitness(coords_fitness)
+        self.energy_evaluator.calc_energy(fragments_coords=coords_fitness[best_index][0])
+        self.energy_evaluator.taboo_current_position()
+
+        # clean swarm memory
+        self.ea._previous_population = []
+        self.ea.archive = []
+
+    def _get_best_index_and_fitness(self, coords_fitness):
+        best_index = 0
+        best_fitness = coords_fitness[best_index][1]
+        for i, (c, fitness) in coords_fitness:
+            if fitness < best_fitness:
+                best_index = i
+                best_fitness = fitness
+        return best_fitness, best_index
+
+    def is_conformer_located(self, coords_fitness):
+        # print self.ea.num_evaluations
+        # print self.ea.population
+        # if self.ea.num_evaluations >=1:
+        #     exit(0)
+        best_fitness, best_index = self._get_best_index_and_fitness(coords_fitness)
+        if best_fitness > -1.0:
+            # Even not optimized by MOPAC
+            return False
+        best_coords = itertools.chain(*coords_fitness[best_index][0])
+        distances_to_best = [max([math.sqrt(sum([(x1-x2)**2
+                                                 for x1, x2 in zip(c1, c2)]))
+                                  for c1, c2 in zip(itertools.chain(*particle), best_coords)])
+                             for particle, fitness in coords_fitness]
+        num_particle_in_range = 0
+        for d in distances_to_best:
+            if d <= self.taboo_tolerance_au:
+                num_particle_in_range += 1
+        ratio_particle_in_range = float(num_particle_in_range)/len(distances_to_best)
+        if ratio_particle_in_range >= self.taboo_tolerance_particle_ratio:
+            return True
+        else:
+            return False
+
+
     # noinspection PyUnusedLocal
     def evaluate_conformers(self, candidates, args):
         # evaluator
         fitness = []
+        all_coords = []
         for c in candidates:
             fragments_coords = self.decode_solution(c)
             energy = self.energy_evaluator.calc_energy(fragments_coords)
             fitness.append(energy)
+            all_coords.append(fragments_coords)
+        if self.is_conformer_located(zip(all_coords, fitness)):
+            self.taboo_current_solution()
         return fitness
 
     def place(self, max_evaluations=30000, pop_size=100, neighborhood_size=5):
@@ -209,6 +258,12 @@ def main():
     parser.add_argument("-c", "--charge", dest="charge", type=int,
                         required=True,
                         help="total charge of the system")
+    parser.add_argument("-t", "--taboo_tolerance", dest="taboo_tolerance", type=float,
+                        default=1.0,
+                        help="The radius to taboo a solution (in Angstrom)")
+    parser.add_argument("-r", "--ratio_taboo_particles", dest="ratio_taboo_particles", type=float,
+                        default=0.5,
+                        help="ratio of particle within the tolerance to consider taboo current solution")
     parser.add_argument("-o", "--outputfile", dest="outputfile", type=str,
                         required=True,
                         help="the file name of the aligned conformer")
@@ -253,10 +308,11 @@ def main():
             file_format = os.path.splitext(frag_file)[1][1:]
             # noinspection PyProtectedMember
             fragments.append(BabelMolAdaptor.from_file(frag_file, file_format)._obmol)
-        energy_evaluator = SemiEmpricalQuatumMechanicalEnergyEvaluator(molecule, fragments, options.nums_fragments,
-                                                                       total_charge=options.charge)
+        energy_evaluator = SemiEmpricalQuatumMechanicalEnergyEvaluator(
+            molecule, fragments, options.nums_fragments, total_charge=options.charge, taboo_tolerance_ang=options.taboo_tolerance)
     placer = IonPlacer(molecule=molecule, fragments=fragments, nums_fragments=options.nums_fragments,
-                       energy_evaluator=energy_evaluator)
+                       energy_evaluator=energy_evaluator, taboo_tolerance_ang=options.taboo_tolerance,
+                       taboo_tolerance_particle_ratio=options.ratio_taboo_particles)
     placer.place(max_evaluations=options.iterations,
                  pop_size=options.size,
                  neighborhood_size=options.num_neighbours)

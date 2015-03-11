@@ -8,6 +8,7 @@ import math
 from monty.tempfile import ScratchDir
 from pymatgen.core.structure import Molecule
 from pymatgen.core.units import Energy
+from pymatgen.io.babelio import BabelMolAdaptor
 
 from rubicon.io.mopacio.custodian.mopac_error_handlers import MopacErrorHandler
 from rubicon.io.mopacio.custodian.mopacjob import MopacJob
@@ -56,7 +57,13 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
 
     def taboo_current_position(self, raw_position_only=False):
         self.tabooed_raw_positions.append(self.current_raw_position)
-        if self.current_optimized_position is not None and not raw_position_only:
+        if not raw_position_only:
+            if self.current_optimized_position is None:
+                mol = self._get_super_molecule(self.current_raw_position)
+                energy, final_mol = self.run_mopac(mol)
+                from rubicon.utils.ion_arranger.ion_arranger import IonPlacer
+                final_coords = IonPlacer.normalize_molecule(final_mol)
+                self.current_optimized_position = final_coords
             self.tabooed_optimizated_positions.append(self.current_optimized_position)
 
     def is_current_position_tabooed(self, position_type):
@@ -130,7 +137,8 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
             c = Custodian(handlers=[handler], jobs=[job], max_errors=50)
             custodian_out = c.run()
             mopout = MopOutput("mol.out")
-            final_mol = mopout.data["molecules"][-1]
+            final_pmg_mol = mopout.data["molecules"][-1]
+            final_ob_mol = BabelMolAdaptor(final_pmg_mol)._obmol
             energy = Energy(mopout.data["energies"][-1][-1], "eV").to("Ha")
             if energy < self.best_energy:
                 self.best_energy = energy
@@ -142,7 +150,7 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
                 out_error_logs_file = os.path.join(cur_dir, "out_error_logs.txt")
                 bak_cmd = "cat {} >> {}".format("mol.out", out_error_logs_file)
                 os.system(bak_cmd)
-        return energy, final_mol
+        return energy, final_ob_mol
 
     def _get_super_molecule(self, fragments_coords):
         super_mol_species = []
