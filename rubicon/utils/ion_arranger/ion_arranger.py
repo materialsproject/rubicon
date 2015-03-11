@@ -157,22 +157,24 @@ class IonPlacer():
     def _get_best_index_and_fitness(self, coords_fitness):
         best_index = 0
         best_fitness = coords_fitness[best_index][1]
-        for i, (c, fitness) in coords_fitness:
+        for i, (c, fitness) in enumerate(coords_fitness):
             if fitness < best_fitness:
                 best_index = i
                 best_fitness = fitness
         return best_fitness, best_index
 
     def is_conformer_located(self, coords_fitness):
-        # print self.ea.num_evaluations
-        # print self.ea.population
-        # if self.ea.num_evaluations >=1:
-        #     exit(0)
+        #print self.ea.num_evaluations
+        #print self.ea.population
+        if self.ea.num_evaluations >=1:
+             exit(0)
         best_fitness, best_index = self._get_best_index_and_fitness(coords_fitness)
+        #print best_fitness, best_index
         if best_fitness > -1.0:
             # Even not optimized by MOPAC
             return False
         best_coords = itertools.chain(*coords_fitness[best_index][0])
+        #print best_coords
         distances_to_best = [max([math.sqrt(sum([(x1-x2)**2
                                                  for x1, x2 in zip(c1, c2)]))
                                   for c1, c2 in zip(itertools.chain(*particle), best_coords)])
