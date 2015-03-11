@@ -41,6 +41,9 @@ class AtomicRadiusUtils(object):
 
 class CoulumbEnergyEvaluator(EnergyEvaluator):
 
+    def taboo_current_position(self):
+        pass
+
     def __init__(self, mol_coords, mol_charges, mol_radius, fragments_charges, nums_fragments,
                  fragment_atom_radius):
         super(CoulumbEnergyEvaluator, self).__init__(mol_coords)
@@ -80,6 +83,9 @@ class CoulumbEnergyEvaluator(EnergyEvaluator):
         return energy
 
 class HardSphereEnergyEvaluator(EnergyEvaluator):
+    def taboo_current_position(self):
+        pass
+
     overlap_energy = 1.0E4
 
     def __init__(self, mol_coords, mol_radius, fragments_atom_radius, nums_fragments):
@@ -160,6 +166,9 @@ class ContactDetector(object):
 
 class LargestContactGapEnergyEvaluator(EnergyEvaluator):
 
+    def taboo_current_position(self):
+        pass
+
     def __init__(self, mol_coords, mol_radius, fragments_atom_radius, nums_fragments, max_cap, threshold=1.0E-2):
         super(LargestContactGapEnergyEvaluator, self).__init__(mol_coords)
         self.max_cap = max_cap * AtomicRadiusUtils.angstrom2au
@@ -186,6 +195,9 @@ class LargestContactGapEnergyEvaluator(EnergyEvaluator):
 
 
 class GravitationalEnergyEvaluator(EnergyEvaluator):
+
+    def taboo_current_position(self):
+        pass
 
     gravity = 0.001
 
@@ -220,6 +232,9 @@ class GravitationalEnergyEvaluator(EnergyEvaluator):
             return self.gravity * grav_distance
 
 class HardSphereElectrostaticEnergyEvaluator(EnergyEvaluator):
+    def taboo_current_position(self):
+        pass
+
     def __init__(self, mol_coords, mol_radius, mol_charges, fragments_charges,
                  nums_fragments, fragment_atom_radius):
         super(HardSphereElectrostaticEnergyEvaluator, self).__init__(mol_coords)

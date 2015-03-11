@@ -77,6 +77,7 @@ class IonPlacer():
     @staticmethod
     def normalize_molecule(mol):
         mol.Center()
+        mol.ToInertialFrame()
         coords = IonPlacer.get_mol_coords(mol)
         return coords
 

@@ -24,7 +24,8 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
 
     def __init__(self, ob_mol, ob_fragments, nums_fragments, total_charge,
                  lower_covalent_radius_scale=2.0, lower_metal_radius_scale=0.8,
-                 upper_covalent_radius_scale=3.0, upper_metal_radius_scale=1.5,):
+                 upper_covalent_radius_scale=3.0, upper_metal_radius_scale=1.5,
+                 taboo_tolerance_ang=1.0):
         from rubicon.utils.ion_arranger.ion_arranger import IonPlacer
         mol_coords = IonPlacer.normalize_molecule(ob_mol)
         super(SemiEmpricalQuatumMechanicalEnergyEvaluator, self).__init__(mol_coords)
@@ -47,7 +48,29 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
         self.memory_position_tolerance_au = 0.3 * AtomicRadiusUtils.angstrom2au
         self.memory_positions = []
         self.memory_size = 1000
+        self.current_raw_position = None
+        self.current_optimized_position = None
+        self.taboo_tolerance_au = taboo_tolerance_ang * AtomicRadiusUtils.angstrom2au
+        self.tabooed_raw_positions = []
+        self.tabooed_optimizated_positions = []
 
+    def taboo_current_position(self, raw_position_only=False):
+        self.tabooed_raw_positions.append(self.current_raw_position)
+        if self.current_optimized_position is not None and not raw_position_only:
+            self.tabooed_optimizated_positions.append(self.current_optimized_position)
+
+    def is_current_position_tabooed(self, position_type):
+        if position_type not in ["raw", "optimized"]:
+            raise ValueError("Position type must be either raw or optimized")
+        current_pos = self.current_raw_position if position_type == "raw" \
+            else self.current_optimized_position
+        for p in self.tabooed_raw_positions:
+            distance = max([math.sqrt(sum([(x1-x2)**2 for x1, x2 in zip(c1, c2)]))
+                            for c1, c2 in
+                            zip(itertools.chain(*p), itertools.chain(*current_pos))])
+            if distance < self.taboo_tolerance_au:
+                return True
+        return False
 
     def query_memory_positions(self, fragments_coords):
         for p, energy in self.memory_positions:
@@ -64,6 +87,10 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
             self.memory_positions.pop()
 
     def calc_energy(self, fragments_coords):
+        self.current_raw_position = fragments_coords
+        self.current_optimized_position = None
+        if self.is_current_position_tabooed(position_type="raw"):
+            return 1.0
         energy = self.lower_sphere.calc_energy(fragments_coords)
         if energy > HardSphereEnergyEvaluator.overlap_energy * 0.9:
             return energy
@@ -74,7 +101,13 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
             energy = memorized_energy
         else:
             mol = self._get_super_molecule(fragments_coords)
-            energy = self.run_mopac(mol)
+            energy, final_mol = self.run_mopac(mol)
+            from rubicon.utils.ion_arranger.ion_arranger import IonPlacer
+            final_coords = IonPlacer.normalize_molecule(final_mol)
+            self.current_optimized_position = final_coords
+            if self.is_current_position_tabooed(position_type="optimized"):
+                self.taboo_current_position(raw_position_only=True)
+                return 1.0
             energy = round(energy, 3)
             self.append_position_to_memory(fragments_coords, energy)
         # coarse grained energy,
@@ -97,6 +130,7 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
             c = Custodian(handlers=[handler], jobs=[job], max_errors=50)
             custodian_out = c.run()
             mopout = MopOutput("mol.out")
+            final_mol = mopout.data["molecules"][-1]
             energy = Energy(mopout.data["energies"][-1][-1], "eV").to("Ha")
             if energy < self.best_energy:
                 self.best_energy = energy
@@ -108,7 +142,7 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
                 out_error_logs_file = os.path.join(cur_dir, "out_error_logs.txt")
                 bak_cmd = "cat {} >> {}".format("mol.out", out_error_logs_file)
                 os.system(bak_cmd)
-        return energy
+        return energy, final_mol
 
     def _get_super_molecule(self, fragments_coords):
         super_mol_species = []
