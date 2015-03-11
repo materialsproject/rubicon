@@ -46,13 +46,14 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
         self.best_energy = 0.0
         self.memory_position_tolerance_au = 0.3 * AtomicRadiusUtils.angstrom2au
         self.memory_positions = []
-        self.memory_size = 100
+        self.memory_size = 1000
 
 
     def query_memory_positions(self, fragments_coords):
         for p, energy in self.memory_positions:
-            distance = max([math.sqrt(sum([(x1-x2)**2 for x1, x2 in zip(c1, c2)])) for c1, c2
-                            in zip(itertools.chain(p), itertools.chain(fragments_coords))])
+            distance = max([math.sqrt(sum([(x1-x2)**2 for x1, x2 in zip(c1, c2)]))
+                            for c1, c2 in
+                            zip(itertools.chain(*p), itertools.chain(*fragments_coords))])
             if distance < self.memory_position_tolerance_au:
                 return energy
         return None
