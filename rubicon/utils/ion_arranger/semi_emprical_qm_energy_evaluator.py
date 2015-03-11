@@ -56,7 +56,7 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
         self.tabooed_optimizated_positions = []
 
     def taboo_current_position(self, raw_position_only=False):
-        self.tabooed_raw_positions.append(self.current_raw_position)
+        self.tabooed_raw_positions.append(list(itertools.chain(*self.current_raw_position)))
         if not raw_position_only:
             if self.current_optimized_position is None:
                 mol = self._get_super_molecule(self.current_raw_position)
@@ -71,10 +71,14 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
             raise ValueError("Position type must be either raw or optimized")
         current_pos = self.current_raw_position if position_type == "raw" \
             else self.current_optimized_position
-        for p in self.tabooed_raw_positions:
+        if position_type == "raw":
+            current_pos = list(itertools.chain(*current_pos))
+        tabooed_positions = self.tabooed_raw_positions if position_type == "raw" \
+            else self.tabooed_optimizated_positions
+        for p in tabooed_positions:
             distance = max([math.sqrt(sum([(x1-x2)**2 for x1, x2 in zip(c1, c2)]))
                             for c1, c2 in
-                            zip(itertools.chain(*p), itertools.chain(*current_pos))])
+                            zip(p, current_pos)])
             if distance < self.taboo_tolerance_au:
                 return True
         return False
