@@ -6,7 +6,13 @@ __author__ = 'xiaohuiqu'
 
 class TestOrderredLayoutEnergyEvaluator(TestCase):
     def test_calc_energy(self):
-        pass
+        nums_fragments = [3, 5]
+        evaluator = OrderredLayoutEnergyEvaluator(mol_coords=None, nums_fragments=nums_fragments)
+        fragments_coords = [[[3.0, 0.0, 0.0]], [[0.0, 0.0, -.5]], [[0.0, -.0, 0.0]],
+                            [[3.0, 0.0, 0.0]], [[0.0, 0.0, 15.0]], [[0.0, 2.0, 0.0]],
+                            [[0.0, 4.0, 0.0]], [[0.0, 0.0, 3.0]]]
+        energy = evaluator.calc_energy(fragments_coords)
+        self.assertAlmostEqual(energy, 5101.1, places=5)
 
     def test_get_frag_ranks(self):
         frag_coords = [[[3.0, 0.0, 0.0]], [[0.0, 0.0, -.5]], [[0.0, -.0, 0.0]]]

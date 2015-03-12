@@ -121,14 +121,31 @@ class OrderredLayoutEnergyEvaluator(EnergyEvaluator):
     def taboo_current_position(self):
         pass
 
-    overlap_energy = 5.0E3 + 1.0
+    base_energy = 5.0E3 + 100.0
 
     def __init__(self, mol_coords, nums_fragments):
         super(OrderredLayoutEnergyEvaluator, self).__init__(mol_coords)
         self.nums_fragments = nums_fragments
 
     def calc_energy(self, fragments_coords):
-        pass
+        tokens = []
+        start_index = 0
+        for nf in self.nums_fragments:
+            end_index = start_index + nf
+            tokens.append(fragments_coords[start_index: end_index])
+            start_index = end_index
+        if start_index != len(fragments_coords):
+            raise Exception("The number of fragments is not consistent")
+        spearmans_rank_coeffs = []
+        for frag in tokens:
+            ranks = self._get_frag_ranks(frag)
+            coeff = self._spearsman_rank_coefficient(ranks)
+            spearmans_rank_coeffs.append(coeff)
+        total_spearmans = sum(spearmans_rank_coeffs)
+        # positive spearmans rank coefficient means more ordered, and should
+        # be prefered by negative energy, therefore, inverse the spearmans value
+        return self.base_energy + (-total_spearmans)
+
 
     @classmethod
     def _get_frag_ranks(cls, frag_coords):
