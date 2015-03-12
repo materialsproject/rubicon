@@ -308,6 +308,8 @@ def main():
             fragments.append(BabelMolAdaptor.from_file(frag_file, file_format)._obmol)
         energy_evaluator = SemiEmpricalQuatumMechanicalEnergyEvaluator(
             molecule, fragments, options.nums_fragments, total_charge=options.charge, taboo_tolerance_ang=options.taboo_tolerance)
+    if len(fragments) != len(options.nums_fragments):
+        raise ValueError("you must specify the duplicated count for every fragment")
     placer = IonPlacer(molecule=molecule, fragments=fragments, nums_fragments=options.nums_fragments,
                        energy_evaluator=energy_evaluator, taboo_tolerance_ang=options.taboo_tolerance,
                        taboo_tolerance_particle_ratio=options.ratio_taboo_particles)
