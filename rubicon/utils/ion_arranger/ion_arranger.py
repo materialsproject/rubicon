@@ -165,7 +165,8 @@ class IonPlacer():
 
     def is_conformer_located(self, coords_fitness):
         best_fitness, best_index = self._get_best_index_and_fitness(coords_fitness)
-        if best_fitness > -1.0:
+        unmbrella_enhancement = -3.0
+        if best_fitness > unmbrella_enhancement - 0.5:
             # Even not optimized by MOPAC
             return False
         best_coords = list(itertools.chain(*coords_fitness[best_index][0]))
