@@ -79,13 +79,15 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
                 final_coords = IonPlacer.normalize_molecule(final_mol)
                 self.current_optimized_position = final_coords
             self.tabooed_optimizated_positions.append(self.current_optimized_position)
-        self.save_current_best_position()
-        self.memory_positions = []
-        self.best_energy = None
-        self.current_best_optimized_position = None
-        self.current_best_raw_position = None
-        self.best_mol = None
-        self.best_run_number = None
+
+            # taboo is called from ion arranger
+            self.save_current_best_position()
+            self.memory_positions = []
+            self.best_energy = None
+            self.current_best_optimized_position = None
+            self.current_best_raw_position = None
+            self.best_mol = None
+            self.best_run_number = None
 
     def is_current_position_tabooed(self, position_type):
         if position_type not in ["raw", "optimized"]:
