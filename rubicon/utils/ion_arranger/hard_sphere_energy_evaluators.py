@@ -117,6 +117,29 @@ class HardSphereEnergyEvaluator(EnergyEvaluator):
                     energy += cls.overlap_energy
         return energy
 
+class OrderredLayoutEnergyEvaluator(EnergyEvaluator):
+    def taboo_current_position(self):
+        pass
+
+    overlap_energy = 5.0E3 + 1.0
+
+    def __init__(self, mol_coords, nums_fragments):
+        super(OrderredLayoutEnergyEvaluator, self).__init__(mol_coords)
+        self.nums_fragments = nums_fragments
+
+    def calc_energy(self, fragments_coords):
+        pass
+
+    @classmethod
+    def _spearsman_rank_coefficient(self, rank_y):
+        n = len(rank_y)
+        if n == 0 or n == 1:
+            return 1.0
+        rank_x = range(1, n+1)
+        d_2 = [(rx-ry)**2 for rx, ry in zip(rank_x, rank_y)]
+        spearsman = 1.0 - (6.0 * sum(d_2))/(n * (n**2 - 1))
+        return spearsman
+
 class ContactDetector(object):
     def __init__(self, mol_coords, mol_radius, fragments_atom_radius, nums_fragments, cap=0.0):
         self.mol_coords = mol_coords
