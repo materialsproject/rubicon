@@ -8,6 +8,14 @@ class TestOrderredLayoutEnergyEvaluator(TestCase):
     def test_calc_energy(self):
         pass
 
+    def test_get_frag_ranks(self):
+        frag_coords = [[[3.0, 0.0, 0.0]], [[0.0, 0.0, -.5]], [[0.0, -.0, 0.0]]]
+        ranks = OrderredLayoutEnergyEvaluator._get_frag_ranks(frag_coords)
+        self.assertEqual(ranks, [3, 1, 2])
+        frag_coords = [[[3.0, 0.0, 0.0]], [[0.0, 0.0, 15.0]], [[0.0, 2.0, 0.0]], [[0.0, 4.0, 0.0]], [[0.0, 0.0, 3.0]]]
+        ranks = OrderredLayoutEnergyEvaluator._get_frag_ranks(frag_coords)
+        self.assertEqual(ranks, [5, 2, 3, 4, 1])
+
     def test_spearsman_rank_coefficient(self):
         rank_y = [3, 1, 2]
         spearsamn = OrderredLayoutEnergyEvaluator._spearsman_rank_coefficient(rank_y)
