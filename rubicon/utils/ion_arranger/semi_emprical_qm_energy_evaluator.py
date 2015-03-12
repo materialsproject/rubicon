@@ -15,7 +15,7 @@ from rubicon.io.mopacio.custodian.mopacjob import MopacJob
 from rubicon.io.mopacio.mopacio import MopOutput, MopTask
 from rubicon.utils.ion_arranger.energy_evaluator import EnergyEvaluator
 from rubicon.utils.ion_arranger.hard_sphere_energy_evaluators import HardSphereEnergyEvaluator, AtomicRadiusUtils, \
-    ContactDetector, LargestContactGapEnergyEvaluator
+    ContactDetector, LargestContactGapEnergyEvaluator, OrderredLayoutEnergyEvaluator
 
 
 __author__ = 'xiaohuiqu'
@@ -37,6 +37,7 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
         self.contact_detector = self._construct_contact_detector(
             upper_covalent_radius_scale, upper_metal_radius_scale,
             mol_coords, ob_mol, ob_fragments, nums_fragments)
+        self.layout_order = OrderredLayoutEnergyEvaluator(mol_coords, nums_fragments)
         self.gravitation = self._construct_largest_cap_energy_evaluator(
             upper_covalent_radius_scale, upper_metal_radius_scale,
             mol_coords, ob_mol, ob_fragments, nums_fragments)
@@ -158,6 +159,9 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
         energy = self.lower_sphere.calc_energy(fragments_coords)
         if energy > HardSphereEnergyEvaluator.overlap_energy * 0.9:
             return energy + unmbrella_enhancement
+        energy = self.layout_order.calc_energy(fragments_coords)
+        if energy > self.layout_order.base_energy - 100.0:
+            return energy
         if not self.contact_detector.is_contact(fragments_coords):
             return self.gravitation.calc_energy(fragments_coords) + unmbrella_enhancement
         memorized_energy = self.query_memory_positions(fragments_coords)
