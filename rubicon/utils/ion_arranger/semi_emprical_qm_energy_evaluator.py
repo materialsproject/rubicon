@@ -67,7 +67,7 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
             os.mkdir(conformer_dir)
         mol_file_name = os.path.join(conformer_dir,
                                      "step_{}_energy_{}.xyz".format(self.best_run_number, self.best_energy))
-        self.best_mol.to("xyz", mol_file_name)
+        BabelMolAdaptor(self.best_mol).write_file(mol_file_name, file_format="xyz")
 
     def taboo_current_position(self, raw_position_only=False):
         self.tabooed_raw_positions.append(list(itertools.chain(*self.current_raw_position)))
