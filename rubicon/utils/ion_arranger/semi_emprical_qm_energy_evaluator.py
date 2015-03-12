@@ -120,6 +120,8 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
             self.memory_positions.pop()
 
     def is_raw_position_inside_best_umbrella(self, fragments_coords):
+        if self.current_best_raw_position is None:
+            return False
         current_pos = list(itertools.chain(*fragments_coords))
         distance = max([math.sqrt(sum([(x1-x2)**2 for x1, x2 in zip(c1, c2)]))
                         for c1, c2 in
