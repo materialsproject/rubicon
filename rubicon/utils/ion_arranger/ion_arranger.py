@@ -24,7 +24,8 @@ class IonPlacer():
 
 
     def __init__(self, molecule, fragments, nums_fragments, energy_evaluator,
-                 prng=None, seed=None, taboo_tolerance_ang=1.0, taboo_tolerance_particle_ratio=0.5):
+                 prng=None, seed=None, taboo_tolerance_ang=1.0, taboo_tolerance_particle_ratio=0.5,
+                 topology="ring"):
         self.prng = prng if prng else Random()
         self.seed = seed if seed else time()
         self.prng.seed(self.seed)
@@ -32,7 +33,12 @@ class IonPlacer():
         self.best = None
         self.ea = inspyred.swarm.PSO(self.prng)
         self.ea.terminator = inspyred.ec.terminators.evaluation_termination
-        self.ea.topology = inspyred.swarm.topologies.ring_topology
+        if topology == "ring":
+            self.ea.topology = inspyred.swarm.topologies.ring_topology
+        elif topology == "star":
+            self.ea.topology = inspyred.swarm.topologies.star_topology
+        else:
+            raise ValueError("only RING and STAR topology are supported")
         self.ea.observer = inspyred.ec.observers.best_observer
         self.molecule = molecule
         self.fragments = fragments
@@ -272,7 +278,10 @@ def main():
                         help="population size")
     parser.add_argument("-k", "--num_neighbours", dest="num_neighbours", type=int, default=2,
                         help="number of neighbours")
-    parser.add_argument("--force_ordered_fragment", dest="force_ordered_fragment", action="store_true")
+    parser.add_argument("--force_ordered_fragment", dest="force_ordered_fragment", action="store_true",
+                        help="set this option to keep the fragment of the same in the order of input along the X-axis")
+    parser.add_argument("--topology", dest="topology", choices=["ring", "star"], type=str, default="ring",
+                        help="the topology of the PSO information network")
     parser.add_argument("-e", "--evaluator", dest="evaluator", type=str, default="hardsphere",
                         choices=["hardsphere", "sqm"], help="Energy Evaluator")
     options = parser.parse_args()
@@ -314,7 +323,7 @@ def main():
         raise ValueError("you must specify the duplicated count for every fragment")
     placer = IonPlacer(molecule=molecule, fragments=fragments, nums_fragments=options.nums_fragments,
                        energy_evaluator=energy_evaluator, taboo_tolerance_ang=options.taboo_tolerance,
-                       taboo_tolerance_particle_ratio=options.ratio_taboo_particles)
+                       taboo_tolerance_particle_ratio=options.ratio_taboo_particles, topology=options.topology)
     placer.place(max_evaluations=options.iterations,
                  pop_size=options.size,
                  neighborhood_size=options.num_neighbours)
