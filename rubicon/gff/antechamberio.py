@@ -10,12 +10,10 @@ __author__ = 'navnidhirajput'
 import subprocess
 from pymatgen import write_mol
 import shlex
-from gff import Gff
+from gff import Gff, FFCorruptionException, correct_corrupted_frcmod_files
 from monty.io import ScratchDir
 import tempfile
-from rubicon.gff.topology import TopMol
-
-
+from rubicon.gff.topology import TopMol, TopCorruptionException, TopCorruptionException, correct_corrupted_top_files
 
 
 class AntechamberRunner():
@@ -23,6 +21,7 @@ class AntechamberRunner():
     A wrapper for AntechamberRunner software
 
     """
+
     def __init__(self, mols):
         """
         Args:
@@ -39,7 +38,6 @@ class AntechamberRunner():
         write_mol(molecule, filename)
 
 
-
     def _run_parmchk(self, filename='ANTECHAMBER_AC.AC'):
         """
         run parmchk using ANTECHAMBER_AC.AC file
@@ -48,12 +46,12 @@ class AntechamberRunner():
             filename: pdb file of the molecule
         """
         command_parmchk = (
-        'parmchk -i ' + filename + ' -f ac -o mol.frcmod -a Y')
+            'parmchk -i ' + filename + ' -f ac -o mol.frcmod -a Y')
         return_cmd = subprocess.call(shlex.split(command_parmchk))
         return return_cmd
 
 
-    def get_ff_top_mol(self,mol,filename=None):
+    def get_ff_top_mol(self, mol, filename=None):
         """
         run antechamber using pdb file then run parmchk
         to generate missing force field parameters. Store and return
@@ -68,22 +66,38 @@ class AntechamberRunner():
         """
         scratch = tempfile.gettempdir()
 
-        with ScratchDir(scratch,
-                        copy_to_current_on_exit= True) as d:
+        with ScratchDir(scratch, copy_from_current_on_enter=True,
+                        copy_to_current_on_exit=True) as d:
 
             self._convert_to_pdb(mol, 'mol.pdb')
             command = (
-            'antechamber -i ' + filename + ' -fi pdb -o ' + filename[:-4] +
-            " -fo charmm")
+                'antechamber -i ' + filename + ' -fi pdb -o ' + filename[:-4] +
+                " -fo charmm")
             return_cmd = subprocess.call(shlex.split(command))
             self.molname = filename.split('.')[0]
             self._run_parmchk()
-            top = TopMol.from_file('mol.rtf')
-            gff = Gff.from_forcefield_para('ANTECHAMBER.FRCMOD')
-            gff.read_atom_index(mol,'ANTECHAMBER_AC.AC')
-            gff.read_charges()
-            mol.add_site_property("atomname",(gff.atom_index.values()))
-        ffmol= FFmol(gff,top)
+            #if antechamber can't find parameters go to gaff_nidhi.dat
+            try:
+                 top = TopMol.from_file('mol.rtf')
+
+            except TopCorruptionException:
+                correct_corrupted_top_files('mol.rtf','gaff_nidhi.txt')
+                top = TopMol.from_file('mol.rtf')
+
+            try:
+                gff = Gff.from_forcefield_para('ANTECHAMBER.FRCMOD')
+                gff.read_atom_index(mol, 'ANTECHAMBER_AC.AC')
+                gff.read_charges()
+
+            except FFCorruptionException:
+                #gff= Gff.from_gaff_para('gaff_nidhi.txt')
+                correct_corrupted_frcmod_files('ANTECHAMBER.FRCMOD','gaff_nidhi.txt')
+                gff = Gff.from_forcefield_para('ANTECHAMBER.FRCMOD')
+                gff.read_atom_index(mol, 'ANTECHAMBER_AC.AC')
+                gff.read_charges()
+
+            mol.add_site_property("atomname", (gff.atom_index.values()))
+        ffmol = FFmol(gff, top)
         return ffmol
 
 

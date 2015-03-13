@@ -1,3 +1,4 @@
+import os
 from pymatgen import Molecule
 
 __author__ = 'navnidhirajput'
@@ -7,7 +8,7 @@ class TopMol(object):
 
 
 
-    def __init__(self,atoms,bonds,angles,dihedrals,imdihedrals,num_bonds):
+    def __init__(self,atoms,bonds,angles,dihedrals,imdihedrals,num_bonds, num_gaff_atoms, gaff_atoms):
 
         self.atoms=atoms
         self.bonds=bonds
@@ -19,9 +20,11 @@ class TopMol(object):
         self.topangleff = dict()
         self.topdihedralff = dict()
         self.topimdihedralff = dict()
+        self.num_gaff_atoms = num_gaff_atoms
+        self.gaff_atoms = gaff_atoms
 
     @classmethod
-    def from_file(cls,filename):
+    def from_file(cls,filename, continue_on_corrupt_file = False):
 
         """
         read the .rtf file created by antechamber and stores
@@ -33,12 +36,19 @@ class TopMol(object):
         angles=[]
         dihedrals=[]
         imdihedrals=[]
+        number_gaff_atoms = []
+        gaff_atoms = []
         with open(filename) as f :
             lines=f.readlines()
             for line in lines:
+                if 'need revision' in line and not continue_on_corrupt_file:
+                   raise TopCorruptionException
                 if len(line.strip())==0:
                     continue
                 token = line.split()
+                if token[0]=='MASS':
+                    gaff_atoms.append(token[1:3])
+                    number_gaff_atoms.append(token[1])
                 if token[0]=='ATOM':
                     atoms.append(token[1:3])
                 if token[0]=='BOND':
@@ -49,7 +59,9 @@ class TopMol(object):
                     dihedrals.append(token[1:5])
                 elif token[0]=='IMPH':
                     imdihedrals.append(token[1:5])
-            topology=TopMol(atoms,bonds,angles,dihedrals,imdihedrals,len(bonds))
+
+
+            topology=TopMol(atoms,bonds,angles,dihedrals,imdihedrals,len(bonds), number_gaff_atoms, gaff_atoms)
             return topology
 
 
@@ -125,6 +137,103 @@ class TopMol(object):
                 self.topimdihedralff[d1] = (
                 imdihedral_label, gff_imdihedrals[imdihedral_label])
             self.num_imdih_types = len(set(self.topimdihedralff.keys()))
+
+    @classmethod
+    def gaff_fromfile(self, filename= None):
+        """
+        read the gaff.txt file to store
+        atoms, bonds, angles, dihedrals and improper dihedrals of
+        a molecule
+        """
+        atom_section = False
+        atoms={}
+        bonds=[]
+        angles=[]
+        dihedrals=[]
+        imdihedrals=[]
+        num_gaff_atoms = []
+        gaff_atoms = []
+
+        with open(filename) as f :
+           for line in f.readlines():
+                if line.startswith('atom_name'):
+                    atom_section = True
+                    continue
+                if atom_section:
+                    if len(line.strip())==0:
+                        atom_section = False
+                        continue
+                    atom_name = line[0:2]
+                    atom_mass = line[3:9]
+                    atoms[atom_name] = atom_mass
+                if len(line.strip())==0:
+                    continue
+                token = line.split()
+                if token[0]=='ATOM':
+                    atoms.append(token[1:3])
+                if token[0]=='BOND':
+                    bonds.append(token[1:3])
+                elif token[0]=='ANGL':
+                    angles.append(token[1:4])
+                elif token[0]=='DIHE':
+                    dihedrals.append(token[1:5])
+                elif token[0]=='IMPH':
+                    imdihedrals.append(token[1:5])
+           topology=TopMol(atoms,bonds,angles,dihedrals,imdihedrals,len(bonds), num_gaff_atoms, gaff_atoms)
+           return topology
+
+
+
+
+
+class TopCorruptionException(Exception):
+    pass
+
+
+def correct_corrupted_top_files(corrupted_file = None, gaff_file = None):
+
+
+
+    rtf_lines = []
+    rtf_lines.append('{}{}'.format('* Topology File.\n','*\n'))
+
+    top = TopMol.from_file(corrupted_file, True)
+    top_gaff = TopMol.gaff_fromfile(gaff_file)
+    atom_index = 1
+
+    for x in xrange(0,len(top.atoms)):
+        if top.atoms[x][1].lower() in top_gaff.atoms.keys():
+
+            rtf_lines.append('{}  {}  {}   {}'.format('MASS',atom_index,top.atoms[x][1].lower(), top_gaff.atoms[top.atoms[x][1].lower()]))
+            rtf_lines.append('\n')
+        atom_index += 1
+    rtf_lines.append('{}{}'.format('\nRESI MOL  0.000\n','GROUP\n'))
+
+
+    for atoms in top.atoms:
+        rtf_lines.append('{}  {}  {}'.format('ATOM',atoms[0],atoms[1].lower()))
+        rtf_lines.append('\n')
+    rtf_lines.append('\n')
+
+    for bonds in top.bonds:
+        rtf_lines.append('{}  {}  {}'.format('BOND',bonds[0],bonds[1]))
+        rtf_lines.append('\n')
+
+    rtf_lines.append('\n')
+
+    for angles in top.angles:
+        rtf_lines.append('{}  {}  {}  {}'.format('ANGL',angles[0],angles[1], angles[2]))
+        rtf_lines.append('\n')
+
+    rtf_lines.append('\n')
+
+    for dihedrals in top.dihedrals:
+        rtf_lines.append('{}  {}  {}  {}  {}'.format('DIHE',dihedrals[0],dihedrals[1],dihedrals[2],dihedrals[3]))
+        rtf_lines.append('\n')
+
+
+    with open('mol.rtf', 'w') as f:
+        f.writelines(rtf_lines)
 
 
 
