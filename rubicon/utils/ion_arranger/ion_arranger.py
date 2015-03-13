@@ -1,3 +1,4 @@
+import copy
 import os
 from random import Random
 from time import time
@@ -25,7 +26,7 @@ class IonPlacer():
 
     def __init__(self, molecule, fragments, nums_fragments, energy_evaluator,
                  prng=None, seed=None, taboo_tolerance_ang=1.0, taboo_tolerance_particle_ratio=0.5,
-                 topology="ring"):
+                 topology="ring", initial_guess="breadth"):
         self.prng = prng if prng else Random()
         self.seed = seed if seed else time()
         self.prng.seed(self.seed)
@@ -39,6 +40,7 @@ class IonPlacer():
             self.ea.topology = inspyred.swarm.topologies.star_topology
         else:
             raise ValueError("only RING and STAR topology are supported")
+        self.initial_guess = initial_guess
         self.ea.observer = inspyred.ec.observers.best_observer
         self.molecule = molecule
         self.fragments = fragments
@@ -47,11 +49,25 @@ class IonPlacer():
         for frag in self.fragments:
             self.normalize_molecule(frag)
         self.bounder = self.get_bounder(self.mol_coords, self.fragments, self.nums_fragments)
+        self.max_radius = self.get_max_radius(self.mol_coords, self.fragments, self.nums_fragments)
         self.best_pymatgen_mol = None
         self.playing_time = None
         self.energy_evaluator = energy_evaluator
         self.taboo_tolerance_au = taboo_tolerance_ang * AtomicRadiusUtils.angstrom2au
         self.taboo_tolerance_particle_ratio = taboo_tolerance_particle_ratio
+
+    @classmethod
+    def get_max_radius(cls, mol_coords, fragments, nums_fragments):
+        mol_radius = max([math.sqrt(sum([x**2 for x in c]))
+                          for c in mol_coords])
+        max_radius = mol_radius
+        for frag, num_frag in zip(fragments, nums_fragments):
+            frag_coords = cls.get_mol_coords(frag)
+            frag_radius = max([math.sqrt(sum([x**2 for x in c]))
+                               for c in frag_coords])
+            if frag_radius > max_radius:
+                max_radius = frag_radius
+        return max_radius
 
     @classmethod
     def get_bounder(cls, mol_coords, fragments, nums_fragments):
@@ -144,11 +160,20 @@ class IonPlacer():
                 fragments_coords.append(self.get_mol_coords(cc))
         return fragments_coords
 
-    @staticmethod
-    def generate_conformers(random, args):
+    def generate_conformers(self, random, args):
         # generator
-        lower_bound = args['_ec'].bounder.lower_bound
-        upper_bound = args['_ec'].bounder.upper_bound
+        lower_bound = copy.deepcopy(args['_ec'].bounder.lower_bound)
+        upper_bound = copy.deepcopy(args['_ec'].bounder.upper_bound)
+        if self.initial_guess == "center":
+            fragments_atom_counts = [frag.NumAtoms() for frag in self.fragments]
+            xi = 0
+            for num_frag, num_atoms in zip(self.nums_fragments, fragments_atom_counts):
+                for i in range(num_frag):
+                    lower_bound[xi: xi+3] = [-self.max_radius] * 3
+                    upper_bound[xi: xi+3] = [self.max_radius] *3
+                    xi += 3
+                    if num_atoms > 1:
+                        xi += 2
         return [random.uniform(l, u) for l, u in zip(lower_bound, upper_bound)]
 
     def taboo_current_solution(self, coords_fitness):
@@ -282,6 +307,8 @@ def main():
                         help="set this option to keep the fragment of the same in the order of input along the X-axis")
     parser.add_argument("--topology", dest="topology", choices=["ring", "star"], type=str, default="ring",
                         help="the topology of the PSO information network")
+    parser.add_argument("--initial_guess", dest="initial_guess", choices=["breadth", "center"], default="breadth",
+                        help="where should particles should be initially put")
     parser.add_argument("-e", "--evaluator", dest="evaluator", type=str, default="hardsphere",
                         choices=["hardsphere", "sqm"], help="Energy Evaluator")
     options = parser.parse_args()
@@ -323,7 +350,8 @@ def main():
         raise ValueError("you must specify the duplicated count for every fragment")
     placer = IonPlacer(molecule=molecule, fragments=fragments, nums_fragments=options.nums_fragments,
                        energy_evaluator=energy_evaluator, taboo_tolerance_ang=options.taboo_tolerance,
-                       taboo_tolerance_particle_ratio=options.ratio_taboo_particles, topology=options.topology)
+                       taboo_tolerance_particle_ratio=options.ratio_taboo_particles, topology=options.topology,
+                       initial_guess=options.initial_guess)
     placer.place(max_evaluations=options.iterations,
                  pop_size=options.size,
                  neighborhood_size=options.num_neighbours)
