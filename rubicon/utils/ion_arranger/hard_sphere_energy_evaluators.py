@@ -161,26 +161,27 @@ class OrderredLayoutEnergyEvaluator(EnergyEvaluator):
             xs, ys, zs = zip(*frag)
             center = tuple([sum(xs)/float(natoms), sum(ys)/float(natoms), sum(zs)/float(natoms)])
             center_with_original_rank.append(tuple([center, i+1]))
-        sorted_center_with_original_rank = []
-        while len(center_with_original_rank) > 0:
-            xi, yi, zi = center_with_original_rank[0][0]
-            lowest_index = 0
-            for j in range(len(center_with_original_rank)):
-                i_lowest = True
-                xj, yj, zj = center_with_original_rank[j][0]
-                if abs(xi - xj) > grain_size:
-                    if xi > xj:
-                        i_lowest = False
-                elif abs(yi - yj) > grain_size:
-                    if yi > yj:
-                        i_lowest = False
-                elif abs(zi - zj) > grain_size:
-                    if zi > zj:
-                        i_lowest = False
-                if not i_lowest:
-                    lowest_index = j
-                    xi, yi, zi = center_with_original_rank[lowest_index][0]
-            sorted_center_with_original_rank.append(center_with_original_rank.pop(lowest_index))
+        # sorted_center_with_original_rank = []
+        # while len(center_with_original_rank) > 0:
+        #     xi, yi, zi = center_with_original_rank[0][0]
+        #     lowest_index = 0
+        #     for j in range(len(center_with_original_rank)):
+        #         i_lowest = True
+        #         xj, yj, zj = center_with_original_rank[j][0]
+        #         if abs(xi - xj) > grain_size:
+        #             if xi > xj:
+        #                 i_lowest = False
+        #         elif abs(yi - yj) > grain_size:
+        #             if yi > yj:
+        #                 i_lowest = False
+        #         elif abs(zi - zj) > grain_size:
+        #             if zi > zj:
+        #                 i_lowest = False
+        #         if not i_lowest:
+        #             lowest_index = j
+        #             xi, yi, zi = center_with_original_rank[lowest_index][0]
+        #     sorted_center_with_original_rank.append(center_with_original_rank.pop(lowest_index))
+        sorted_center_with_original_rank = sorted(center_with_original_rank, key=lambda x: x[0][0])
         original_ranks = [i for center, i in sorted_center_with_original_rank]
         cur_orig_rank = [tuple([i+1, j]) for i,j in zip(range(nfrags), original_ranks)]
         cur_orig_rank.sort(key=lambda x: x[1])
