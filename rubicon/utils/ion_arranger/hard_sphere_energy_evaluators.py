@@ -147,7 +147,6 @@ class UmbrellarForceEnergyEvaluator(EnergyEvaluator):
                 return 0.0
             else:
                 umbrella_distances.append(distance)
-        print "UMBERELLA", umbrella_distances
         energy = min(umbrella_distances)
         if energy < 0.01:
             return 0.0
