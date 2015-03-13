@@ -26,11 +26,12 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
     def __init__(self, ob_mol, ob_fragments, nums_fragments, total_charge,
                  lower_covalent_radius_scale=2.0, lower_metal_radius_scale=0.8,
                  upper_covalent_radius_scale=3.0, upper_metal_radius_scale=1.5,
-                 taboo_tolerance_ang=1.0):
+                 taboo_tolerance_ang=1.0, force_order_fragment=False):
         from rubicon.utils.ion_arranger.ion_arranger import IonPlacer
         mol_coords = IonPlacer.normalize_molecule(ob_mol)
         super(SemiEmpricalQuatumMechanicalEnergyEvaluator, self).__init__(mol_coords)
         self.total_charge = total_charge
+        self.force_ordered_fragment = force_order_fragment
         self.lower_sphere = self._construct_hardsphere_energy_evaluator(
             lower_covalent_radius_scale, lower_metal_radius_scale,
             mol_coords, ob_mol, ob_fragments, nums_fragments)
@@ -159,9 +160,10 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
         energy = self.lower_sphere.calc_energy(fragments_coords)
         if energy > HardSphereEnergyEvaluator.overlap_energy * 0.9:
             return energy + unmbrella_enhancement
-        energy = self.layout_order.calc_energy(fragments_coords)
-        if energy > self.layout_order.base_energy - 100.0:
-            return energy
+        if self.force_ordered_fragment:
+            energy = self.layout_order.calc_energy(fragments_coords)
+            if energy > self.layout_order.base_energy - 100.0:
+                return energy
         if not self.contact_detector.is_contact(fragments_coords):
             return self.gravitation.calc_energy(fragments_coords) + unmbrella_enhancement
         memorized_energy = self.query_memory_positions(fragments_coords)

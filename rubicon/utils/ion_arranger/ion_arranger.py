@@ -272,6 +272,7 @@ def main():
                         help="population size")
     parser.add_argument("-k", "--num_neighbours", dest="num_neighbours", type=int, default=2,
                         help="number of neighbours")
+    parser.add_argument("--force_ordered_fragment", dest="force_ordered_fragment", action="store_true")
     parser.add_argument("-e", "--evaluator", dest="evaluator", type=str, default="hardsphere",
                         choices=["hardsphere", "sqm"], help="Energy Evaluator")
     options = parser.parse_args()
@@ -307,7 +308,8 @@ def main():
             # noinspection PyProtectedMember
             fragments.append(BabelMolAdaptor.from_file(frag_file, file_format)._obmol)
         energy_evaluator = SemiEmpricalQuatumMechanicalEnergyEvaluator(
-            molecule, fragments, options.nums_fragments, total_charge=options.charge, taboo_tolerance_ang=options.taboo_tolerance)
+            molecule, fragments, options.nums_fragments, total_charge=options.charge,
+            taboo_tolerance_ang=options.taboo_tolerance, force_order_fragment=options.force_ordered_fragment)
     if len(fragments) != len(options.nums_fragments):
         raise ValueError("you must specify the duplicated count for every fragment")
     placer = IonPlacer(molecule=molecule, fragments=fragments, nums_fragments=options.nums_fragments,
