@@ -128,7 +128,7 @@ class OrderredLayoutEnergyEvaluator(EnergyEvaluator):
         self.nums_fragments = nums_fragments
 
     def calc_energy(self, fragments_coords):
-        perfect_energy = self.base_energy - len(fragments_coords)
+        perfect_energy = self.base_energy - len(self.nums_fragments)
         tokens = []
         start_index = 0
         for nf in self.nums_fragments:
