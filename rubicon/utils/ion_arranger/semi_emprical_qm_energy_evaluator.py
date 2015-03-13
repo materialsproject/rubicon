@@ -184,8 +184,8 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
                     self.current_best_raw_position = list(itertools.chain(*fragments_coords))
                     self.best_mol = final_mol
                     self.best_run_number = self.run_number
-                else:
-                    energy = unmbrella_taboo_energy
+            else:
+                energy = unmbrella_taboo_energy
             self.append_position_to_memory(fragments_coords, energy)
         # coarse grained energy,
         # make potential energy surface simpler
