@@ -106,7 +106,10 @@ class HardSphereEnergyEvaluator(EnergyEvaluator):
         for (coords1, rad1), (coords2, rad2) in \
                 itertools.combinations(components, 2):
             energy += self._pair_energy(coords1, rad1, coords2, rad2)
-        return energy + self.base_energy
+        if energy < 0.009:
+            return 0.0
+        else:
+            return energy + self.base_energy
 
     @classmethod
     def _pair_energy(cls, coords1, radius1, coords2, radius2):
@@ -144,7 +147,12 @@ class UmbrellarForceEnergyEvaluator(EnergyEvaluator):
                 return 0.0
             else:
                 umbrella_distances.append(distance)
-        return self.base_energy + min(umbrella_distances)
+        print "UMBERELLA", umbrella_distances
+        energy = min(umbrella_distances)
+        if energy < 0.01:
+            return 0.0
+        else:
+            return self.base_energy + min(umbrella_distances)
 
 
 class OrderredLayoutEnergyEvaluator(EnergyEvaluator):
@@ -158,7 +166,6 @@ class OrderredLayoutEnergyEvaluator(EnergyEvaluator):
         self.nums_fragments = nums_fragments
 
     def calc_energy(self, fragments_coords):
-        perfect_energy = self.base_energy - len(self.nums_fragments)
         tokens = []
         start_index = 0
         for nf in self.nums_fragments:
@@ -175,11 +182,11 @@ class OrderredLayoutEnergyEvaluator(EnergyEvaluator):
         total_spearmans = sum(spearmans_rank_coeffs)
         # positive spearmans rank coefficient means more ordered, and should
         # be prefered by negative energy, therefore, inverse the spearmans value
-        energy = self.base_energy + (-total_spearmans) + len(self.nums_fragments)
-        if abs(energy - perfect_energy) < 1.0E-8:
+        energy = (-total_spearmans) + len(self.nums_fragments)
+        if energy < 1.0E-8:
             return 0.0
         else:
-            return energy
+            return energy + self.base_energy
 
     @classmethod
     def _get_frag_ranks(cls, frag_coords):
@@ -304,7 +311,11 @@ class LargestContactGapEnergyEvaluator(EnergyEvaluator):
                 high = mid
             else:
                 low = mid
-        return ((high + low)/2.0) + self.base_energy
+        energy = (high + low)/2.0
+        if energy < 0.01:
+            return 0.0
+        else:
+            return ((high + low)/2.0) + self.base_energy
 
 
 class GravitationalEnergyEvaluator(EnergyEvaluator):

@@ -176,9 +176,9 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
                 return energy
 
         energy = self.lower_sphere.calc_energy(fragments_coords)
-        if energy > HardSphereEnergyEvaluator.overlap_energy - 100.0:
-            return energy
 
+        if energy > HardSphereEnergyEvaluator.base_energy - 100.0:
+            return energy
         if not self.contact_detector.is_contact(fragments_coords):
             return self.gravitation.calc_energy(fragments_coords)
 
