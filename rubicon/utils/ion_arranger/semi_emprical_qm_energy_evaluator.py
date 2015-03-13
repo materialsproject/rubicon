@@ -15,7 +15,7 @@ from rubicon.io.mopacio.custodian.mopacjob import MopacJob
 from rubicon.io.mopacio.mopacio import MopOutput, MopTask
 from rubicon.utils.ion_arranger.energy_evaluator import EnergyEvaluator
 from rubicon.utils.ion_arranger.hard_sphere_energy_evaluators import HardSphereEnergyEvaluator, AtomicRadiusUtils, \
-    ContactDetector, LargestContactGapEnergyEvaluator, OrderredLayoutEnergyEvaluator
+    ContactDetector, LargestContactGapEnergyEvaluator, OrderredLayoutEnergyEvaluator, UmbrellarForceEnergyEvaluator
 
 
 __author__ = 'xiaohuiqu'
@@ -62,6 +62,11 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
         self.best_energy = None
         self.best_mol = None
         self.best_run_number = None
+        self.umbrella_centers = []
+        self.umbrella = UmbrellarForceEnergyEvaluator(mol_coords, self.umbrella_centers, self.taboo_tolerance_au,
+                                                      self.best_umbrella_ratio)
+        self.arranger = None
+
 
     def save_current_best_position(self):
         conformer_dir = "conformers"
@@ -90,6 +95,7 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
             self.current_best_raw_position = None
             self.best_mol = None
             self.best_run_number = None
+            del self.umbrella_centers[:]
 
     def is_current_position_tabooed(self, position_type):
         if position_type not in ["raw", "optimized"]:
@@ -124,6 +130,7 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
             self.memory_positions.pop()
 
     def is_raw_position_inside_best_umbrella(self, fragments_coords):
+        # replaced by Umbrella force
         if self.current_best_raw_position is None:
             return False
         current_pos = list(itertools.chain(*fragments_coords))
@@ -147,25 +154,34 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
             return False
 
     def calc_energy(self, fragments_coords):
-        tabooed_energy = 10.0
-        unmbrella_taboo_energy = 10.0
+        # Energy orders:
+        # Tabooed(1.0E5) > Umbrella(7.0E4) > Layout (6.0E4) > HardSphere (5.0E4)  >
+        # gravity (4.0E4) > PM7 (-1.0E1)
+
+        tabooed_energy = 1.0E5
 
         self.current_raw_position = fragments_coords
         self.current_optimized_position = None
+
         if self.is_current_position_tabooed(position_type="raw"):
             return tabooed_energy
-        unmbrella_enhancement = 0.0
-        if self.is_raw_position_inside_best_umbrella(fragments_coords):
-            unmbrella_enhancement = -3.0
-        energy = self.lower_sphere.calc_energy(fragments_coords)
-        if energy > HardSphereEnergyEvaluator.overlap_energy * 0.9:
-            return energy + unmbrella_enhancement
+
+        umbrella_energy = self.umbrella.calc_energy(fragments_coords)
+        if umbrella_energy > self.umbrella.base_energy - 100.0:
+            return umbrella_energy
+
         if self.force_ordered_fragment:
             energy = self.layout_order.calc_energy(fragments_coords)
             if energy > self.layout_order.base_energy - 100.0:
                 return energy
+
+        energy = self.lower_sphere.calc_energy(fragments_coords)
+        if energy > HardSphereEnergyEvaluator.overlap_energy - 100.0:
+            return energy
+
         if not self.contact_detector.is_contact(fragments_coords):
-            return self.gravitation.calc_energy(fragments_coords) + unmbrella_enhancement
+            return self.gravitation.calc_energy(fragments_coords)
+
         memorized_energy = self.query_memory_positions(fragments_coords)
         if memorized_energy is not None:
             energy = memorized_energy
@@ -184,10 +200,13 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
                     self.best_energy = energy
                     self.current_best_optimized_position = final_coords
                     self.current_best_raw_position = list(itertools.chain(*fragments_coords))
+                    if len(self.umbrella_centers) == 0 and self.arranger is not None:
+                        self.arranger.clean_swarm_memory()
+                    self.umbrella_centers.append(self.current_best_raw_position)
                     self.best_mol = final_mol
                     self.best_run_number = self.run_number
             else:
-                energy = unmbrella_taboo_energy
+                energy = tabooed_energy
             self.append_position_to_memory(fragments_coords, energy)
         # coarse grained energy,
         # make potential energy surface simpler

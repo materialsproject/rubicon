@@ -86,7 +86,9 @@ class HardSphereEnergyEvaluator(EnergyEvaluator):
     def taboo_current_position(self):
         pass
 
-    overlap_energy = 1.0E4
+    base_energy = 5.0E4
+    overlap_energy = 0.01
+
 
     def __init__(self, mol_coords, mol_radius, fragments_atom_radius, nums_fragments):
         super(HardSphereEnergyEvaluator, self).__init__(mol_coords)
@@ -104,7 +106,7 @@ class HardSphereEnergyEvaluator(EnergyEvaluator):
         for (coords1, rad1), (coords2, rad2) in \
                 itertools.combinations(components, 2):
             energy += self._pair_energy(coords1, rad1, coords2, rad2)
-        return energy
+        return energy + self.base_energy
 
     @classmethod
     def _pair_energy(cls, coords1, radius1, coords2, radius2):
@@ -117,11 +119,39 @@ class HardSphereEnergyEvaluator(EnergyEvaluator):
                     energy += cls.overlap_energy
         return energy
 
+class UmbrellarForceEnergyEvaluator(EnergyEvaluator):
+    def taboo_current_position(self):
+        pass
+
+    base_energy = 7.0E4
+
+    def __init__(self, mol_coords, centers, taboo_tolerance_au, best_umbrella_ratio):
+        super(UmbrellarForceEnergyEvaluator, self).__init__(mol_coords)
+        self.centers = centers
+        self.taboo_tolerance_au = taboo_tolerance_au
+        self.best_umbrella_ratio = best_umbrella_ratio
+
+    def calc_energy(self, fragments_coords):
+        if len(self.centers) == 0:
+            return 0.0
+        umbrella_distances = []
+        for center in self.centers:
+            current_pos = list(itertools.chain(*fragments_coords))
+            distance = max([math.sqrt(sum([(x1-x2)**2 for x1, x2 in zip(c1, c2)]))
+                            for c1, c2 in
+                            zip(center, current_pos)])
+            if distance <= self.taboo_tolerance_au * self.best_umbrella_ratio:
+                return 0.0
+            else:
+                umbrella_distances.append(distance)
+        return self.base_energy + min(umbrella_distances)
+
+
 class OrderredLayoutEnergyEvaluator(EnergyEvaluator):
     def taboo_current_position(self):
         pass
 
-    base_energy = 5.0E3 + 100.0
+    base_energy = 6.0E4
 
     def __init__(self, mol_coords, nums_fragments):
         super(OrderredLayoutEnergyEvaluator, self).__init__(mol_coords)
@@ -145,7 +175,7 @@ class OrderredLayoutEnergyEvaluator(EnergyEvaluator):
         total_spearmans = sum(spearmans_rank_coeffs)
         # positive spearmans rank coefficient means more ordered, and should
         # be prefered by negative energy, therefore, inverse the spearmans value
-        energy = self.base_energy + (-total_spearmans)
+        energy = self.base_energy + (-total_spearmans) + len(self.nums_fragments)
         if abs(energy - perfect_energy) < 1.0E-8:
             return 0.0
         else:
@@ -247,6 +277,7 @@ class ContactDetector(object):
 
 
 class LargestContactGapEnergyEvaluator(EnergyEvaluator):
+    base_energy = 4.0E4
 
     def taboo_current_position(self):
         pass
@@ -273,7 +304,7 @@ class LargestContactGapEnergyEvaluator(EnergyEvaluator):
                 high = mid
             else:
                 low = mid
-        return ((high + low)/2.0)
+        return ((high + low)/2.0) + self.base_energy
 
 
 class GravitationalEnergyEvaluator(EnergyEvaluator):

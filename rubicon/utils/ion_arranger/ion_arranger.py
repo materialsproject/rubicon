@@ -176,14 +176,18 @@ class IonPlacer():
                         xi += 2
         return [random.uniform(l, u) for l, u in zip(lower_bound, upper_bound)]
 
+    def clean_swarm_memory(self):
+        self.ea._previous_population = []
+        self.ea.archive = []
+
+
     def taboo_current_solution(self, coords_fitness):
         best_fitness, best_index = self._get_best_index_and_fitness(coords_fitness)
         self.energy_evaluator.calc_energy(fragments_coords=coords_fitness[best_index][0])
         self.energy_evaluator.taboo_current_position()
 
         # clean swarm memory
-        self.ea._previous_population = []
-        self.ea.archive = []
+        self.clean_swarm_memory()
 
     def _get_best_index_and_fitness(self, coords_fitness):
         best_index = 0
