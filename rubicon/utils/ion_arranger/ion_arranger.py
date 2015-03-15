@@ -26,7 +26,7 @@ class IonPlacer():
 
     def __init__(self, molecule, fragments, nums_fragments, energy_evaluator,
                  prng=None, seed=None, taboo_tolerance_ang=1.0, taboo_tolerance_particle_ratio=0.5,
-                 topology="ring", initial_guess="breadth"):
+                 topology="ring", initial_guess="breadth", bound_setter="chain"):
         self.prng = prng if prng else Random()
         self.seed = seed if seed else time()
         self.prng.seed(self.seed)
@@ -48,7 +48,7 @@ class IonPlacer():
         self.mol_coords = self.normalize_molecule(self.molecule)
         for frag in self.fragments:
             self.normalize_molecule(frag)
-        self.bounder = self.get_bounder(self.mol_coords, self.fragments, self.nums_fragments)
+        self.bounder = self.get_bounder(self.mol_coords, self.fragments, self.nums_fragments, bound_setter=bound_setter)
         if self.initial_guess == "center":
             self.max_radius = self.get_max_radius(self.mol_coords, self.fragments, self.nums_fragments)
         elif self.initial_guess == "volume":
@@ -60,6 +60,7 @@ class IonPlacer():
         self.energy_evaluator = energy_evaluator
         self.taboo_tolerance_au = taboo_tolerance_ang * AtomicRadiusUtils.angstrom2au
         self.taboo_tolerance_particle_ratio = taboo_tolerance_particle_ratio
+        self.bound_setter = bound_setter
 
     @classmethod
     def get_max_radius(cls, mol_coords, fragments, nums_fragments):
@@ -95,31 +96,49 @@ class IonPlacer():
 
 
     @classmethod
-    def get_bounder(cls, mol_coords, fragments, nums_fragments):
+    def get_bounder(cls, mol_coords, fragments, nums_fragments, bound_setter):
         lower_bound = []
         upper_bound = []
-        frag_dimensions = []
-        mol_radius = max([math.sqrt(sum([x**2 for x in c]))
-                          for c in mol_coords])
-        frag_dimensions.append(tuple([mol_radius, 1]))
-        frag_atom_counts = []
-        for frag, num_frag in zip(fragments, nums_fragments):
-            num_atoms = frag.NumAtoms()
-            frag_coords = cls.get_mol_coords(frag)
-            frag_radius = max([math.sqrt(sum([x**2 for x in c]))
-                               for c in frag_coords])
-            frag_dimensions.append(tuple([frag_radius, num_frag]))
-            frag_atom_counts.append(num_atoms)
-        max_length = 2 * sum([r*n for r, n in frag_dimensions])
-        x_min = max_length + 5.0 * sum(nums_fragments)
-        for num_frag, num_atoms in zip(nums_fragments, frag_atom_counts):
-            single_frag_lower_bound = [-x_min] * 3
-            single_frag_upper_bound = [x_min] * 3
-            if num_atoms > 1:
-                single_frag_lower_bound.extend([0.0, -math.pi])
-                single_frag_upper_bound.extend([math.pi, math.pi])
-            lower_bound.extend(single_frag_lower_bound * num_frag)
-            upper_bound.extend(single_frag_upper_bound * num_frag)
+        if bound_setter == "chain":
+            frag_dimensions = []
+            mol_radius = max([math.sqrt(sum([x**2 for x in c]))
+                              for c in mol_coords])
+            frag_dimensions.append(tuple([mol_radius, 1]))
+            frag_atom_counts = []
+            for frag, num_frag in zip(fragments, nums_fragments):
+                num_atoms = frag.NumAtoms()
+                frag_coords = cls.get_mol_coords(frag)
+                frag_radius = max([math.sqrt(sum([x**2 for x in c]))
+                                   for c in frag_coords])
+                frag_dimensions.append(tuple([frag_radius, num_frag]))
+                frag_atom_counts.append(num_atoms)
+            max_length = 2 * sum([r*n for r, n in frag_dimensions])
+            x_min = max_length + 5.0 * sum(nums_fragments)
+            for num_frag, num_atoms in zip(nums_fragments, frag_atom_counts):
+                single_frag_lower_bound = [-x_min] * 3
+                single_frag_upper_bound = [x_min] * 3
+                if num_atoms > 1:
+                    single_frag_lower_bound.extend([0.0, -math.pi])
+                    single_frag_upper_bound.extend([math.pi, math.pi])
+                lower_bound.extend(single_frag_lower_bound * num_frag)
+                upper_bound.extend(single_frag_upper_bound * num_frag)
+        elif bound_setter == "volume":
+            margin = 3.0
+            super_mol_radius = cls.get_equivalent_radius(mol_coords, fragments, nums_fragments) + margin
+            frag_atom_counts = []
+            for frag in fragments:
+                num_atoms = frag.NumAtoms()
+                frag_atom_counts.append(num_atoms)
+            for num_frag, num_atoms in zip(nums_fragments, frag_atom_counts):
+                single_frag_lower_bound = [-super_mol_radius] * 3
+                single_frag_upper_bound = [super_mol_radius] * 3
+                if num_atoms > 1:
+                    single_frag_lower_bound.extend([0.0, -math.pi])
+                    single_frag_upper_bound.extend([math.pi, math.pi])
+                lower_bound.extend(single_frag_lower_bound * num_frag)
+                upper_bound.extend(single_frag_upper_bound * num_frag)
+        else:
+            raise ValueError("only chain and volume bound setter is supported")
         bounder = inspyred.ec.Bounder(lower_bound, upper_bound)
         return bounder
 
@@ -336,8 +355,11 @@ def main():
                         help="set this option to keep the fragment of the same in the order of input along the X-axis")
     parser.add_argument("--topology", dest="topology", choices=["ring", "star"], type=str, default="ring",
                         help="the topology of the PSO information network")
-    parser.add_argument("--initial_guess", dest="initial_guess", choices=["breadth", "center", "volume"], default="breadth",
+    parser.add_argument("--initial_guess", dest="initial_guess", choices=["breadth", "center", "volume"],
+                        default="breadth",
                         help="where should particles should be initially put")
+    parser.add_argument("--bound_setter", dest="bound_setter", choices=["chain", "volume"], default="chain",
+                        help="method to set the bound conditions of PSO")
     parser.add_argument("-e", "--evaluator", dest="evaluator", type=str, default="hardsphere",
                         choices=["hardsphere", "sqm"], help="Energy Evaluator")
     options = parser.parse_args()
@@ -374,13 +396,14 @@ def main():
             fragments.append(BabelMolAdaptor.from_file(frag_file, file_format)._obmol)
         energy_evaluator = SemiEmpricalQuatumMechanicalEnergyEvaluator(
             molecule, fragments, options.nums_fragments, total_charge=options.charge,
-            taboo_tolerance_ang=options.taboo_tolerance, force_order_fragment=options.force_ordered_fragment)
+            taboo_tolerance_ang=options.taboo_tolerance, force_order_fragment=options.force_ordered_fragment,
+            bound_setter=options.bound_setter)
     if len(fragments) != len(options.nums_fragments):
         raise ValueError("you must specify the duplicated count for every fragment")
     placer = IonPlacer(molecule=molecule, fragments=fragments, nums_fragments=options.nums_fragments,
                        energy_evaluator=energy_evaluator, taboo_tolerance_ang=options.taboo_tolerance,
                        taboo_tolerance_particle_ratio=options.ratio_taboo_particles, topology=options.topology,
-                       initial_guess=options.initial_guess)
+                       initial_guess=options.initial_guess, bound_setter=options.bound_setter)
     energy_evaluator.arranger = placer
     placer.place(max_evaluations=options.iterations,
                  pop_size=options.size,

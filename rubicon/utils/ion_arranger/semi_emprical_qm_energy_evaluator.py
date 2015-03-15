@@ -26,7 +26,7 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
     def __init__(self, ob_mol, ob_fragments, nums_fragments, total_charge,
                  lower_covalent_radius_scale=2.0, lower_metal_radius_scale=0.8,
                  upper_covalent_radius_scale=3.0, upper_metal_radius_scale=1.5,
-                 taboo_tolerance_ang=1.0, force_order_fragment=False):
+                 taboo_tolerance_ang=1.0, force_order_fragment=False, bound_setter="chain"):
         from rubicon.utils.ion_arranger.ion_arranger import IonPlacer
         mol_coords = IonPlacer.normalize_molecule(ob_mol)
         super(SemiEmpricalQuatumMechanicalEnergyEvaluator, self).__init__(mol_coords)
@@ -41,7 +41,7 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
         self.layout_order = OrderredLayoutEnergyEvaluator(mol_coords, nums_fragments)
         self.gravitation = self._construct_largest_cap_energy_evaluator(
             upper_covalent_radius_scale, upper_metal_radius_scale,
-            mol_coords, ob_mol, ob_fragments, nums_fragments)
+            mol_coords, ob_mol, ob_fragments, nums_fragments, bound_setter=bound_setter)
         self.mol_species = IonPlacer.get_mol_species(ob_mol)
         self.fragments_species = [IonPlacer.get_mol_species(frag) for frag in ob_fragments]
         self.ob_fragments = ob_fragments
@@ -278,12 +278,13 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
 
     @staticmethod
     def _construct_largest_cap_energy_evaluator(covalent_radius_scale, metal_radius_scale,
-                                                mol_coords, ob_mol, ob_fragments, nums_fragments):
+                                                mol_coords, ob_mol, ob_fragments, nums_fragments,
+                                                bound_setter="chain"):
         rad_util = AtomicRadiusUtils(covalent_radius_scale, metal_radius_scale)
         mol_radius = rad_util.get_radius(ob_mol)
         fragments_atom_radius = [rad_util.get_radius(frag) for frag in ob_fragments]
         from rubicon.utils.ion_arranger.ion_arranger import IonPlacer
-        bounder = IonPlacer.get_bounder(mol_coords, ob_fragments, nums_fragments)
+        bounder = IonPlacer.get_bounder(mol_coords, ob_fragments, nums_fragments, bound_setter)
         max_cap = max(bounder.upper_bound) * 2.0 / AtomicRadiusUtils.angstrom2au
         evaluator = LargestContactGapEnergyEvaluator(
             mol_coords, mol_radius, fragments_atom_radius, nums_fragments, max_cap, threshold=0.01)
