@@ -356,6 +356,7 @@ def main():
                        energy_evaluator=energy_evaluator, taboo_tolerance_ang=options.taboo_tolerance,
                        taboo_tolerance_particle_ratio=options.ratio_taboo_particles, topology=options.topology,
                        initial_guess=options.initial_guess)
+    energy_evaluator.arranger = placer
     placer.place(max_evaluations=options.iterations,
                  pop_size=options.size,
                  neighborhood_size=options.num_neighbours)
