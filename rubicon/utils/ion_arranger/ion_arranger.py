@@ -49,7 +49,12 @@ class IonPlacer():
         for frag in self.fragments:
             self.normalize_molecule(frag)
         self.bounder = self.get_bounder(self.mol_coords, self.fragments, self.nums_fragments)
-        self.max_radius = self.get_max_radius(self.mol_coords, self.fragments, self.nums_fragments)
+        if self.initial_guess == "center":
+            self.max_radius = self.get_max_radius(self.mol_coords, self.fragments, self.nums_fragments)
+        elif self.initial_guess == "volume":
+            self.max_radius = self.get_equivalent_radius(self.mol_coords, self.fragments, self.nums_fragments)
+        else:
+            self.max_radius = None
         self.best_pymatgen_mol = None
         self.playing_time = None
         self.energy_evaluator = energy_evaluator
@@ -68,6 +73,26 @@ class IonPlacer():
             if frag_radius > max_radius:
                 max_radius = frag_radius
         return max_radius
+
+    @classmethod
+    def get_equivalent_radius(cls, mol_coords, fragments, nums_fragments):
+        extra_atom_radius = 1.5
+        total_volume = 0.0
+        mol_radius = max([math.sqrt(sum([x**2 for x in c]))
+                          for c in mol_coords])
+        safe_radius = mol_radius + extra_atom_radius
+        mol_volume = (4.0/3.0) * math.pi * (safe_radius ** 3)
+        total_volume += mol_volume
+        for frag, num_frag in zip(fragments, nums_fragments):
+            frag_coords = cls.get_mol_coords(frag)
+            frag_radius = max([math.sqrt(sum([x**2 for x in c]))
+                               for c in frag_coords])
+            safe_radius = frag_radius + extra_atom_radius
+            frag_volume = (4.0/3.0) * math.pi * (safe_radius ** 3)
+            total_volume += frag_volume * num_frag
+        equivalent_radius = (total_volume * (3.0/4.0) / math.pi) ** (1.0/3.0)
+        return equivalent_radius
+
 
     @classmethod
     def get_bounder(cls, mol_coords, fragments, nums_fragments):
@@ -311,7 +336,7 @@ def main():
                         help="set this option to keep the fragment of the same in the order of input along the X-axis")
     parser.add_argument("--topology", dest="topology", choices=["ring", "star"], type=str, default="ring",
                         help="the topology of the PSO information network")
-    parser.add_argument("--initial_guess", dest="initial_guess", choices=["breadth", "center"], default="breadth",
+    parser.add_argument("--initial_guess", dest="initial_guess", choices=["breadth", "center", "volume"], default="breadth",
                         help="where should particles should be initially put")
     parser.add_argument("-e", "--evaluator", dest="evaluator", type=str, default="hardsphere",
                         choices=["hardsphere", "sqm"], help="Energy Evaluator")
