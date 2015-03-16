@@ -63,6 +63,7 @@ class IonPlacer():
         self.taboo_tolerance_particle_ratio = taboo_tolerance_particle_ratio
         self.bound_setter = bound_setter
         self.always_write_best = always_write_best
+        self.reevaluate_fitness = False
 
     def fitness_observer(self, population, num_generations, num_evaluations, args):
         current_fitness = [p.fitness for p in population]
@@ -235,6 +236,7 @@ class IonPlacer():
     def clean_swarm_memory(self):
         self.ea._previous_population = []
         self.ea.archive = []
+        self.reevaluate_fitness = True
 
 
     def taboo_current_solution(self, coords_fitness):
@@ -291,6 +293,9 @@ class IonPlacer():
         if self.always_write_best:
             best_fitness, best_index = self._get_best_index_and_fitness(coords_fitness)
             self.write_structure(candidates[best_index], "current_best.xyz")
+        if self.reevaluate_fitness:
+            self.reevaluate_fitness = False
+            fitness = self.evaluate_conformers(candidates, args)
         return fitness
 
     def write_structure(self, candidate, filename="result.xyz"):
