@@ -139,13 +139,14 @@ class UmbrellarForceEnergyEvaluator(EnergyEvaluator):
         umbrella_distances = []
         for center in self.centers:
             current_pos = list(itertools.chain(*fragments_coords))
-            distance = max([math.sqrt(sum([(x1-x2)**2 for x1, x2 in zip(c1, c2)]))
-                            for c1, c2 in
-                            zip(center, current_pos)])
-            if distance <= self.umbrella_radius:
+            atom_distances = [math.sqrt(sum([(x1-x2)**2 for x1, x2 in zip(c1, c2)]))
+                              for c1, c2 in
+                              zip(center, current_pos)]
+            rmsd_distance = math.sqrt(sum(d**2 for d in atom_distances)/len(atom_distances))
+            if rmsd_distance <= self.umbrella_radius:
                 return 0.0
             else:
-                umbrella_distances.append(distance)
+                umbrella_distances.append(rmsd_distance)
         energy = min(umbrella_distances)
         if energy < 0.01:
             return 0.0
