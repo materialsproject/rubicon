@@ -265,6 +265,10 @@ class IonPlacer():
         else:
             return False
 
+    @classmethod
+    def print_fitness(cls, fitness):
+        short_fitness = [round(x, 2) for x in fitness]
+        print "FITNESS", short_fitness
 
     # noinspection PyUnusedLocal
     def evaluate_conformers(self, candidates, args):
