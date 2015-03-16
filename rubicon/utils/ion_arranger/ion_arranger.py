@@ -286,6 +286,7 @@ class IonPlacer():
         if self.always_write_best:
             best_fitness, best_index = self._get_best_index_and_fitness(coords_fitness)
             self.write_structure(candidates[best_index], "current_best.xyz")
+        self.print_fitness(fitness)
         return fitness
 
     def write_structure(self, candidate, filename="result.xyz"):

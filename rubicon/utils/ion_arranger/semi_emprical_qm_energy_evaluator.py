@@ -169,7 +169,7 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
             umbrella_coords = list(itertools.chain(*fragments_coords))
             self.sqm_umbrella_centers.append(umbrella_coords)
             self.smallest_gap = current_gap
-        self.gap_umbrella.umbrella_radius = umbrella_radius
+            self.gap_umbrella.umbrella_radius = umbrella_radius
 
 
     def calc_energy(self, fragments_coords):
