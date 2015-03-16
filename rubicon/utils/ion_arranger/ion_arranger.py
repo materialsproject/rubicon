@@ -12,6 +12,7 @@ from pymatgen.io.babelio import BabelMolAdaptor
 from pymatgen.io.qchemio import QcOutput
 from pymatgen.io.smartio import write_mol
 import numpy as np
+import simplerandom.random as srr
 
 from rubicon.utils.ion_arranger.hard_sphere_energy_evaluators import HardSphereElectrostaticEnergyEvaluator, \
     AtomicRadiusUtils
@@ -25,9 +26,14 @@ class IonPlacer():
 
 
     def __init__(self, molecule, fragments, nums_fragments, energy_evaluator,
-                 prng=None, random_seed=None, taboo_tolerance_ang=1.0, taboo_tolerance_particle_ratio=0.5,
-                 topology="ring", initial_guess="breadth", bound_setter="chain", always_write_best=False,):
-        self.prng = prng if prng else Random()
+                 prng="kiss", random_seed=None, taboo_tolerance_ang=1.0, taboo_tolerance_particle_ratio=0.5,
+                 topology="ring", initial_guess="breadth", bound_setter="chain", always_write_best=False):
+        if prng == "kiss":
+            self.prng = srr.KISS()
+        elif prng == "python":
+            self.prng = Random()
+        else:
+            raise Exception("Random number generator is not supported")
         self.seed = random_seed if random_seed else int(time())
         self.prng.seed(self.seed)
         print "Random Seed:", self.seed
