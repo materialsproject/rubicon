@@ -331,7 +331,11 @@ class IonPlacer():
                                         bounder=self.bounder,
                                         maximize=False,
                                         max_evaluations=max_evaluations,
-                                        neighborhood_size=neighborhood_size)
+                                        neighborhood_size=neighborhood_size,
+
+                                        inertia=0.721,
+                                        cognitive_rate=1.193,
+                                        social_rate=1.193)
         self.best = max(self.final_pop)
         # max means best, not necessarily smallest
         self.write_structure(self.best.candidate, filename="result.xyz")
