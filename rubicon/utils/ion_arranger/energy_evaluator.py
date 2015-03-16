@@ -17,5 +17,5 @@ class EnergyEvaluator(object):
 
 
     @abstractmethod
-    def calc_energy(self, cation_coords, anion_coords):
+    def calc_energy(self, fragments_coords):
         pass

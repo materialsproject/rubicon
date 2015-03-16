@@ -26,28 +26,31 @@ class TestLargestContactGapEnergyEvaluator(TestCase):
         pymatgen_tfsi = tfsi_qcout.data[0]["molecules"][-1]
         # noinspection PyProtectedMember
         tfsi_obmol = BabelMolAdaptor(pymatgen_tfsi)._obmol
+        fragments = [sodium_obmol, tfsi_obmol]
+        nums_fragments = [1, 1]
         self.acetoxyq_natfsi_placer = IonPlacer(
-            acetoxyq_obmol, sodium_obmol, tfsi_obmol, 1, 1, None)
+            acetoxyq_obmol, fragments, nums_fragments, None)
         rad_util = AtomicRadiusUtils(covalent_radius_scale=3.0, metal_radius_scale=1.5)
         mol_radius = rad_util.get_radius(acetoxyq_obmol)
         cation_radius = rad_util.get_radius(sodium_obmol)
         anion_radius = rad_util.get_radius(tfsi_obmol)
         mol_coords = IonPlacer.normalize_molecule(acetoxyq_obmol)
-        bounder = IonPlacer.get_bounder(mol_coords, sodium_obmol, tfsi_obmol, 1, 1)
+        bounder = IonPlacer.get_bounder(mol_coords, fragments, nums_fragments)
         max_cap = max(bounder.upper_bound) / AtomicRadiusUtils.angstrom2au
+        fragments_atom_radius = [cation_radius, anion_radius]
         self.evaluator = LargestContactGapEnergyEvaluator(
-            mol_coords, mol_radius, cation_radius, anion_radius, max_cap, threshold=0.01)
+            mol_coords, mol_radius,fragments_atom_radius, nums_fragments, max_cap, threshold=0.01)
 
     def test_calc_energy(self):
         c = [-0.0, 0.0, 0.0, 20.0, 0.0, 0.0, 1.0, 2.0]
-        cation_coords, anion_coords = self.acetoxyq_natfsi_placer.decode_solution(c)
-        cap = self.evaluator.calc_energy(cation_coords, anion_coords)
+        fragments_coords = self.acetoxyq_natfsi_placer.decode_solution(c)
+        cap = self.evaluator.calc_energy(fragments_coords)
         self.assertAlmostEqual(cap, 1.92, 1)
         c = [-20.0, 0.0, 0.0, 20.0, 0.0, 0.0, 1.0, 2.0]
-        cation_coords, anion_coords = self.acetoxyq_natfsi_placer.decode_solution(c)
-        cap = self.evaluator.calc_energy(cation_coords, anion_coords)
+        fragments_coords = self.acetoxyq_natfsi_placer.decode_solution(c)
+        cap = self.evaluator.calc_energy(fragments_coords)
         self.assertAlmostEqual(cap, 4.64, 1)
         c = [-10.0, 0.0, 0.0, 30.0, 0.0, 0.0, 1.0, 2.0]
-        cation_coords, anion_coords = self.acetoxyq_natfsi_placer.decode_solution(c)
-        cap = self.evaluator.calc_energy(cation_coords, anion_coords)
+        fragments_coords = self.acetoxyq_natfsi_placer.decode_solution(c)
+        cap = self.evaluator.calc_energy(fragments_coords)
         self.assertAlmostEqual(cap, 11.71, 1)
