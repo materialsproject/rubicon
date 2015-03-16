@@ -16,8 +16,7 @@ real, intent(in)	:: maxr
 integer, dimension(0:numbins-1), intent(out)	:: g1
 real	:: dx,dy,dz
 real	:: r
-integer	:: ind
-integer	:: counter	
+integer	:: ind	
 	if(mol1==mol2) then
 		do i=1,nummol-1
 			if (moltype(i)==mol1) then
@@ -33,7 +32,6 @@ integer	:: counter
 						if (r<=maxr+3*binsize/2) then
 							ind = nint(r/binsize)-1
 							g1(ind)=g1(ind)+2
-							counter = counter+2
 						end if
 					end if
 				end do
@@ -52,8 +50,10 @@ integer	:: counter
 						dy=dy-Ly*float(nint(dy/Ly))
 						dz=dz-Lz*float(nint(dz/Lz))
 						r=sqrt(dx**2+dy**2+dz**2)
-						ind = nint(r/binsize)-1
-						g1(ind)=g1(ind)+1
+						if (r<=maxr+3*binsize/2) then
+							ind = nint(r/binsize)-1
+							g1(ind)=g1(ind)+1
+						end if
 					end if
 				end do
 			end if
