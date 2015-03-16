@@ -25,11 +25,12 @@ class IonPlacer():
 
 
     def __init__(self, molecule, fragments, nums_fragments, energy_evaluator,
-                 prng=None, seed=None, taboo_tolerance_ang=1.0, taboo_tolerance_particle_ratio=0.5,
-                 topology="ring", initial_guess="breadth", bound_setter="chain", always_write_best=False):
+                 prng=None, random_seed=None, taboo_tolerance_ang=1.0, taboo_tolerance_particle_ratio=0.5,
+                 topology="ring", initial_guess="breadth", bound_setter="chain", always_write_best=False,):
         self.prng = prng if prng else Random()
-        self.seed = seed if seed else time()
+        self.seed = random_seed if random_seed else int(time())
         self.prng.seed(self.seed)
+        print "Random Seed:", self.seed
         self.final_pop = None
         self.best = None
         self.ea = inspyred.swarm.PSO(self.prng)
@@ -370,6 +371,8 @@ def main():
                         help="method to set the bound conditions of PSO")
     parser.add_argument("--always_write_best", dest="always_write_best", action="store_true",
                         help="enable this option to output the best structure at every iteration")
+    parser.add_argument("--random_seed", dest="random_seed", default=None, type=int,
+                        help="random seed for PSO, an integer is expected")
     parser.add_argument("-e", "--evaluator", dest="evaluator", type=str, default="hardsphere",
                         choices=["hardsphere", "sqm"], help="Energy Evaluator")
     options = parser.parse_args()
@@ -414,7 +417,7 @@ def main():
                        energy_evaluator=energy_evaluator, taboo_tolerance_ang=options.taboo_tolerance,
                        taboo_tolerance_particle_ratio=options.ratio_taboo_particles, topology=options.topology,
                        initial_guess=options.initial_guess, bound_setter=options.bound_setter,
-                       always_write_best=options.always_write_best)
+                       always_write_best=options.always_write_best, random_seed=options.random_seed)
     energy_evaluator.arranger = placer
     placer.place(max_evaluations=options.iterations,
                  pop_size=options.size,
