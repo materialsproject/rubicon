@@ -284,6 +284,7 @@ class ContactDetector(object):
 
 class LargestContactGapEnergyEvaluator(EnergyEvaluator):
     base_energy = 4.0E4
+    grain_size = 0.3
 
     def taboo_current_position(self):
         pass
@@ -293,6 +294,14 @@ class LargestContactGapEnergyEvaluator(EnergyEvaluator):
         self.max_cap = max_cap * AtomicRadiusUtils.angstrom2au
         self.threshold = threshold
         self.contact_detector = ContactDetector(mol_coords, mol_radius, fragments_atom_radius, nums_fragments, cap=0.0)
+
+    @classmethod
+    def _coarse_grain_energy(cls, energy):
+        decimal_places = -int(math.floor(math.log10(cls.grain_size)))
+        folds = round(cls.grain_size / (10.0 ** -decimal_places), 0)
+        coarse_grained_energy = round(energy/folds, decimal_places) * folds
+        return coarse_grained_energy
+
 
     def calc_energy(self, fragments_coords):
         low = 0.0
@@ -311,7 +320,8 @@ class LargestContactGapEnergyEvaluator(EnergyEvaluator):
             else:
                 low = mid
         energy = (high + low)/2.0
-        if energy < 0.01:
+        energy = self._coarse_grain_energy(energy)
+        if energy < self.grain_size * 0.5:
             return 0.0
         else:
             return ((high + low)/2.0) + self.base_energy

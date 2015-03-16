@@ -180,7 +180,9 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
         if energy > HardSphereEnergyEvaluator.base_energy - 100.0:
             return energy
         if not self.contact_detector.is_contact(fragments_coords):
-            return self.gravitation.calc_energy(fragments_coords)
+            energy = self.gravitation.calc_energy(fragments_coords)
+            if energy > HardSphereEnergyEvaluator.base_energy - 100.0:
+                return energy
 
         memorized_energy = self.query_memory_positions(fragments_coords)
         if memorized_energy is not None:
