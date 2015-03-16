@@ -29,7 +29,7 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
                  taboo_tolerance_ang=1.0, force_order_fragment=False, bound_setter="chain"):
         from rubicon.utils.ion_arranger.ion_arranger import IonPlacer
         self.mol_coords = IonPlacer.normalize_molecule(ob_mol)
-        super(SemiEmpricalQuatumMechanicalEnergyEvaluator, self).__init__(mol_coords)
+        super(SemiEmpricalQuatumMechanicalEnergyEvaluator, self).__init__(self.mol_coords)
         self.total_charge = total_charge
         self.force_ordered_fragment = force_order_fragment
         self.lower_sphere = self._construct_hardsphere_energy_evaluator(
@@ -38,7 +38,7 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
         self.contact_detector = self._construct_contact_detector(
             upper_covalent_radius_scale, upper_metal_radius_scale,
             self.mol_coords, ob_mol, ob_fragments, nums_fragments)
-        self.layout_order = OrderredLayoutEnergyEvaluator(mol_coords, nums_fragments)
+        self.layout_order = OrderredLayoutEnergyEvaluator(self.mol_coords, nums_fragments)
         self.gravitation = self._construct_largest_cap_energy_evaluator(
             upper_covalent_radius_scale, upper_metal_radius_scale,
             self.mol_coords, ob_mol, ob_fragments, nums_fragments, bound_setter=bound_setter)
