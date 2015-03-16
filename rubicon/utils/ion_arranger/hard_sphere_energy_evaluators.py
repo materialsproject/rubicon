@@ -324,7 +324,7 @@ class LargestContactGapEnergyEvaluator(EnergyEvaluator):
         if energy < self.grain_size * 0.5:
             return 0.0
         else:
-            return ((high + low)/2.0) + self.base_energy
+            return energy + self.base_energy
 
 
 class GravitationalEnergyEvaluator(EnergyEvaluator):
