@@ -26,7 +26,7 @@ class IonPlacer():
 
     def __init__(self, molecule, fragments, nums_fragments, energy_evaluator,
                  prng=None, seed=None, taboo_tolerance_ang=1.0, taboo_tolerance_particle_ratio=0.5,
-                 topology="ring", initial_guess="breadth", bound_setter="chain"):
+                 topology="ring", initial_guess="breadth", bound_setter="chain", always_write_best=False):
         self.prng = prng if prng else Random()
         self.seed = seed if seed else time()
         self.prng.seed(self.seed)
@@ -61,6 +61,7 @@ class IonPlacer():
         self.taboo_tolerance_au = taboo_tolerance_ang * AtomicRadiusUtils.angstrom2au
         self.taboo_tolerance_particle_ratio = taboo_tolerance_particle_ratio
         self.bound_setter = bound_setter
+        self.always_write_best = always_write_best
 
     @classmethod
     def get_max_radius(cls, mol_coords, fragments, nums_fragments):
@@ -277,7 +278,28 @@ class IonPlacer():
         coords_fitness = zip(all_coords, fitness)
         if self.is_conformer_located(coords_fitness):
             self.taboo_current_solution(coords_fitness)
+        if self.always_write_best:
+            best_fitness, best_index = self._get_best_index_and_fitness(coords_fitness)
+            self.write_structure(candidates[best_index], "current_best.xyz")
         return fitness
+
+    def write_structure(self, candidate, filename="result.xyz"):
+        fragments_coords = self.decode_solution(candidate)
+        mol_elements = self.get_mol_species(self.molecule)
+        fragments_elements = []
+        for frag, num_frag in zip(self.fragments, self.nums_fragments):
+            fragments_elements.extend([self.get_mol_species(frag)] * num_frag)
+        species = []
+        coords_au = []
+        species.extend(mol_elements)
+        coords_au.extend(self.mol_coords)
+        for elements, c in zip(fragments_elements,fragments_coords):
+            species.extend(elements)
+            coords_au.extend(c)
+        coords_ang = [[x / AtomicRadiusUtils.angstrom2au for x in c] for c in coords_au]
+        pmg_mol = Molecule(species, coords_ang)
+        file_format = os.path.splitext(filename)[1][1:]
+        pmg_mol.to(file_format, filename)
 
     def place(self, max_evaluations=30000, pop_size=100, neighborhood_size=5):
         t1 = time()
@@ -291,21 +313,7 @@ class IonPlacer():
                                         neighborhood_size=neighborhood_size)
         self.best = max(self.final_pop)
         # max means best, not necessarily smallest
-        best_fragments_coords = self.decode_solution(
-            self.best.candidate)
-        mol_elements = self.get_mol_species(self.molecule)
-        fragments_elements = []
-        for frag, num_frag in zip(self.fragments, self.nums_fragments):
-            fragments_elements.extend([self.get_mol_species(frag)]*num_frag)
-        species = []
-        coords_au = []
-        species.extend(mol_elements)
-        coords_au.extend(self.mol_coords)
-        for elements, c in zip(fragments_elements, best_fragments_coords):
-            species.extend(elements)
-            coords_au.extend(c)
-        coords_ang = [[x/AtomicRadiusUtils.angstrom2au for x in c] for c in coords_au]
-        self.best_pymatgen_mol = Molecule(species, coords_ang)
+        self.write_structure(self.best.candidate, filename="result.xyz")
         t2 = time()
         self.playing_time = t2 - t1
         return self.best_pymatgen_mol
@@ -360,6 +368,8 @@ def main():
                         help="where should particles should be initially put")
     parser.add_argument("--bound_setter", dest="bound_setter", choices=["chain", "volume"], default="chain",
                         help="method to set the bound conditions of PSO")
+    parser.add_argument("--always_write_best", dest="always_write_best", action="store_true",
+                        help="enable this option to output the best structure at every iteration")
     parser.add_argument("-e", "--evaluator", dest="evaluator", type=str, default="hardsphere",
                         choices=["hardsphere", "sqm"], help="Energy Evaluator")
     options = parser.parse_args()
@@ -403,7 +413,8 @@ def main():
     placer = IonPlacer(molecule=molecule, fragments=fragments, nums_fragments=options.nums_fragments,
                        energy_evaluator=energy_evaluator, taboo_tolerance_ang=options.taboo_tolerance,
                        taboo_tolerance_particle_ratio=options.ratio_taboo_particles, topology=options.topology,
-                       initial_guess=options.initial_guess, bound_setter=options.bound_setter)
+                       initial_guess=options.initial_guess, bound_setter=options.bound_setter,
+                       always_write_best=options.always_write_best)
     energy_evaluator.arranger = placer
     placer.place(max_evaluations=options.iterations,
                  pop_size=options.size,
@@ -411,7 +422,6 @@ def main():
     print 'It took {:.1f} seconds to place the salt'.format(placer
                                                             .playing_time)
 
-    placer.best_pymatgen_mol.to("xyz", options.outputfile)
 
 if __name__ == '__main__':
     main()
