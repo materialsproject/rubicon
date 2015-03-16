@@ -318,23 +318,29 @@ class ContactGapRMSDEnergyEvaluator(EnergyEvaluator):
         fragments.extend(zip(fragments_coords, self.fragments_atom_radius))
         fragments = [(c, r, i) for i, (c, r) in enumerate(fragments)]
         mol_gaps = []
-        frag_pair = itertools.combinations(fragments, r=2)
-        for p in frag_pair:
-            ((c1s, r1s, i1), (c2s, r2s, i2)) = p
-            contact = False
-            atom_gaps = []
-            for (c1, r1), (c2, r2) in itertools.product(zip(c1s, r1s), zip(c2s, r2s)):
-                distance = math.sqrt(sum([(x1-x2)**2 for x1, x2
-                                          in zip(c1, c2)]))
-                if distance <= r1 + r2 + self.cap:
-                    contact = True
+        for c1s, r1s, i1 in fragments:
+            min_frag1_gap = 9999999999.9
+            nearest_frag_index = -1
+            for c2s, r2s, i2 in fragments:
+                if i1 == i2:
+                    continue
+                contact = False
+                for (c1, r1), (c2, r2) in itertools.product(zip(c1s, r1s), zip(c2s, r2s)):
+                    distance = math.sqrt(sum([(x1-x2)**2 for x1, x2
+                                              in zip(c1, c2)]))
+                    if distance <= r1 + r2 + self.cap:
+                        contact = True
+                        break
+                    else:
+                        cur_gap = distance - (r1 + r2 + self.cap)
+                        if cur_gap < min_frag1_gap:
+                            min_frag1_gap = cur_gap
+                            nearest_frag_index = i2
+                if contact:
+                    min_frag1_gap = 0.0
+                    nearest_frag_index = i2
                     break
-                else:
-                    atom_gaps.append(distance - (r1 + r2 + self.cap))
-            if contact:
-                mol_gaps.append(tuple([0.0, i1, i2]))
-            else:
-                mol_gaps.append(tuple([min(atom_gaps), i1, i2]))
+            mol_gaps.append(tuple([min_frag1_gap, i1, nearest_frag_index]))
         return mol_gaps
 
 
