@@ -281,6 +281,62 @@ class ContactDetector(object):
             contact_matrix[i2, i1] = contact
         return contact_matrix
 
+class ContactGapRMSDEnergyEvaluator(EnergyEvaluator):
+    base_energy = 4.0E4
+
+    def taboo_current_position(self):
+        pass
+
+    def __init__(self, mol_coords, mol_radius, fragments_atom_radius, nums_fragments, cap=0.0):
+        super(ContactGapRMSDEnergyEvaluator, self).__init__(mol_coords)
+        self.mol_coords = mol_coords
+        self.mol_radius = mol_radius
+        self.fragments_atom_radius = []
+        for frag_rad, num in zip(fragments_atom_radius, nums_fragments):
+            self.fragments_atom_radius.extend([frag_rad]*num)
+        self.cap = cap * AtomicRadiusUtils.angstrom2au
+
+    def calc_energy(self, fragments_coords):
+        max_gap = 0.0
+        frag_index_1 = None
+        frag_index_2 = None
+        mol_gaps = self._get_mol_gaps(fragments_coords)
+        for g, i1, i2 in mol_gaps:
+            if g > max_gap:
+                max_gap = g
+                frag_index_1 = i1
+                frag_index_2 = i2
+        rmsd_gaps = math.sqrt(sum([g**2 for g, i1, i2 in mol_gaps])/len(mol_gaps))
+        if max_gap < 0.1:
+            return 0.0
+        else:
+            return self.base_energy + rmsd_gaps
+
+
+    def _get_mol_gaps(self, fragments_coords):
+        fragments = [(self.mol_coords, self.mol_radius)]
+        fragments.extend(zip(fragments_coords, self.fragments_atom_radius))
+        fragments = [(c, r, i) for i, (c, r) in enumerate(fragments)]
+        mol_gaps = []
+        frag_pair = itertools.combinations(fragments, r=2)
+        for p in frag_pair:
+            ((c1s, r1s, i1), (c2s, r2s, i2)) = p
+            contact = False
+            atom_gaps = []
+            for (c1, r1), (c2, r2) in itertools.product(zip(c1s, r1s), zip(c2s, r2s)):
+                distance = math.sqrt(sum([(x1-x2)**2 for x1, x2
+                                          in zip(c1, c2)]))
+                if distance <= r1 + r2 + self.cap:
+                    contact = True
+                    break
+                else:
+                    atom_gaps.append(distance - (r1 + r2 + self.cap))
+            if contact:
+                mol_gaps.append(tuple([0.0, i1, i2]))
+            else:
+                mol_gaps.append(tuple([min(atom_gaps), i1, i2]))
+        return mol_gaps
+
 
 class LargestContactGapEnergyEvaluator(EnergyEvaluator):
     base_energy = 4.0E4

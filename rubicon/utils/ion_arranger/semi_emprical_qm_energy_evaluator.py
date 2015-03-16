@@ -15,7 +15,8 @@ from rubicon.io.mopacio.custodian.mopacjob import MopacJob
 from rubicon.io.mopacio.mopacio import MopOutput, MopTask
 from rubicon.utils.ion_arranger.energy_evaluator import EnergyEvaluator
 from rubicon.utils.ion_arranger.hard_sphere_energy_evaluators import HardSphereEnergyEvaluator, AtomicRadiusUtils, \
-    ContactDetector, LargestContactGapEnergyEvaluator, OrderredLayoutEnergyEvaluator, UmbrellarForceEnergyEvaluator
+    ContactDetector, LargestContactGapEnergyEvaluator, OrderredLayoutEnergyEvaluator, UmbrellarForceEnergyEvaluator, \
+    ContactGapRMSDEnergyEvaluator
 
 
 __author__ = 'xiaohuiqu'
@@ -39,9 +40,15 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
             upper_covalent_radius_scale, upper_metal_radius_scale,
             self.mol_coords, ob_mol, ob_fragments, nums_fragments)
         self.layout_order = OrderredLayoutEnergyEvaluator(self.mol_coords, nums_fragments)
-        self.gravitation = self._construct_largest_cap_energy_evaluator(
-            upper_covalent_radius_scale, upper_metal_radius_scale,
-            self.mol_coords, ob_mol, ob_fragments, nums_fragments, bound_setter=bound_setter)
+        grav = "rmsd_gap"
+        if grav == "rmsd_gap":
+            self.gravitation = self._construct_contact_cap_rmsd_energy_evaluator(
+                upper_covalent_radius_scale, upper_metal_radius_scale,
+                self.mol_coords, ob_mol, ob_fragments, nums_fragments)
+        elif grav == "largest_gap":
+            self.gravitation = self._construct_largest_cap_energy_evaluator(
+                upper_covalent_radius_scale, upper_metal_radius_scale,
+                self.mol_coords, ob_mol, ob_fragments, nums_fragments, bound_setter=bound_setter)
         self.mol_species = IonPlacer.get_mol_species(ob_mol)
         self.fragments_species = [IonPlacer.get_mol_species(frag) for frag in ob_fragments]
         self.ob_fragments = ob_fragments
@@ -318,4 +325,13 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
         max_cap = max(bounder.upper_bound) * 2.0 / AtomicRadiusUtils.angstrom2au
         evaluator = LargestContactGapEnergyEvaluator(
             mol_coords, mol_radius, fragments_atom_radius, nums_fragments, max_cap, threshold=0.01)
+        return evaluator
+
+    @staticmethod
+    def _construct_contact_cap_rmsd_energy_evaluator(covalent_radius_scale, metal_radius_scale,
+                                                mol_coords, ob_mol, ob_fragments, nums_fragments):
+        rad_util = AtomicRadiusUtils(covalent_radius_scale, metal_radius_scale)
+        mol_radius = rad_util.get_radius(ob_mol)
+        fragments_atom_radius = [rad_util.get_radius(frag) for frag in ob_fragments]
+        evaluator = ContactGapRMSDEnergyEvaluator(mol_coords, mol_radius, fragments_atom_radius, nums_fragments)
         return evaluator
