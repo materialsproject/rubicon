@@ -131,8 +131,7 @@ class UmbrellarForceEnergyEvaluator(EnergyEvaluator):
     def __init__(self, mol_coords, centers, taboo_tolerance_au, best_umbrella_ratio):
         super(UmbrellarForceEnergyEvaluator, self).__init__(mol_coords)
         self.centers = centers
-        self.taboo_tolerance_au = taboo_tolerance_au
-        self.best_umbrella_ratio = best_umbrella_ratio
+        self.umbrella_radius = taboo_tolerance_au * best_umbrella_ratio
 
     def calc_energy(self, fragments_coords):
         if len(self.centers) == 0:
@@ -143,7 +142,7 @@ class UmbrellarForceEnergyEvaluator(EnergyEvaluator):
             distance = max([math.sqrt(sum([(x1-x2)**2 for x1, x2 in zip(c1, c2)]))
                             for c1, c2 in
                             zip(center, current_pos)])
-            if distance <= self.taboo_tolerance_au * self.best_umbrella_ratio:
+            if distance <= self.umbrella_radius:
                 return 0.0
             else:
                 umbrella_distances.append(distance)

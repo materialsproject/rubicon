@@ -28,20 +28,20 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
                  upper_covalent_radius_scale=3.0, upper_metal_radius_scale=1.5,
                  taboo_tolerance_ang=1.0, force_order_fragment=False, bound_setter="chain"):
         from rubicon.utils.ion_arranger.ion_arranger import IonPlacer
-        mol_coords = IonPlacer.normalize_molecule(ob_mol)
+        self.mol_coords = IonPlacer.normalize_molecule(ob_mol)
         super(SemiEmpricalQuatumMechanicalEnergyEvaluator, self).__init__(mol_coords)
         self.total_charge = total_charge
         self.force_ordered_fragment = force_order_fragment
         self.lower_sphere = self._construct_hardsphere_energy_evaluator(
             lower_covalent_radius_scale, lower_metal_radius_scale,
-            mol_coords, ob_mol, ob_fragments, nums_fragments)
+            self.mol_coords, ob_mol, ob_fragments, nums_fragments)
         self.contact_detector = self._construct_contact_detector(
             upper_covalent_radius_scale, upper_metal_radius_scale,
-            mol_coords, ob_mol, ob_fragments, nums_fragments)
+            self.mol_coords, ob_mol, ob_fragments, nums_fragments)
         self.layout_order = OrderredLayoutEnergyEvaluator(mol_coords, nums_fragments)
         self.gravitation = self._construct_largest_cap_energy_evaluator(
             upper_covalent_radius_scale, upper_metal_radius_scale,
-            mol_coords, ob_mol, ob_fragments, nums_fragments, bound_setter=bound_setter)
+            self.mol_coords, ob_mol, ob_fragments, nums_fragments, bound_setter=bound_setter)
         self.mol_species = IonPlacer.get_mol_species(ob_mol)
         self.fragments_species = [IonPlacer.get_mol_species(frag) for frag in ob_fragments]
         self.ob_fragments = ob_fragments
@@ -62,9 +62,12 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
         self.best_energy = None
         self.best_mol = None
         self.best_run_number = None
-        self.umbrella_centers = []
-        self.umbrella = UmbrellarForceEnergyEvaluator(mol_coords, self.umbrella_centers, self.taboo_tolerance_au,
-                                                      self.best_umbrella_ratio)
+        self.sqm_umbrella_centers = []
+        self.sqm_umbrella = UmbrellarForceEnergyEvaluator(self.mol_coords, self.sqm_umbrella_centers, self.taboo_tolerance_au,
+                                                          self.best_umbrella_ratio)
+        self.gap_umbrella_centers = []
+        self.gap_umbrella = None
+        self.smallest_gap = 9999999999.9
         self.arranger = None
 
 
@@ -95,7 +98,7 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
             self.current_best_raw_position = None
             self.best_mol = None
             self.best_run_number = None
-            del self.umbrella_centers[:]
+            del self.sqm_umbrella_centers[:]
 
     def is_current_position_tabooed(self, position_type):
         if position_type not in ["raw", "optimized"]:
@@ -153,6 +156,22 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
         else:
             return False
 
+    def build_or_extend_gap_umbrella(self, current_gap, fragments_coords):
+        smallest_gap_umbrella_radius = self.taboo_tolerance_au * self.best_umbrella_ratio
+        umbrella_radius = min([smallest_gap_umbrella_radius, current_gap])
+        if self.gap_umbrella is None:
+            self.gap_umbrella = UmbrellarForceEnergyEvaluator(self.mol_coords, self.gap_umbrella_centers,
+                                                              self.taboo_tolerance_au,
+                                                              self.best_umbrella_ratio)
+            self.arranger.clean_swarm_memory()
+            self.smallest_gap = 9999999999.9
+        if current_gap < self.smallest_gap:
+            umbrella_coords = list(itertools.chain(*fragments_coords))
+            self.sqm_umbrella_centers.append(umbrella_coords)
+            self.smallest_gap = current_gap
+        self.gap_umbrella.umbrella_radius = umbrella_radius
+
+
     def calc_energy(self, fragments_coords):
         # Energy orders:
         # Tabooed(1.0E5) > Umbrella(7.0E4) > Layout (6.0E4) > HardSphere (5.0E4)  >
@@ -166,9 +185,14 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
         if self.is_current_position_tabooed(position_type="raw"):
             return tabooed_energy
 
-        umbrella_energy = self.umbrella.calc_energy(fragments_coords)
-        if umbrella_energy > self.umbrella.base_energy - 100.0:
-            return umbrella_energy
+        if self.gap_umbrella is not None:
+            gap_umbrella_energy = self.gap_umbrella.calc_energy(fragments_coords)
+            if gap_umbrella_energy > self.gap_umbrella.base_energy - 100.0:
+                return gap_umbrella_energy
+
+        sqm_umbrella_energy = self.sqm_umbrella.calc_energy(fragments_coords)
+        if sqm_umbrella_energy > self.sqm_umbrella.base_energy - 100.0:
+            return sqm_umbrella_energy
 
         if self.force_ordered_fragment:
             energy = self.layout_order.calc_energy(fragments_coords)
@@ -182,6 +206,8 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
         if not self.contact_detector.is_contact(fragments_coords):
             energy = self.gravitation.calc_energy(fragments_coords)
             if energy > self.gravitation.base_energy - 100.0:
+                self.build_or_extend_gap_umbrella(current_gap=energy-self.gravitation.base_energy,
+                                                  fragments_coords=fragments_coords)
                 return energy
 
         memorized_energy = self.query_memory_positions(fragments_coords)
@@ -202,9 +228,11 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
                     self.best_energy = energy
                     self.current_best_optimized_position = final_coords
                     self.current_best_raw_position = list(itertools.chain(*fragments_coords))
-                    if len(self.umbrella_centers) == 0 and self.arranger is not None:
+                    if len(self.sqm_umbrella_centers) == 0 and self.arranger is not None:
                         self.arranger.clean_swarm_memory()
-                    self.umbrella_centers.append(self.current_best_raw_position)
+                        self.gap_umbrella = None
+                        self.gap_umbrella_centers = []
+                    self.sqm_umbrella_centers.append(self.current_best_raw_position)
                     self.best_mol = final_mol
                     self.best_run_number = self.run_number
             else:
