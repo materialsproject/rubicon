@@ -42,7 +42,7 @@ class IonPlacer():
         else:
             raise ValueError("only RING and STAR topology are supported")
         self.initial_guess = initial_guess
-        self.ea.observer = inspyred.ec.observers.best_observer
+        self.ea.observer = self.fitness_observer
         self.molecule = molecule
         self.fragments = fragments
         self.nums_fragments = nums_fragments
@@ -63,6 +63,16 @@ class IonPlacer():
         self.taboo_tolerance_particle_ratio = taboo_tolerance_particle_ratio
         self.bound_setter = bound_setter
         self.always_write_best = always_write_best
+
+    def fitness_observer(self, population, num_generations, num_evaluations, args):
+        current_fitness = [p.fitness for p in population]
+        short_current_fitness = [round(x, 2) for x in current_fitness]
+        print "BEST FITNESS", min(short_current_fitness)
+        print "CURRENT FITNESS", short_current_fitness
+        archieved_fitness = [p.fitness for p in self.ea.archive]
+        short_archieved_fitness = [round(x, 2) for x in archieved_fitness]
+        print "ARCHIEVED FITNESS", short_archieved_fitness
+        print
 
     @classmethod
     def get_max_radius(cls, mol_coords, fragments, nums_fragments):
@@ -265,11 +275,6 @@ class IonPlacer():
         else:
             return False
 
-    @classmethod
-    def print_fitness(cls, fitness):
-        short_fitness = [round(x, 2) for x in fitness]
-        print "FITNESS", short_fitness
-
     # noinspection PyUnusedLocal
     def evaluate_conformers(self, candidates, args):
         # evaluator
@@ -286,7 +291,6 @@ class IonPlacer():
         if self.always_write_best:
             best_fitness, best_index = self._get_best_index_and_fitness(coords_fitness)
             self.write_structure(candidates[best_index], "current_best.xyz")
-        self.print_fitness(fitness)
         return fitness
 
     def write_structure(self, candidate, filename="result.xyz"):
