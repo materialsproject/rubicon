@@ -65,7 +65,7 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
         self.tabooed_optimizated_positions = []
         self.current_best_raw_position = None
         self.current_best_optimized_position = None
-        self.best_umbrella_ratio = 3.0
+        self.best_umbrella_ratio = 2.0
         self.best_energy = None
         self.best_mol = None
         self.best_run_number = None
