@@ -10,7 +10,6 @@ import openbabel as ob
 from pymatgen.core.structure import Molecule
 from pymatgen.io.babelio import BabelMolAdaptor
 from pymatgen.io.qchemio import QcOutput
-from pymatgen.io.smartio import write_mol
 import numpy as np
 import simplerandom.random as srr
 
@@ -27,7 +26,8 @@ class IonPlacer():
 
     def __init__(self, molecule, fragments, nums_fragments, energy_evaluator,
                  prng="kiss", random_seed=None, taboo_tolerance_ang=1.0, taboo_tolerance_particle_ratio=0.5,
-                 topology="ring", initial_guess="breadth", bound_setter="chain", always_write_best=False):
+                 topology="ring", initial_guess="breadth", bound_setter="chain", always_write_best=False,
+                 max_generations_each_conformer=100):
         if prng == "kiss":
             self.prng = srr.KISS()
         elif prng == "python":
@@ -70,6 +70,8 @@ class IonPlacer():
         self.bound_setter = bound_setter
         self.always_write_best = always_write_best
         self.reevaluate_fitness = False
+        self.max_generations_each_conformer = max_generations_each_conformer
+        self.conformer_staring_generation = None
 
     def fitness_observer(self, population, num_generations, num_evaluations, args):
         current_fitness = [p.fitness for p in population]
@@ -252,6 +254,7 @@ class IonPlacer():
 
         # clean swarm memory
         self.clean_swarm_memory()
+        self.conformer_staring_generation = None
 
     def _get_best_index_and_fitness(self, coords_fitness):
         best_index = 0
@@ -264,8 +267,8 @@ class IonPlacer():
 
     def is_conformer_located(self, coords_fitness):
         best_fitness, best_index = self._get_best_index_and_fitness(coords_fitness)
-        unmbrella_enhancement = -3.0
-        if best_fitness > unmbrella_enhancement - 0.5:
+        mopac_energy_threshold = -3.0
+        if best_fitness > mopac_energy_threshold:
             # Even not optimized by MOPAC
             return False
         best_coords = list(itertools.chain(*coords_fitness[best_index][0]))
@@ -302,6 +305,14 @@ class IonPlacer():
         if self.reevaluate_fitness:
             self.reevaluate_fitness = False
             fitness = self.evaluate_conformers(candidates, args)
+        mopac_energy_threshold = -3.0
+        if min(fitness) < mopac_energy_threshold and self.conformer_staring_generation is None:
+            self.conformer_staring_generation = self.ea.num_evaluations
+        if self.conformer_staring_generation is not None and \
+                        self.ea.num_evaluations > self.conformer_staring_generation + \
+                        self.max_generations_each_conformer:
+            coords_fitness = zip(all_coords, fitness)
+            self.taboo_current_solution(coords_fitness)
         return fitness
 
     def write_structure(self, candidate, filename="result.xyz"):
@@ -397,6 +408,8 @@ def main():
                         help="enable this option to output the best structure at every iteration")
     parser.add_argument("--random_seed", dest="random_seed", default=None, type=int,
                         help="random seed for PSO, an integer is expected")
+    parser.add_argument("--max_generations_each_conformer", dest="max_generations_each_conformer", default=100, type=int,
+                        help="maximum generations for each conformer")
     parser.add_argument("-e", "--evaluator", dest="evaluator", type=str, default="hardsphere",
                         choices=["hardsphere", "sqm"], help="Energy Evaluator")
     options = parser.parse_args()
@@ -441,7 +454,8 @@ def main():
                        energy_evaluator=energy_evaluator, taboo_tolerance_ang=options.taboo_tolerance,
                        taboo_tolerance_particle_ratio=options.ratio_taboo_particles, topology=options.topology,
                        initial_guess=options.initial_guess, bound_setter=options.bound_setter,
-                       always_write_best=options.always_write_best, random_seed=options.random_seed)
+                       always_write_best=options.always_write_best, random_seed=options.random_seed,
+                       max_generations_each_conformer=options.max_generations_each_conformer)
     energy_evaluator.arranger = placer
     placer.place(max_evaluations=options.iterations,
                  pop_size=options.size,
