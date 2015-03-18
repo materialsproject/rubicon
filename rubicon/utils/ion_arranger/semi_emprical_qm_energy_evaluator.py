@@ -222,7 +222,10 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
             energy = memorized_energy
         else:
             mol = self._get_super_molecule(fragments_coords)
-            energy, final_mol = self.run_mopac(mol)
+            try:
+                energy, final_mol = self.run_mopac(mol)
+            except:
+                return tabooed_energy
             from rubicon.utils.ion_arranger.ion_arranger import IonPlacer
             final_coords = IonPlacer.normalize_molecule(final_mol)
             self.current_optimized_position = final_coords
