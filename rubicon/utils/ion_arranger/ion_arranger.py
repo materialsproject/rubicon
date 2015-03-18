@@ -281,6 +281,7 @@ class IonPlacer():
             if d <= self.taboo_tolerance_au:
                 num_particle_in_range += 1
         ratio_particle_in_range = float(num_particle_in_range)/len(distances_to_best)
+        print "Current Ratio", ratio_particle_in_range, self.taboo_tolerance_particle_ratio
         if ratio_particle_in_range >= self.taboo_tolerance_particle_ratio:
             return True
         else:

@@ -364,7 +364,8 @@ class MopOutput(object):
                                    "(?P<z>\-?\d+\.\d+)")
         error_defs = (
             (re.compile("EXCESS NUMBER OF OPTIMIZATION CYCLES"), "Geometry optimization failed"),
-            (re.compile("UNABLE TO ACHIEVE SELF-CONSISTENCE"), "Bad SCF convergence")
+            (re.compile("UNABLE TO ACHIEVE SELF-CONSISTENCE"), "Bad SCF convergence"),
+            (re.compile("TO CONTINUE, START AGAIN WITH THE WORD \"PRECISE\""), "Not Accurate Enough")
         )
         energies = []
         parse_keywords = None
