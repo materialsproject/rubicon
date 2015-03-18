@@ -243,7 +243,6 @@ class SemiEmpricalQuatumMechanicalEnergyEvaluator(EnergyEvaluator):
                     self.best_mol = final_mol
                     self.best_run_number = self.run_number
             else:
-                print "Taboo other conformers"
                 energy = tabooed_energy
             self.append_position_to_memory(fragments_coords, energy)
         # coarse grained energy,

@@ -281,7 +281,6 @@ class IonPlacer():
             if d <= self.taboo_tolerance_au:
                 num_particle_in_range += 1
         ratio_particle_in_range = float(num_particle_in_range)/len(distances_to_best)
-        print "Current Ratio", ratio_particle_in_range, self.taboo_tolerance_particle_ratio
         if ratio_particle_in_range >= self.taboo_tolerance_particle_ratio:
             return True
         else:
@@ -297,15 +296,14 @@ class IonPlacer():
             energy = self.energy_evaluator.calc_energy(fragments_coords)
             fitness.append(energy)
             all_coords.append(fragments_coords)
-        coords_fitness = zip(all_coords, fitness)
-        if self.is_conformer_located(coords_fitness):
-            self.taboo_current_solution(coords_fitness)
-        if self.always_write_best:
-            best_fitness, best_index = self._get_best_index_and_fitness(coords_fitness)
-            self.write_structure(candidates[best_index], "current_best.xyz")
+
         if self.reevaluate_fitness:
             self.reevaluate_fitness = False
             fitness = self.evaluate_conformers(candidates, args)
+        else:
+            coords_fitness = zip(all_coords, fitness)
+            if self.is_conformer_located(coords_fitness):
+                self.taboo_current_solution(coords_fitness)
         mopac_energy_threshold = -3.0
         if min(fitness) < mopac_energy_threshold and self.conformer_staring_generation is None:
             self.conformer_staring_generation = self.ea.num_evaluations
@@ -314,6 +312,9 @@ class IonPlacer():
                         self.max_generations_each_conformer:
             coords_fitness = zip(all_coords, fitness)
             self.taboo_current_solution(coords_fitness)
+        if self.always_write_best:
+            best_fitness, best_index = self._get_best_index_and_fitness(coords_fitness)
+            self.write_structure(candidates[best_index], "current_best.xyz")
         return fitness
 
     def write_structure(self, candidate, filename="result.xyz"):
