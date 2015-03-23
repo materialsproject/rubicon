@@ -3,6 +3,7 @@
 """
 This module implements input and output processing from MOPAC
 """
+from __future__ import unicode_literals
 import copy
 from textwrap import TextWrapper
 from monty.io import zopen
@@ -363,7 +364,8 @@ class MopOutput(object):
                                    "(?P<z>\-?\d+\.\d+)")
         error_defs = (
             (re.compile("EXCESS NUMBER OF OPTIMIZATION CYCLES"), "Geometry optimization failed"),
-            (re.compile("UNABLE TO ACHIEVE SELF-CONSISTENCE"), "Bad SCF convergence")
+            (re.compile("UNABLE TO ACHIEVE SELF-CONSISTENCE"), "Bad SCF convergence"),
+            (re.compile("TO CONTINUE, START AGAIN WITH THE WORD \"PRECISE\""), "Not Accurate Enough")
         )
         energies = []
         parse_keywords = None
