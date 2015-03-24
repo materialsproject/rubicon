@@ -1,0 +1,5 @@
+__author__ = 'xiaohuiqu'
+import rubicon.scripts.moo2xyz as moo2xyz
+
+if __name__ == '__main__':
+    moo2xyz.main()
