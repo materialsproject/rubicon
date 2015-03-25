@@ -58,7 +58,6 @@ def main():
 
     qcinp_no_basis = QcInput.from_file(options.input)
     mol_with_basis = assign_basis_set_by_range(qcinp=qcinp_no_basis, basis_def_file=options.basis)
-    exit(0)
     mol_with_basis.write_file(options.output)
 
 
