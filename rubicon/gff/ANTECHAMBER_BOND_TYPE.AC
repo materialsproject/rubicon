@@ -1,0 +1,47 @@
+CHARGE      0.00 ( 0 )
+Formula: H14 C6 O3 
+ATOM      1  O   LIG     1       1.023   0.136  -0.063  0.000000         O
+ATOM      2  C   LIG     1       0.506   1.443   0.126  0.000000         C
+ATOM      3  C   LIG     1       2.441   0.089  -0.070  0.000000         C
+ATOM      4  C   LIG     1      -1.013   1.345   0.112  0.000000         C
+ATOM      5  C   LIG     1       2.854  -1.361  -0.280  0.000000         C
+ATOM      6  O   LIG     1      -1.529   2.651   0.301  0.000000         O
+ATOM      7  O   LIG     1       4.270  -1.407  -0.287  0.000000         O
+ATOM      8  C   LIG     1      -2.943   2.693   0.307  0.000000         C
+ATOM      9  C   LIG     1       4.781  -2.713  -0.476  0.000000         C
+ATOM     10  H   LIG     1       0.846   2.116  -0.677  0.000000         H
+ATOM     11  H   LIG     1       0.846   1.860   1.087  0.000000         H
+ATOM     12  H   LIG     1       2.847   0.460   0.884  0.000000         H
+ATOM     13  H   LIG     1       2.847   0.715  -0.880  0.000000         H
+ATOM     14  H   LIG     1      -1.353   0.671   0.915  0.000000         H
+ATOM     15  H   LIG     1      -1.353   0.927  -0.849  0.000000         H
+ATOM     16  H   LIG     1       2.447  -1.733  -1.235  0.000000         H
+ATOM     17  H   LIG     1       2.447  -1.988   0.530  0.000000         H
+ATOM     18  H   LIG     1      -3.232   3.736   0.459  0.000000         H
+ATOM     19  H   LIG     1      -3.359   2.080   1.123  0.000000         H
+ATOM     20  H   LIG     1      -3.359   2.337  -0.649  0.000000         H
+ATOM     21  H   LIG     1       5.871  -2.635  -0.465  0.000000         H
+ATOM     22  H   LIG     1       4.458  -3.133  -1.442  0.000000         H
+ATOM     23  H   LIG     1       4.459  -3.390   0.331  0.000000         H
+BOND    1    1    2    1      O    C
+BOND    2    1    3    1      O    C
+BOND    3    2    4    1      C    C
+BOND    4    2   10    1      C    H
+BOND    5    2   11    1      C    H
+BOND    6    3    5    1      C    C
+BOND    7    3   12    1      C    H
+BOND    8    3   13    1      C    H
+BOND    9    4    6    1      C    O
+BOND   10    4   14    1      C    H
+BOND   11    4   15    1      C    H
+BOND   12    5    7    1      C    O
+BOND   13    5   16    1      C    H
+BOND   14    5   17    1      C    H
+BOND   15    6    8    1      O    C
+BOND   16    7    9    1      O    C
+BOND   17    8   18    1      C    H
+BOND   18    8   19    1      C    H
+BOND   19    8   20    1      C    H
+BOND   20    9   21    1      C    H
+BOND   21    9   22    1      C    H
+BOND   22    9   23    1      C    H

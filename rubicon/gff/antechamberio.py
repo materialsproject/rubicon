@@ -80,22 +80,21 @@ class AntechamberRunner():
             try:
                  top = TopMol.from_file('mol.rtf')
 
+
             except TopCorruptionException:
                 correct_corrupted_top_files('mol.rtf','gaff_nidhi.txt')
                 top = TopMol.from_file('mol.rtf')
 
             try:
                 gff = Gff.from_forcefield_para('ANTECHAMBER.FRCMOD')
-                gff.read_atom_index(mol, 'ANTECHAMBER_AC.AC')
-                gff.read_charges()
 
             except FFCorruptionException:
-                #gff= Gff.from_gaff_para('gaff_nidhi.txt')
                 correct_corrupted_frcmod_files('ANTECHAMBER.FRCMOD','gaff_nidhi.txt')
                 gff = Gff.from_forcefield_para('ANTECHAMBER.FRCMOD')
-                gff.read_atom_index(mol, 'ANTECHAMBER_AC.AC')
-                gff.read_charges()
+            gff.read_atom_index(mol, 'ANTECHAMBER_AC.AC')
+            gff.read_charges()
 
+#
             mol.add_site_property("atomname", (gff.atom_index.values()))
         ffmol = FFmol(gff, top)
         return ffmol

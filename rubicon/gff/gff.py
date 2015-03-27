@@ -35,7 +35,7 @@ class Gff(MSONable):
     """
 
 
-    def __init__(self, atoms, bonds, angles, dihedrals, imdihedrals, vdws, masses, charges):
+    def __init__(self, atoms, bonds, angles, dihedrals, imdihedrals, vdws, masses=None, charges= None):
 
         self.atoms = atoms
         self.bonds = bonds
@@ -63,6 +63,7 @@ class Gff(MSONable):
         dihedrals = defaultdict(dict)
         imdihedrals = {}
         vdws = {}
+        masses = {}
 
 
 
@@ -85,10 +86,10 @@ class Gff(MSONable):
                     if len(line.strip()) == 0:
                         mass_section = False
                         continue
-
                     atom_type = line[0:2].strip()
                     mass = float(line[3:9])
-                    atoms[atom_type.lower()] = (mass)
+                    masses[atom_type.lower()] = (mass)
+
 
                 if line.startswith('BOND'):
                     bond_section = True
@@ -162,15 +163,17 @@ class Gff(MSONable):
                     if len(line.strip()) == 0:
                         vdw_section = False
                         continue
+
+
                     token = line.split()
-                    vdw_type = line[2:4].strip()
-                    vdw_type = line[2:4].strip()
-                    sigma = float(line[14:20])
-                    epsilon = abs(float(line[22:28]))
-                    vdws[vdw_type] = (sigma, epsilon)
+                    vdw_type = token[0]
+                    sigma = float(token[1])
+                    epsilon = abs(float(token[2]))
+                    vdws[vdw_type.lower()] = (sigma, epsilon)
 
-
-            return atoms, bonds,angles,dihedrals,imdihedrals,vdws
+            gff = Gff(None, bonds,angles,dihedrals,imdihedrals,vdws, masses, None)
+            return gff
+            #return atoms, bonds,angles,dihedrals,imdihedrals,vdws
 
 
 
@@ -308,6 +311,8 @@ class Gff(MSONable):
                     self.atom_index_gaff[index]=gaff_name
             self.atom_gaff.update(self.atom_gaff)
         self.num_types = len(set(self.atom_gaff.values()))
+        
+        return self.atom_index_gaff
 
 
 
@@ -320,6 +325,10 @@ class Gff(MSONable):
         jsonfile = open(filename)
         self.charges = json.load(jsonfile, encoding="utf-8")
         return self.charges
+
+    def return_charges(self):
+        return self.charges, self.atom_index_gaff
+
 
 
 
@@ -353,31 +362,30 @@ def correct_corrupted_frcmod_files(corrupted_file = None, gaff_file = None):
 
 
     gff = Gff.from_forcefield_para(corrupted_file, True)
+    atoms,bonds,angles,specific_dihedrals,general_dihedrals,vdws= Gff.from_gaff_para(gaff_file)
+    #print atoms
     gff_para = Gff.from_gaff_para(gaff_file)
-
-    gaff_atom = gff[0].keys()
-    for ant_atom_name in gaff_atom:
-        print gaff_atom[0].lower()
+    for ant_atom_name in gff.masses.keys():
         if ant_atom_name in gff_para[0].keys():
              frc_lines.append('{}  {}'.format(ant_atom_name,gff_para[0][ant_atom_name]))
              frc_lines.append('\n')
 
     frc_lines.append('\nBOND\n')
-    for bond in gff[1]:
+    for bond in gff.bonds:
         if bond in gff_para[1].keys():
 
             frc_lines.append('{}{}{}    {}     {}'.format(bond[0], '-', bond[1],gff_para[1][bond][0],gff_para[1][bond][1]))
             frc_lines.append('\n')
 
     frc_lines.append('\nANGLE\n')
-    for angle in gff[2]:
+    for angle in gff.angles:
         if angle in gff_para[2].keys():
 
             frc_lines.append('{}{}{}{}{}   {}    {}'.format(angle[0], '-', angle[1], '-', angle[2],gff_para[2][angle][0],gff_para[2][angle][1]))
             frc_lines.append('\n')
 
     frc_lines.append('\nDIHE\n')
-    for dihedral in gff[3]:
+    for dihedral in gff.dihedrals:
         if dihedral in gff_para[3].keys():
             frc_lines.append('{}{}{}{}{}{}{}'.format(dihedral[0], '-', dihedral[1], '-', dihedral[2], '-', dihedral[3]))
             frc_lines.append('\n')
@@ -394,7 +402,7 @@ def correct_corrupted_frcmod_files(corrupted_file = None, gaff_file = None):
 
 
     frc_lines.append('\nIMPROPER\n')
-    for improper in gff[4]:
+    for improper in gff.imdihedrals:
         if improper in gff_para[3].keys():
             frc_lines.append('{}{}{}{}{}{}{}'.format(improper[0], '-', improper[1], '-', improper[2], '-', improper[3]))
             frc_lines.append('\n')
@@ -411,14 +419,13 @@ def correct_corrupted_frcmod_files(corrupted_file = None, gaff_file = None):
 
 
     frc_lines.append('\nNONBON\n')
-    for vdw in gff[5]:
+    for vdw in gff.vdws:
         if vdw in gff_para[5].keys():
             frc_lines.append('{}  {}    {}'.format(vdw,gff_para[5][vdw][0],gff_para[5][vdw][1]))
-
-
         frc_lines.append('\n')
 
-    with open('mol.frcmod', 'w') as f:
+
+    with open('ANTECHAMBER.FRCMOD', 'w') as f:
         f.writelines(frc_lines)
 
 
