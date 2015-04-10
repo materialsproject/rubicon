@@ -94,7 +94,6 @@ class AntechamberRunner():
             gff.read_atom_index(mol, 'ANTECHAMBER_AC.AC')
             gff.read_charges()
 
-#
             mol.add_site_property("atomname", (gff.atom_index.values()))
         ffmol = FFmol(gff, top)
         return ffmol
