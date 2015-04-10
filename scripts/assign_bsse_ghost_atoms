@@ -1,0 +1,6 @@
+__author__ = 'xiaohuiqu'
+
+import rubicon.scripts.assign_bsse_ghost_atoms as abga
+
+if __name__ == "__main__":
+    abga.main()

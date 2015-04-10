@@ -1,0 +1,6 @@
+__author__ = 'xiaohuiqu'
+
+import rubicon.scripts.replace_first_qctask_coords_with_xyz as coords_replacer
+
+if __name__ == '__main__':
+    coords_replacer.main()

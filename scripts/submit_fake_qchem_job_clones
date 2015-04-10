@@ -1,0 +1,4 @@
+import rubicon.scripts.submit_fake_qchem_job_clones as fake_qchem
+
+fake_qchem.main()
+
