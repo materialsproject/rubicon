@@ -295,31 +295,33 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
     def build_molecule_structure_properties(docs):
         molecule = dict()
         if "molname" in docs["user_tags"]:
-            molname = docs["user_tags"]['molname']
-            m = TaskKeys.lei_1_group_pattern.search(molname)
-            if m:
-                base_mol = m.group("base_mol")
-                literal_group_name = m.group("group_name")
-                if literal_group_name in TaskKeys.literal_to_formula_group_name:
-                    formula_group_name = TaskKeys.literal_to_formula_group_name[literal_group_name]
-                    molecule["base_molecule"] = base_mol
-                    molecule["functional_groups"] = [formula_group_name]
-            m = TaskKeys.lei_2_group_pattern.search(molname)
-            if m:
-                base_mol = m.group("base_mol")
-                literal_group1 = m.group("group1")
-                literal_group2 = m.group("group2")
-                if literal_group1 in TaskKeys.literal_to_formula_group_name \
-                        and literal_group2 in TaskKeys.literal_to_formula_group_name:
-                    formula_group1 = TaskKeys.literal_to_formula_group_name[literal_group1]
-                    formula_group2 = TaskKeys.literal_to_formula_group_name[literal_group2]
-                    molecule["base_molecule"] = base_mol
-                    molecule["functional_groups"] = sorted([formula_group1, formula_group2])
-        elif "derivation_name" in docs["user_tags"]:
-            functional_groups, base_mol_name = MoleculesBuilder.parse_derivation_name(
-                docs["user_tags"]["derivation_name"], docs["user_tags"]['molname'])
-            molecule["base_molecule"] = base_mol_name
-            molecule["functional_groups"] = sorted(functional_groups)
+            if "derivation_name" in docs["user_tags"] and \
+                            ";" in ["user_tags"]["derivation_name"]:
+                functional_groups, base_mol_name = MoleculesBuilder.parse_derivation_name(
+                    docs["user_tags"]["derivation_name"], docs["user_tags"]['molname'])
+                molecule["base_molecule"] = base_mol_name
+                molecule["functional_groups"] = sorted(functional_groups)
+            else:
+                molname = docs["user_tags"]['molname']
+                m = TaskKeys.lei_1_group_pattern.search(molname)
+                if m:
+                    base_mol = m.group("base_mol")
+                    literal_group_name = m.group("group_name")
+                    if literal_group_name in TaskKeys.literal_to_formula_group_name:
+                        formula_group_name = TaskKeys.literal_to_formula_group_name[literal_group_name]
+                        molecule["base_molecule"] = base_mol
+                        molecule["functional_groups"] = [formula_group_name]
+                m = TaskKeys.lei_2_group_pattern.search(molname)
+                if m:
+                    base_mol = m.group("base_mol")
+                    literal_group1 = m.group("group1")
+                    literal_group2 = m.group("group2")
+                    if literal_group1 in TaskKeys.literal_to_formula_group_name \
+                            and literal_group2 in TaskKeys.literal_to_formula_group_name:
+                        formula_group1 = TaskKeys.literal_to_formula_group_name[literal_group1]
+                        formula_group2 = TaskKeys.literal_to_formula_group_name[literal_group2]
+                        molecule["base_molecule"] = base_mol
+                        molecule["functional_groups"] = sorted([formula_group1, formula_group2])
         return molecule
 
     def _build_indexes(self):
