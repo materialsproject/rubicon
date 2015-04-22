@@ -282,7 +282,7 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         if base_mol_name != 'dbbb':
             for g in group_name_texts.split(','):
                 position, gn = g.split('-')
-                functional_groups.append([int(position), gn])
+                functional_groups.append(TaskKeys.literal_to_formula_group_name[gn])
         else:
             pos_text, group1_text, group2_text = group_name_texts.split(',')
             group1_name = group1_text.split('-')[1]
