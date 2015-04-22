@@ -35,7 +35,6 @@ class LmpInput():
         improper_type_list = []
         lines.append('LAMMPS data File\n')
         for  mol, num_mols in zip(mols_in_box.mols,mols_in_box.num_mols):
-            #print mols_in_box.num_mols
             lines.append("{} {} {} {}".format('#',num_mols,
                                               mol.site_properties["mol_name"][0],
                                               "molecules"))
@@ -44,7 +43,7 @@ class LmpInput():
         for ffmol in ffmol_list:
             gff = ffmol.gff
             atom_type_list.extend(gff.masses.keys())
-            atom_type_list.extend(gff.masses.keys())
+         #   atom_type_list.extend(gff.masses.keys())
             bond_type_list.extend(gff.bonds.keys())
             angle_type_list.extend(gff.angles.keys())
             dihedral_type_list.extend(gff.dihedrals.keys())
@@ -163,9 +162,6 @@ class LmpInput():
         for ffmol,mol in zip(ffmol_list, mols_in_box.mols):
             gff = ffmol.gff
             top = ffmol.top
-        # for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
-        #                                mols_in_box.mols,
-        #                                mols_in_box.param_list):
             if gff.vdws:
                 for i, v in enumerate(gff.vdws.values()):
                     if gff.vdws.keys()[i] in element_list:
@@ -337,9 +333,6 @@ class LmpInput():
                                   mols_in_box.num_mols):
             gff = ffmol.gff
             top = ffmol.top
-        # for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
-        #                                mols_in_box.mols,
-        #                                mols_in_box.no):
             if gff.masses is not None:
                 for m, v in enumerate(gff.masses.values()):
                     if gff.masses.keys()[m] in element_list:
@@ -354,23 +347,18 @@ class LmpInput():
             #iterate every molecule of molecule type
             for imol in range(num_mols):
                 mol_coords = mols_in_box.mols_coords.cart_coords[i:i + num_atoms]
-
                 mol_index += 1
 
                 d = {}
                 for k, v in enumerate(mol_coords):
-                    #print mol.site_properties["mol_name"][0][gff.atom_index[
-                    #         k + 1]]
-                    print gff.atom_index[k+1]
-                    print gff.charges[mol.site_properties["mol_name"][0]][gff.atom_index[
-                             k + 1]]
+
                     lines.append(
                         '{}  {}  {}  {}  {}  {} {} {}  {} {} {} {}'.format(k + i + 1,
                          mol_index,
                          atom_type_index[
                              gff.atom_index_gaff
                              [
-                                 k + 1]],
+                                 k + 1].lower()],
                          gff.charges[mol.site_properties["mol_name"][0]][gff.atom_index[
                              k + 1]],
                          v[0], v[1],

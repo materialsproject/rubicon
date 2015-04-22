@@ -42,7 +42,6 @@ class WritelammpsInputTask(FireTaskBase):
     def run_task(self, fw_spec):
         mols_dict = fw_spec["molecules"]
         mols = [Molecule.from_dict(m) for m in mols_dict]
-
         ffmol_list = []
         for mol in mols:
             acr = AntechamberRunner(mol)
@@ -51,7 +50,9 @@ class WritelammpsInputTask(FireTaskBase):
         #pmr = PackmolRunner(mols, [{"number":15,"inside box":[0.,0.,0.,50.,50.,50.]},{"number":30},{"number":232}])
         #pmr = PackmolRunner(mols, [{"number":15},{"number":30},{"number":232}])
         #pmr = PackmolRunner(mols, [{"number":15}])
-        pmr = PackmolRunner(mols, [{"number":1,"inside box":[0.,0.,0.,50.,50.,50.]}])
+        #pmr = PackmolRunner(mols, [{"number":1,"inside box":[0.,0.,0.,50.,50.,50.]}])
+        pmr = PackmolRunner(mols, [{"number":15,"inside box":[0.,0.,0.,100.,100.,100.]},{"number":30,"inside box":[0.,0.,0.,100.,100.,100.]},{"number":232,"inside box":[0.,0.,0.,100.,100.,100.]}])
+
         mols_coord = pmr.run()
         boxmol= BoxMol.from_packmol(pmr, mols_coord)
 
