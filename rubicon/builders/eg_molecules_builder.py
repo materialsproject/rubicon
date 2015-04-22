@@ -296,7 +296,7 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         molecule = dict()
         if "molname" in docs["user_tags"]:
             if "derivation_name" in docs["user_tags"] and \
-                            ";" in ["user_tags"]["derivation_name"]:
+                            ";" in docs["user_tags"]["derivation_name"]:
                 functional_groups, base_mol_name = MoleculesBuilder.parse_derivation_name(
                     docs["user_tags"]["derivation_name"], docs["user_tags"]['molname'])
                 molecule["base_molecule"] = base_mol_name
