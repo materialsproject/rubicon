@@ -11,7 +11,7 @@ import subprocess
 from pymatgen import write_mol
 import shlex
 from gff import Gff, FFCorruptionException, correct_corrupted_frcmod_files
-from monty.io import ScratchDir
+from monty.tempfile import ScratchDir
 import tempfile
 from rubicon.gff.topology import TopMol, TopCorruptionException, TopCorruptionException, correct_corrupted_top_files
 
