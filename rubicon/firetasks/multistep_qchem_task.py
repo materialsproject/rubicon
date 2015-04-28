@@ -330,7 +330,8 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
 def get_bsse_update_specs(fw_spec, d):
     if "super_mol_snlgroup_id" in fw_spec["run_tags"]:
         ghost_atoms = fw_spec["run_tags"].get("ghost_atoms", list())
-        fragment_type = fw_spec["run_tags"]["bsse_fragment_type"]
+        from rubicon.workflows.bsse_wf import BSSEFragment
+        fragment_type = fw_spec["run_tags"].get("bsse_fragment_type", BSSEFragment.ISOLATED)
         fragment_key = BasisSetSuperpositionErrorCalculationTask.get_fragment_key(ghost_atoms, fragment_type)
         fragment_dict = dict()
         fragment_dict["task_id"] = [d["task_id"]]
@@ -401,6 +402,8 @@ class BasisSetSuperpositionErrorCalculationTask(FireTaskBase, FWSerializable):
         fragments_dict = dict()
         bsse = 0.0
         for frag in fragments:
+            if len(frag.ghost_atoms) == 0:
+                continue
             fragment_name = self.get_fragment_name(frag.ghost_atoms)
             fragments_dict[fragment_name] = dict()
             ov_fragment_key = self.get_fragment_key(frag.ghost_atoms, BSSEFragment.OVERLAPPED)

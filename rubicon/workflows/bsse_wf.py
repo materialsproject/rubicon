@@ -95,6 +95,8 @@ def bsse_fws(super_mol_egsnl, name, super_mol_snlgroup_id, super_mol_charge, sup
     links_dict = dict()
     current_fwid = fwid_base
     for frag in fragments:
+        if len(frag.ghost_atoms) == 0:
+            continue
         frag_name = name + "_" + BasisSetSuperpositionErrorCalculationTask.get_fragment_name(frag.ghost_atoms)
         fw_ov_creator = QChemFireWorkCreator(mol=super_mol, molname=frag_name, mission=mission, dupefinder=dupefinder,
                                              priority=priority, additional_user_tags=additional_user_tags, large=large)
