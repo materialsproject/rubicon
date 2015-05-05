@@ -21,14 +21,13 @@ class calcCOM:
         (xcol, ycol, zcol, molcol, typecol) = self.getcolumns(trjfilename[0])
         atommass = self.getmass(datfilename)
         for i in range(0,len(trjfilename)):
-            print i
             while line[i] < num_lines[i]:
                 (x,y,z,mol,atype,line) = self.readdata(trjfilename[i], n, line, x, y, z, mol, atype, xcol, ycol, zcol, molcol, typecol,i)
                 if count == 0:
                     (nummol, comx, comy, comz, molmass) = self.comprep(mol, n, atype, atommass, num_timesteps)
                 (comx, comy, comz, count) = self.calccom(comx, comy, comz, x, y, z, mol, atype, atommass, molmass, Lx, Ly, Lz, Lx2, Ly2, Lz2, n, count, nummol)
             linecache.clearcache()
-        self.saveCOM(comx, comy, comz)
+        #self.saveCOM(comx, comy, comz)
         return (comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2)
         
     def getnum(self,trjfilename):
@@ -159,7 +158,6 @@ class calcCOM:
         comy[count] += comyt
         comz[count] += comzt
         count += 1
-        print('timestep ' + str(count) + ' finished')
             
         return (comx, comy, comz, count)
         

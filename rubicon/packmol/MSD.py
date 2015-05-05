@@ -19,14 +19,10 @@ class MSD:
         num_timesteps = len(comx)
         (MSDt, MSD, diffusivity) = self.gettimesteps(num_timesteps, moltypel)
         (molcheck,nummol) = self.setmolarray(moltype,moltypel)
-        tic = time.time()        
         for i in range(0,MSDt):
             for j in range(i,i+MSDt):
                 r2 = self.calcr2(comx, comy, comz, i, j)
                 MSD = self.MSDadd(r2, MSD, molcheck, i, j)
-            print('timestep ' + str(i) + ' finished')
-        toc = time.time()
-        print('calc time' + str((toc-tic)/60)+ ' minutes')
         MSD = self.MSDnorm(MSD, MSDt, nummol)
         Time = self.createtime(dt, tsjump, MSDt)
         #self.writetofile(MSD, Time)
@@ -38,7 +34,6 @@ class MSD:
         return output
     
     def unwrap(self, comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2):
-        start = time.time()
         for i in range(1,len(comx)):
             for j in range(0,len(comx[i])):
                 if (comx[i][j]-comx[i-1][j])>Lx2:
@@ -61,9 +56,6 @@ class MSD:
                 elif (comz[i][j]-comz[i-1][j])< (-Lz2):
                     while (comz[i][j]-comz[i-1][j])< (-Lz2):
                         comz[i][j] += Lz
-            print('timestep ' + str(i) + ' finished')
-        stop = time.time()                
-        print('unwrap time '+ str((stop-start)/60) + ' minutes')
         return (comx, comy, comz)
         
     def gettimesteps(self, num_timesteps,moltypel):
