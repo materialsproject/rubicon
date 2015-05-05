@@ -473,7 +473,7 @@ class BasisSetSuperpositionErrorCalculationTask(FireTaskBase, FWSerializable):
             elif update_duplicates:
                 d["task_id"] = result["task_id"]
                 logger.info("Updating BSSE for snlgroup {} with taskid = {}"
-                            .format(d["super_mol_snlgroup_id"], d["task_id"]))
+                            .format(d["super_mol_snlgroup_id"], fw_spec["super_mol_snlgroup_id"]))
             coll.update({"super_mol_snlgroup_id": fw_spec["snlgroup_id"],
                          "fragments_def": fw_spec["fragments"]},
                         {"$set": d},
@@ -491,7 +491,7 @@ class BasisSetSuperpositionErrorCalculationTask(FireTaskBase, FWSerializable):
 
     @classmethod
     def get_fragment_name(cls, ghost_atoms):
-        return "ga_" + "-".join([str(i) for i in sorted(set(ghost_atoms))])
+        return "ga_" + "-".join([str(i) for i in sorted(set(ghost_atoms))]) if len(ghost_atoms) > 0 else "ga_none"
 
     @classmethod
     def get_fragment_key(cls, ghost_atoms, fragment_type):

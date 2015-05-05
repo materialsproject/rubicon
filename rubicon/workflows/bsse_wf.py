@@ -129,7 +129,7 @@ def bsse_fws(super_mol_egsnl, name, super_mol_snlgroup_id, super_mol_charge, sup
                                                    super_mol_snlgroup_id=super_mol_snlgroup_id,
                                                    super_mol_egsnl=super_mol_egsnl,
                                                    super_mol_inchi_root=super_mol_inchi_root,
-                                                   ghost_atoms=None, bs_overlap=False)
+                                                   ghost_atoms=frag.ghost_atoms, bs_overlap=False)
         fws.extend(fws_iso)
         db_fwids.append(fw_iso_db_id)
         links_dict[fw_iso_cal_id] = fw_iso_db_id
