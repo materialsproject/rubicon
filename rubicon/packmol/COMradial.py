@@ -19,7 +19,6 @@ class COMradialdistribution:
         (nummol1, nummol2, mol1, mol2) = self.getnummol(moltypel, nummoltype, mol1, mol2)
         while count < len(comx):
             (count) = self.radialdistribution(g, mol1, mol2, len(comx[1]), moltype, comx, comy, comz, Lx, Ly, Lz, binsize, numbins, maxr, count)
-            print('timestep ' + str(count-firststep) + ' of ' + str(len(comx)-firststep) + ' finished')
         (radiuslist) = self.radialnormalization(numbins,binsize,Lx,Ly,Lz,nummol1,nummol2,count,g,firststep)
         #self.plot(radiuslist, g)
         #self.writetofile(numbins, radiuslist, g)
@@ -80,22 +79,17 @@ class COMradialdistribution:
         
     def radialnormalization(self,numbins,binsize,Lx,Ly,Lz,nummol1,nummol2,count,g, firststep):
         # normalizes g to box density
-        print('start normalization')
         radiuslist = (np.arange(numbins)+1)*binsize
         g *= Lx*Ly*Lz/nummol1/nummol2/4/np.pi/(radiuslist)**2/binsize/(count-firststep)
-        print('end normalization')
         return (radiuslist)
         
     def plot(self, radiuslist, g):
         # plots radial distribution function
-        print('begin plot')
         plt.plot(radiuslist,g)
         plt.xlabel('radius')
         plt.ylabel('g(r)')
         plt.title('Pair Distribution Function')
-        plt.savefig('Pairdist2.png')
-        #plt.show()
-        print('end plot')        
+        plt.savefig('Pairdist2.png')       
         
     def writetofile(self, numbins, radiuslist, g):
         try:
