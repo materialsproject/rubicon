@@ -1,7 +1,7 @@
 import datetime
 import os
 from fireworks.utilities.fw_serializers import FWSerializable
-from pymatgen.symmetry.pointgroup import PointGroupAnalyzer
+from pymatgen.symmetry.analyzer import PointGroupAnalyzer
 from pymongo import MongoClient, DESCENDING
 from rubicon.utils.snl.egsnl import EGStructureNL, SNLGroup
 
@@ -27,6 +27,9 @@ class EGSNLMongoAdapter(FWSerializable):
         self._update_indices()
 
     def _reset(self):
+        if "prod" in self.database.name:
+            print "PROD database is not supposed to reset, please changed the code to reset"
+            exit()
         self.restart_id_assigner_at(1, 1)
         self.snl.remove()
         self.snlgroups.remove()
@@ -134,7 +137,7 @@ class EGSNLMongoAdapter(FWSerializable):
         self.snlgroups.update({'snlgroup_id': snlgroup_id}, new_group.as_dict())
 
 
-    def as_dict(self):
+    def to_dict(self):
         """
         Note: usernames/passwords are exported as unencrypted Strings!
         """

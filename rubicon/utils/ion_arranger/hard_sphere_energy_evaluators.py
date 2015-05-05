@@ -41,31 +41,30 @@ class AtomicRadiusUtils(object):
 
 class CoulumbEnergyEvaluator(EnergyEvaluator):
 
-    def __init__(self, mol_coords, mol_charges, cation_charges, anion_charges,
-                 mol_radius, cation_radius, anion_radius):
+    def taboo_current_position(self):
+        pass
+
+    def __init__(self, mol_coords, mol_charges, mol_radius, fragments_charges, nums_fragments,
+                 fragment_atom_radius):
         super(CoulumbEnergyEvaluator, self).__init__(mol_coords)
         self.mol_charges = mol_charges
-        self.cation_charges = cation_charges
-        self.anion_charges = anion_charges
+        self.fragments_charges = []
+        for frag_ch, num in zip(fragments_charges, nums_fragments):
+            self.fragments_charges.extend([frag_ch]*num)
         self.mol_radius = mol_radius
-        self.cation_radius = cation_radius
-        self.anion_radius = anion_radius
+        self.fragments_atom_radius = []
+        for frag_rad, num in zip(fragment_atom_radius, nums_fragments):
+            self.fragments_atom_radius.extend([frag_rad]*num)
 
-    def calc_energy(self, cation_coords, anion_coords):
+    def calc_energy(self, fragments_coords):
+        components = []
+        components.append(tuple([self.mol_coords, self.mol_charges, self.mol_radius]))
+        for coords, ch, rad in zip(fragments_coords, self.fragments_charges, self.fragments_atom_radius):
+            components.append(tuple([coords, ch, rad]))
         energy = 0.0
-        for frag_coords in cation_coords:
-            energy += self._pair_energy(
-                self.mol_coords, self.mol_charges, self.mol_radius,
-                frag_coords, self.cation_charges, self.cation_radius)
-        for frag_coords in anion_coords:
-            energy += self._pair_energy(
-                self.mol_coords, self.mol_charges, self.mol_radius,
-                frag_coords, self.anion_charges, self.anion_radius)
-        for cc in cation_coords:
-            for ac in anion_coords:
-                energy += self._pair_energy(
-                    cc, self.cation_charges, self.cation_radius,
-                    ac, self.anion_charges, self.anion_radius)
+        for (coords1, ch1, rad1), (coords2, ch2, rad2) in \
+                itertools.combinations(components):
+            energy += self._pair_energy(coords1, ch1, rad1, coords2, ch2, rad2)
         return energy
 
     @staticmethod
@@ -84,28 +83,33 @@ class CoulumbEnergyEvaluator(EnergyEvaluator):
         return energy
 
 class HardSphereEnergyEvaluator(EnergyEvaluator):
-    overlap_energy = 1.0E4
+    def taboo_current_position(self):
+        pass
 
-    def __init__(self, mol_coords, mol_radius, cation_radius, anion_radius):
+    base_energy = 5.0E4
+    overlap_energy = 0.01
+
+
+    def __init__(self, mol_coords, mol_radius, fragments_atom_radius, nums_fragments):
         super(HardSphereEnergyEvaluator, self).__init__(mol_coords)
         self.mol_radius = mol_radius
-        self.cation_radius = cation_radius
-        self.anion_radius = anion_radius
+        self.fragments_atom_radius = []
+        for frag_rad, num in zip(fragments_atom_radius, nums_fragments):
+            self.fragments_atom_radius.extend([frag_rad]*num)
 
-    def calc_energy(self, cation_coords, anion_coords):
-        energies = []
-        for frag_coords in cation_coords:
-            energies.append(self._pair_energy(self.mol_coords, self.mol_radius,
-                frag_coords, self.cation_radius))
-        for frag_coords in anion_coords:
-            energies.append(self._pair_energy(self.mol_coords, self.mol_radius,
-                frag_coords, self.anion_radius))
-        for cc in cation_coords:
-            for ac in anion_coords:
-                energies.append(self._pair_energy(cc, self.cation_radius,
-                    ac, self.anion_radius))
-        energy = sum(energies)
-        return energy
+    def calc_energy(self, fragments_coords):
+        components = []
+        components.append(tuple([self.mol_coords, self.mol_radius]))
+        for coords, rad in zip(fragments_coords, self.fragments_atom_radius):
+            components.append(tuple([coords, rad]))
+        energy = 0.0
+        for (coords1, rad1), (coords2, rad2) in \
+                itertools.combinations(components, 2):
+            energy += self._pair_energy(coords1, rad1, coords2, rad2)
+        if energy < 0.009:
+            return 0.0
+        else:
+            return energy + self.base_energy
 
     @classmethod
     def _pair_energy(cls, coords1, radius1, coords2, radius2):
@@ -118,16 +122,130 @@ class HardSphereEnergyEvaluator(EnergyEvaluator):
                     energy += cls.overlap_energy
         return energy
 
+class UmbrellarForceEnergyEvaluator(EnergyEvaluator):
+    def taboo_current_position(self):
+        pass
+
+    base_energy = 7.0E4
+
+    def __init__(self, mol_coords, centers, taboo_tolerance_au, best_umbrella_ratio):
+        super(UmbrellarForceEnergyEvaluator, self).__init__(mol_coords)
+        self.centers = centers
+        self.umbrella_radius = taboo_tolerance_au * best_umbrella_ratio
+
+    def calc_energy(self, fragments_coords):
+        if len(self.centers) == 0:
+            return 0.0
+        umbrella_distances = []
+        for center in self.centers:
+            current_pos = list(itertools.chain(*fragments_coords))
+            atom_distances = [math.sqrt(sum([(x1-x2)**2 for x1, x2 in zip(c1, c2)]))
+                              for c1, c2 in
+                              zip(center, current_pos)]
+            rmsd_distance = math.sqrt(sum(d**2 for d in atom_distances)/len(atom_distances))
+            if rmsd_distance <= self.umbrella_radius:
+                return 0.0
+            else:
+                umbrella_distances.append(rmsd_distance)
+        energy = min(umbrella_distances)
+        if energy < 0.01:
+            return 0.0
+        else:
+            return self.base_energy + min(umbrella_distances)
+
+
+class OrderredLayoutEnergyEvaluator(EnergyEvaluator):
+    def taboo_current_position(self):
+        pass
+
+    base_energy = 6.0E4
+
+    def __init__(self, mol_coords, nums_fragments):
+        super(OrderredLayoutEnergyEvaluator, self).__init__(mol_coords)
+        self.nums_fragments = nums_fragments
+
+    def calc_energy(self, fragments_coords):
+        tokens = []
+        start_index = 0
+        for nf in self.nums_fragments:
+            end_index = start_index + nf
+            tokens.append(fragments_coords[start_index: end_index])
+            start_index = end_index
+        if start_index != len(fragments_coords):
+            raise Exception("The number of fragments is not consistent")
+        spearmans_rank_coeffs = []
+        for frag in tokens:
+            ranks = self._get_frag_ranks(frag)
+            coeff = self._spearsman_rank_coefficient(ranks)
+            spearmans_rank_coeffs.append(coeff)
+        total_spearmans = sum(spearmans_rank_coeffs)
+        # positive spearmans rank coefficient means more ordered, and should
+        # be prefered by negative energy, therefore, inverse the spearmans value
+        energy = (-total_spearmans) + len(self.nums_fragments)
+        if energy < 1.0E-8:
+            return 0.0
+        else:
+            return energy + self.base_energy
+
+    @classmethod
+    def _get_frag_ranks(cls, frag_coords):
+        grain_size = 1.0
+        natoms = len(frag_coords[0])
+        nfrags = len(frag_coords)
+        center_with_original_rank = []
+        for i, frag in enumerate(frag_coords):
+            xs, ys, zs = zip(*frag)
+            center = tuple([sum(xs)/float(natoms), sum(ys)/float(natoms), sum(zs)/float(natoms)])
+            center_with_original_rank.append(tuple([center, i+1]))
+        # sorted_center_with_original_rank = []
+        # while len(center_with_original_rank) > 0:
+        #     xi, yi, zi = center_with_original_rank[0][0]
+        #     lowest_index = 0
+        #     for j in range(len(center_with_original_rank)):
+        #         i_lowest = True
+        #         xj, yj, zj = center_with_original_rank[j][0]
+        #         if abs(xi - xj) > grain_size:
+        #             if xi > xj:
+        #                 i_lowest = False
+        #         elif abs(yi - yj) > grain_size:
+        #             if yi > yj:
+        #                 i_lowest = False
+        #         elif abs(zi - zj) > grain_size:
+        #             if zi > zj:
+        #                 i_lowest = False
+        #         if not i_lowest:
+        #             lowest_index = j
+        #             xi, yi, zi = center_with_original_rank[lowest_index][0]
+        #     sorted_center_with_original_rank.append(center_with_original_rank.pop(lowest_index))
+        sorted_center_with_original_rank = sorted(center_with_original_rank, key=lambda x: x[0][0])
+        original_ranks = [i for center, i in sorted_center_with_original_rank]
+        cur_orig_rank = [tuple([i+1, j]) for i,j in zip(range(nfrags), original_ranks)]
+        cur_orig_rank.sort(key=lambda x: x[1])
+        ranks = [i for i, j in cur_orig_rank]
+        return ranks
+
+
+    @classmethod
+    def _spearsman_rank_coefficient(self, rank_y):
+        n = len(rank_y)
+        if n == 0 or n == 1:
+            return 1.0
+        rank_x = range(1, n+1)
+        d_2 = [(rx-ry)**2 for rx, ry in zip(rank_x, rank_y)]
+        spearsman = 1.0 - (6.0 * sum(d_2))/(n * (n**2 - 1))
+        return spearsman
+
 class ContactDetector(object):
-    def __init__(self, mol_coords, mol_radius, cation_radius, anion_radius, cap=0.0):
+    def __init__(self, mol_coords, mol_radius, fragments_atom_radius, nums_fragments, cap=0.0):
         self.mol_coords = mol_coords
         self.mol_radius = mol_radius
-        self.cation_radius = cation_radius
-        self.anion_radius = anion_radius
+        self.fragments_atom_radius = []
+        for frag_rad, num in zip(fragments_atom_radius, nums_fragments):
+            self.fragments_atom_radius.extend([frag_rad]*num)
         self.cap = cap * AtomicRadiusUtils.angstrom2au
 
-    def is_contact(self, cation_coords, anion_coords):
-        contact_matrix = self._get_contact_matrix(cation_coords, anion_coords)
+    def is_contact(self, fragments_coords):
+        contact_matrix = self._get_contact_matrix(fragments_coords)
         distance_matrix = self._get_distance_matrix(contact_matrix)
         return np.all(distance_matrix < 1000)
 
@@ -143,10 +261,9 @@ class ContactDetector(object):
             distMatrix = np.minimum(distMatrix, distMatrix[np.newaxis, i, :] + distMatrix[:, i, np.newaxis])
         return distMatrix
 
-    def _get_contact_matrix(self, cation_coords, anion_coords):
+    def _get_contact_matrix(self, fragments_coords):
         fragments = [(self.mol_coords, self.mol_radius)]
-        fragments.extend(zip(cation_coords, [self.cation_radius] * len(cation_coords)))
-        fragments.extend(zip(anion_coords, [self.anion_radius] * len(anion_coords)))
+        fragments.extend(zip(fragments_coords, self.fragments_atom_radius))
         num_frag = len(fragments)
         fragments = [(c, r, i) for i, (c, r) in enumerate(fragments)]
         contact_matrix = np.zeros((num_frag, num_frag), dtype=int)
@@ -164,50 +281,132 @@ class ContactDetector(object):
             contact_matrix[i2, i1] = contact
         return contact_matrix
 
+class ContactGapRMSDEnergyEvaluator(EnergyEvaluator):
+    base_energy = 4.0E4
+
+    def taboo_current_position(self):
+        pass
+
+    def __init__(self, mol_coords, mol_radius, fragments_atom_radius, nums_fragments, cap=0.0):
+        super(ContactGapRMSDEnergyEvaluator, self).__init__(mol_coords)
+        self.mol_coords = mol_coords
+        self.mol_radius = mol_radius
+        self.fragments_atom_radius = []
+        for frag_rad, num in zip(fragments_atom_radius, nums_fragments):
+            self.fragments_atom_radius.extend([frag_rad]*num)
+        self.cap = cap * AtomicRadiusUtils.angstrom2au
+
+    def calc_energy(self, fragments_coords):
+        max_gap = 0.0
+        frag_index_1 = None
+        frag_index_2 = None
+        mol_gaps = self._get_mol_gaps(fragments_coords)
+        for g, i1, i2 in mol_gaps:
+            if g > max_gap:
+                max_gap = g
+                frag_index_1 = i1
+                frag_index_2 = i2
+        rmsd_gaps = math.sqrt(sum([g**2 for g, i1, i2 in mol_gaps])/len(mol_gaps))
+        if max_gap < 0.1:
+            return 0.0
+        else:
+            return self.base_energy + rmsd_gaps
+
+
+    def _get_mol_gaps(self, fragments_coords):
+        fragments = [(self.mol_coords, self.mol_radius)]
+        fragments.extend(zip(fragments_coords, self.fragments_atom_radius))
+        fragments = [(c, r, i) for i, (c, r) in enumerate(fragments)]
+        mol_gaps = []
+        for c1s, r1s, i1 in fragments:
+            min_frag1_gap = 9999999999.9
+            nearest_frag_index = -1
+            for c2s, r2s, i2 in fragments:
+                if i1 == i2:
+                    continue
+                contact = False
+                for (c1, r1), (c2, r2) in itertools.product(zip(c1s, r1s), zip(c2s, r2s)):
+                    distance = math.sqrt(sum([(x1-x2)**2 for x1, x2
+                                              in zip(c1, c2)]))
+                    if distance <= r1 + r2 + self.cap:
+                        contact = True
+                        break
+                    else:
+                        cur_gap = distance - (r1 + r2 + self.cap)
+                        if cur_gap < min_frag1_gap:
+                            min_frag1_gap = cur_gap
+                            nearest_frag_index = i2
+                if contact:
+                    min_frag1_gap = 0.0
+                    nearest_frag_index = i2
+                    break
+            mol_gaps.append(tuple([min_frag1_gap, i1, nearest_frag_index]))
+        return mol_gaps
+
 
 class LargestContactGapEnergyEvaluator(EnergyEvaluator):
+    base_energy = 4.0E4
+    grain_size = 0.3
 
-    def __init__(self, mol_coords, mol_radius, cation_radius, anion_radius, max_cap, threshold=1.0E-2):
+    def taboo_current_position(self):
+        pass
+
+    def __init__(self, mol_coords, mol_radius, fragments_atom_radius, nums_fragments, max_cap, threshold=1.0E-2):
         super(LargestContactGapEnergyEvaluator, self).__init__(mol_coords)
         self.max_cap = max_cap * AtomicRadiusUtils.angstrom2au
         self.threshold = threshold
-        self.contact_detector = ContactDetector(mol_coords, mol_radius, cation_radius, anion_radius, cap=0.0)
+        self.contact_detector = ContactDetector(mol_coords, mol_radius, fragments_atom_radius, nums_fragments, cap=0.0)
 
-    def calc_energy(self, cation_coords, anion_coords):
+    @classmethod
+    def _coarse_grain_energy(cls, energy):
+        decimal_places = -int(math.floor(math.log10(cls.grain_size)))
+        folds = round(cls.grain_size / (10.0 ** -decimal_places), 0)
+        coarse_grained_energy = round(energy/folds, decimal_places) * folds
+        return coarse_grained_energy
+
+
+    def calc_energy(self, fragments_coords):
         low = 0.0
         high = self.max_cap
         self.contact_detector.cap = high
-        if not self.contact_detector.is_contact(cation_coords, anion_coords):
+        if not self.contact_detector.is_contact(fragments_coords):
             return float("NaN")
         self.contact_detector.cap = low
-        if self.contact_detector.is_contact(cation_coords, anion_coords):
+        if self.contact_detector.is_contact(fragments_coords):
             return low
         while high - low > self.threshold:
             mid = (low + high)/2.0
             self.contact_detector.cap = mid
-            if self.contact_detector.is_contact(cation_coords, anion_coords):
+            if self.contact_detector.is_contact(fragments_coords):
                 high = mid
             else:
                 low = mid
-        return ((high + low)/2.0)
+        energy = (high + low)/2.0
+        energy = self._coarse_grain_energy(energy)
+        if energy < self.grain_size * 0.5:
+            return 0.0
+        else:
+            return energy + self.base_energy
 
 
 class GravitationalEnergyEvaluator(EnergyEvaluator):
 
+    def taboo_current_position(self):
+        pass
+
     gravity = 0.001
 
-    def __init__(self, mol_coords, mol_radius, cation_radius, anion_radius):
+    def __init__(self, mol_coords, mol_radius, fragments_atom_radius, nums_fragments):
         super(GravitationalEnergyEvaluator, self).__init__(mol_coords)
         self.mol_radius = mol_radius
-        self.cation_radius = cation_radius
-        self.anion_radius = anion_radius
+        self.fragments_atom_radius = []
+        for frag_rad, num in zip(fragments_atom_radius, nums_fragments):
+            self.fragments_atom_radius.extend([frag_rad]*num)
 
-    def calc_energy(self, cation_coords, anion_coords):
+    def calc_energy(self, fragments_coords):
         energy = 0.0
-        for frag_coords in cation_coords:
-            energy += self._gravitational_energy(frag_coords, self.cation_radius)
-        for frag_coords in anion_coords:
-            energy += self._gravitational_energy(frag_coords, self.anion_radius)
+        for frag_coords, frag_radius in zip(fragments_coords, self.fragments_atom_radius):
+            energy += self._gravitational_energy(frag_coords, frag_radius)
         return energy
 
     def _gravitational_energy(self, ion_coords, ion_radius):
@@ -228,19 +427,24 @@ class GravitationalEnergyEvaluator(EnergyEvaluator):
             return self.gravity * grav_distance
 
 class HardSphereElectrostaticEnergyEvaluator(EnergyEvaluator):
-    def __init__(self, mol_coords, mol_radius, cation_radius, anion_radius,
-                 mol_charges, cation_charges, anion_charges):
+    def taboo_current_position(self):
+        pass
+
+    def __init__(self, mol_coords, mol_radius, mol_charges, fragments_charges,
+                 nums_fragments, fragment_atom_radius):
         super(HardSphereElectrostaticEnergyEvaluator, self).__init__(mol_coords)
-        self.hardsphere = HardSphereEnergyEvaluator(mol_coords, mol_radius, cation_radius, anion_radius)
-        self.coulumb = CoulumbEnergyEvaluator(mol_coords, mol_charges, cation_charges, anion_charges,
-                                              mol_radius, cation_radius, anion_radius)
-        self.gravitation = GravitationalEnergyEvaluator(mol_coords, mol_radius, cation_radius, anion_radius)
+        self.hardsphere = HardSphereEnergyEvaluator(mol_coords, mol_radius, fragment_atom_radius,
+                                                    nums_fragments)
+        self.coulumb = CoulumbEnergyEvaluator(mol_coords, mol_charges, mol_radius, fragments_charges,
+                                              nums_fragments, fragment_atom_radius)
+        self.gravitation = GravitationalEnergyEvaluator(mol_coords, mol_radius, fragment_atom_radius,
+                                                        nums_fragments)
         self.calculators = [self.hardsphere, self.coulumb, self.gravitation]
 
-    def calc_energy(self, cation_coords, anion_coords):
+    def calc_energy(self, fragments_coords):
         energy = 0.0
         for c in self.calculators:
-            energy += c.calc_energy(cation_coords, anion_coords)
+            energy += c.calc_energy(fragments_coords)
             if energy > HardSphereEnergyEvaluator.overlap_energy * 0.9:
                 return energy
         return energy

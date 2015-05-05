@@ -3,6 +3,7 @@
 """
 This module implements input and output processing from MOPAC
 """
+from __future__ import unicode_literals
 import copy
 from textwrap import TextWrapper
 from monty.io import zopen
@@ -143,11 +144,10 @@ class MopTask(MSONable):
                                              x=site.x, y=site.y, z=site.z))
         return lines
 
-    @property
-    def to_dict(self):
+    def as_dict(self):
         return {"@module": self.__class__.__module__,
                 "@class": self.__class__.__name__,
-                "molecule": self.mol.to_dict,
+                "molecule": self.mol.as_dict(),
                 "keywords": self.keywords,
                 "title": self.title}
 
@@ -190,7 +190,7 @@ class MopTask(MSONable):
         keywords = cls._parse_keywords(lines[0:1])
         title = lines[1: 3]
         mol = cls._parse_molecule(lines[3:])
-        d = {"keywords": keywords, "title": title, "molecule": mol.to_dict,
+        d = {"keywords": keywords, "title": title, "molecule": mol.as_dict(),
              "@module": cls.__module__, "@class": cls.__name__}
         return MopTask.from_dict(d)
 
@@ -364,7 +364,8 @@ class MopOutput(object):
                                    "(?P<z>\-?\d+\.\d+)")
         error_defs = (
             (re.compile("EXCESS NUMBER OF OPTIMIZATION CYCLES"), "Geometry optimization failed"),
-            (re.compile("UNABLE TO ACHIEVE SELF-CONSISTENCE"), "Bad SCF convergence")
+            (re.compile("UNABLE TO ACHIEVE SELF-CONSISTENCE"), "Bad SCF convergence"),
+            (re.compile("TO CONTINUE, START AGAIN WITH THE WORD \"PRECISE\""), "Not Accurate Enough")
         )
         energies = []
         parse_keywords = None

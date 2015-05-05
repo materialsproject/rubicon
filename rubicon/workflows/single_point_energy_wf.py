@@ -6,11 +6,12 @@ from rubicon.utils.qchem_firework_creator import QChemFireWorkCreator
 __author__ = 'xiaohuiqu'
 
 
-def single_point_energy_fws(mol, name, mission, solvent, solvent_method, qm_method, pop_method, dupefinder=None, priority=1,
-                            parent_fwid=None, additional_user_tags=None):
-    large = False
-    if len(mol) > 50:
-        large = True
+def single_point_energy_fws(mol, name, mission, solvent, solvent_method, use_vdW_surface, qm_method, pop_method, dupefinder=None, priority=1,
+                            parent_fwid=None, additional_user_tags=None, depend_on_parent_fw=True, large=None):
+    if large is None:
+        large = False
+        if len(mol) > 50:
+            large = True
     energy_method, sol_qm_method, geom_method = qm_method.split("//")
     charge = mol.charge
     spin_multiplicity = mol.spin_multiplicity
@@ -44,7 +45,8 @@ def single_point_energy_fws(mol, name, mission, solvent, solvent_method, qm_meth
 
     sol_cal_fwid, sol_db_fwid = fwid_base + 4, fwid_base + 5
     fw_sol = fw_creator.sp_fw(
-        charge, spin_multiplicity, sol_cal_fwid, sol_db_fwid, solvent_method=solvent_method, solvent=solvent,
+        charge, spin_multiplicity, sol_cal_fwid, sol_db_fwid, solvent_method=solvent_method,
+        use_vdW_surface=use_vdW_surface, solvent=solvent,
         priority=priority, qm_method=sol_qm_method, population_method=pop_method, task_type_name="solvation energy")
     fws.extend(fw_sol)
     links_dict[sol_cal_fwid] = sol_db_fwid
@@ -58,11 +60,13 @@ def single_point_energy_fws(mol, name, mission, solvent, solvent_method, qm_meth
 
     if len(mol) > 1:
         links_dict[freq_db_fwid] = sol_cal_fwid
-        for pfw_id in parent_fwid:
-            links_dict[pfw_id] = geom_cal_fwid
+        if depend_on_parent_fw:
+            for pfw_id in parent_fwid:
+                links_dict[pfw_id] = geom_cal_fwid
     else:
-        for pfw_id in parent_fwid:
-            links_dict[pfw_id] = sol_cal_fwid
+        if depend_on_parent_fw:
+            for pfw_id in parent_fwid:
+                links_dict[pfw_id] = sol_cal_fwid
     return fws, links_dict
 
 

@@ -6,12 +6,13 @@ TODO: Modify module doc.
 
 from __future__ import division
 from monty.io import zopen
+from monty.json import jsanitize
 from monty.os.path import zpath
 from pymatgen import Molecule
 from pymatgen.analysis.molecule_structure_comparator import \
     MoleculeStructureComparator
 from pymatgen.io.qchemio import QcOutput
-from pymatgen.symmetry.pointgroup import PointGroupAnalyzer
+from pymatgen.symmetry.analyzer import PointGroupAnalyzer
 from rubicon.utils.snl.egsnl import EGStructureNL
 from rubicon.utils.snl.egsnl_mongo import EGSNLMongoAdapter
 
@@ -30,7 +31,6 @@ import datetime
 from pymongo import MongoClient
 
 from pymatgen.apps.borg.hive import AbstractDrone
-from pymatgen.util.io_utils import clean_json
 from pymatgen.io.babelio import BabelMolAdaptor
 from pymatgen.io.xyzio import XYZ
 
@@ -247,7 +247,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
         if "state" not in d:
             d["state"] = "successful"
 
-        return clean_json(d)
+        return jsanitize(d)
 
     @staticmethod
     def update_tags(fw_spec, d, task_id):
@@ -289,7 +289,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
                     # add snl
                     egsnl, snlgroup_id = sma.add_snl(
                         new_snl, snlgroup_guess=d['snlgroup_id_initial'])
-                    d['snl_final'] = egsnl.as_dicit()
+                    d['snl_final'] = egsnl.as_dict()
                     d['snlgroup_id_final'] = snlgroup_id
                 else:
                     d['snl_final'] = fw_spec['egsnl']

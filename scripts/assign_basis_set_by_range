@@ -1,0 +1,6 @@
+__author__ = 'xiaohuiqu'
+
+import rubicon.scripts.assign_basis_set_by_range as absbr
+
+if __name__ == "__main__":
+    absbr.main()

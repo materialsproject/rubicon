@@ -53,7 +53,15 @@ class TaskKeys:
                                      "fluoro": "-F", "ethynyl": "-CCH", "methyl": "-CH3", "ethyl": "-CH2CH3",
                                      "hydroxyl": "-OH", "vinyl": "-C=CH2", "methoxyl": "-OCH3",
                                      "ethanamide": "-NHC(O)CH3", "benzene": "-C5H6", "amine": "-NH2",
-                                     "methylamine": "-NHCH3", "dimethylamine": "-N(CH3)2"}
+                                     "methylamine": "-NHCH3", "dimethylamine": "-N(CH3)2",
+                                     "Aceto": "-C(O)CH3", "Amine": "-NH2", "Benzene": "-C5H6", "Butyl": "-C4H9",
+                                     "Carboxyl": "-COOH", "Chloro": "-Cl", "Cyano": "-CN", "Dimethylamine": "-N(CH3)2",
+                                     "Ethanamide": "-NHC(O)CH3", "Ethyl": "-CH2CH3", "Ethynyl": "-CCH", "Fluoro": "-F",
+                                     "G0": "-OCH3", "G1": "-OCH2CH2OCH3", "G2": "-O(CH2CH2O)2CH3",
+                                     "G3": "-O(CH2CH2O)3CH3", "Hydroxyl": "-OH", "Methoxyl": "-OCH3", "Methyl": "-CH3",
+                                     "Methylamine": "-NHCH3", "Nitro": "-NO2", "S2": "-OCH2OCH3", "S3": "-O(CH2O)2CH3",
+                                     "Tribromomethyl": "-CBr3", "Tricholoromethyl": "-CCl3", "Triflouromethyl": "-CF3",
+                                     "Vinyl": "-C=CH2", "butyl": "-C4H9"}
 
 
 class MoleculesBuilder(eg_shared.ParallelBuilder):
@@ -113,20 +121,23 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         solvents = self._c.tasks.find(query, fields=TaskKeys.fields).distinct(
             "implicit_solvent.solvent_name"
         )
-        solvent_model = "ief-pcm"
+        #solvent_model = "ief-pcm"
+        solvent_models = self._c.tasks.find(query, fields=TaskKeys.fields).distinct("implicit_solvent.model")
         molecule = dict()
         molecule['charge'] = self.ref_charge
         docs_available = False
         molecule['solvated_properties'] = dict()
-        for solvent in solvents:
-            query['implicit_solvent.solvent_name'] = solvent
-            query['implicit_solvent.model'] = solvent_model
-            docs = list(self._c.tasks.find(query, fields=TaskKeys.fields))
-            if docs:
-                docs_available = True
-            d = self.build_molecule_solvated_properties(docs)
-            if d and len(d) > 0:
-                molecule['solvated_properties'][solvent.replace(".", "_")] = d
+        for solvent_model in solvent_models:
+            for solvent in solvents:
+                query['implicit_solvent.solvent_name'] = solvent
+                query['implicit_solvent.model'] = solvent_model
+                docs = list(self._c.tasks.find(query, fields=TaskKeys.fields))
+                if docs:
+                    docs_available = True
+                d = self.build_molecule_solvated_properties(docs)
+                if d and len(d) > 0:
+                    solvent_key = "{}_{}".format(solvent, solvent_model).replace(".", "_")
+                    molecule['solvated_properties'][solvent_key] = d
         if not docs_available:
             return 1
         if len(molecule['solvated_properties']) == 0:
@@ -195,6 +206,8 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
                 docs["neutral"]["calculations"][scf_name]["energies"][-1][-1] \
                 - \
                 docs["anion"]["calculations"][scf_name]["energies"][-1][-1]
+        if "IP" in molecule and "EA" in molecule:
+            molecule["electrochemical_window_width"] = molecule["IP"] - molecule["EA"]
         molecule['electrode_potentials'] = dict()
         if solution_phase:
             if 'IP' in molecule:
@@ -261,26 +274,54 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         return molecule
 
     @staticmethod
+    def parse_derivation_name(derivation_name, molname):
+        group_name_texts, base_mol_name = derivation_name.split(';')
+        if base_mol_name == "thiophene" and "thiophen" not in molname:
+            base_mol_name = "tetrathiafulvulene"
+        functional_groups = []
+        if base_mol_name != 'dbbb':
+            for g in group_name_texts.split(','):
+                position, gn = g.split('-')
+                functional_groups.append(TaskKeys.literal_to_formula_group_name[gn])
+        else:
+            pos_text, group1_text, group2_text = group_name_texts.split(',')
+            group1_name = group1_text.split('-')[1]
+            group2_name = group2_text.split('-')[1]
+            functional_groups.append(TaskKeys.literal_to_formula_group_name[group1_name])
+            functional_groups.append(TaskKeys.literal_to_formula_group_name[group2_name])
+        return functional_groups, base_mol_name
+
+    @staticmethod
     def build_molecule_structure_properties(docs):
         molecule = dict()
         if "molname" in docs["user_tags"]:
-            molname = docs["user_tags"]['molname']
-            m = TaskKeys.lei_1_group_pattern.search(molname)
-            if m:
-                base_mol = m.group("base_mol")
-                literal_group_name = m.group("group_name")
-                formula_group_name = TaskKeys.literal_to_formula_group_name[literal_group_name]
-                molecule["base_molecule"] = base_mol
-                molecule["functional_groups"] = [formula_group_name]
-            m = TaskKeys.lei_2_group_pattern.search(molname)
-            if m:
-                base_mol = m.group("base_mol")
-                literal_group1 = m.group("group1")
-                literal_group2 = m.group("group2")
-                formula_group1 = TaskKeys.literal_to_formula_group_name[literal_group1]
-                formula_group2 = TaskKeys.literal_to_formula_group_name[literal_group2]
-                molecule["base_molecule"] = base_mol
-                molecule["functional_groups"] = sorted([formula_group1, formula_group2])
+            if "derivation_name" in docs["user_tags"] and \
+                            ";" in docs["user_tags"]["derivation_name"]:
+                functional_groups, base_mol_name = MoleculesBuilder.parse_derivation_name(
+                    docs["user_tags"]["derivation_name"], docs["user_tags"]['molname'])
+                molecule["base_molecule"] = base_mol_name
+                molecule["functional_groups"] = sorted(functional_groups)
+            else:
+                molname = docs["user_tags"]['molname']
+                m = TaskKeys.lei_1_group_pattern.search(molname)
+                if m:
+                    base_mol = m.group("base_mol")
+                    literal_group_name = m.group("group_name")
+                    if literal_group_name in TaskKeys.literal_to_formula_group_name:
+                        formula_group_name = TaskKeys.literal_to_formula_group_name[literal_group_name]
+                        molecule["base_molecule"] = base_mol
+                        molecule["functional_groups"] = [formula_group_name]
+                m = TaskKeys.lei_2_group_pattern.search(molname)
+                if m:
+                    base_mol = m.group("base_mol")
+                    literal_group1 = m.group("group1")
+                    literal_group2 = m.group("group2")
+                    if literal_group1 in TaskKeys.literal_to_formula_group_name \
+                            and literal_group2 in TaskKeys.literal_to_formula_group_name:
+                        formula_group1 = TaskKeys.literal_to_formula_group_name[literal_group1]
+                        formula_group2 = TaskKeys.literal_to_formula_group_name[literal_group2]
+                        molecule["base_molecule"] = base_mol
+                        molecule["functional_groups"] = sorted([formula_group1, formula_group2])
         return molecule
 
     def _build_indexes(self):

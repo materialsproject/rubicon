@@ -137,7 +137,7 @@ class QChemFireWorkCreator():
                                             energy=10.0)
         qcinp = QcInput([qctask])
         spec = self.base_spec()
-        spec["qcinp"] = qcinp.to_dict
+        spec["qcinp"] = qcinp.as_dict()
         spec['task_type'] = task_type
         spec['charge'] = charge
         spec['spin_multiplicity'] = spin_multiplicity
@@ -182,7 +182,7 @@ class QChemFireWorkCreator():
             qctask.set_scf_algorithm_and_iterations(iterations=100)
         qcinp = QcInput([qctask])
         spec = self.base_spec()
-        spec["qcinp"] = qcinp.to_dict
+        spec["qcinp"] = qcinp.as_dict()
         spec['task_type'] = task_type
         spec['charge'] = charge
         spec['spin_multiplicity'] = spin_multiplicity
@@ -206,7 +206,7 @@ class QChemFireWorkCreator():
         return fw_freq_cal, fw_freq_db
 
     @staticmethod
-    def get_dielectric_constant(solvent):
+    def get_dielectric_constant(solvent, use_vdW_surface):
         dielec_const_file = os.path.join(os.path.dirname(__file__),
                                          "../utils/data", "pcm_params.json")
         with open(dielec_const_file) as f:
@@ -260,6 +260,8 @@ class QChemFireWorkCreator():
         else:
             raise Exception("Please use a string for pure solvent, and use"
                             "dict for mixtures")
+        if use_vdW_surface:
+            probe_radius = 0.0
         return dielectric_constant, probe_radius, solvent_name
 
     @staticmethod
@@ -281,7 +283,7 @@ class QChemFireWorkCreator():
                            smx_solvent=smx_solvent.lower())
         return rem_options, smx_solvent
 
-    def set_solvent_method(self, qctask_sol, solvent, solvent_method):
+    def set_solvent_method(self, qctask_sol, solvent, solvent_method, use_vdW_surface=False):
         implicit_solvent = dict()
         implicit_solvent['solvent_name'] = solvent
         if solvent_method.lower() in ['cpcm', 'ief-pcm']:
@@ -289,18 +291,18 @@ class QChemFireWorkCreator():
                 solvent_theory = 'ssvpe'
             else:
                 solvent_theory = 'cpcm'
-            dielectric_constant, probe_radius, solvent_name = self.get_dielectric_constant(solvent)
+            dielectric_constant, probe_radius, solvent_name = self.get_dielectric_constant(solvent, use_vdW_surface)
             qctask_sol.use_pcm(solvent_params={"Dielectric": dielectric_constant},
                                pcm_params={'Theory': solvent_theory,
                                            "SASrad": probe_radius})
-            implicit_solvent['model'] = solvent_method.lower()
+            implicit_solvent['model'] = "{}_at_surface{:.2f}".format(solvent_method.lower(), probe_radius)
             implicit_solvent['dielectric_constant'] = dielectric_constant
             implicit_solvent['solvent_probe_radius'] = probe_radius
             implicit_solvent['radii'] = 'uff'
             implicit_solvent['vdwscale'] = 1.1
             implicit_solvent['solvent_name'] = solvent_name
         elif solvent_method.lower() == 'cosmo':
-            dielectric_constant, dummy, solvent_name = self.get_dielectric_constant(solvent)
+            dielectric_constant, dummy, solvent_name = self.get_dielectric_constant(solvent, use_vdW_surface)
             qctask_sol.use_cosmo(dielectric_constant)
             implicit_solvent['model'] = 'cosmo'
             implicit_solvent['dielectric_constant'] = dielectric_constant
@@ -326,7 +328,7 @@ class QChemFireWorkCreator():
         return implicit_solvent
 
     def sp_fw(self, charge, spin_multiplicity, fw_id_cal, fw_id_db,
-              solvent_method="ief-pcm", solvent="water", priority=None, qm_method=None,
+              solvent_method="ief-pcm", use_vdW_surface=False, solvent="water", priority=None, qm_method=None,
               population_method=None, task_type_name=None):
         if not qm_method:
             qm_method = "B3LYP/6-31+G*"
@@ -361,10 +363,10 @@ class QChemFireWorkCreator():
                             jobtype="sp", title=title, exchange=exchange, correlation=correlation,
                             basis_set=basis_set, aux_basis_set=aux_basis, rem_params=rem_params)
         qctask_sol.set_scf_initial_guess(guess="read")
-        implicit_solvent = self.set_solvent_method(qctask_sol, solvent, solvent_method)
+        implicit_solvent = self.set_solvent_method(qctask_sol, solvent, solvent_method, use_vdW_surface)
 
         qcinp = QcInput([qctask_vac, qctask_sol])
-        spec["qcinp"] = qcinp.to_dict
+        spec["qcinp"] = qcinp.as_dict()
         spec['task_type'] = task_type
         spec['charge'] = charge
         spec['spin_multiplicity'] = spin_multiplicity
@@ -397,8 +399,8 @@ class QChemFireWorkCreator():
         if priority:
             spec['_priority'] = priority
         if super_mol_snlgroup_id:
-            from rubicon.workflows.bsse_wf import BSSEFragments
-            task_type = "bsse {} fragment".format(BSSEFragments.OVERLAPPED if bs_overlap else BSSEFragments.ISOLATED)
+            from rubicon.workflows.bsse_wf import BSSEFragment
+            task_type = "bsse {} fragment".format(BSSEFragment.OVERLAPPED if bs_overlap else BSSEFragment.ISOLATED)
         else:
             task_type = "vacuum only single point energy"
         if mixed_basis_generator or mixed_aux_basis_generator:
@@ -444,8 +446,8 @@ class QChemFireWorkCreator():
             spec["inchi_root"] = super_mol_inchi_root
         if ghost_atoms:
             spec["run_tags"]["ghost_atoms"] = sorted(set(ghost_atoms))
-            from rubicon.workflows.bsse_wf import BSSEFragments
-            spec["run_tags"]["bsse_fragment_type"] = BSSEFragments.OVERLAPPED if bs_overlap else BSSEFragments.ISOLATED
+            from rubicon.workflows.bsse_wf import BSSEFragment
+            spec["run_tags"]["bsse_fragment_type"] = BSSEFragment.OVERLAPPED if bs_overlap else BSSEFragment.ISOLATED
         if mixed_basis_generator:
             spec["_mixed_basis_set_generator"] = mixed_basis_generator
         if mixed_aux_basis_generator:
@@ -492,7 +494,7 @@ class QChemFireWorkCreator():
         qctask_vac.set_scf_algorithm_and_iterations(iterations=100)
 
         qcinp = QcInput([qctask_vac])
-        spec["qcinp"] = qcinp.to_dict
+        spec["qcinp"] = qcinp.as_dict()
         spec['task_type'] = task_type
         spec['charge'] = charge
         spec['spin_multiplicity'] = spin_multiplicity

@@ -71,6 +71,24 @@
             "SolG": 20.2,
             "SolH": 0.0,
             "SolN": 1.415
+        },
+        "diethylether": {
+            "Dielec": 4.34,
+            "SolA": 0.0,
+            "SolB": 0.439,
+            "SolC": 0.0,
+            "SolG": 24.47,
+            "SolH": 0.0,
+            "SolN": 1.3497
+        },
+        "methyltetrahydrofuran": {
+            "Dielec": 6.97,
+            "SolA": 0.0,
+            "SolB": 0.426,
+            "SolC": 0.0,
+            "SolG": 36.56,
+            "SolH": 0.0,
+            "SolN": 1.406
         }
     },
     "builtin_solvent": [

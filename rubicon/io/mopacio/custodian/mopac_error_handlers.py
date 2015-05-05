@@ -37,6 +37,9 @@ class MopacErrorHandler(ErrorHandler):
         if e == "Geometry optimization failed":
             self.mopinp.use_bfgs()
             actions.append("Use BFGS")
+        elif e == "Not Accurate Enough":
+            self.mopinp.use_precise()
+            actions.append("Use Precise")
         else:
             return {"errors": self.errors, "actions": None}
         self.mopinp.write_file(self.input_file)

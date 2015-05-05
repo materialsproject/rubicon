@@ -1,9 +1,10 @@
 from collections import defaultdict
-import copy
 import datetime
 import json
 import os
+import dateutil.parser
 from pymatgen.io.babelio import BabelMolAdaptor
+from pymatgen.matproj.snl import StructureNL
 from pymongo import MongoClient
 import yaml
 from rubicon.utils.snl.egsnl import get_meta_from_structure
@@ -37,10 +38,16 @@ class SubmissionMongoAdapterEG(object):
         self._update_indices()
 
     def _reset(self):
+        if "prod" in self.database.name:
+            print "PROD database is not supposed to reset, please changed the code to reset"
+            exit()
         self._restart_id_assigner_at(1)
         self.jobs.remove()
 
     def _reset_reactions_collection(self):
+        if "prod" in self.database.name:
+            print "PROD database is not supposed to reset, please changed the code to reset"
+            exit()
         self._restart_reaction_id_assigner_at(1)
         self.reactions.remove()
 
@@ -94,7 +101,7 @@ class SubmissionMongoAdapterEG(object):
         self.jobs.insert(d)
         return d['submission_id']
 
-    def submit_reaction(self, reactant_snls, product_snls, submitter_email, parameters=None):
+    def submit_reaction(self, reactant_snls, product_snls, reactant_fragments, product_fragments, submitter_email, parameters=None):
         """
             Submit a reaction. This task will be separated to several single point energy calculations, and submitted
             as individual molecule.
@@ -102,6 +109,8 @@ class SubmissionMongoAdapterEG(object):
             Args:
                 reactant_snls: List of tuple(snl, count, nickname).
                 product_snls: List of tuple(snl, count, nickname).
+                reactant_fragments: BSSE fragments definition. (BSSEFragment)
+                product_fragments: BSSE fragments definition. (BSSEFragment)
                 submitter_email: Email.
                 parameters: dict of parameter. Expected parameters are 1) method: QChem theoretival method. e.g.
                     B3LYP-XDM/6-31+G*; 2) solvent: implicit solvent in energy calcuation. e.g. THF; ...
@@ -120,21 +129,6 @@ class SubmissionMongoAdapterEG(object):
                 product_element_count[element] += n
         if reaction_element_count != product_element_count:
             raise Exception("Number of atoms is inconsistant in reactant and product")
-        params = copy.deepcopy(parameters)
-        if "workflow" not in params:
-            params["workflow"] = "single point energy"
-        reactant_submission_ids = []
-        for snl, n, nick_name in reactant_snls:
-            params_t = copy.deepcopy(params)
-            params_t["nick_name"] = nick_name
-            submission_id = self.submit_snl(snl, submitter_email, params_t)
-            reactant_submission_ids.append(submission_id)
-        product_submission_ids = []
-        for snl, n, nick_name in product_snls:
-            params_t = copy.deepcopy(params)
-            params_t["nick_name"] = nick_name
-            submission_id = self.submit_snl(snl, submitter_email, params_t)
-            product_submission_ids.append(submission_id)
         reactant_inchis = []
         product_inchis = []
         num_reactants = []
@@ -172,22 +166,25 @@ class SubmissionMongoAdapterEG(object):
         d['state'] = 'SUBMITTED'
         d['reaction_id'] = self._get_next_reaction_id()
         d['submitted_at'] = datetime.datetime.utcnow().isoformat()
-        d["reactant_snls"] = [s[0].to_dict for s in reactant_snls]
-        d["product_snls"] = [s[0].to_dict for s in product_snls]
+        d["reactant_snls"] = [s[0].as_dict() for s in reactant_snls]
+        d["product_snls"] = [s[0].as_dict() for s in product_snls]
         d['all_inchis'] = all_inchis
         d['reactant_inchis'] = reactant_inchis
         d['product_inchis'] = product_inchis
         d['num_reactants'] = num_reactants
         d['num_products'] = num_products
-        d['reactant_submission_ids'] = reactant_submission_ids
-        d['product_submission_ids'] = product_submission_ids
         d['reactant_nicknames'] = reactant_nicknames
         d['product_nicknames'] = product_nicknames
         d['reactant_charges'] = reactant_charges
         d['product_charges'] = product_charges
         d['reactant_spin_multiplicities'] = reactant_spin_multiplicities
         d['product_spin_multiplicities'] = product_spin_multiplicities
+        d['reactant_fragments'] = [[frag.to_dict() for frag in specie] for specie in reactant_fragments]
+        d['product_fragments'] = [[frag.to_dict() for frag in specie] for specie in product_fragments]
         self.reactions.insert(d)
+        dummy_snl = StructureNL.from_dict(d["reactant_snls"][0])
+        parameters['reaction_id'] = d['reaction_id']
+        self.submit_snl(dummy_snl, submitter_email, parameters)
         return d['reaction_id']
 
     def resubmit(self, submission_id):
@@ -203,6 +200,26 @@ class SubmissionMongoAdapterEG(object):
         # in the SubmissionProcessor, detect this state and defuse the FW
         raise NotImplementedError()
 
+    def set_job_state_to_cancel(self, submission_id):
+        self.jobs.update({'submission_id': submission_id},
+                         {'$set': {'state': 'CANCELLED'}})
+
+    def get_submission_ids_after(self, dt):
+        '''
+        Return the submission id after a time point
+        :param dt: a datetime object after which point you want to get
+        :return: a list of IDs
+        '''
+        job_docs = self.jobs.find({}, fields=["submission_id",
+                                              "submitted_at",
+                                              "parameters.nick_name"])
+        ids = []
+        for j in job_docs:
+            submission_dt = dateutil.parser.parse(j['submitted_at'])
+            if submission_dt > dt:
+                ids.append(j['submission_id'])
+        return ids
+
     def get_states(self, crit):
         props = ['state', 'state_details', 'task_dict', 'submission_id',
                  'formula']
@@ -211,7 +228,7 @@ class SubmissionMongoAdapterEG(object):
             infos.append(dict([(p, j[p]) for p in props]))
         return infos
 
-    def to_dict(self):
+    def as_dict(self):
         """
         Note: usernames/passwords are exported as unencrypted Strings!
         """
@@ -242,12 +259,12 @@ class SubmissionMongoAdapterEG(object):
         :param f_format: the format to output to (default json)
         """
         if f_format == 'json':
-            return json.dumps(self.to_dict(),
+            return json.dumps(self.as_dict(),
                               default=DATETIME_HANDLER,
                               **kwargs)
         elif f_format == 'yaml':
             # start with the JSON format, and convert to YAML
-            return yaml.dump(self.to_dict(), default_flow_style=YAML_STYLE,
+            return yaml.dump(self.as_dict(), default_flow_style=YAML_STYLE,
                              allow_unicode=True)
         else:
             raise ValueError('Unsupported format {}'.format(f_format))

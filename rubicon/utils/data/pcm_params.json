@@ -1,6 +1,5 @@
 {
-    "water": {"dielectric": 78.3553, "solvent_probe_radius": 0.0},
-    "water1.4": {"dielectric": 78.3553, "solvent_probe_radius": 1.4},
+    "water": {"dielectric": 78.3553, "solvent_probe_radius": 1.4},
     "diglym": {"dielectric": 7.23, "solvent_probe_radius": 3.07},
     "dimethylamine": {"dielectric": 5.3, "solvent_probe_radius": 2.17},
     "dimethoxyethane": {"dielectric": 7.2, "solvent_probe_radius": 2.76},
@@ -11,5 +10,9 @@
     "ethylenecarbonate": {"dielectric": 90.0, "solvent_probe_radius": 2.38},
     "acetonitrile": {"dielectric": 37.0, "solvent_probe_radius": 2.20},
     "dmso": {"dielectric": 46.0, "solvent_probe_radius": 2.44},
-    "thf": {"dielectric": 7.6, "solvent_probe_radius": 2.54}
+    "thf": {"dielectric": 7.6, "solvent_probe_radius": 2.54},
+    "diethylcarbonate": {"dielectric": 2.8, "solvent_probe_radius": 2.91},
+    "dimethylformamide": {"dielectric": 36.7, "solvent_probe_radius": 2.50},
+    "diethylether": {"dielectric": 4.34, "solvent_probe_radius": 2.76},
+    "methyltetrahydrofuran": {"dielectric": 6.97, "solvent_probe_radius": 2.74}
 }

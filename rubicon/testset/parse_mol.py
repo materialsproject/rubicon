@@ -65,12 +65,12 @@ def insert_g3testset(coll):
                 can = pbmol.write("can").split()[0]
                 inchi = pbmol.write("inchi")
                 svg = pbmol.write("svg")
-                d = {"molecule": clean_mol.to_dict}
+                d = {"molecule": clean_mol.as_dict()}
                 comp = clean_mol.composition
                 d["pretty_formula"] = comp.reduced_formula
                 d["formula"] = comp.formula
-                d["composition"] = comp.to_dict
-                d["elements"] = list(comp.to_dict.keys())
+                d["composition"] = comp.as_dict()
+                d["elements"] = list(comp.as_dict().keys())
                 d["nelements"] = len(comp)
                 d["charge"] = charge
                 d["spin_multiplicity"] = spin
@@ -127,12 +127,12 @@ def insert_solvents(coll):
             inchi = pbmol.write("inchi")
             svg = pbmol.write("svg")
 
-            d = {"molecule": clean_mol.to_dict}
+            d = {"molecule": clean_mol.as_dict()}
             comp = clean_mol.composition
             d["pretty_formula"] = comp.reduced_formula
             d["formula"] = comp.formula
-            d["composition"] = comp.to_dict
-            d["elements"] = list(comp.to_dict.keys())
+            d["composition"] = comp.as_dict()
+            d["elements"] = list(comp.as_dict().keys())
             d["nelements"] = len(comp)
             d["charge"] = clean_mol.charge
             d["spin_multiplicity"] = clean_mol.spin_multiplicity
@@ -165,12 +165,12 @@ def insert_elements(coll):
                 can = pbmol.write("can").split()[0]
                 inchi = pbmol.write("inchi")
                 svg = pbmol.write("svg")
-                d = {"molecule": clean_mol.to_dict}
+                d = {"molecule": clean_mol.as_dict()}
                 comp = clean_mol.composition
                 d["pretty_formula"] = comp.reduced_formula
                 d["formula"] = comp.formula
-                d["composition"] = comp.to_dict
-                d["elements"] = list(comp.to_dict.keys())
+                d["composition"] = comp.as_dict()
+                d["elements"] = list(comp.as_dict().keys())
                 d["nelements"] = len(comp)
                 d["charge"] = 0
                 d["spin_multiplicity"] = clean_mol.spin_multiplicity

@@ -9,7 +9,7 @@ from rubicon.utils.snl.egsnl import EGStructureNL
 __author__ = 'xiaohuiqu'
 
 
-class BSSEFragments(FWSerializable):
+class BSSEFragment(FWSerializable):
     OVERLAPPED = "overlapped"
     ISOLATED = "isolated"
 
@@ -37,7 +37,7 @@ class BSSEFragments(FWSerializable):
 
     @classmethod
     def from_dict(cls, m_dict):
-        return BSSEFragments(m_dict["charge"], m_dict["spin_multiplicity"], m_dict["ghost_atoms"])
+        return BSSEFragment(m_dict["charge"], m_dict["spin_multiplicity"], m_dict["ghost_atoms"])
 
 
 def get_sub_mol(mol, frag):
@@ -47,7 +47,7 @@ def get_sub_mol(mol, frag):
     return sub_mol
 
 def counterpoise_correction_generation_fw(molname, charge, spin_multiplicity, qm_method, fragments,
-                       mission, priority=1, parent_fwid=None, additional_user_tags=None):
+                       mission, priority=1, parent_fwid=None, additional_user_tags=None, large=False):
     fw_spec = dict()
     fw_spec["user_tags"] = dict()
     fw_spec["user_tags"]["molname"] = molname
@@ -56,6 +56,7 @@ def counterpoise_correction_generation_fw(molname, charge, spin_multiplicity, qm
     fw_spec["fragments"] = fragments
     fw_spec["charge"] = charge
     fw_spec["spin_multiplicity"] = spin_multiplicity
+    fw_spec["large"] = large
     if priority:
         fw_spec['_priority'] = priority
     fw_spec["user_tags"].update(additional_user_tags)
@@ -77,7 +78,7 @@ def counterpoise_correction_generation_fw(molname, charge, spin_multiplicity, qm
 
 def bsse_fws(super_mol_egsnl, name, super_mol_snlgroup_id, super_mol_charge, super_mol_spin_multiplicity,
              super_mol_inchi_root, qm_method, fragments, mission, dupefinder=None, priority=1,
-             parent_fwid=None, additional_user_tags=None, is_spawnned=False):
+             parent_fwid=None, additional_user_tags=None, is_spawnned=False, large=False):
     super_mol = EGStructureNL.from_dict(super_mol_egsnl).structure
     fwid_base = 1
     if parent_fwid:
@@ -94,9 +95,11 @@ def bsse_fws(super_mol_egsnl, name, super_mol_snlgroup_id, super_mol_charge, sup
     links_dict = dict()
     current_fwid = fwid_base
     for frag in fragments:
+        if len(frag.ghost_atoms) == 0:
+            continue
         frag_name = name + "_" + BasisSetSuperpositionErrorCalculationTask.get_fragment_name(frag.ghost_atoms)
         fw_ov_creator = QChemFireWorkCreator(mol=super_mol, molname=frag_name, mission=mission, dupefinder=dupefinder,
-                                             priority=priority, additional_user_tags=additional_user_tags)
+                                             priority=priority, additional_user_tags=additional_user_tags, large=large)
         fw_ov_cal_id = current_fwid
         current_fwid += fwid_incr_factor
         fw_ov_db_id = current_fwid
@@ -116,7 +119,7 @@ def bsse_fws(super_mol_egsnl, name, super_mol_snlgroup_id, super_mol_charge, sup
 
         sub_mol = get_sub_mol(super_mol, frag)
         fw_iso_creator = QChemFireWorkCreator(mol=sub_mol, molname=frag_name, mission=mission, dupefinder=dupefinder,
-                                              priority=priority, additional_user_tags=additional_user_tags)
+                                              priority=priority, additional_user_tags=additional_user_tags, large=large)
         fw_iso_cal_id = current_fwid
         current_fwid += fwid_incr_factor
         fw_iso_db_id = current_fwid

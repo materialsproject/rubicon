@@ -49,11 +49,32 @@ def transform_molecule_doc(mol1):
     mol2["xyz"] = mol1["vacuum_properties"]["xyz"]["neutral"]
     mol2["inchi"] = mol1["vacuum_properties"]["inchi"]["neutral"]
 
-    if "solvated_properties" in mol1 and "water" in mol1["solvated_properties"]:
-        if "IP" in mol1["solvated_properties"]["water"]:
-            mol2["IE"] = mol1["solvated_properties"]["water"]["IP"]
-        if "EA" in mol1["solvated_properties"]["water"]:
-            mol2["EA"] = mol1["solvated_properties"]["water"]["EA"]
+    solname = None
+    for prefer_k in ["water_ief-pcm_at_surface0_00",
+                     "water_ief-pcm_at_surface",
+                     "water_ief-pcm",
+                     "ief-pcm_at_surface0_00",
+                     "ief-pcm_at_surface",
+                     "ief-pcm"]:
+        for k in mol1["solvated_properties"].keys():
+            if prefer_k in k:
+                solname = k
+                break
+        if solname:
+            break
+    else:
+        for k in mol1["solvated_properties"].keys():
+            solname = k
+            break
+    if solname:
+        if "solvated_properties" in mol1:
+            if "IP" in mol1["solvated_properties"][solname]:
+                mol2["IE"] = mol1["solvated_properties"][solname]["IP"]
+            if "EA" in mol1["solvated_properties"][solname]:
+                mol2["EA"] = mol1["solvated_properties"][solname]["EA"]
+            if "electrochemical_window_width" in mol1["solvated_properties"][solname]:
+                mol2["electrochemical_window_width"] = mol1["solvated_properties"][
+                    solname]["electrochemical_window_width"]
 
     mol2["svg"] = mol1["svg"]
     return mol2
@@ -80,7 +101,7 @@ def copy_collections():
             logging.info("INSERT molecule \"{}\"".format(molname))
             coll_dest.insert(mol_web)
 
-if __name__ == '__main__':
+def main():
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger('CopyMolecules')
     logger.setLevel(logging.INFO)
@@ -88,3 +109,6 @@ if __name__ == '__main__':
     sh.setLevel(getattr(logging, 'INFO'))
     logger.addHandler(sh)
     copy_collections()
+
+if __name__ == '__main__':
+    main()
