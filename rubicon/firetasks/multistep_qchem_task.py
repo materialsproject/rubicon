@@ -330,7 +330,8 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
 def get_bsse_update_specs(fw_spec, d):
     if "super_mol_snlgroup_id" in fw_spec["run_tags"]:
         ghost_atoms = fw_spec["run_tags"].get("ghost_atoms", list())
-        fragment_type = fw_spec["run_tags"]["bsse_fragment_type"]
+        from rubicon.workflows.bsse_wf import BSSEFragment
+        fragment_type = fw_spec["run_tags"].get("bsse_fragment_type", BSSEFragment.ISOLATED)
         fragment_key = BasisSetSuperpositionErrorCalculationTask.get_fragment_key(ghost_atoms, fragment_type)
         fragment_dict = dict()
         fragment_dict["task_id"] = [d["task_id"]]
@@ -401,6 +402,8 @@ class BasisSetSuperpositionErrorCalculationTask(FireTaskBase, FWSerializable):
         fragments_dict = dict()
         bsse = 0.0
         for frag in fragments:
+            if len(frag.ghost_atoms) == 0:
+                continue
             fragment_name = self.get_fragment_name(frag.ghost_atoms)
             fragments_dict[fragment_name] = dict()
             ov_fragment_key = self.get_fragment_key(frag.ghost_atoms, BSSEFragment.OVERLAPPED)
@@ -470,7 +473,7 @@ class BasisSetSuperpositionErrorCalculationTask(FireTaskBase, FWSerializable):
             elif update_duplicates:
                 d["task_id"] = result["task_id"]
                 logger.info("Updating BSSE for snlgroup {} with taskid = {}"
-                            .format(d["super_mol_snlgroup_id"], d["task_id"]))
+                            .format(d["super_mol_snlgroup_id"], fw_spec["super_mol_snlgroup_id"]))
             coll.update({"super_mol_snlgroup_id": fw_spec["snlgroup_id"],
                          "fragments_def": fw_spec["fragments"]},
                         {"$set": d},
@@ -488,7 +491,7 @@ class BasisSetSuperpositionErrorCalculationTask(FireTaskBase, FWSerializable):
 
     @classmethod
     def get_fragment_name(cls, ghost_atoms):
-        return "ga_" + "-".join([str(i) for i in sorted(set(ghost_atoms))])
+        return "ga_" + "-".join([str(i) for i in sorted(set(ghost_atoms))]) if len(ghost_atoms) > 0 else "ga_none"
 
     @classmethod
     def get_fragment_key(cls, ghost_atoms, fragment_type):
