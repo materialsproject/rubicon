@@ -13,12 +13,12 @@ import comradial
 
 class COMradialdistribution:
     
-    def runradial(self, datfilename, mol1, mol2, comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2, output, firststep=1):
-        (maxr, binsize, numbins, count, g) = self.setgparam(Lx2,Ly2,Lz2,firststep)    
-        (linenum, nummoltype, moltypel, moltype) = self.getmoltype(datfilename)
+    def runradial(self, datfilename, mol1, mol2, comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2, output, nummoltype, moltypel, moltype, firststep=1):
+        (maxr, binsize, numbins, count, g) = self.setgparam(Lx2,Ly2,Lz2,firststep)  
         (nummol1, nummol2, mol1, mol2) = self.getnummol(moltypel, nummoltype, mol1, mol2)
         while count < len(comx):
             (count) = self.radialdistribution(g, mol1, mol2, len(comx[1]), moltype, comx, comy, comz, Lx, Ly, Lz, binsize, numbins, maxr, count)
+            #print('timestep ' + str(count-firststep) + ' of ' + str(len(comx)-firststep) + ' finished')
         (radiuslist) = self.radialnormalization(numbins,binsize,Lx,Ly,Lz,nummol1,nummol2,count,g,firststep)
         #self.plot(radiuslist, g)
         #self.writetofile(numbins, radiuslist, g)
@@ -85,11 +85,14 @@ class COMradialdistribution:
         
     def plot(self, radiuslist, g):
         # plots radial distribution function
+        #print('begin plot')
         plt.plot(radiuslist,g)
         plt.xlabel('radius')
         plt.ylabel('g(r)')
         plt.title('Pair Distribution Function')
-        plt.savefig('Pairdist2.png')       
+        plt.savefig('Pairdist2.png')
+        #plt.show()
+        #print('end plot')        
         
     def writetofile(self, numbins, radiuslist, g):
         try:

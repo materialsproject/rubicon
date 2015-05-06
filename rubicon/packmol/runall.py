@@ -40,7 +40,7 @@ print('MSD '+ str((toc-tic)/60)+ ' minutes')
 tic = time.time()
 for i in range(0,len(moltypel)):
     for j in range(i,len(moltypel)):
-        output = crd.runradial(datfile, moltypel[i], moltypel[j], comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2, output, firststep=1)
+        output = crd.runradial(datfile, moltypel[i], moltypel[j], comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2, output, nummoltype, moltypel, moltype, firststep=1)
 toc = time.time()
 print('radial ' + str((toc-tic)/60)+ ' minutes')
 stop = time.time()
