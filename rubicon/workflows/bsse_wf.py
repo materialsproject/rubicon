@@ -57,6 +57,7 @@ def counterpoise_correction_generation_fw(molname, charge, spin_multiplicity, qm
     fw_spec["charge"] = charge
     fw_spec["spin_multiplicity"] = spin_multiplicity
     fw_spec["large"] = large
+    fw_spec["task_type"] = "counterpoise correction generation"
     if priority:
         fw_spec['_priority'] = priority
     fw_spec["user_tags"].update(additional_user_tags)
@@ -95,6 +96,8 @@ def bsse_fws(super_mol_egsnl, name, super_mol_snlgroup_id, super_mol_charge, sup
     links_dict = dict()
     current_fwid = fwid_base
     for frag in fragments:
+        if len(frag.ghost_atoms) == 0:
+            continue
         frag_name = name + "_" + BasisSetSuperpositionErrorCalculationTask.get_fragment_name(frag.ghost_atoms)
         fw_ov_creator = QChemFireWorkCreator(mol=super_mol, molname=frag_name, mission=mission, dupefinder=dupefinder,
                                              priority=priority, additional_user_tags=additional_user_tags, large=large)
@@ -127,7 +130,7 @@ def bsse_fws(super_mol_egsnl, name, super_mol_snlgroup_id, super_mol_charge, sup
                                                    super_mol_snlgroup_id=super_mol_snlgroup_id,
                                                    super_mol_egsnl=super_mol_egsnl,
                                                    super_mol_inchi_root=super_mol_inchi_root,
-                                                   ghost_atoms=None, bs_overlap=False)
+                                                   ghost_atoms=frag.ghost_atoms, bs_overlap=False)
         fws.extend(fws_iso)
         db_fwids.append(fw_iso_db_id)
         links_dict[fw_iso_cal_id] = fw_iso_db_id
@@ -147,7 +150,8 @@ def bsse_fws(super_mol_egsnl, name, super_mol_snlgroup_id, super_mol_charge, sup
                  "qm_method": qm_method,
                  "charge": super_mol_charge,
                  "spin_multiplicity": super_mol_spin_multiplicity,
-                 "inchi_root": super_mol_inchi_root}
+                 "inchi_root": super_mol_inchi_root,
+                 "task_type": "bsse calculation"}
     fw_bsse = Firework([BasisSetSuperpositionErrorCalculationTask()],
                        spec=bsse_spec, name=name+" BSSE Calculation", fw_id=current_fwid)
     for i in db_fwids:

@@ -83,7 +83,7 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
         states = self.run_parallel()
         return self.combine_status(states)
 
-    def find_reaction_tasks_docs(self, solvent, reaction):
+    def find_reaction_tasks_docs(self, solvent, solvent_model, reaction):
         reactant_freq_docs = []
         reactant_sol_docs = []
         reactant_sp_docs = []
@@ -94,8 +94,9 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
                                "task_type": "vibrational frequency",
                                "stationary_type": "minimum"}
         sol_query_template = {"implicit_solvent.solvent_name": solvent,
-                             "state": "successful",
-                             "task_type": "solvation energy"}
+                              "implicit_solvent.model": solvent_model,
+                              "state": "successful",
+                              "task_type": "solvation energy"}
         sp_query_template = {"state": "successful",
                              "task_type": "vacuum only single point energy"}
         for inchi, charge, spin in zip(reaction["reactant_inchis"],
@@ -223,14 +224,13 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
     def process_item(self, reaction):
         """Create and add material for a given grouping identifer.
         """
-
-        solvents = self._c.tasks.find({"inchi_root": {"$in": reaction["all_inchis"]},
-                                       "state": "successful",
-                                       "task_type": {"$in": ["vibrational frequency",
-                                                             "vacuum only single point energy",
-                                                             "solvation energy"]}},
-                                      fields=TaskKeys.tasks_fields)\
-            .distinct("implicit_solvent.solvent_name")
+        query = {'state': 'successful', 'inchi_root': {"$in": reaction["all_inchis"]},
+                 'task_type': "solvation energy"}
+        solvents = self._c.tasks.find(query, fields=TaskKeys.tasks_fields).distinct(
+            "implicit_solvent.solvent_name"
+        )
+        solvent_models = self._c.tasks.find(query, fields=TaskKeys.tasks_fields)\
+            .distinct("implicit_solvent.model")
         fe_docs = dict()
         fe_docs["reaction_id"] = reaction["reaction_id"]
         fe_docs["all_inchis"] = reaction["all_inchis"]
@@ -241,15 +241,19 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
         fe_docs["submitter_email"] = reaction["submitter_email"]
         docs_available = False
         fe_docs['solvated_properties'] = dict()
-        for solvent in solvents:
-            docs = self.find_reaction_tasks_docs(solvent, reaction)
-            if docs:
-                docs_available = True
-            d = self.build_reaction_data(docs, reaction, solution_phase=True) if docs else None
-            if d and len(d) > 0:
-                fe_docs['solvated_properties'][solvent] = d
-                if "vacuum_properties" not in fe_docs:
-                    fe_docs["vacuum_properties"] = self.build_reaction_data(docs, reaction, solution_phase=False)
+        for solvent_model in solvent_models:
+            for solvent in solvents:
+                query['implicit_solvent.solvent_name'] = solvent
+                query['implicit_solvent.model'] = solvent_model
+                docs = self.find_reaction_tasks_docs(solvent, solvent_model, reaction)
+                if docs:
+                    docs_available = True
+                d = self.build_reaction_data(docs, reaction, solution_phase=True) if docs else None
+                if d and len(d) > 0:
+                    solvent_key = "{}_{}".format(solvent, solvent_model).replace(".", "_")
+                    fe_docs['solvated_properties'][solvent_key] = d
+                    if "vacuum_properties" not in fe_docs:
+                        fe_docs["vacuum_properties"] = self.build_reaction_data(docs, reaction, solution_phase=False)
         if not docs_available or "vacuum_properties" not in fe_docs or fe_docs["vacuum_properties"] is None:
             return 1
         if len(fe_docs['solvated_properties']) == 0:
