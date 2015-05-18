@@ -7,21 +7,25 @@ Created on Tue Mar 10 10:07:34 2015
 
 import numpy as np
 import linecache
-import matplotlib.pyplot as plt
-import os
 import comradial
 
 class COMradialdistribution:
+    
+    '''
+            Calculates the center of mass radial distribution function for a
+            given pair of molecules in a system
+            
+            Outputs are stored in a dictionary called output to later be stored
+           in JSON format
+           
+   '''    
     
     def runradial(self, datfilename, mol1, mol2, comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2, output, nummoltype, moltypel, moltype, firststep=1):
         (maxr, binsize, numbins, count, g) = self.setgparam(Lx2,Ly2,Lz2,firststep)  
         (nummol1, nummol2, mol1, mol2) = self.getnummol(moltypel, nummoltype, mol1, mol2)
         while count < len(comx):
             (count) = self.radialdistribution(g, mol1, mol2, len(comx[1]), moltype, comx, comy, comz, Lx, Ly, Lz, binsize, numbins, maxr, count)
-            #print('timestep ' + str(count-firststep) + ' of ' + str(len(comx)-firststep) + ' finished')
         (radiuslist) = self.radialnormalization(numbins,binsize,Lx,Ly,Lz,nummol1,nummol2,count,g,firststep)
-        #self.plot(radiuslist, g)
-        #self.writetofile(numbins, radiuslist, g)
         self.append_dict(radiuslist, g, output, mol1, mol2, moltypel)
         return output
         
@@ -83,28 +87,7 @@ class COMradialdistribution:
         g *= Lx*Ly*Lz/nummol1/nummol2/4/np.pi/(radiuslist)**2/binsize/(count-firststep)
         return (radiuslist)
         
-    def plot(self, radiuslist, g):
-        # plots radial distribution function
-        #print('begin plot')
-        plt.plot(radiuslist,g)
-        plt.xlabel('radius')
-        plt.ylabel('g(r)')
-        plt.title('Pair Distribution Function')
-        plt.savefig('Pairdist2.png')
-        #plt.show()
-        #print('end plot')        
-        
-    def writetofile(self, numbins, radiuslist, g):
-        try:
-            os.remove("gr2.dat")
-        except OSError:
-            pass        
-        
-        gfile = open("gr2.dat", "a")
-        for radius in range(0,numbins):
-            gfile.write(str(radiuslist[radius]) + "     " + str(g[radius]) + "\n")
-        gfile.close()
         
     def append_dict(self, radiuslist, g, output, mol1, mol2, moltypel):
-        output['g(r) for {0} and {1}'.format(moltypel[mol1], moltypel[mol2])] = g
-        output['r list for g(r) in angstroms'] = radiuslist
+        output['RDF']['{0}-{1}'.format(moltypel[mol1], moltypel[mol2])] = g
+        output['RDF']['distance'] = radiuslist
