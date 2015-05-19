@@ -6,7 +6,6 @@ Created on Tue Mar 10 10:07:34 2015
 """
 
 import numpy as np
-import linecache
 import comradial
 
 class COMradialdistribution:
@@ -39,30 +38,6 @@ class COMradialdistribution:
         g = np.zeros(numbins)
         return (maxr, binsize, numbins, count, g)
         
-    def getmoltype(self, datfilename):
-        # determines molecule types and number of each molecule type
-        #also creates a list of molecule type of each molecule
-        linenum=3
-        nummoltype = []
-        moltypel = []
-        moltype = []
-        readingmolecules = True
-        while readingmolecules == True:
-            line = linecache.getline(datfilename, linenum)
-            line = line.split()
-            if len(line) == 4:
-                nummoltype.append(int(line[1]))
-                moltypel.append(line[2])
-                linenum += 1
-                
-            else:
-                readingmolecules = False
-                
-        for i in range(0,len(moltypel)):
-            for j in range(0,nummoltype[i]):
-                moltype.append(int(i))
-                
-        return (linenum, nummoltype, moltypel, moltype)
         
     def getnummol(self, moltypel, nummoltype, mol1, mol2):
         # returns number of each mpolecule type and converts the molecule type to an integer
