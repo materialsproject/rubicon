@@ -7,12 +7,26 @@ Created on Tue Mar 10 10:07:34 2015
 
 import numpy as np
 import linecache
-import os
-import time
 import calccomf
 
 
 class calcCOM:
+    
+    '''
+            Calculates the center of mass for all molecules in a system from
+            a lammps trajectory file and a lammps data file
+            
+            Requires the following comments in the lammps data file starting 
+            at the third line
+            
+            # "number" "molecule" molecules
+            
+            where "number" is the number of that molecule type and
+            "molecule" is a name for that molecule
+            
+            Do not include blank lines in between the molecule types
+            
+    '''
     
     def calcCOM(self, trjfilename, datfilename):
         (num_lines, n, num_timesteps, count, line)=self.getnum(trjfilename)
@@ -27,7 +41,6 @@ class calcCOM:
                     (nummol, comx, comy, comz, molmass) = self.comprep(mol, n, atype, atommass, num_timesteps)
                 (comx, comy, comz, count) = self.calccom(comx, comy, comz, x, y, z, mol, atype, atommass, molmass, Lx, Ly, Lz, Lx2, Ly2, Lz2, n, count, nummol)
             linecache.clearcache()
-        #self.saveCOM(comx, comy, comz)
         return (comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2)
         
     def getnum(self,trjfilename):
@@ -161,39 +174,3 @@ class calcCOM:
             
         return (comx, comy, comz, count)
         
-    def saveCOM(self, comx, comy, comz):
-        try:
-            os.remove("COMx.dat")
-        except OSError:
-            pass        
-        
-        COMxfile = open("COMx.dat", "a")
-        for timepoint in range(0,len(comx)):
-            for molecule in range(0,len(comx[0])):
-                COMxfile.write('      ' + str(comx[timepoint][molecule]))
-            COMxfile.write('\n')
-        COMxfile.close()
-        
-        try:
-            os.remove("COMy.dat")
-        except OSError:
-            pass        
-        
-        COMyfile = open("COMy.dat", "a")
-        for timepoint in range(0,len(comy)):
-            for molecule in range(0,len(comy[0])):
-                COMyfile.write('      ' + str(comy[timepoint][molecule]))
-            COMyfile.write('\n')
-        COMyfile.close()
-        
-        try:
-            os.remove("COMz.dat")
-        except OSError:
-            pass        
-        
-        COMzfile = open("COMz.dat", "a")
-        for timepoint in range(0,len(comz)):
-            for molecule in range(0,len(comz[0])):
-                COMzfile.write('      ' + str(comz[timepoint][molecule]))
-            COMzfile.write('\n')
-        COMzfile.close()

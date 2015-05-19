@@ -473,7 +473,7 @@ class BasisSetSuperpositionErrorCalculationTask(FireTaskBase, FWSerializable):
             elif update_duplicates:
                 d["task_id"] = result["task_id"]
                 logger.info("Updating BSSE for snlgroup {} with taskid = {}"
-                            .format(d["super_mol_snlgroup_id"], fw_spec["super_mol_snlgroup_id"]))
+                            .format(fw_spec["snlgroup_id"], d["task_id"]))
             coll.update({"super_mol_snlgroup_id": fw_spec["snlgroup_id"],
                          "fragments_def": fw_spec["fragments"]},
                         {"$set": d},

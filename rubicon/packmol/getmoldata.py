@@ -9,6 +9,23 @@ import linecache
 
 class getmoldata:
     
+    '''
+    
+             Determines molecule types and number of each molecule type and 
+             creates a list of molecule type of each molecule
+             
+             Requires the following comments in the lammps data file starting 
+            at the third line
+            
+            # "number" "molecule" molecules
+            
+            where "number" is the number of that molecule type and
+            "molecule" is a name for that molecule
+            
+            Do not include blank lines in between the molecule types
+            
+    '''
+    
     def getmoltype(self, datfilename):
         # determines molecule types and number of each molecule type
         #also creates a list of molecule type of each molecule

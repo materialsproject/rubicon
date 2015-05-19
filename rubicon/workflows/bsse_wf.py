@@ -57,6 +57,7 @@ def counterpoise_correction_generation_fw(molname, charge, spin_multiplicity, qm
     fw_spec["charge"] = charge
     fw_spec["spin_multiplicity"] = spin_multiplicity
     fw_spec["large"] = large
+    fw_spec["task_type"] = "counterpoise correction generation"
     if priority:
         fw_spec['_priority'] = priority
     fw_spec["user_tags"].update(additional_user_tags)
@@ -149,7 +150,8 @@ def bsse_fws(super_mol_egsnl, name, super_mol_snlgroup_id, super_mol_charge, sup
                  "qm_method": qm_method,
                  "charge": super_mol_charge,
                  "spin_multiplicity": super_mol_spin_multiplicity,
-                 "inchi_root": super_mol_inchi_root}
+                 "inchi_root": super_mol_inchi_root,
+                 "task_type": "bsse calculation"}
     fw_bsse = Firework([BasisSetSuperpositionErrorCalculationTask()],
                        spec=bsse_spec, name=name+" BSSE Calculation", fw_id=current_fwid)
     for i in db_fwids:

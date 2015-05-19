@@ -9,6 +9,13 @@ import linecache
 
 class gettimedata:
     
+    '''
+            Uses a lammps trajectory file and log file to determine the 
+            timestep size and the trajectory print frequency
+            
+    '''
+    
+    
     def getdt(self, logfilename):
         line = 1
         foundtimestep=False
