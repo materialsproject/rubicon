@@ -41,7 +41,6 @@ class calcCOM:
                     (nummol, comx, comy, comz, molmass) = self.comprep(mol, n, atype, atommass, num_timesteps)
                 (comx, comy, comz, count) = self.calccom(comx, comy, comz, x, y, z, mol, atype, atommass, molmass, Lx, Ly, Lz, Lx2, Ly2, Lz2, n, count, nummol)
             trjfile.close()
-        self.saveCOM(comx, comy, comz)
         return (comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2)
         
     def getnum(self,trjfilename):
