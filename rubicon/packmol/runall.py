@@ -32,12 +32,16 @@ if __name__ ==  '__main__':
     from gettimedata import gettimedata
     from getmoldata import getmoldata
     from COMradial import COMradialdistribution
+    from getatomcharges import getatomcharges
+    from calcNEconductivity import calcNEconductivity
     
     c = calcCOM()
     m = MSD()
     gt = gettimedata()
     gm = getmoldata()
     crd = COMradialdistribution()
+    gc = getatomcharges()
+    ne = calcNEconductivity()
     
     trjfile=['sample_files/NaSCN.lammpstrj']
     datfile='sample_files/data.water_1NaSCN'
@@ -45,14 +49,25 @@ if __name__ ==  '__main__':
     output = {}
     output['RDF'] = {}
     output['RDF']['units'] = 'unitless and angstroms'
+    output['Conductivity'] = {}
+    output['Conductivity']['units'] = 'S/m'
+    T = 298 #get from lammpsio
     
     tsjump = gt.getjump(trjfile[0])
     (nummoltype, moltypel, moltype) = gm.getmoltype(datfile)
     dt = gt.getdt(logfile)
+    n = gc.findnumatoms(datfile)
+    (molcharges, atomcharges,n) = gc.getmolcharges(datfile,n)
+    molcharge = gc.molchargedict(molcharges, moltypel, moltype)
     (comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2) = c.calcCOM(trjfile,datfile)
     
     
     output = m.runMSD(comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2, moltype, moltypel, dt, tsjump, output)
+    
+    output = ne.calcNEconductivity(output, molcharge, Lx, Ly, Lz, nummoltype, moltypel, T)
+    
     for i in range(0,len(moltypel)):
         for j in range(i,len(moltypel)):
             output = crd.runradial(datfile, moltypel[i], moltypel[j], comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2, output, nummoltype, moltypel, moltype, firststep=1)
+            
+    

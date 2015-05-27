@@ -145,11 +145,11 @@ class MSD:
     def append_dict(self, MSD, moltypel, diffusivity, output, Time):
         output['MSD'] = {}
         output['MSD']['units']='Angstroms^2, fs'
-        output['diffusivity'] = {}
-        output['diffusivity']['units'] = 'm^2/s'        
+        output['Diffusivity'] = {}
+        output['Diffusivity']['units'] = 'm^2/s'        
         for i in range(0,len(moltypel)):
             output['MSD'][moltypel[i]] = copy.deepcopy(MSD[i])
-            output['diffusivity'][moltypel[i]] = copy.deepcopy(diffusivity[i])
+            output['Diffusivity'][moltypel[i]] = copy.deepcopy(diffusivity[i])
             
         output['MSD']['time'] = Time
             
