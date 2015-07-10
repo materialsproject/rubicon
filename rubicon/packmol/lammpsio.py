@@ -2,7 +2,7 @@
 
 import re
 import numpy as np
-from pymatgen.serializers.json_coders import MSONable
+#from json_coders import MSONable
 import scipy.integrate
 from multiprocessing import Pool
 
@@ -22,7 +22,7 @@ def autocorrelate (a):
     return d
 
 
-class LammpsLog(MSONable):
+class LammpsLog():
     """
     Parser for LAMMPS log file (parse function).
     Saves the output properties (log file) in the form of a dictionary (LOG) with the key being
@@ -120,15 +120,15 @@ class LammpsLog(MSONable):
             which saves the correlation function and its integration which is teh viscosity in cP
         """
 
-        NCORES=8
+        NCORES=4
         p=Pool(NCORES)
 
-        a1=self.llog['pxy']
-        a2=self.llog['pxz']
-        a3=self.llog['pyz']
-        a4=self.llog['pxx']-self.llog['pyy']
-        a5=self.llog['pyy']-self.llog['pzz']
-        a6=self.llog['pxx']-self.llog['pzz']
+        a1=self.llog['pxy'][cutoff:]
+        a2=self.llog['pxz'][cutoff:]
+        a3=self.llog['pyz'][cutoff:]
+        a4=self.llog['pxx'][cutoff:]-self.llog['pyy'][cutoff:]
+        a5=self.llog['pyy'][cutoff:]-self.llog['pzz'][cutoff:]
+        a6=self.llog['pxx'][cutoff:]-self.llog['pzz'][cutoff:]
         array_array=[a1,a2,a3,a4,a5,a6]
         pv=p.map(autocorrelate,array_array)
         pcorr = (pv[0]+pv[1]+pv[2])/6+(pv[3]+pv[4]+pv[5])/24
@@ -136,9 +136,9 @@ class LammpsLog(MSONable):
         temp=np.mean(self.llog['temp'][cutoff:])
        
         visco = (scipy.integrate.cumtrapz(pcorr,self.llog['step'][:len(pcorr)]))*self.llog['timestep']*10**-15*1000*101325.**2*self.llog['vol'][-1]*10**-30/(1.38*10**-23*temp)
-        output=open('viscosity_parallel.txt','w')
+        output=open('viscosity_parallel15ns.txt','w')
         output.write('#Time (fs), Average Pressure Correlation (atm^2), Viscosity (cp)\n')
-        for line in zip(np.array(self.llog['step'][:len(pcorr)-1])*self.llog['timestep']-cutoff,pcorr,visco):
+        for line in zip(np.array(self.llog['step'][:len(pcorr)-1])*self.llog['timestep'],pcorr,visco):
             output.write(' '.join(str(x) for x in line)+'\n')
         output.close()
 
@@ -156,11 +156,11 @@ class LammpsLog(MSONable):
 
 
 if __name__ == '__main__':
-    filename = 'log.test'
+    filename = 'visc.log'
     log = LammpsLog.from_file(filename)
     #print log.LOG.keys()
     #print log.llog
     #log.list_properties()
-    log.viscosity(0)
+    log.viscosity(500001)
     #print np.mean(log.llog['density'])
     #print log.ave['step']
