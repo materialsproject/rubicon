@@ -3,7 +3,10 @@ import os
 from unittest import TestCase
 import unittest
 from pymatgen import Molecule
-from pymatgen.packmol.packmol import PackmolRunner
+try:
+    from pymatgen.packmol.packmol import PackmolRunner
+except:
+    pass
 from rubicon.gff.antechamberio import AntechamberRunner
 from rubicon.gff.lammps_data import LmpInput
 
