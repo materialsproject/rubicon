@@ -6,13 +6,26 @@ Created on Tue Mar 10 10:07:34 2015
 """
 
 import numpy as np
-import linecache
-import os
-import time
 import calccomf
 
 
 class calcCOM:
+    
+    '''
+            Calculates the center of mass for all molecules in a system from
+            a lammps trajectory file and a lammps data file
+            
+            Requires the following comments in the lammps data file starting 
+            at the third line
+            
+            # "number" "molecule" molecules
+            
+            where "number" is the number of that molecule type and
+            "molecule" is a name for that molecule
+            
+            Do not include blank lines in between the molecule types
+            
+    '''
     
     def calcCOM(self, trjfilename, datfilename):
         (num_lines, n, num_timesteps, count, line)=self.getnum(trjfilename)
@@ -21,18 +34,22 @@ class calcCOM:
         (xcol, ycol, zcol, molcol, typecol) = self.getcolumns(trjfilename[0])
         atommass = self.getmass(datfilename)
         for i in range(0,len(trjfilename)):
+            trjfile = open(trjfilename[i])
             while line[i] < num_lines[i]:
-                (x,y,z,mol,atype,line) = self.readdata(trjfilename[i], n, line, x, y, z, mol, atype, xcol, ycol, zcol, molcol, typecol,i)
+                (x,y,z,mol,atype,line) = self.readdata(trjfile, n, line, x, y, z, mol, atype, xcol, ycol, zcol, molcol, typecol,i)
                 if count == 0:
                     (nummol, comx, comy, comz, molmass) = self.comprep(mol, n, atype, atommass, num_timesteps)
                 (comx, comy, comz, count) = self.calccom(comx, comy, comz, x, y, z, mol, atype, atommass, molmass, Lx, Ly, Lz, Lx2, Ly2, Lz2, n, count, nummol)
-            linecache.clearcache()
-        #self.saveCOM(comx, comy, comz)
+            trjfile.close()
         return (comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2)
         
     def getnum(self,trjfilename):
         # uses the trjectory file and returns the number of lines and the number of atoms
-        n = int(linecache.getline(trjfilename[0],4))
+        trjfile = open(trjfilename[0])
+        for i in range(0,3):
+            trjfile.readline()
+        n = int(trjfile.readline())
+        trjfile.close()
         num_timesteps=1
         num_lines=[]
         for i in range(0,len(trjfilename)):
@@ -46,11 +63,14 @@ class calcCOM:
         
     def getdimensions(self,trjfilename):
         # uses trjectory file to get the length of box sides
-        xbounds = linecache.getline(trjfilename, 6)
+        trjfile = open(trjfilename)
+        for i in range(0,5):
+            trjfile.readline()
+        xbounds = trjfile.readline()
         xbounds = xbounds.split()
-        ybounds = linecache.getline(trjfilename, 7)
+        ybounds = trjfile.readline()
         ybounds = ybounds.split()
-        zbounds = linecache.getline(trjfilename, 8)
+        zbounds = trjfile.readline()
         zbounds = zbounds.split()
         Lx = float(xbounds[1])-float(xbounds[0])
         Lx2 = Lx/2
@@ -58,6 +78,7 @@ class calcCOM:
         Ly2 = Ly/2
         Lz = float(zbounds[1])-float(zbounds[0])
         Lz2 = Lz/2 
+        trjfile.close()
         return (Lx, Lx2, Ly, Ly2, Lz, Lz2)
         
     def createarrays(self,n):
@@ -71,7 +92,10 @@ class calcCOM:
 
     def getcolumns(self,trjfilename):
         # defines the columns each data type is in in the trjectory file
-        inline = linecache.getline(trjfilename, 9)
+        trjfile = open(trjfilename)
+        for j in range(0,8):
+            trjfile.readline()
+        inline = trjfile.readline()
         inline = inline.split()
         inline.remove('ITEM:')
         inline.remove('ATOMS')
@@ -84,46 +108,47 @@ class calcCOM:
         
     def getmass(self, datfilename):
         # returns a dictionary of the mass of each atom type
-        linenum=5
         atommass = {}
         foundmass= False
         readingmasses = True
         atomnum = 1
+        datfile = open(datfilename)
+        for i in range(0,4):
+            datfile.readline()
         
         while foundmass == False:
-            line = linecache.getline(datfilename, linenum)
+            line = datfile.readline()
             line = line.split()
             
             if len(line) > 0:
                 if line[0] == 'Masses':
                     foundmass = True
-                    linenum += 2
-                else:
-                    linenum += 1
-            else:
-                linenum += 1
+                    datfile.readline()
                 
         while readingmasses == True:
-            line = linecache.getline(datfilename, linenum)
+            line = datfile.readline()
             line = line.split()
             if len(line) > 0:
                 if int(line[0]) == atomnum:
                     atommass[int(line[0])] = float(line[1])
                     atomnum += 1
-                    linenum += 1
                     
                 else:
                     readingmasses = False
                 
             else:
                 readingmasses = False
-                    
+                
+        datfile.close()
+        
         return atommass
         
-    def readdata(self, trjfilename, n, line, x, y, z, mol, atype, xcol, ycol, zcol, molcol, typecol, i):
+    def readdata(self, trjfile, n, line, x, y, z, mol, atype, xcol, ycol, zcol, molcol, typecol, i):
         # reads data from trjectory file into precreated arrays
+        for j in range(0,9):
+            trjfile.readline()
         for a in range(0,n):
-            inline = linecache.getline(trjfilename, line[i] + a)
+            inline = trjfile.readline()
             inline = inline.split()
             x[a]= inline[xcol]
             y[a]= inline[ycol]
@@ -161,39 +186,3 @@ class calcCOM:
             
         return (comx, comy, comz, count)
         
-    def saveCOM(self, comx, comy, comz):
-        try:
-            os.remove("COMx.dat")
-        except OSError:
-            pass        
-        
-        COMxfile = open("COMx.dat", "a")
-        for timepoint in range(0,len(comx)):
-            for molecule in range(0,len(comx[0])):
-                COMxfile.write('      ' + str(comx[timepoint][molecule]))
-            COMxfile.write('\n')
-        COMxfile.close()
-        
-        try:
-            os.remove("COMy.dat")
-        except OSError:
-            pass        
-        
-        COMyfile = open("COMy.dat", "a")
-        for timepoint in range(0,len(comy)):
-            for molecule in range(0,len(comy[0])):
-                COMyfile.write('      ' + str(comy[timepoint][molecule]))
-            COMyfile.write('\n')
-        COMyfile.close()
-        
-        try:
-            os.remove("COMz.dat")
-        except OSError:
-            pass        
-        
-        COMzfile = open("COMz.dat", "a")
-        for timepoint in range(0,len(comz)):
-            for molecule in range(0,len(comz[0])):
-                COMzfile.write('      ' + str(comz[timepoint][molecule]))
-            COMzfile.write('\n')
-        COMzfile.close()

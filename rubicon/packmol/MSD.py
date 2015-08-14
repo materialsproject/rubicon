@@ -6,13 +6,20 @@ Created on Thu Mar 12 14:08:27 2015
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
 import os
 from scipy import stats
-import time
 import copy
 
 class MSD:
+    
+    '''
+            Calculates the MSD and diffusivity for all molecules in the system 
+            given a list of center of mass coordinates.
+           
+           Outputs are stored in a dictionary called output to later be stored
+           in JSON format
+           
+    '''
     
     def runMSD(self, comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2, moltype, moltypel, dt, tsjump, output):
         (comx, comy, comz) = self.unwrap(comx,comy,comz,Lx,Ly,Lz,Lx2,Ly2,Lz2)
@@ -25,8 +32,7 @@ class MSD:
                 MSD = self.MSDadd(r2, MSD, molcheck, i, j)
         MSD = self.MSDnorm(MSD, MSDt, nummol)
         Time = self.createtime(dt, tsjump, MSDt)
-        #self.writetofile(MSD, Time)
-        (MSD, Time, lnMSD, lntime) = self.plotMSD(MSD, Time)
+        (lnMSD, lntime) = self.takelnMSD(MSD, Time)
         for molecule in range(0,len(moltypel)):
             firststep = self.findlinearregion(lnMSD, lntime, dt, molecule)
             self.getdiffusivity(Time, MSD, firststep, molecule, diffusivity)
@@ -87,7 +93,6 @@ class MSD:
     def MSDnorm(self, MSD,MSDt,nummol):
         for i in range(0,len(nummol)):        
             MSD[i] /= MSDt*nummol[i]
-        
         return MSD
         
     def createtime(self, dt, tsjump, MSDt):
@@ -95,36 +100,11 @@ class MSD:
         Time *= dt*tsjump
         return Time
     
-    def writetofile(self, MSD, Time):
-        try:
-            os.remove("MSD.dat")
-        except OSError:
-            pass        
-        
-        MSDfile = open("MSD.dat", "a")
-        for timepoint in range(0,len(MSD[0])):
-            MSDfile.write(str(Time[timepoint]))
-            for molecule in range(0,len(MSD)):
-                MSDfile.write('      ' + str(MSD[molecule][timepoint]))
-            MSDfile.write('\n')
-        MSDfile.close()
-    
-    def plotMSD(self, MSD, Time):
-        
-        lnMSD = np.log(MSD)
-        lntime = np.log(Time)
-        
-        for i in range(0,len(MSD)):
-            plt.figure()
-            plt.plot(Time, MSD[i])
-            #plt.savefig('MSD.png')
-            #plt.show()
+    def takelnMSD(self, MSD, Time):
+        lnMSD = np.log(MSD[:,1:])
+        lntime = np.log(Time[1:])
             
-            plt.figure()
-            plt.plot(lntime,lnMSD[i])
-            #plt.show()
-            
-        return (MSD, Time, lnMSD, lntime)
+        return (lnMSD, lntime)
         
     def findlinearregion(self, lnMSD, lntime, dt, molecule):
         timestepskip=int(500/dt)
@@ -163,10 +143,14 @@ class MSD:
             diffusivity.append(slope/600000)
             
     def append_dict(self, MSD, moltypel, diffusivity, output, Time):
+        output['MSD'] = {}
+        output['MSD']['units']='Angstroms^2, fs'
+        output['Diffusivity'] = {}
+        output['Diffusivity']['units'] = 'm^2/s'        
         for i in range(0,len(moltypel)):
-            output['MSD of {0} in angstroms^2'.format(moltypel[i])] = copy.deepcopy(MSD[i])
-            output['Diffusivity of {0} in m^2/sec'.format(moltypel[i])] = copy.deepcopy(diffusivity[i])
+            output['MSD'][moltypel[i]] = copy.deepcopy(MSD[i])
+            output['Diffusivity'][moltypel[i]] = copy.deepcopy(diffusivity[i])
             
-        output['Time in fs'] = Time
+        output['MSD']['time'] = Time
             
         

@@ -5,30 +5,39 @@ Created on Fri Mar 13 10:41:46 2015
 @author: mhumbert
 """
 
-import linecache
 
 class gettimedata:
     
+    '''
+            Uses a lammps trajectory file and log file to determine the 
+            timestep size and the trajectory print frequency
+            
+    '''
+    
+    
     def getdt(self, logfilename):
-        line = 1
+        logfile = open(logfilename)
         foundtimestep=False
         while foundtimestep==False:
-            inline = linecache.getline(logfilename, line)
+            inline = logfile.readline()
             inline = inline.split()
-            
-            if len(inline) == 0:
-                line +=1
-            
-            elif inline[0] == 'timestep':
-                dt = float(inline[1])
-                foundtimestep=True
-                
-            else:
-                line += 1 
+            if len(inline) > 0:
+                if inline[0] == 'timestep':
+                    dt = float(inline[1])
+                    foundtimestep=True
+        logfile.close()
         
         return dt
         
     def getjump(self, trjfilename):
-        n = int(linecache.getline(trjfilename,4))
-        tsjump = int(linecache.getline(trjfilename,n+11))-int(linecache.getline(trjfilename,2))
+        trjfile = open(trjfilename)
+        trjfile.readline()
+        t1 = trjfile.readline()
+        t1 = int(t1)
+        trjfile.readline()
+        n = int(trjfile.readline())
+        for i in range(0,n+6):
+            trjfile.readline()
+        t2 = int(trjfile.readline())
+        tsjump = t2-t1
         return tsjump
