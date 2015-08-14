@@ -1,6 +1,6 @@
 import os
 from unittest import TestCase
-from pymatgen.io.qchemio import QcOutput
+from pymatgen.io.qchem import QcOutput
 from rubicon.utils.atomic_charge_mixed_basis_set_generator import AtomicChargeMixedBasisSetGenerator
 
 __author__ = 'xiaohuiqu'

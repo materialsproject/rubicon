@@ -5,7 +5,7 @@ import math
 import openbabel as ob
 from pymatgen.core.structure import Molecule
 from pymatgen.io.babelio import BabelMolAdaptor
-from pymatgen.io.qchemio import QcOutput
+from pymatgen.io.qchem import QcOutput
 
 from rubicon.utils.ion_arranger.ion_arranger import IonPlacer
 

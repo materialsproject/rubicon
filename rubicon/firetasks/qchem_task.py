@@ -14,7 +14,7 @@ from fireworks.utilities.fw_serializers import FWSerializable
 
 from custodian.custodian import Custodian
 from pymatgen.core.structure import Molecule
-from pymatgen.io.qchemio import QcInput
+from pymatgen.io.qchem import QcInput
 from rubicon.utils.eg_wf_utils import move_to_eg_garden
 from rubicon.workflows.wf_settings import MOVE_TO_EG_GARDEN
 

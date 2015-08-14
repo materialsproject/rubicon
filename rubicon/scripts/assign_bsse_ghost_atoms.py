@@ -2,7 +2,7 @@ import argparse
 import copy
 import itertools
 from pymatgen.core.structure import Molecule
-from pymatgen.io.qchemio import QcInput
+from pymatgen.io.qchem import QcInput
 from rubicon.workflows.bsse_wf import BSSEFragment, get_sub_mol
 
 __author__ = 'xiaohuiqu'

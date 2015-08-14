@@ -1,7 +1,7 @@
 import argparse
 import os
 from pymatgen.core.structure import Molecule
-from pymatgen.io.qchemio import QcInput
+from pymatgen.io.qchem import QcInput
 
 __author__ = 'xiaohuiqu'
 

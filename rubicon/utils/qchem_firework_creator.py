@@ -7,7 +7,7 @@ import math
 from fireworks import Firework
 from fireworks.core.firework import Tracker
 from pymatgen.io.babelio import BabelMolAdaptor
-from pymatgen.io.qchemio import QcTask, QcInput
+from pymatgen.io.qchem import QcTask, QcInput
 
 from rubicon.dupefinders.dupefinder_eg import DupeFinderEG
 from rubicon.firetasks.qchem_task import QChemTask

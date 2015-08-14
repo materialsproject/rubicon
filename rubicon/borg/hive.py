@@ -11,7 +11,7 @@ from monty.os.path import zpath
 from pymatgen import Molecule
 from pymatgen.analysis.molecule_structure_comparator import \
     MoleculeStructureComparator
-from pymatgen.io.qchemio import QcOutput
+from pymatgen.io.qchem import QcOutput
 from pymatgen.symmetry.analyzer import PointGroupAnalyzer
 from rubicon.utils.snl.egsnl import EGStructureNL
 from rubicon.utils.snl.egsnl_mongo import EGSNLMongoAdapter

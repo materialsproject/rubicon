@@ -11,7 +11,7 @@ from fireworks.utilities.fw_serializers import FWSerializable
 from pymatgen import Molecule
 from pymatgen.analysis.molecule_structure_comparator import \
     MoleculeStructureComparator
-from pymatgen.io.qchemio import QcInput
+from pymatgen.io.qchem import QcInput
 from pymongo import MongoClient
 
 from rubicon.borg.hive import DeltaSCFQChemToDbTaskDrone

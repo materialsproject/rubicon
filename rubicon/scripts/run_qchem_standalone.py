@@ -13,7 +13,7 @@ from custodian.qchem.handlers import QChemErrorHandler
 from custodian.qchem.jobs import QchemJob
 import math
 from pymatgen import Molecule
-from pymatgen.io.qchemio import QcInput, QcOutput
+from pymatgen.io.qchem import QcInput, QcOutput
 import sys
 
 __author__ = 'xiaohuiqu'

@@ -1,6 +1,6 @@
 import os
 from unittest import TestCase
-from pymatgen.io.qchemio import QcInput
+from pymatgen.io.qchem import QcInput
 from rubicon.scripts.assign_basis_set_by_range import assign_basis_set_by_range
 
 __author__ = 'xiaohuiqu'
