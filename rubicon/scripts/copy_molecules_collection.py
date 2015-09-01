@@ -30,11 +30,6 @@ def transform_molecule_doc(mol1):
     if "functional_groups" in mol1:
         mol2["functional_groups"] = mol1["functional_groups"]
     mol2["reduced_cell_formula_abc"] = mol1["reduced_cell_formula_abc"]
-    if "water" in mol1["solvated_properties"]:
-        mol2["implicit_solvent"] = mol1["solvated_properties"]["water"]["implicit_solvent"]
-        mol2["electrode_potentials"] = mol1["solvated_properties"]["water"]["electrode_potentials"]
-    else:
-        mol2["implicit_solvent"] = {}
     mol2["pretty_formula"] = mol1["pretty_formula"]
     mol2["formula"] = mol1["formula"]
     mol2["pointgroup"] = mol1["pointgroup"]
@@ -75,6 +70,10 @@ def transform_molecule_doc(mol1):
             if "electrochemical_window_width" in mol1["solvated_properties"][solname]:
                 mol2["electrochemical_window_width"] = mol1["solvated_properties"][
                     solname]["electrochemical_window_width"]
+            if "implicit_solvent" in mol1["solvated_properties"][solname]:
+                mol2["implicit_solvent"] = mol1["solvated_properties"][solname]["implicit_solvent"]
+            if "electrode_potentials" in mol1["solvated_properties"][solname]:
+                mol2["electrode_potentials"] = mol1["solvated_properties"][solname]["electrode_potentials"]
 
     mol2["svg"] = mol1["svg"]
     return mol2
