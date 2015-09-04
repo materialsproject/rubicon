@@ -37,6 +37,40 @@ class QChemTask(FireTaskBase, FWSerializable):
 
     _fw_name = "QChem Task"
 
+    def _calibrate_alcf_cmd(self, input_file="mol.qcinp", max_minutes=60, num_nodes=8, ranks_per_node=1,
+                            num_threads=64, scr_size_GB=4, use_runjob=True):
+        qc_package_path = "/projects/JCESR/pkcoff/qchem422.mod2"
+        qcaux_path = "/projects/JCESR/qcaux"
+        qc_exe_path = "/projects/JCESR/pkcoff/public/qcprog-optv1.exe"
+        qc_scr_dir = "/dev/local/qchem"
+        scr_size_bytes = scr_size_GB * (2 ** 30)
+        qc_envs = {
+            "HOME": os.environ["HOME"],
+            "QC": qc_package_path,
+            "QCAUX": qcaux_path,
+            "QCSCRATCH": qc_scr_dir,
+            "QCFILEPREF": os.path.join(qc_scr_dir, "qc_job"),
+            "QCTMPDIR": qc_scr_dir,
+            "QCTHREADS": num_threads,
+            "OMP_NUM_THREADS": num_threads,
+            "INT_OMP_MIN_LENSTEP": 10,
+            "INT_OMP_MAX_LENSTEP": 50,
+            "INT_OMP_MIN_LENSTEP_PATH1": 25,
+            "INT_OMP_MAX_LENSTEP_PATH1": 100,
+            "QCLOCALFSSIZE": scr_size_bytes
+        }
+        qsub_env_text = ":".join(["{}={}".format(k, v) for k, v in qc_envs.items()])
+        runjob_env_text = " ".join(["--envs {}={}".format(k, v) for k, v in qc_envs.items()])
+        block_name = os.environ["COBALT_PARTNAME"]
+        cur_dir = os.getcwd()
+        qc_runjob_cmd = "runjob --block {block_name} -n {num_processes} --ranks-per-node " \
+                 "{ranks_per_node} --verbose 2 {envs} --cwd={cur_dir} : {qc_exe_path} {qc_input_file} {scr_dir}"\
+            .format(block_name=block_name, num_processes=num_nodes*ranks_per_node, ranks_per_node=ranks_per_node,
+                    envs=runjob_env_text, cur_dir=cur_dir, qc_exe_path=qc_exe_path, qc_input_file=input_file,
+                    scr_dir=qc_scr_dir)
+        return qc_runjob_cmd
+
+
     def run_task(self, fw_spec):
         qcinp = QcInput.from_dict(fw_spec["qcinp"])
         if 'mol' in fw_spec:
@@ -85,6 +119,9 @@ class QChemTask(FireTaskBase, FWSerializable):
         elif carver_name_pattern.match(socket.gethostname()):
         # mendel compute nodes
             qc_exe = shlex.split("qchem -np {}".format(min(8, len(mol))))
+        elif 'vesta' in socket.gethostname():
+            # ALCF, Blue Gene
+            qc_exe = shlex.split(self._calibrate_alcf_cmd())
         elif "macqu" in socket.gethostname().lower():
             qc_exe = shlex.split("qchem -nt 2")
         else:
