@@ -25,7 +25,6 @@ __maintainer__ = 'Anubhav Jain'
 __email__ = 'ajain@lbl.gov'
 __date__ = 'Jun 07, 2013'
 
-
 DATETIME_HANDLER = lambda obj: obj.isoformat() \
     if isinstance(obj, datetime.datetime) else None
 
@@ -37,8 +36,9 @@ class QChemTask(FireTaskBase, FWSerializable):
 
     _fw_name = "QChem Task"
 
-    def _calibrate_alcf_cmd(self, input_file="mol.qcinp", max_minutes=60, num_nodes=8, ranks_per_node=1,
-                            num_threads=64, scr_size_GB=4, use_runjob=True):
+    @staticmethod
+    def _calibrate_alcf_cmd(input_file="mol.qcinp", max_minutes=60, num_nodes=8, ranks_per_node=1,
+                            num_threads=64, scr_size_GB=4, use_runjob=False):
         qc_package_path = "/projects/JCESR/pkcoff/qchem422.mod2"
         qcaux_path = "/projects/JCESR/qcaux"
         qc_exe_path = "/projects/JCESR/pkcoff/public/qcprog-optv1.exe"
@@ -64,12 +64,21 @@ class QChemTask(FireTaskBase, FWSerializable):
         block_name = os.environ["COBALT_PARTNAME"]
         cur_dir = os.getcwd()
         qc_runjob_cmd = "runjob --block {block_name} -n {num_processes} --ranks-per-node " \
-                 "{ranks_per_node} --verbose 2 {envs} --cwd={cur_dir} : {qc_exe_path} {qc_input_file} {scr_dir}"\
-            .format(block_name=block_name, num_processes=num_nodes*ranks_per_node, ranks_per_node=ranks_per_node,
-                    envs=runjob_env_text, cur_dir=cur_dir, qc_exe_path=qc_exe_path, qc_input_file=input_file,
-                    scr_dir=qc_scr_dir)
-        return qc_runjob_cmd
-
+                        "{ranks_per_node} --verbose 2 {envs} --cwd={cur_dir} : {qc_exe_path} {qc_input_file} " \
+                        "{scr_dir}".format(
+                            block_name=block_name, num_processes=num_nodes * ranks_per_node,
+                            ranks_per_node=ranks_per_node, envs=runjob_env_text, cur_dir=cur_dir,
+                            qc_exe_path=qc_exe_path, qc_input_file=input_file, scr_dir=qc_scr_dir)
+        qc_qsub_cmd = "qsub -A JCESR -t {max_minutes} -n {num_nodes} --mode c{ranks_per_node} --env {envs} " \
+                      "--cwd={cur_dir} {qc_exe_path} {qc_input_file} {scr_dir}".format(
+                          max_minutes=max_minutes, num_nodes=num_nodes, ranks_per_node=ranks_per_node,
+                          envs=qsub_env_text, cur_dir=cur_dir, qc_exe_path=qc_exe_path, qc_input_file=input_file,
+                          scr_dir=qc_scr_dir)
+        if use_runjob:
+            qc_cmd = qc_runjob_cmd
+        else:
+            qc_cmd = qc_qsub_cmd
+        return qc_cmd
 
     def run_task(self, fw_spec):
         qcinp = QcInput.from_dict(fw_spec["qcinp"])
@@ -92,7 +101,7 @@ class QChemTask(FireTaskBase, FWSerializable):
         fw_data = FWData()
         half_cpus_cmd = shlex.split("qchem -np 12")
         if "PBS_JOBID" in os.environ and "edique" in os.environ["PBS_JOBID"]:
-        # edison compute nodes
+            # edison compute nodes
             if (not fw_data.MULTIPROCESSING) or (fw_data.SUB_NPROCS is None):
                 qc_exe = shlex.split("qchem -np {}".format(min(24, len(mol))))
                 half_cpus_cmd = shlex.split("qchem -np {}".format(
@@ -103,7 +112,7 @@ class QChemTask(FireTaskBase, FWSerializable):
                 qc_exe = shlex.split("qchem -np {}".format(
                     min(fw_data.SUB_NPROCS, len(mol))))
                 half_cpus_cmd = shlex.split("qchem -np {}".format(
-                    min(fw_data.SUB_NPROCS/2, len(mol))))
+                    min(fw_data.SUB_NPROCS / 2, len(mol))))
         elif "PBS_JOBID" in os.environ and "hopque" in os.environ["PBS_JOBID"]:
             if (not fw_data.MULTIPROCESSING) or (fw_data.SUB_NPROCS is None):
                 qc_exe = shlex.split("qchem -np {}".format(min(24, len(mol))))
@@ -115,9 +124,9 @@ class QChemTask(FireTaskBase, FWSerializable):
                 qc_exe = shlex.split("qchem -np {}".format(
                     min(fw_data.SUB_NPROCS, len(mol))))
                 half_cpus_cmd = shlex.split("qchem -np {}".format(
-                    min(fw_data.SUB_NPROCS/2, len(mol))))
+                    min(fw_data.SUB_NPROCS / 2, len(mol))))
         elif carver_name_pattern.match(socket.gethostname()):
-        # mendel compute nodes
+            # mendel compute nodes
             qc_exe = shlex.split("qchem -np {}".format(min(8, len(mol))))
         elif 'vesta' in socket.gethostname():
             # ALCF, Blue Gene
@@ -143,8 +152,8 @@ class QChemTask(FireTaskBase, FWSerializable):
             geom_max_cycles = 500
 
         qcinp.write_file("mol.qcinp")
-        if 'implicit_solvent' in fw_spec and\
-                'solvent_data' in fw_spec['implicit_solvent']:
+        if 'implicit_solvent' in fw_spec and \
+                        'solvent_data' in fw_spec['implicit_solvent']:
             solvent_data = fw_spec['implicit_solvent']['solvent_data']
             values = ['{:.4f}'.format(solvent_data[t]) for t in
                       ['Dielec', 'SolN', 'SolA', 'SolB', 'SolG', 'SolC',
