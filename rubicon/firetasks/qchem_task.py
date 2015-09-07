@@ -156,6 +156,8 @@ class QChemTask(FireTaskBase, FWSerializable):
         geom_max_cycles = 200
         alt_cmd = {"half_cpus": half_cpus_cmd,
                    "openmp": shlex.split("qchem -seq -nt 24")}
+        if 'vesta' in socket.gethostname():
+            alt_cmd.pop("openmp")
         if fw_spec['num_atoms'] > 50:
             scf_max_cycles = 300
             geom_max_cycles = 500
