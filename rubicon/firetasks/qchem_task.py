@@ -80,6 +80,13 @@ class QChemTask(FireTaskBase, FWSerializable):
             qc_cmd = qc_qsub_cmd
         return qc_cmd
 
+    @staticmethod
+    def _customize_alcf_qcinp(qcinp, num_nodes=8):
+        for qj in qcinp.jobs:
+            qj.params["rem"]["parallel_tasks"] = num_nodes
+            qj.params["rem"]["BLAS3_DFT"] = 1
+            qj.params["rem"]["PDIAG_ON"] = 1
+
     def run_task(self, fw_spec):
         qcinp = QcInput.from_dict(fw_spec["qcinp"])
         if 'mol' in fw_spec:
@@ -131,6 +138,8 @@ class QChemTask(FireTaskBase, FWSerializable):
         elif 'vesta' in socket.gethostname():
             # ALCF, Blue Gene
             qc_exe = shlex.split(self._calibrate_alcf_cmd())
+            half_cpus_cmd = shlex.split(self._calibrate_alcf_cmd(scr_size_GB=8))
+            self._customize_alcf_qcinp()
         elif "macqu" in socket.gethostname().lower():
             qc_exe = shlex.split("qchem -nt 2")
         else:
