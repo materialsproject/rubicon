@@ -43,7 +43,8 @@ class QChemTask(FireTaskBase, FWSerializable):
         qcaux_path = "/projects/JCESR/qcaux"
         qc_exe_path = "/projects/JCESR/pkcoff/public/qcprog-optv1.exe"
         qc_scr_dir = "/dev/local/qchem"
-        scr_size_bytes = scr_size_GB * (2 ** 30)
+        #scr_size_bytes = scr_size_GB * (2 ** 30)
+        scr_size_bytes = scr_size_GB * (10**9)
         qc_envs = {
             "HOME": os.environ["HOME"],
             "QC": qc_package_path,
