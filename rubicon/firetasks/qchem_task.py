@@ -3,6 +3,7 @@ import logging
 import re
 import shlex
 import os
+import shutil
 import socket
 import datetime
 import sys
@@ -87,6 +88,9 @@ class QChemTask(FireTaskBase, FWSerializable):
             qj.params["rem"]["parallel_tasks"] = num_nodes
             qj.params["rem"]["BLAS3_DFT"] = 1
             qj.params["rem"]["PDIAG_ON"] = 1
+        # use Paul Coffman's version of pathtable
+        pathtable_src = "/projects/JCESR/pkcoff/public/pathtable"
+        shutil.copy(pathtable_src, "pathtable")
 
     def run_task(self, fw_spec):
         qcinp = QcInput.from_dict(fw_spec["qcinp"])
