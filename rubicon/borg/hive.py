@@ -308,8 +308,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
                 db.authenticate(self.user, self.password)
             coll = db[self.collection]
 
-            result = coll.find_one({"path": d["path"]},
-                                   fields=["path", "task_id"])
+            result = coll.find_one({"path": d["path"]})
             if result is None or self.update_duplicates:
                 d["last_updated"] = datetime.datetime.today()
                 if result is None:
