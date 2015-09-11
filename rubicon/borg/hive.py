@@ -155,7 +155,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
                              stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE)
-        out, err = p.communicate(xyz)
+        out, err = p.communicate(str(xyz))
         return out
 
     @classmethod
