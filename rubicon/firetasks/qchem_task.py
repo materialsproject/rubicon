@@ -86,7 +86,8 @@ class QChemTask(FireTaskBase, FWSerializable):
     def _customize_alcf_qcinp(qcinp, num_nodes=8):
         for qj in qcinp.jobs:
             qj.params["rem"]["parallel_tasks"] = num_nodes
-            qj.params["rem"]["BLAS3_DFT"] = 1
+            if qj.params["rem"]["jobtype"] != "freq":
+                qj.params["rem"]["BLAS3_DFT"] = 1
             qj.params["rem"]["PDIAG_ON"] = 1
         # use Paul Coffman's version of pathtable
         pathtable_src = "/projects/JCESR/pkcoff/public/pathtable"
