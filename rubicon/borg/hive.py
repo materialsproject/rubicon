@@ -5,14 +5,16 @@ TODO: Modify module doc.
 """
 
 from __future__ import division
+import shlex
 from monty.io import zopen
 from monty.json import jsanitize
 from monty.os.path import zpath
 from pymatgen import Molecule
 from pymatgen.analysis.molecule_structure_comparator import \
     MoleculeStructureComparator
-from pymatgen.io.qchemio import QcOutput
+from pymatgen.io.qchem import QcOutput
 from pymatgen.symmetry.analyzer import PointGroupAnalyzer
+import subprocess
 from rubicon.utils.snl.egsnl import EGStructureNL
 from rubicon.utils.snl.egsnl_mongo import EGSNLMongoAdapter
 
@@ -146,6 +148,16 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
         msc = MoleculeStructureComparator(priority_bonds=bonds)
         return not msc.are_equal(mol1, mol2)
 
+    @staticmethod
+    def xyz2svg(xyz):
+        babel_cmd = shlex.split("babel -ixyz -osvg")
+        p = subprocess.Popen(babel_cmd,
+                             stdin=subprocess.PIPE,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE)
+        out, err = p.communicate(str(xyz))
+        return out
+
     @classmethod
     def get_task_doc(cls, path, fw_spec=None):
         """
@@ -161,7 +173,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
         smiles = pbmol.write("smi").split()[0]
         can = pbmol.write("can").split()[0]
         inchi_final = pbmol.write("inchi").strip()
-        svg = cls.modify_svg(pbmol.write("svg"))
+        svg = cls.modify_svg(cls.xyz2svg(xyz))
         comp = mol.composition
         initial_mol = data[0]["molecules"][0]
         charge = mol.charge
@@ -308,8 +320,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
                 db.authenticate(self.user, self.password)
             coll = db[self.collection]
 
-            result = coll.find_one({"path": d["path"]},
-                                   fields=["path", "task_id"])
+            result = coll.find_one({"path": d["path"]})
             if result is None or self.update_duplicates:
                 d["last_updated"] = datetime.datetime.today()
                 if result is None:

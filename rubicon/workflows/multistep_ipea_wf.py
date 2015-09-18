@@ -63,12 +63,13 @@ def multistep_ipea_fws(mol, name, mission, solvent, solvent_method, use_vdW_surf
     fireworks.extend(itertools.chain.from_iterable(fws))
     if len(mol) > 1:
         if large:
-            links_dict.update({cgi_db: cspi_cal, ngi_db: nspi_cal,
+            links_dict.update({cgi_db: cspi_cal,
                                agi_db: aspi_cal})
+            links_dict.update({ngi_db: [cgi_cal, agi_cal, nspi_cal]})
         else:
             links_dict.update({cfi_db: cspi_cal, nfi_db: nspi_cal,
                                afi_db: aspi_cal})
-        links_dict.update({nspi_db: [cgi_cal, agi_cal]})
+            links_dict.update({nfi_db: [cgi_cal, agi_cal, nspi_cal]})
         if parent_fwid:
             for pfw_id in parent_fwid:
                 links_dict[pfw_id] = ngi_cal

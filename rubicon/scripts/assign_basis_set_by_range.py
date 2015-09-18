@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 import argparse
 import copy
-from pymatgen.io.qchemio import QcInput
+from pymatgen.io.qchem import QcInput
 
 __author__ = 'xiaohuiqu'
 

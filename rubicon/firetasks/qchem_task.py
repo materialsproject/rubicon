@@ -3,6 +3,7 @@ import logging
 import re
 import shlex
 import os
+import shutil
 import socket
 import datetime
 import sys
@@ -14,7 +15,7 @@ from fireworks.utilities.fw_serializers import FWSerializable
 
 from custodian.custodian import Custodian
 from pymatgen.core.structure import Molecule
-from pymatgen.io.qchemio import QcInput
+from pymatgen.io.qchem import QcInput
 from rubicon.utils.eg_wf_utils import move_to_eg_garden
 from rubicon.workflows.wf_settings import MOVE_TO_EG_GARDEN
 
@@ -24,7 +25,6 @@ __version__ = '0.1'
 __maintainer__ = 'Anubhav Jain'
 __email__ = 'ajain@lbl.gov'
 __date__ = 'Jun 07, 2013'
-
 
 DATETIME_HANDLER = lambda obj: obj.isoformat() \
     if isinstance(obj, datetime.datetime) else None
@@ -36,6 +36,62 @@ class QChemTask(FireTaskBase, FWSerializable):
     """
 
     _fw_name = "QChem Task"
+
+    @staticmethod
+    def _calibrate_alcf_cmd(input_file="mol.qcinp", max_minutes=60, num_nodes=8, ranks_per_node=1,
+                            num_threads=64, scr_size_GB=4, use_runjob=False):
+        qc_package_path = "/projects/JCESR/pkcoff/qchem422.mod2"
+        qcaux_path = "/projects/JCESR/qcaux"
+        qc_exe_path = "/projects/JCESR/pkcoff/public/qcprog-optv1.exe"
+        qc_scr_dir = "/dev/local/qchem"
+        #scr_size_bytes = scr_size_GB * (2 ** 30)
+        scr_size_bytes = scr_size_GB * (10**9)
+        qc_envs = {
+            "HOME": os.environ["HOME"],
+            "QC": qc_package_path,
+            "QCAUX": qcaux_path,
+            "QCSCRATCH": qc_scr_dir,
+            "QCFILEPREF": os.path.join(qc_scr_dir, "qc_job"),
+            "QCTMPDIR": qc_scr_dir,
+            "QCTHREADS": num_threads,
+            "OMP_NUM_THREADS": num_threads,
+            "INT_OMP_MIN_LENSTEP": 10,
+            "INT_OMP_MAX_LENSTEP": 50,
+            "INT_OMP_MIN_LENSTEP_PATH1": 25,
+            "INT_OMP_MAX_LENSTEP_PATH1": 100,
+            "QCLOCALFSSIZE": scr_size_bytes
+        }
+        qsub_env_text = ":".join(["{}={}".format(k, v) for k, v in qc_envs.items()])
+        runjob_env_text = " ".join(["--envs {}={}".format(k, v) for k, v in qc_envs.items()])
+        block_name = os.environ["COBALT_PARTNAME"]
+        cur_dir = os.getcwd()
+        qc_runjob_cmd = "runjob --block {block_name} -n {num_processes} --ranks-per-node " \
+                        "{ranks_per_node} --verbose 2 {envs} --cwd={cur_dir} : {qc_exe_path} {qc_input_file} " \
+                        "{scr_dir}".format(
+                            block_name=block_name, num_processes=num_nodes * ranks_per_node,
+                            ranks_per_node=ranks_per_node, envs=runjob_env_text, cur_dir=cur_dir,
+                            qc_exe_path=qc_exe_path, qc_input_file=input_file, scr_dir=qc_scr_dir)
+        qc_qsub_cmd = "qsub -A JCESR -t {max_minutes} -n {num_nodes} --mode c{ranks_per_node} --env {envs} " \
+                      "--cwd={cur_dir} {qc_exe_path} {qc_input_file} {scr_dir}".format(
+                          max_minutes=max_minutes, num_nodes=num_nodes, ranks_per_node=ranks_per_node,
+                          envs=qsub_env_text, cur_dir=cur_dir, qc_exe_path=qc_exe_path, qc_input_file=input_file,
+                          scr_dir=qc_scr_dir)
+        if use_runjob:
+            qc_cmd = qc_runjob_cmd
+        else:
+            qc_cmd = qc_qsub_cmd
+        return qc_cmd
+
+    @staticmethod
+    def _customize_alcf_qcinp(qcinp, num_nodes=8):
+        for qj in qcinp.jobs:
+            qj.params["rem"]["parallel_tasks"] = num_nodes
+            if qj.params["rem"]["jobtype"] != "freq":
+                qj.params["rem"]["BLAS3_DFT"] = 1
+            qj.params["rem"]["PDIAG_ON"] = 1
+        # use Paul Coffman's version of pathtable
+        pathtable_src = "/projects/JCESR/pkcoff/public/pathtable"
+        shutil.copy(pathtable_src, "pathtable")
 
     def run_task(self, fw_spec):
         qcinp = QcInput.from_dict(fw_spec["qcinp"])
@@ -58,7 +114,7 @@ class QChemTask(FireTaskBase, FWSerializable):
         fw_data = FWData()
         half_cpus_cmd = shlex.split("qchem -np 12")
         if "PBS_JOBID" in os.environ and "edique" in os.environ["PBS_JOBID"]:
-        # edison compute nodes
+            # edison compute nodes
             if (not fw_data.MULTIPROCESSING) or (fw_data.SUB_NPROCS is None):
                 qc_exe = shlex.split("qchem -np {}".format(min(24, len(mol))))
                 half_cpus_cmd = shlex.split("qchem -np {}".format(
@@ -69,7 +125,7 @@ class QChemTask(FireTaskBase, FWSerializable):
                 qc_exe = shlex.split("qchem -np {}".format(
                     min(fw_data.SUB_NPROCS, len(mol))))
                 half_cpus_cmd = shlex.split("qchem -np {}".format(
-                    min(fw_data.SUB_NPROCS/2, len(mol))))
+                    min(fw_data.SUB_NPROCS / 2, len(mol))))
         elif "PBS_JOBID" in os.environ and "hopque" in os.environ["PBS_JOBID"]:
             if (not fw_data.MULTIPROCESSING) or (fw_data.SUB_NPROCS is None):
                 qc_exe = shlex.split("qchem -np {}".format(min(24, len(mol))))
@@ -81,10 +137,16 @@ class QChemTask(FireTaskBase, FWSerializable):
                 qc_exe = shlex.split("qchem -np {}".format(
                     min(fw_data.SUB_NPROCS, len(mol))))
                 half_cpus_cmd = shlex.split("qchem -np {}".format(
-                    min(fw_data.SUB_NPROCS/2, len(mol))))
+                    min(fw_data.SUB_NPROCS / 2, len(mol))))
         elif carver_name_pattern.match(socket.gethostname()):
-        # mendel compute nodes
+            # mendel compute nodes
             qc_exe = shlex.split("qchem -np {}".format(min(8, len(mol))))
+        elif 'vesta' in socket.gethostname():
+            # ALCF, Blue Gene
+            num_nodes = 8
+            qc_exe = shlex.split(self._calibrate_alcf_cmd())
+            half_cpus_cmd = shlex.split(self._calibrate_alcf_cmd(num_nodes=num_nodes, scr_size_GB=8))
+            self._customize_alcf_qcinp(qcinp, num_nodes=num_nodes)
         elif "macqu" in socket.gethostname().lower():
             qc_exe = shlex.split("qchem -nt 2")
         else:
@@ -101,13 +163,15 @@ class QChemTask(FireTaskBase, FWSerializable):
         geom_max_cycles = 200
         alt_cmd = {"half_cpus": half_cpus_cmd,
                    "openmp": shlex.split("qchem -seq -nt 24")}
+        if 'vesta' in socket.gethostname():
+            alt_cmd.pop("openmp")
         if fw_spec['num_atoms'] > 50:
             scf_max_cycles = 300
             geom_max_cycles = 500
 
         qcinp.write_file("mol.qcinp")
-        if 'implicit_solvent' in fw_spec and\
-                'solvent_data' in fw_spec['implicit_solvent']:
+        if 'implicit_solvent' in fw_spec and \
+                        'solvent_data' in fw_spec['implicit_solvent']:
             solvent_data = fw_spec['implicit_solvent']['solvent_data']
             values = ['{:.4f}'.format(solvent_data[t]) for t in
                       ['Dielec', 'SolN', 'SolA', 'SolB', 'SolG', 'SolC',
