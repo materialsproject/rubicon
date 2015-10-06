@@ -1,0 +1,14 @@
+{
+    "medium size": {
+        "INT_OMP_MAX_LENSTEP": 50, 
+        "INT_OMP_MAX_LENSTEP_PATH1": 100, 
+        "INT_OMP_MIN_LENSTEP": 10, 
+        "INT_OMP_MIN_LENSTEP_PATH1": 25
+    }, 
+    "small size": {
+        "INT_OMP_MAX_LENSTEP": 3, 
+        "INT_OMP_MAX_LENSTEP_PATH1": 3, 
+        "INT_OMP_MIN_LENSTEP": 3, 
+        "INT_OMP_MIN_LENSTEP_PATH1": 3
+    }
+}

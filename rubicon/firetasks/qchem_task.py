@@ -1,4 +1,5 @@
 import copy
+import json
 import logging
 import re
 import shlex
@@ -55,12 +56,14 @@ class QChemTask(FireTaskBase, FWSerializable):
             "QCTMPDIR": qc_scr_dir,
             "QCTHREADS": num_threads,
             "OMP_NUM_THREADS": num_threads,
-            "INT_OMP_MIN_LENSTEP": 10,
-            "INT_OMP_MAX_LENSTEP": 50,
-            "INT_OMP_MIN_LENSTEP_PATH1": 25,
-            "INT_OMP_MAX_LENSTEP_PATH1": 100,
             "QCLOCALFSSIZE": scr_size_bytes
         }
+        with open(os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                               "data/qc_lenstep_config_set"))) \
+                as f:
+            lenstep_config_set = json.load(f)
+        lenstep_setting = lenstep_config_set["small size"]
+        qc_envs.update(lenstep_setting)
         qsub_env_text = ":".join(["{}={}".format(k, v) for k, v in qc_envs.items()])
         runjob_env_text = " ".join(["--envs {}={}".format(k, v) for k, v in qc_envs.items()])
         block_name = os.environ["COBALT_PARTNAME"]
