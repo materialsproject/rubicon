@@ -43,7 +43,7 @@ class QChemTask(FireTaskBase, FWSerializable):
                             num_threads=64, scr_size_GB=4, use_runjob=False):
         qc_package_path = "/projects/JCESR/pkcoff/qchem422.mod2"
         qcaux_path = "/projects/JCESR/qcaux"
-        qc_exe_path = "/projects/JCESR/pkcoff/public/qcprog-optv1.exe"
+        qc_exe_path = "/projects/JCESR/pkcoff/public/qcprog-optv2.exe"
         qc_scr_dir = "/dev/local/qchem"
         #scr_size_bytes = scr_size_GB * (2 ** 30)
         scr_size_bytes = scr_size_GB * (10**9)
