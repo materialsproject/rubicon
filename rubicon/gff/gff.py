@@ -4,7 +4,7 @@ import os
 
 __author__ = 'navnidhirajput'
 
-from pymatgen.serializers.json_coders import MSONable
+from monty.json import MSONable
 
 
 class Gff(MSONable):
