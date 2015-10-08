@@ -3,7 +3,7 @@ from monty.json import MontyDecoder
 from pymatgen import Composition, Structure, Molecule
 from pymatgen.analysis.molecule_matcher import \
     MoleculeMatcher, InchiMolAtomMapper
-from pymatgen.io.babelio import BabelMolAdaptor
+from pymatgen.io.babel import BabelMolAdaptor
 from pymatgen.matproj.snl import StructureNL
 
 

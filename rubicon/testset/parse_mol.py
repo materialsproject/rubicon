@@ -9,9 +9,9 @@ import traceback
 import sys
 
 from pymatgen import Element, Molecule
-from pymatgen.io.gaussianio import GaussianInput
-from pymatgen.io.babelio import BabelMolAdaptor
-from pymatgen.io.xyzio import XYZ
+from pymatgen.io.gaussian import GaussianInput
+from pymatgen.io.babel import BabelMolAdaptor
+from pymatgen.io.xyz import XYZ
 
 
 def parse_file(filename):

@@ -33,8 +33,8 @@ import datetime
 from pymongo import MongoClient
 
 from pymatgen.apps.borg.hive import AbstractDrone
-from pymatgen.io.babelio import BabelMolAdaptor
-from pymatgen.io.xyzio import XYZ
+from pymatgen.io.babel import BabelMolAdaptor
+from pymatgen.io.xyz import XYZ
 
 from rubicon.testset.parse_mol import get_nih_names
 
