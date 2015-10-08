@@ -2,11 +2,18 @@
 
 import re
 import glob
-
 import requests
-import pybel as pb
 import traceback
 import sys
+
+try:
+    import pybel as pb
+except Exception as ex:
+    print "WARNING: Error importing pybel, setting pb to None!"
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    traceback.print_exception(
+	exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
+    pb = None
 
 from pymatgen import Element, Molecule
 from pymatgen.io.gaussianio import GaussianInput
