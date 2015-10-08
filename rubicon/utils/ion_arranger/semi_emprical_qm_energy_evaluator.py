@@ -8,7 +8,7 @@ import math
 from monty.tempfile import ScratchDir
 from pymatgen.core.structure import Molecule
 from pymatgen.core.units import Energy
-from pymatgen.io.babelio import BabelMolAdaptor
+from pymatgen.io.babel import BabelMolAdaptor
 
 from rubicon.io.mopacio.custodian.mopac_error_handlers import MopacErrorHandler
 from rubicon.io.mopacio.custodian.mopacjob import MopacJob

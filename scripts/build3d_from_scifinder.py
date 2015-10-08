@@ -8,7 +8,7 @@ __date__ = 'Aug 08, 2013'
 import glob
 import openbabel as ob
 import re
-from pymatgen.io.babelio import BabelMolAdaptor
+from pymatgen.io.babel import BabelMolAdaptor
 from pymatgen.matproj.snl import StructureNL
 import os
 import json

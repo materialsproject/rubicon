@@ -2,7 +2,7 @@ import subprocess
 from fireworks.core.firework import FireTaskBase
 from fireworks.utilities.fw_serializers import FWSerializable
 from pymatgen import Molecule
-from pymatgen.io.gaussianio import GaussianInput
+from pymatgen.io.gaussian import GaussianInput
 
 __author__ = 'Anubhav Jain'
 __copyright__ = 'Copyright 2013, The Materials Project'

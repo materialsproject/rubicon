@@ -8,7 +8,7 @@ import itertools
 import inspyred
 import openbabel as ob
 from pymatgen.core.structure import Molecule
-from pymatgen.io.babelio import BabelMolAdaptor
+from pymatgen.io.babel import BabelMolAdaptor
 from pymatgen.io.qchem import QcOutput
 import numpy as np
 import simplerandom.random as srr

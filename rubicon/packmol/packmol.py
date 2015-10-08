@@ -3,7 +3,7 @@ import tempfile
 from monty.io import ScratchDir
 
 from pymatgen import Molecule
-from pymatgen.io.babelio import BabelMolAdaptor
+from pymatgen.io.babel import BabelMolAdaptor
 import pybel as pb
 import os
 from subprocess import Popen, PIPE
