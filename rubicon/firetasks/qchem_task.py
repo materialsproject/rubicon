@@ -40,13 +40,12 @@ class QChemTask(FireTaskBase, FWSerializable):
 
     @staticmethod
     def _calibrate_alcf_cmd(input_file="mol.qcinp", max_minutes=60, num_nodes=8, ranks_per_node=1,
-                            num_threads=64, scr_size_GB=4, use_runjob=False):
+                            num_threads=64, scr_size_GB=2.0, use_runjob=False):
         qc_package_path = "/projects/JCESR/pkcoff/qchem422.mod2"
         qcaux_path = "/projects/JCESR/qcaux"
         qc_exe_path = "/projects/JCESR/pkcoff/public/qcprog-optv2.exe"
         qc_scr_dir = "/dev/local/qchem"
-        #scr_size_bytes = scr_size_GB * (2 ** 30)
-        scr_size_bytes = scr_size_GB * (10**9)
+        scr_size_bytes = int(scr_size_GB * (2 ** 30))
         qc_envs = {
             "HOME": os.environ["HOME"],
             "QC": qc_package_path,
@@ -146,9 +145,9 @@ class QChemTask(FireTaskBase, FWSerializable):
             qc_exe = shlex.split("qchem -np {}".format(min(8, len(mol))))
         elif 'vesta' in socket.gethostname():
             # ALCF, Blue Gene
-            num_nodes = 8
+            num_nodes = 4
             qc_exe = shlex.split(self._calibrate_alcf_cmd())
-            half_cpus_cmd = shlex.split(self._calibrate_alcf_cmd(num_nodes=num_nodes, scr_size_GB=8))
+            half_cpus_cmd = shlex.split(self._calibrate_alcf_cmd(num_nodes=num_nodes, scr_size_GB=3.72))
             self._customize_alcf_qcinp(qcinp, num_nodes=num_nodes)
         elif "macqu" in socket.gethostname().lower():
             qc_exe = shlex.split("qchem -nt 2")
