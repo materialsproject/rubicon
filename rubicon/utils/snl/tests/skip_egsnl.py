@@ -2,8 +2,9 @@ import json
 import os
 from unittest import TestCase
 import unittest
-from pymatgen.io.babelio import BabelMolAdaptor
-from pymatgen.io.smartio import read_mol
+
+from pymatgen.io.smart import read_mol
+
 from rubicon.utils.snl.egsnl import get_meta_from_structure
 
 __author__ = 'xiaohuiqu'

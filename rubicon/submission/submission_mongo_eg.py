@@ -3,7 +3,7 @@ import datetime
 import json
 import os
 import dateutil.parser
-from pymatgen.io.babelio import BabelMolAdaptor
+from pymatgen.io.babel import BabelMolAdaptor
 from pymatgen.matproj.snl import StructureNL
 from pymongo import MongoClient
 import yaml

@@ -1,7 +1,7 @@
 import os
 from unittest import TestCase
 from pymatgen import Molecule
-from pymatgen.io.babelio import BabelMolAdaptor
+from pymatgen.io.babel import BabelMolAdaptor
 from pymatgen.io.qchem import QcOutput
 from rubicon.utils.ion_arranger.hard_sphere_energy_evaluators import AtomicRadiusUtils, ContactDetector
 from rubicon.utils.ion_arranger.ion_arranger import IonPlacer
