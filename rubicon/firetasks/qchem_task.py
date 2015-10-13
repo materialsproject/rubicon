@@ -146,7 +146,7 @@ class QChemTask(FireTaskBase, FWSerializable):
         elif 'vesta' in socket.gethostname():
             # ALCF, Blue Gene
             num_nodes = 4
-            qc_exe = shlex.split(self._calibrate_alcf_cmd())
+            qc_exe = shlex.split(self._calibrate_alcf_cmd(num_nodes=num_nodes))
             half_cpus_cmd = shlex.split(self._calibrate_alcf_cmd(num_nodes=num_nodes, scr_size_GB=3.72))
             self._customize_alcf_qcinp(qcinp, num_nodes=num_nodes)
         elif "macqu" in socket.gethostname().lower():
