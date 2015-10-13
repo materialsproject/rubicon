@@ -1,10 +1,11 @@
 from collections import defaultdict
 import json
 import os
+from monty.json import MSONable
 
 __author__ = 'navnidhirajput'
 
-from pymatgen.serializers.json_coders import MSONable
+
 
 
 class Gff(MSONable):

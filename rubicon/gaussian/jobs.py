@@ -6,6 +6,7 @@ This module implements basic kinds of jobs for Gaussian runs.
 
 from __future__ import division
 from monty.io import zopen
+from monty.json import MSONable
 
 __author__ = "Shyue Ping Ong"
 __version__ = "0.1"
@@ -19,7 +20,7 @@ import subprocess
 import os
 import shutil
 
-from pymatgen.serializers.json_coders import MSONable
+
 
 from custodian.custodian import Job
 
