@@ -2,11 +2,15 @@
 
 import re
 import glob
-
 import requests
-import pybel as pb
 import traceback
 import sys
+
+try:
+    import pybel as pb
+except Exception as ex:
+    print "WARNING: Error importing pybel, setting pb to None!"
+    pb = None
 
 from pymatgen import Element, Molecule
 from pymatgen.io.gaussian import GaussianInput
