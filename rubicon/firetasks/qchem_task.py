@@ -91,6 +91,9 @@ class QChemTask(FireTaskBase, FWSerializable):
             if qj.params["rem"]["jobtype"] != "freq":
                 qj.params["rem"]["BLAS3_DFT"] = 1
             qj.params["rem"]["PDIAG_ON"] = 1
+            solvent_params = qj.params.pop("pcm_solvent", None)
+            if solvent_params is not None:
+                qj.params["solvent"] = solvent_params
         # use Paul Coffman's version of pathtable
         pathtable_src = "/projects/JCESR/pkcoff/public/pathtable"
         shutil.copy(pathtable_src, "pathtable")
