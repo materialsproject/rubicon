@@ -151,8 +151,13 @@ class QChemTask(FireTaskBase, FWSerializable):
             num_nodes = 4
             num_threads = 32
             scr_size_GB = 0.476
-            qc_exe = shlex.split(self._calibrate_alcf_cmd(num_nodes=num_nodes, num_threads=num_threads, scr_size_GB=scr_size_GB))
-            half_cpus_cmd = shlex.split(self._calibrate_alcf_cmd(num_nodes=num_nodes, num_threads=num_threads/2, scr_size_GB=scr_size_GB))
+            max_minutes = 120
+            qc_exe = shlex.split(self._calibrate_alcf_cmd(
+                num_nodes=num_nodes, max_minutes=max_minutes, num_threads=num_threads,
+                scr_size_GB=scr_size_GB))
+            half_cpus_cmd = shlex.split(self._calibrate_alcf_cmd(
+                num_nodes=num_nodes, max_minutes=max_minutes, num_threads=num_threads/2,
+                scr_size_GB=scr_size_GB))
             self._customize_alcf_qcinp(qcinp, num_nodes=num_nodes)
         elif "macqu" in socket.gethostname().lower():
             qc_exe = shlex.split("qchem -nt 2")
