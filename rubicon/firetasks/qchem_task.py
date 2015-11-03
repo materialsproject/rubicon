@@ -99,9 +99,15 @@ class QChemTask(FireTaskBase, FWSerializable):
         shutil.copy(pathtable_src, "pathtable")
 
     def run_task(self, fw_spec):
-        qcinp = QcInput.from_dict(fw_spec["qcinp"])
+        if isinstance(fw_spec["qcinp"], dict):
+            qcinp = QcInput.from_dict(fw_spec["qcinp"])
+        else:
+            qcinp = fw_spec["qcinp"]
         if 'mol' in fw_spec:
-            mol = Molecule.from_dict(fw_spec["mol"])
+            if isinstance(fw_spec["mol"], dict):
+                mol = Molecule.from_dict(fw_spec["mol"])
+            else:
+                mol = fw_spec["mol"]
             for qj in qcinp.jobs:
                 if isinstance(qj.mol, Molecule):
                     qj.mol = copy.deepcopy(mol)

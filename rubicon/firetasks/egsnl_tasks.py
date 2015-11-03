@@ -14,7 +14,10 @@ class AddEGSNLTask(FireTaskBase, FWSerializable):
     def run_task(self, fw_spec):
 
         sma = EGSNLMongoAdapter.auto_load()
-        snl = StructureNL.from_dict(fw_spec['snl'])
+        if isinstance(fw_spec['snl'], dict):
+            snl = StructureNL.from_dict(fw_spec['snl'])
+        else:
+            snl = fw_spec['snl']
         egsnl, snlgroup_id = sma.add_snl(snl)
 
         mol = egsnl.structure

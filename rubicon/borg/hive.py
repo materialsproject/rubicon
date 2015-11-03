@@ -6,9 +6,11 @@ TODO: Modify module doc.
 
 from __future__ import division
 import shlex
+import fireworks
 from monty.io import zopen
 from monty.json import jsanitize
 from monty.os.path import zpath
+from pkg_resources import parse_version
 from pymatgen import Molecule
 from pymatgen.analysis.molecule_structure_comparator import \
     MoleculeStructureComparator
@@ -274,10 +276,14 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
                 d['run_tags'] = fw_spec['run_tags']
                 d['implicit_solvent'] = fw_spec['implicit_solvent']
                 d['user_tags'] = fw_spec["user_tags"]
-                d['snl_initial'] = fw_spec['egsnl']
+                if isinstance(fw_spec['egsnl'], dict):
+                    d['snl_initial'] = fw_spec['egsnl']
+                else:
+                    d['snl_initial'] = fw_spec['egsnl'].as_dict()
                 d['snlgroup_id_initial'] = fw_spec['snlgroup_id']
                 d['inchi_root'] = fw_spec['inchi_root']
                 d['inchi_initial'] = fw_spec['inchi']
+
                 if "geometry optimization" in d['task_type'] or "molecule dynamics" in d['task_type']:
                     new_s = Molecule.from_dict(d["molecule_final"])
                     old_snl = EGStructureNL.from_dict(d['snl_initial'])
@@ -304,7 +310,10 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
                     d['snl_final'] = egsnl.as_dict()
                     d['snlgroup_id_final'] = snlgroup_id
                 else:
-                    d['snl_final'] = fw_spec['egsnl']
+                    if isinstance(fw_spec['egsnl'], dict):
+                        d['snl_final'] = fw_spec['egsnl']
+                    else:
+                        d['snl_final'] = fw_spec['egsnl'].as_dict()
                     d['snlgroup_id_final'] = fw_spec['snlgroup_id']
                 d['snlgroup_changed'] = (d['snlgroup_id_initial'] !=
                                          d['snlgroup_id_final'])
