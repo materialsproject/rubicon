@@ -30,7 +30,8 @@ def get_reactions_collection():
     logger.addHandler(sh)
     with open(db_path) as f:
         db_creds = yaml.load(f)
-    conn = MongoClient(db_creds['host'], db_creds['port'])
+    conn = MongoClient(db_creds['host'], db_creds['port'],
+                       connect=False)
     db = conn[db_creds['db']]
     if db_creds['username']:
         db.authenticate(db_creds['username'], db_creds['password'])
@@ -48,7 +49,7 @@ def equilibrium_constant_fws(mission, solvent, solvent_method, use_vdw_surface, 
     else:
         bsse_qm_method = energy_method
     coll = get_reactions_collection()
-    reaction_doc = coll.find_one({"reaction_id": reaction_id})
+    reaction_doc = coll.find_one(filter={"reaction_id": reaction_id})
     reactant_snls = [StructureNL.from_dict(s) for s in reaction_doc["reactant_snls"]]
     product_snls = [StructureNL.from_dict(s) for s in reaction_doc["product_snls"]]
     reactant_nicknames = reaction_doc['reactant_nicknames']

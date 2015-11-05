@@ -24,7 +24,8 @@ def get_g3_bench_collection():
     password = db_creds['readonly_password']
     database_name = db_creds['database']
     collection_name = db_creds['collection']
-    conn = MongoClient(host=host, port=port)
+    conn = MongoClient(host=host, port=port,
+                       connect=False)
     db = conn[database_name]
     if user:
         db.authenticate(user, password)
@@ -34,8 +35,8 @@ def get_g3_bench_collection():
 
 def get_1st_round_calcualtion_result(mission_tag, bench_key_name, bench_dict, no_expt_bench_dict,
                                      db_collection):
-    result_cursor = db_collection.find({"user_tags.mission": mission_tag},
-                                       fields=['pretty_formula', 'IE', 'EA', 'charge',
+    result_cursor = db_collection.find(filter={"user_tags.mission": mission_tag},
+                                       projection=['pretty_formula', 'IE', 'EA', 'charge',
                                                'user_tags.fw_name'])
     calc_result = list(result_cursor)
 
@@ -66,8 +67,8 @@ def get_1st_round_calcualtion_result(mission_tag, bench_key_name, bench_dict, no
 
 def get_2nd_round_calcualtion_result(mission_tag, bench_key_name, bench_dict, no_expt_bench_dict,
                                      db_collection):
-    result_cursor = db_collection.find({"user_tags.mission": mission_tag},
-                                       fields=['user_tags', 'IE', 'EA', 'calculations',
+    result_cursor = db_collection.find(filter={"user_tags.mission": mission_tag},
+                                       projection=['user_tags', 'IE', 'EA', 'calculations',
                                                'inchi'])
     calc_result = list(result_cursor)
     for m in calc_result:

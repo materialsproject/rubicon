@@ -20,7 +20,7 @@ def get_db_collection():
     password = db_creds['readonly_password']
     database_name = db_creds['database']
     collection_name = db_creds['collection']
-    conn = MongoClient(host=host, port=port)
+    conn = MongoClient(host=host, port=port, connect=True)
     db = conn[database_name]
     if user:
         db.authenticate(user, password)
@@ -28,9 +28,9 @@ def get_db_collection():
     return collection
 
 def get_quinoxaline_result(db_collection, mission_tag):
-    result_cursor = db_collection.find({"user_tags.mission": mission_tag},
-                                       fields=['user_tags', 'IE', 'EA',
-                                               'inchi'])
+    result_cursor = db_collection.find(filter={"user_tags.mission": mission_tag},
+                                       projection=['user_tags', 'IE', 'EA',
+                                                   'inchi'])
     result_cursor.sort("user_tags.fw_name", pymongo.ASCENDING)
     calc_result = list(result_cursor)
     return calc_result
@@ -49,8 +49,8 @@ def write_csv(result, filename):
             writer.writerow(row_dict)
 
 def write_path_map(db_collection, mission_tag):
-    result_cursor = db_collection.find({"user_tags.mission": mission_tag},
-                                       fields=['user_tags', 'path'])
+    result_cursor = db_collection.find(filter={"user_tags.mission": mission_tag},
+                                       projection=['user_tags', 'path'])
     result_cursor.sort("user_tags.fw_name", pymongo.ASCENDING)
     calc_result = list(result_cursor)
     name2path = {row['user_tags']['fw_name']: row['path'] for row in

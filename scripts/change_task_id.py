@@ -18,7 +18,7 @@ def get_db_collection():
     password = db_creds['readonly_password']
     database_name = db_creds['database']
     collection_name = db_creds['collection']
-    conn = MongoClient(host=host, port=port)
+    conn = MongoClient(host=host, port=port, connect=False)
     db = conn[database_name]
     if user:
         db.authenticate(user, password)

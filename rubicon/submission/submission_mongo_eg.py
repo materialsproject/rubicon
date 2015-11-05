@@ -25,7 +25,8 @@ class SubmissionMongoAdapterEG(object):
         self.username = username
         self.password = password
 
-        self.connection = MongoClient(host, port, j=False)
+        self.connection = MongoClient(host, port, j=False,
+                                      connect=False)
         self.database = self.connection[db]
         if self.username:
             self.database.authenticate(username, password)
@@ -210,7 +211,7 @@ class SubmissionMongoAdapterEG(object):
         :param dt: a datetime object after which point you want to get
         :return: a list of IDs
         '''
-        job_docs = self.jobs.find({}, fields=["submission_id",
+        job_docs = self.jobs.find(filter={}, projection=["submission_id",
                                               "submitted_at",
                                               "parameters.nick_name"])
         ids = []
@@ -224,7 +225,7 @@ class SubmissionMongoAdapterEG(object):
         props = ['state', 'state_details', 'task_dict', 'submission_id',
                  'formula']
         infos = []
-        for j in self.jobs.find(crit, dict([(p, 1) for p in props])):
+        for j in self.jobs.find(filter=crit, projection=dict([(p, 1) for p in props])):
             infos.append(dict([(p, j[p]) for p in props]))
         return infos
 

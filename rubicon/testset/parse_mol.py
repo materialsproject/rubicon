@@ -158,7 +158,7 @@ def insert_elements(coll):
     print "adding missing elements."
     for z in xrange(1, 19):
         el = Element.from_Z(z)
-        r = coll.find({"formula": "{}1".format(el.symbol)})
+        r = coll.find(filter={"formula": "{}1".format(el.symbol)})
         if r.count() == 0:
             try:
                 clean_mol = Molecule([el], [[0, 0, 0]])

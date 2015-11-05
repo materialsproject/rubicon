@@ -29,8 +29,8 @@ def get_table(url, title, keyname, result):
 
 def refname2inchi(mission_tag):
     collection = get_g3_bench_collection()
-    result_cursor = collection.find({"user_tags.mission": mission_tag},
-                             fields=['inchi', 'user_tags.fw_name'])
+    result_cursor = collection.find(filter={"user_tags.mission": mission_tag},
+                                    projection=['inchi', 'user_tags.fw_name'])
     calc_result = list(result_cursor)
     fw_name_2_inchi = {m['user_tags']['fw_name'].strip(): m['inchi'] for m in calc_result}
 

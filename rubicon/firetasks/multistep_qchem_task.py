@@ -449,15 +449,16 @@ class BasisSetSuperpositionErrorCalculationTask(FireTaskBase, FWSerializable):
         logger.addHandler(sh)
         with open(db_path) as f:
             db_creds = json.load(f)
-        conn = MongoClient(db_creds['host'], db_creds['port'],)
+        conn = MongoClient(db_creds['host'], db_creds['port'],
+                           connect=False)
         db = conn[db_creds['database']]
         if db_creds['admin_user']:
             db.authenticate(db_creds['admin_user'], db_creds['admin_password'])
         coll = db[db_creds['collection']]
 
-        result = coll.find_one({"super_mol_snlgroup_id": fw_spec["snlgroup_id"],
+        result = coll.find_one(filter={"super_mol_snlgroup_id": fw_spec["snlgroup_id"],
                                 "fragments_def": fw_spec["fragments"]},
-                               fields=["task_id", "super_mol_snlgroup_id", "fragments_def"])
+                               projection=["task_id", "super_mol_snlgroup_id", "fragments_def"])
         if result is None or update_duplicates:
             d["last_updated"] = datetime.datetime.today()
             if result is None:

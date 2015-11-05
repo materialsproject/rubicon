@@ -11,7 +11,8 @@ def get_calculation_db(credential_file):
     db_path = os.path.join(db_dir, credential_file)
     with open(db_path) as f:
         db_creds = json.load(f)
-    conn = MongoClient(db_creds['host'], db_creds['port'])
+    conn = MongoClient(db_creds['host'], db_creds['port'],
+                       connect=False)
     db = conn[db_creds['database']]
     if db_creds['admin_user']:
         db.authenticate(db_creds['admin_user'], db_creds['admin_password'])
@@ -51,8 +52,8 @@ def build_ipea_db():
 
         if neutral_tid:
             neutral_energy_dict = tasks_coll.find(
-                {'task_id': neutral_tid},
-                fields={"_id": False,
+                filter={'task_id': neutral_tid},
+                projection={"_id": False,
                         "state": True,
                         "calculations.scf.energies": True,
                         "calculations.scf_pcm.energies": True})[0]
@@ -66,8 +67,8 @@ def build_ipea_db():
 
         if cation_tid:
             cation_energy_dict = tasks_coll.find(
-                {'task_id': cation_tid},
-                fields={"_id": False,
+                filter={'task_id': cation_tid},
+                projection={"_id": False,
                         "state": True,
                         "calculations.scf.energies": True,
                         "calculations.scf_pcm.energies": True})[0]
@@ -81,8 +82,8 @@ def build_ipea_db():
 
         if anion_tid:
             anion_energy_dict = tasks_coll.find(
-                {'task_id': anion_tid},
-                fields={"_id": False,
+                filter={'task_id': anion_tid},
+                projection={"_id": False,
                         "state": True,
                         "calculations.scf.energies": True,
                         "calculations.scf_pcm.energies": True})[0]
