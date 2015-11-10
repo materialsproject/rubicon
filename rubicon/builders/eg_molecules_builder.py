@@ -8,6 +8,7 @@ import datetime
 import sys
 import re
 
+import pymongo
 from pymongo import ASCENDING
 
 from rubicon.builders import eg_shared
@@ -42,7 +43,7 @@ class TaskKeys:
         'pointgroup', 'inchi_root',
         'calculations.scf.energies', 'calculations.scf_pcm.energies',
         'calculations.scf_sm12mk.energies',
-        'formula', 'task_id_deprecated', 'svg', 'xyz')
+        'formula', 'task_id_deprecated', 'svg', 'xyz', "last_updated")
 
     base_molecules = ("quinoxaline", "anthrachinon", "thiane", "viologen")
     lei_1_group_pattern = re.compile('(?P<base_mol>\w+)_wfs_(?P<position>\d+)_'
@@ -226,11 +227,29 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         docs = dict()
         for td in taskdocs:
             if td["charge"] == self.ref_charge:
-                docs["neutral"] = td
+                if "neutral" not in docs:
+                    docs["neutral"] = td
+                else:
+                    if td["last_updated"] > docs["neutral"]["last_updated"]:
+                        docs["neutral"] = td
+                    else:
+                        continue
             elif td["charge"] == self.ref_charge + 1:
-                docs["cation"] = td
+                if "cation" not in docs:
+                    docs["cation"] = td
+                else:
+                    if td["last_updated"] > docs["cation"]["last_updated"]:
+                        docs["cation"] = td
+                    else:
+                        continue
             elif td["charge"] == self.ref_charge - 1:
-                docs["anion"] = td
+                if "anion" not in docs:
+                    docs["anion"] = td
+                else:
+                    if td["last_updated"] > docs["anion"]["last_updated"]:
+                        docs["anion"] = td
+                    else:
+                        continue
         if len(docs) < 2 or ("neutral" not in docs):
             return None
         molecule = dict()
@@ -246,10 +265,12 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         docs = dict()
         for c, i in zip(["anion", "neutral", "cation"], [-1, 0, 1]):
             query['charge'] = self.ref_charge + i
-            taskdocs = self._c.tasks.find_one(filter=query, projection=TaskKeys.fields)
-            if not taskdocs:
+            taskdocs = self._c.tasks.find(filter=query,
+                                          projection=TaskKeys.fields,
+                                          sort=[("_id", pymongo.DESCENDING)])
+            if taskdocs.count() == 0:
                 continue
-            docs[c] = taskdocs
+            docs[c] = taskdocs[0]
         if len(docs) < 2 or ("neutral" not in docs):
             return None
         molecule = dict()
