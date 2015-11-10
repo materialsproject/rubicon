@@ -42,7 +42,8 @@ class WritelammpsInputTask(FireTaskBase):
 
     def run_task(self, fw_spec):
         mols_dict = fw_spec["molecules"]
-        mols = [Molecule.from_dict(m) for m in mols_dict]
+        # mols = [Molecule.from_dict(m) for m in mols_dict]
+        mols = mols_dict
         ffmol_list = []
         for mol in mols:
             acr = AntechamberRunner(mol)
