@@ -106,7 +106,10 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
                                 {"user_tags.initial_charge": {"$exists": False}}]}
             else:
                 spec = {"user_tags.initial_charge": ch}
-            inchi_root = self._c.tasks.find(filter=spec, projection='inchi_root').distinct('inchi_root')
+            inchi_root = list(self._c.tasks.find(filter=spec,
+                                                 projection='inchi_root')
+                              .distinct('inchi_root'))
+            _log.info("There are total {} unique INCHIs".format(len(inchi_root)))
             map(self.add_item, inchi_root)
             _log.info("Beginning analysis")
             states = self.run_parallel()
