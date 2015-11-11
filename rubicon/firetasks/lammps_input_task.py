@@ -66,10 +66,13 @@ class WritelammpsInputTask(FireTaskBase):
         with open("mol_control.lammps") as f:
             subprocess.check_call(shlex.split("aprun -n 48 lmp_hopper"), stdin=f)
 
-        #prev_lammps_dir = os.path.join(os.getcwd(), 'mol.log')
-        prev_lammps_dir = os.getcwd()
+        prev_lammps_log = os.path.join(os.getcwd(), 'mol.log')
+        prev_lammps_trj = os.path.join(os.getcwd(), "mol.lammpstrj")
+        prev_lammps_data = os.path.join(os.getcwd(), "mol_data.lammps")
 
-        update_spec = {'prev_lammps_log': prev_lammps_dir}
+        update_spec = {'prev_lammps_log': prev_lammps_log,
+                       'prev_lammps_trj': prev_lammps_trj,
+                       'prev_lammps_trj': prev_lammps_data}
 
         return FWAction(update_spec=update_spec)
 
