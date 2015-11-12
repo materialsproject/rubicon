@@ -52,6 +52,7 @@ if __name__ ==  '__main__':
     output['Conductivity'] = {}
     output['Conductivity']['units'] = 'S/m'
     T = 298 #get from lammpsio
+
     
     tsjump = gt.getjump(trjfile[0])
     (nummoltype, moltypel, moltype) = gm.getmoltype(datfile)
@@ -63,8 +64,10 @@ if __name__ ==  '__main__':
     
     
     output = m.runMSD(comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2, moltype, moltypel, dt, tsjump, output)
+
     
     output = ne.calcNEconductivity(output, molcharge, Lx, Ly, Lz, nummoltype, moltypel, T)
+    #print(output)
     
     for i in range(0,len(moltypel)):
         for j in range(i,len(moltypel)):

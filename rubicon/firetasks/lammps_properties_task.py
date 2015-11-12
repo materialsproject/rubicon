@@ -1,0 +1,122 @@
+__author__ = 'navnidhirajput'
+import json
+from pymongo import MongoClient
+import shlex
+import numpy
+from rubicon.packmol.MSD import MSD
+from rubicon.packmol.calcCOM import calcCOM
+from rubicon.packmol.gettimedata import gettimedata
+from rubicon.packmol.getmoldata import getmoldata
+from rubicon.packmol.COMradial import COMradialdistribution
+from rubicon.packmol.getatomcharges import getatomcharges
+from rubicon.packmol.calcNEconductivity import calcNEconductivity
+from fireworks import FireTaskBase, explicit_serialize, Firework, Workflow
+
+__author__ = 'navnidhirajput'
+
+
+
+@explicit_serialize
+class ParselammpsProperties(FireTaskBase):
+    """
+    Parse LAMMPS properties.
+
+    Required params:
+
+
+    Optional params:
+
+    """
+
+    _fw_name = "Lammps Properties Parser"
+
+    def lampps_properties(self):
+        """
+        calculate the MSD and diffusivity for all
+        molecules in a system as well as the center of mass radial distribution
+        function for all pairs of molecules in the system
+
+        Requires the following comments in the lammps data file starting
+        at the third line
+
+        # "number" "molecule" molecules
+
+        where "number" is the number of that molecule type and
+        "molecule" is a name for that molecule
+
+        Do not include blank lines in between the molecule types
+
+        Outputs are stored in a dictionary called output to later be stored
+        in JSON format
+        :return: Output
+        """
+        c = calcCOM()
+        m = MSD()
+        gt = gettimedata()
+        gm = getmoldata()
+        crd = COMradialdistribution()
+        gc = getatomcharges()
+        ne = calcNEconductivity()
+
+        trjfile=["mol.lammpstrj"]
+        datfile="mol_data.lammps"
+        logfile="mol.log"
+        output = {}
+        output['RDF'] = {}
+        output['RDF']['units'] = 'unitless and angstroms'
+        output['Conductivity'] = {}
+        output['Conductivity']['units'] = 'S/m'
+        T = 298 #get from lammpsio
+
+
+        tsjump = gt.getjump(trjfile[0])
+        (nummoltype, moltypel, moltype) = gm.getmoltype(datfile)
+        dt = gt.getdt(logfile)
+        n = gc.findnumatoms(datfile)
+        (molcharges, atomcharges,n) = gc.getmolcharges(datfile,n)
+        molcharge = gc.molchargedict(molcharges, moltypel, moltype)
+        (comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2) = c.calcCOM(trjfile,datfile)
+
+
+        output = m.runMSD(comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2, moltype, moltypel, dt, tsjump, output)
+
+
+        output = ne.calcNEconductivity(output, molcharge, Lx, Ly, Lz, nummoltype, moltypel, T)
+
+
+        for i in range(0,len(moltypel)):
+            for j in range(i,len(moltypel)):
+                output = crd.runradial(datfile, moltypel[i], moltypel[j], comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2, output, nummoltype, moltypel, moltype, firststep=1)
+
+        return output
+
+    def _insert_doc(self, fw_spec = None, filename = None):
+        db_dir = shlex.os.environ['DB_LOC']
+        db_path = shlex.os.path.join(db_dir, 'tasks_db.json')
+        with open(db_path) as f:
+            db_creds = json.load(f)
+        conn = MongoClient(db_creds['host'], db_creds['port'],)
+        db = conn[db_creds['database']]
+        if db_creds['admin_user']:
+            db.authenticate(db_creds['admin_user'], db_creds['admin_password'])
+            coll = db['lammps_properties']
+        parse_lammps_prop = self.lampps_properties()
+        print parse_lammps_prop
+        docs = parse_lammps_prop.output
+        docs = {k: list(v) if isinstance(v, numpy.ndarray) else v for k, v in docs.items()}
+        coll.insert(docs)
+        #coll.update(docs)
+
+    def run_task(self, fw_spec):
+        mol_log_file = fw_spec["prev_lammps_log"]
+        self._insert_doc(filename=mol_log_file)
+
+#x = ParselammpsProperties()
+#print x._insert_doc()
+
+
+
+
+
+
+

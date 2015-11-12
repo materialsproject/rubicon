@@ -32,8 +32,6 @@ __author__ = 'navnidhirajput'
 
 
 
-
-
 @explicit_serialize
 class WritelammpsOutputTask(FireTaskBase):
     """
