@@ -1,5 +1,7 @@
 import os
 
+from pkg_resources import parse_version
+
 
 def get_qchem_version():
     if "QC" in os.environ:
@@ -9,7 +11,7 @@ def get_qchem_version():
         if os.path.exists(version_file_path):
             with open(version_file_path) as f:
                 text = f.readlines()
-            version = text[0].strip()
+            version = parse_version(text[0].strip())
             return version
         else:
             raise Exception("Can't find QChem version "
