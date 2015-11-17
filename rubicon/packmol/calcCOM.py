@@ -6,7 +6,10 @@ Created on Tue Mar 10 10:07:34 2015
 """
 
 import numpy as np
-import calccomf
+try:
+    import calccomf
+except:
+    import calccomf2 as calccomf
 
 
 class calcCOM:

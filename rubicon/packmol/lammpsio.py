@@ -5,7 +5,7 @@ import numpy as np
 #from json_coders import MSONable
 import scipy.integrate
 from multiprocessing import Pool
-
+import time
 
 def _list2float(seq):
     for x in seq:
@@ -56,7 +56,7 @@ class LammpsLog():
         """
         md = 0  # To avoid reading the minimization data steps
         header = 0
-        #footer_blank_line = 0
+        footer_blank_line = 0
         llog = {}
 
         with open(filename, 'r') as logfile:
@@ -91,13 +91,13 @@ class LammpsLog():
 
                 header += 1
 
-            # note: we are starting from the "break" above
-            #for line in logfile:
-            #    if line == '\n':
-            #        footer_blank_line += 1
+            #note: we are starting from the "break" above
+            for line in logfile:
+                if line == '\n':
+                    footer_blank_line += 1
             print int(md_step/log_save_freq)
 
-            rawdata = np.genfromtxt(fname=filename,dtype=float,skip_header=header,skip_footer=int(total_lines-header-md_step/log_save_freq ))
+            rawdata = np.genfromtxt(fname=filename,dtype=float,skip_header=header,skip_footer=int(total_lines-header-md_step/log_save_freq-1 )-footer_blank_line)
 
             for column, property in enumerate(data_format):
                 llog[property] = rawdata[:, column]
@@ -129,6 +129,8 @@ class LammpsLog():
         a4=self.llog['pxx'][cutoff:]-self.llog['pyy'][cutoff:]
         a5=self.llog['pyy'][cutoff:]-self.llog['pzz'][cutoff:]
         a6=self.llog['pxx'][cutoff:]-self.llog['pzz'][cutoff:]
+        print len(a1)
+        time.sleep(100)
         array_array=[a1,a2,a3,a4,a5,a6]
         pv=p.map(autocorrelate,array_array)
         pcorr = (pv[0]+pv[1]+pv[2])/6+(pv[3]+pv[4]+pv[5])/24
@@ -136,7 +138,7 @@ class LammpsLog():
         temp=np.mean(self.llog['temp'][cutoff:])
        
         visco = (scipy.integrate.cumtrapz(pcorr,self.llog['step'][:len(pcorr)]))*self.llog['timestep']*10**-15*1000*101325.**2*self.llog['vol'][-1]*10**-30/(1.38*10**-23*temp)
-        output=open('viscosity_parallel15ns.txt','w')
+        output=open('viscosity_parallel.txt','w')
         output.write('#Time (fs), Average Pressure Correlation (atm^2), Viscosity (cp)\n')
         for line in zip(np.array(self.llog['step'][:len(pcorr)-1])*self.llog['timestep'],pcorr,visco):
             output.write(' '.join(str(x) for x in line)+'\n')
@@ -161,6 +163,6 @@ if __name__ == '__main__':
     #print log.LOG.keys()
     #print log.llog
     #log.list_properties()
-    log.viscosity(500001)
+    log.viscosity(100001)
     #print np.mean(log.llog['density'])
     #print log.ave['step']
