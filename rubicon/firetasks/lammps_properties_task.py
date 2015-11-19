@@ -30,7 +30,7 @@ class ParselammpsProperties(FireTaskBase):
 
     _fw_name = "Lammps Properties Parser"
 
-    def lampps_properties(self):
+    def lampps_properties(self, trjfile , datafile):
         """
         calculate the MSD and diffusivity for all
         molecules in a system as well as the center of mass radial distribution
@@ -59,7 +59,7 @@ class ParselammpsProperties(FireTaskBase):
         ne = calcNEconductivity()
 
         trjfile=["mol.lammpstrj"]
-        datfile="mol_data.lammps"
+        datafile="mol_data.lammps"
         logfile="mol.log"
         output = {}
         output['RDF'] = {}
@@ -70,12 +70,12 @@ class ParselammpsProperties(FireTaskBase):
 
 
         tsjump = gt.getjump(trjfile[0])
-        (nummoltype, moltypel, moltype) = gm.getmoltype(datfile)
+        (nummoltype, moltypel, moltype) = gm.getmoltype(datafile)
         dt = gt.getdt(logfile)
-        n = gc.findnumatoms(datfile)
-        (molcharges, atomcharges,n) = gc.getmolcharges(datfile,n)
+        n = gc.findnumatoms(datafile)
+        (molcharges, atomcharges,n) = gc.getmolcharges(datafile,n)
         molcharge = gc.molchargedict(molcharges, moltypel, moltype)
-        (comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2) = c.calcCOM(trjfile,datfile)
+        (comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2) = c.calcCOM(trjfile,datafile)
 
 
         output = m.runMSD(comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2, moltype, moltypel, dt, tsjump, output)
@@ -86,11 +86,11 @@ class ParselammpsProperties(FireTaskBase):
 
         for i in range(0,len(moltypel)):
             for j in range(i,len(moltypel)):
-                output = crd.runradial(datfile, moltypel[i], moltypel[j], comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2, output, nummoltype, moltypel, moltype, firststep=1)
+                output = crd.runradial(datafile, moltypel[i], moltypel[j], comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2, output, nummoltype, moltypel, moltype, firststep=1)
 
         return output
 
-    def _insert_doc(self, fw_spec = None, filename = None):
+    def _insert_doc(self, fw_spec = None, filename = None, Trjfile = None, Datafile = None):
         db_dir = shlex.os.environ['DB_LOC']
         db_path = shlex.os.path.join(db_dir, 'tasks_db.json')
         with open(db_path) as f:
@@ -100,7 +100,7 @@ class ParselammpsProperties(FireTaskBase):
         if db_creds['admin_user']:
             db.authenticate(db_creds['admin_user'], db_creds['admin_password'])
             coll = db['lammps_properties']
-        parse_lammps_prop = self.lampps_properties()
+        parse_lammps_prop = self.lampps_properties(Trjfile, Datafile)
         print parse_lammps_prop
         docs = parse_lammps_prop.output
         docs = {k: list(v) if isinstance(v, numpy.ndarray) else v for k, v in docs.items()}
@@ -109,10 +109,11 @@ class ParselammpsProperties(FireTaskBase):
 
     def run_task(self, fw_spec):
         mol_log_file = fw_spec["prev_lammps_log"]
-        self._insert_doc(filename=mol_log_file)
+        mol_traj_file = fw_spec["prev_lammps_trj"]
+        mol_data_file = fw_spec["prev_lammps_data"]
+        self._insert_doc(filename=mol_log_file, Trjfile = mol_traj_file, Datafile = mol_data_file)
 
-#x = ParselammpsProperties()
-#print x._insert_doc()
+
 
 
 
