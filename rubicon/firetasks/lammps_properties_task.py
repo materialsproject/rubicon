@@ -3,13 +3,18 @@ import json
 from pymongo import MongoClient
 import shlex
 import numpy
-from rubicon.packmol.MSD import MSD
-from rubicon.packmol.calcCOM import calcCOM
-from rubicon.packmol.gettimedata import gettimedata
-from rubicon.packmol.getmoldata import getmoldata
-from rubicon.packmol.COMradial import COMradialdistribution
-from rubicon.packmol.getatomcharges import getatomcharges
-from rubicon.packmol.calcNEconductivity import calcNEconductivity
+try:
+    # these packages are not necessarily installed by all the users
+    # TODO: Refactor PackMol module to python code and merge the ff_dev branch in pymatgen to master
+    from rubicon.packmol.MSD import MSD
+    from rubicon.packmol.calcCOM import calcCOM
+    from rubicon.packmol.gettimedata import gettimedata
+    from rubicon.packmol.getmoldata import getmoldata
+    from rubicon.packmol.COMradial import COMradialdistribution
+    from rubicon.packmol.getatomcharges import getatomcharges
+    from rubicon.packmol.calcNEconductivity import calcNEconductivity
+except:
+    pass
 from fireworks import FireTaskBase, explicit_serialize, Firework, Workflow
 
 __author__ = 'navnidhirajput'

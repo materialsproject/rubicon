@@ -54,7 +54,7 @@ class QChemFireWorkCreator():
 
     @staticmethod
     def get_state_name(charge, spin_multiplicity):
-        charge_state = {-2: "anion_2", -1: "anion", 0: "neutral", 1: "cation", 2: "cation_2"}
+        charge_state = {-3: "anion_3", -2: "anion_2", -1: "anion", 0: "neutral", 1: "cation", 2: "cation_2"}
         spin_state = {1: "singlet", 2: "doublet", 3: "triplet"}
         return spin_state[spin_multiplicity] + " " + charge_state[charge]
 
