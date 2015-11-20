@@ -159,7 +159,7 @@ if __name__ == '__main__':
     #fw1 = Firework([task1], spec={"molecules": [mg.as_dict(),tfsi.as_dict(),diglyme.as_dict()]})
     fw1 = Firework([task1],name = 'Run Lammps', spec={"molecules": [diglyme.as_dict()]}, fw_id=1)
     fw2 = Firework([task2],name='Lammps Log Parsing', fw_id=2)
-    fw3 = Firework([task2],name='Lammps Properties Parser', fw_id=3)
+    fw3 = Firework([task3],name='Lammps Properties Parser', fw_id=3)
 
     depen = {1:[2,3]}
     #depen = {1:2}
