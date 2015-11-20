@@ -82,7 +82,6 @@ class ParselammpsProperties(FireTaskBase):
         molcharge = gc.molchargedict(molcharges, moltypel, moltype)
         (comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2) = c.calcCOM(trjfile,datafile)
 
-
         output = m.runMSD(comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2, moltype, moltypel, dt, tsjump, output)
 
 
@@ -109,13 +108,13 @@ class ParselammpsProperties(FireTaskBase):
         docs = parse_lammps_prop.output
         docs = {k: list(v) if isinstance(v, numpy.ndarray) else v for k, v in docs.items()}
         coll.insert(docs)
-        #coll.update(docs)
+
 
     def run_task(self, fw_spec):
         mol_traj_file = fw_spec["prev_lammps_trj"]
         mol_data_file = fw_spec["prev_lammps_data"]
         mol_log_file = fw_spec["prev_lammps_log"]
-        self._insert_doc(Trjfile = mol_traj_file, Datafile = mol_data_file, Logfile=mol_log_file)
+        self._insert_doc(trjfile = mol_traj_file, datafile = mol_data_file, logfile=mol_log_file)
 
 
 
