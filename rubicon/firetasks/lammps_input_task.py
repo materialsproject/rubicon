@@ -72,7 +72,7 @@ class WritelammpsInputTask(FireTaskBase):
 
         update_spec = {'prev_lammps_log': prev_lammps_log,
                        'prev_lammps_trj': prev_lammps_trj,
-                       'prev_lammps_trj': prev_lammps_data}
+                       'prev_lammps_data': prev_lammps_data}
 
         return FWAction(update_spec=update_spec)
 
