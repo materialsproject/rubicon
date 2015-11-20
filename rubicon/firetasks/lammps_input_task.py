@@ -70,9 +70,9 @@ class WritelammpsInputTask(FireTaskBase):
         prev_lammps_trj = os.path.join(os.getcwd(), "mol.lammpstrj")
         prev_lammps_data = os.path.join(os.getcwd(), "mol_data.lammps")
 
-        update_spec = {'prev_lammps_log': prev_lammps_log,
-                       'prev_lammps_trj': prev_lammps_trj,
-                       'prev_lammps_data': prev_lammps_data}
+        update_spec = {'prev_lammps_trj': prev_lammps_trj,
+                       'prev_lammps_data': prev_lammps_data,
+                       'prev_lammps_log': prev_lammps_log}
 
         return FWAction(update_spec=update_spec)
 
