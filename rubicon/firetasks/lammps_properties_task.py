@@ -78,6 +78,7 @@ class ParselammpsProperties(FireTaskBase):
         (nummoltype, moltypel, moltype) = gm.getmoltype(datafile)
         dt = gt.getdt(logfile)
         n = gc.findnumatoms(datafile)
+        print n
         (molcharges, atomcharges,n) = gc.getmolcharges(datafile,n)
         molcharge = gc.molchargedict(molcharges, moltypel, moltype)
         (comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2) = c.calcCOM(trjfile,datafile)
