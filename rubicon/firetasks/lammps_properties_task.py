@@ -63,9 +63,9 @@ class ParselammpsProperties(FireTaskBase):
         gc = getatomcharges()
         ne = calcNEconductivity()
 
-        trjfile=["mol.lammpstrj"]
-        datafile="mol_data.lammps"
-        logfile="mol.log"
+        #trjfile=["mol.lammpstrj"]
+        #datafile="mol_data.lammps"
+        #logfile="mol.log"
         output = {}
         output['RDF'] = {}
         output['RDF']['units'] = 'unitless and angstroms'
