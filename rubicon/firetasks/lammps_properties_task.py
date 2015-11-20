@@ -74,7 +74,7 @@ class ParselammpsProperties(FireTaskBase):
         T = 298 #get from lammpsio
 
 
-        tsjump = gt.getjump(trjfile[0])
+        tsjump = gt.getjump(trjfile)
         (nummoltype, moltypel, moltype) = gm.getmoltype(datafile)
         dt = gt.getdt(logfile)
         n = gc.findnumatoms(datafile)
