@@ -14,7 +14,7 @@ __author__ = 'navnidhirajput'
 if __name__ == '__main__':
     task1 = WritelammpsInputTask()
     #task2 = WritelammpsOutputTask()
-    task3 = ParselammpsProperties()
+    task2 = ParselammpsProperties()
 
 
     coords_n1c=[[4.522,   8.999,   5.512],
@@ -159,10 +159,10 @@ if __name__ == '__main__':
     #fw1 = Firework([task1], spec={"molecules": [mg.as_dict(),tfsi.as_dict(),diglyme.as_dict()]})
     fw1 = Firework([task1],name = 'Run Lammps', spec={"molecules": [diglyme.as_dict()]}, fw_id=1)
     #fw2 = Firework([task2],name='Lammps Log Parsing', fw_id=2)
-    fw3 = Firework([task3],name='Lammps Properties Parser', fw_id=3)
+    fw2 = Firework([task2],name='Lammps Properties Parser', fw_id=2)
 
     #depen = {1:[2,3]}
-    depen = {1:3}
+    depen = {1:2}
 
 
     #filelist = glob.glob("/Users/navnidhirajput/Dropbox/solvent_molecules/*")
@@ -175,7 +175,7 @@ if __name__ == '__main__':
          #fw1 = Firework([task1], spec={"molecules": [mol.as_dict()]})
 
     #wf = Workflow([fw1,fw2, fw3], name="LAMMPS", links_dict=depen)
-    wf = Workflow([fw1, fw3], name="LAMMPS", links_dict=depen)
+    wf = Workflow([fw1, fw2], name="LAMMPS", links_dict=depen)
 
     lp = LaunchPad.auto_load()
     lp.add_wf(wf)
