@@ -35,7 +35,7 @@ class ParselammpsProperties(FireTaskBase):
 
     _fw_name = "Lammps Properties Parser"
 
-    def lampps_properties(self, trjfile , datafile):
+    def lampps_properties(self, trjfile, datafile, logfile):
         """
         calculate the MSD and diffusivity for all
         molecules in a system as well as the center of mass radial distribution
@@ -95,7 +95,7 @@ class ParselammpsProperties(FireTaskBase):
 
         return output
 
-    def _insert_doc(self, fw_spec = None, filename = None, Trjfile = None, Datafile = None):
+    def _insert_doc(self, fw_spec = None, trjfile = None, datafile = None, logfile = None):
         db_dir = shlex.os.environ['DB_LOC']
         db_path = shlex.os.path.join(db_dir, 'tasks_db.json')
         with open(db_path) as f:
@@ -105,18 +105,17 @@ class ParselammpsProperties(FireTaskBase):
         if db_creds['admin_user']:
             db.authenticate(db_creds['admin_user'], db_creds['admin_password'])
             coll = db['lammps_properties']
-        parse_lammps_prop = self.lampps_properties(Trjfile, Datafile)
-        print parse_lammps_prop
+        parse_lammps_prop = self.lampps_properties(trjfile, datafile, logfile)
         docs = parse_lammps_prop.output
         docs = {k: list(v) if isinstance(v, numpy.ndarray) else v for k, v in docs.items()}
         coll.insert(docs)
         #coll.update(docs)
 
     def run_task(self, fw_spec):
-        mol_log_file = fw_spec["prev_lammps_log"]
         mol_traj_file = fw_spec["prev_lammps_trj"]
         mol_data_file = fw_spec["prev_lammps_data"]
-        self._insert_doc(filename=mol_log_file, Trjfile = mol_traj_file, Datafile = mol_data_file)
+        mol_log_file = fw_spec["prev_lammps_log"]
+        self._insert_doc(Trjfile = mol_traj_file, Datafile = mol_data_file, Logfile=mol_log_file)
 
 
 
