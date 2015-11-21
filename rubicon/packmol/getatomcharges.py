@@ -43,7 +43,7 @@ class getatomcharges:
         while readingcharges == True:
             line = datfile.readline()
             line = line.split()
-            if len(line) == 10:
+            if len(line) >= 6:
                 atomcharges[int(line[0])-1] = float(line[3])
                 mol[int(line[0])-1] = int(line[1])
                 
