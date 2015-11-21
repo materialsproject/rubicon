@@ -48,7 +48,7 @@ class calcCOM:
         
     def getnum(self,trjfilename):
         # uses the trjectory file and returns the number of lines and the number of atoms
-        trjfile = open(trjfilename[0])
+        trjfile = open(trjfilename)
         for i in range(0,3):
             trjfile.readline()
         n = int(trjfile.readline())
@@ -56,7 +56,7 @@ class calcCOM:
         num_timesteps=1
         num_lines=[]
         for i in range(0,len(trjfilename)):
-            num_lines.append(int(sum(1 for line in open(trjfilename[i]))))
+            num_lines.append(int(sum(1 for line in open(trjfilename))))
             num_timesteps += int(num_lines[i] / (n+9))-1
         line = [10 for x in trjfilename]
         for j in range(1,len(trjfilename)):
