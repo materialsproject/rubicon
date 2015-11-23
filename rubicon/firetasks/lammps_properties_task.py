@@ -63,9 +63,7 @@ class ParselammpsProperties(FireTaskBase):
         gc = getatomcharges()
         ne = calcNEconductivity()
 
-        #trjfile=["mol.lammpstrj"]
-        #datafile="mol_data.lammps"
-        #logfile="mol.log"
+
         output = {}
         output['RDF'] = {}
         output['RDF']['units'] = 'unitless and angstroms'
@@ -74,11 +72,10 @@ class ParselammpsProperties(FireTaskBase):
         T = 298 #get from lammpsio
 
 
-        tsjump = gt.getjump(trjfile)
+        tsjump = gt.getjump(trjfile[0])
         (nummoltype, moltypel, moltype) = gm.getmoltype(datafile)
         dt = gt.getdt(logfile)
         n = gc.findnumatoms(datafile)
-        print n
         (molcharges, atomcharges,n) = gc.getmolcharges(datafile,n)
         molcharge = gc.molchargedict(molcharges, moltypel, moltype)
         (comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2) = c.calcCOM(trjfile,datafile)
