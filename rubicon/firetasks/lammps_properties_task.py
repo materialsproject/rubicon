@@ -84,6 +84,7 @@ class ParselammpsProperties(FireTaskBase):
 
 
         output = ne.calcNEconductivity(output, molcharge, Lx, Ly, Lz, nummoltype, moltypel, T)
+        print output
 
 
         for i in range(0,len(moltypel)):
