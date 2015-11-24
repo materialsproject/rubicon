@@ -30,7 +30,7 @@ class gettimedata:
         return dt
         
     def getjump(self, trjfilename):
-        trjfile = open(trjfilename[0])
+        trjfile = open(trjfilename)
         trjfile.readline()
         t1 = trjfile.readline()
         t1 = int(t1)
