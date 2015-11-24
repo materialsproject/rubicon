@@ -78,6 +78,8 @@ class ParselammpsProperties(FireTaskBase):
         n = gc.findnumatoms(datafile)
         (molcharges, atomcharges,n) = gc.getmolcharges(datafile,n)
         molcharge = gc.molchargedict(molcharges, moltypel, moltype)
+        print "PARSEDTRJFILE", trjfile
+        #print "PARSEDDATAFILE", datafile
         (comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2) = c.calcCOM(trjfile,datafile)
 
         output = m.runMSD(comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2, moltype, moltypel, dt, tsjump, output)
@@ -113,6 +115,9 @@ class ParselammpsProperties(FireTaskBase):
         mol_traj_file = fw_spec["prev_lammps_trj"]
         mol_data_file = fw_spec["prev_lammps_data"]
         mol_log_file = fw_spec["prev_lammps_log"]
+        print "trajfile", mol_traj_file
+        #print "datafile", mol_data_file
+        #print "logfile", mol_log_file
         self._insert_doc(trjfile = mol_traj_file, datafile = mol_data_file, logfile=mol_log_file)
 
 
