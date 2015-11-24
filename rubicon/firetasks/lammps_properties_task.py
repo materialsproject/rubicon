@@ -118,7 +118,7 @@ class ParselammpsProperties(FireTaskBase):
         print "trajfile", mol_traj_file
         #print "datafile", mol_data_file
         #print "logfile", mol_log_file
-        self._insert_doc(trjfile = [mol_traj_file], datafile = mol_data_file, logfile=mol_log_file)
+        self._insert_doc(trjfile = mol_traj_file, datafile = mol_data_file, logfile=mol_log_file)
 
 
 
