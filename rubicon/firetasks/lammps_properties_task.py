@@ -113,7 +113,7 @@ class ParselammpsProperties(FireTaskBase):
         mol_traj_file = fw_spec["prev_lammps_trj"]
         mol_data_file = fw_spec["prev_lammps_data"]
         mol_log_file = fw_spec["prev_lammps_log"]
-        self._insert_doc(trjfile = [mol_traj_file], datafile = mol_data_file, logfile=mol_log_file)
+        self._insert_doc(trjfile = mol_traj_file, datafile = mol_data_file, logfile=mol_log_file)
 
 
 
