@@ -10,7 +10,7 @@ try:
     from rubicon.packmol.calcCOM import calcCOM
     from rubicon.packmol.gettimedata import gettimedata
     from rubicon.packmol.getmoldata import getmoldata
-    from rubicon.packmol.COMradial import COMradialdistribution
+    from rubicon.packmol.COMradialnofort import COMradialdistribution
     from rubicon.packmol.getatomcharges import getatomcharges
     from rubicon.packmol.calcNEconductivity import calcNEconductivity
 except:
