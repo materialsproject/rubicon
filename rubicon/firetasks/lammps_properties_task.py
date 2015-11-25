@@ -63,9 +63,7 @@ class ParselammpsProperties(FireTaskBase):
         gc = getatomcharges()
         ne = calcNEconductivity()
 
-        #trjfile=["mol.lammpstrj"]
-        #datafile="mol_data.lammps"
-        #logfile="mol.log"
+
         output = {}
         output['RDF'] = {}
         output['RDF']['units'] = 'unitless and angstroms'
@@ -74,19 +72,21 @@ class ParselammpsProperties(FireTaskBase):
         T = 298 #get from lammpsio
 
 
-        tsjump = gt.getjump(trjfile)
+        tsjump = gt.getjump(trjfile[0])
         (nummoltype, moltypel, moltype) = gm.getmoltype(datafile)
         dt = gt.getdt(logfile)
         n = gc.findnumatoms(datafile)
-        print n
         (molcharges, atomcharges,n) = gc.getmolcharges(datafile,n)
         molcharge = gc.molchargedict(molcharges, moltypel, moltype)
+        print "PARSEDTRJFILE", trjfile
+        #print "PARSEDDATAFILE", datafile
         (comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2) = c.calcCOM(trjfile,datafile)
 
         output = m.runMSD(comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2, moltype, moltypel, dt, tsjump, output)
 
 
         output = ne.calcNEconductivity(output, molcharge, Lx, Ly, Lz, nummoltype, moltypel, T)
+
 
 
         for i in range(0,len(moltypel)):
@@ -115,6 +115,9 @@ class ParselammpsProperties(FireTaskBase):
         mol_traj_file = fw_spec["prev_lammps_trj"]
         mol_data_file = fw_spec["prev_lammps_data"]
         mol_log_file = fw_spec["prev_lammps_log"]
+        print "trajfile", mol_traj_file
+        #print "datafile", mol_data_file
+        #print "logfile", mol_log_file
         self._insert_doc(trjfile = mol_traj_file, datafile = mol_data_file, logfile=mol_log_file)
 
 
