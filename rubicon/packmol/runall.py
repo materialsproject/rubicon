@@ -44,9 +44,9 @@ if __name__ ==  '__main__':
     gc = getatomcharges()
     ne = calcNEconductivity()
     
-    trjfile='NaSCN.lammpstrj'
-    datfile='data.water_1NaSCN'
-    logfile='mol.log'
+    trjfile='sample_files/NaSCN.lammpstrj'
+    datfile='sample_files/data.water_1NaSCN'
+    logfile='sample_files/mol.log'
     output = {}
     output['RDF'] = {}
     output['RDF']['units'] = 'unitless and angstroms'

@@ -25,7 +25,7 @@ class COMradialdistribution:
         #also sets the first line using data on firststep and number of atoms
         maxr = min(Lx2,Ly2,Lz2)
         binsize = 0.1
-        numbins = int(np.ceil(maxr/binsize)-)
+        numbins = int(np.ceil(maxr/binsize))
         count = firststep
         g = np.zeros((len(moltypel),len(moltypel),numbins))
         return (maxr, binsize, numbins, count, g)
