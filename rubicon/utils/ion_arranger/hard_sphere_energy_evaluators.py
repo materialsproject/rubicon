@@ -2,7 +2,7 @@ import copy
 import math
 import itertools
 from pymatgen.analysis.molecule_structure_comparator import CovalentRadius
-from pymatgen.io.babelio import BabelMolAdaptor
+from pymatgen.io.babel import BabelMolAdaptor
 from rubicon.utils.ion_arranger.energy_evaluator import EnergyEvaluator
 import openbabel as ob
 import numpy as np

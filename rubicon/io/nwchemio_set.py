@@ -14,7 +14,7 @@ __email__ = "shyuep@gmail.com"
 __date__ = "6/15/13"
 
 
-from pymatgen.io.nwchemio import NwTask, NwInput
+from pymatgen.io.nwchem import NwTask, NwInput
 
 
 class JCESRDeltaSCFInputSet(object):

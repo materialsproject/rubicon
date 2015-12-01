@@ -49,7 +49,7 @@ def get_settings(config_file):
         raise ConfigurationError(config_file, err)
 
 def get_db(**db_creds):
-    conn = MongoClient(db_creds['host'], db_creds['port'])
+    conn = MongoClient(db_creds['host'], db_creds['port'], connect=False)
     db = conn[db_creds['database']]
     if db_creds['admin_user']:
         db.authenticate(db_creds['admin_user'], db_creds['admin_password'])

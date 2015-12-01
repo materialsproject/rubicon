@@ -148,9 +148,9 @@ class MSD:
         output['Diffusivity'] = {}
         output['Diffusivity']['units'] = 'm^2/s'        
         for i in range(0,len(moltypel)):
-            output['MSD'][moltypel[i]] = copy.deepcopy(MSD[i])
+            output['MSD'][moltypel[i]] = copy.deepcopy(MSD[i].tolist())
             output['Diffusivity'][moltypel[i]] = copy.deepcopy(diffusivity[i])
             
-        output['MSD']['time'] = Time
+        output['MSD']['time'] = Time.tolist()
             
         

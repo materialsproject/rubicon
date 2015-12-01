@@ -1,5 +1,5 @@
 from pymatgen import Molecule
-from pymatgen.io.nwchemio import NwInput, NwTask
+from pymatgen.io.nwchem import NwInput, NwTask
 
 coords = [[0.000000, 0.000000, 0.000000],
           [0.000000, 0.000000, 1.089000],

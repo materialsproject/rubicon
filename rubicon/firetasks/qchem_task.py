@@ -40,13 +40,12 @@ class QChemTask(FireTaskBase, FWSerializable):
 
     @staticmethod
     def _calibrate_alcf_cmd(input_file="mol.qcinp", max_minutes=60, num_nodes=8, ranks_per_node=1,
-                            num_threads=64, scr_size_GB=4, use_runjob=False):
+                            num_threads=64, scr_size_GB=2.0, use_runjob=False):
         qc_package_path = "/projects/JCESR/pkcoff/qchem422.mod2"
         qcaux_path = "/projects/JCESR/qcaux"
         qc_exe_path = "/projects/JCESR/pkcoff/public/qcprog-optv2.exe"
         qc_scr_dir = "/dev/local/qchem"
-        #scr_size_bytes = scr_size_GB * (2 ** 30)
-        scr_size_bytes = scr_size_GB * (10**9)
+        scr_size_bytes = int(scr_size_GB * (2 ** 30))
         qc_envs = {
             "HOME": os.environ["HOME"],
             "QC": qc_package_path,
@@ -92,14 +91,23 @@ class QChemTask(FireTaskBase, FWSerializable):
             if qj.params["rem"]["jobtype"] != "freq":
                 qj.params["rem"]["BLAS3_DFT"] = 1
             qj.params["rem"]["PDIAG_ON"] = 1
+            solvent_params = qj.params.pop("pcm_solvent", None)
+            if solvent_params is not None:
+                qj.params["solvent"] = solvent_params
         # use Paul Coffman's version of pathtable
         pathtable_src = "/projects/JCESR/pkcoff/public/pathtable"
         shutil.copy(pathtable_src, "pathtable")
 
     def run_task(self, fw_spec):
-        qcinp = QcInput.from_dict(fw_spec["qcinp"])
+        if isinstance(fw_spec["qcinp"], dict):
+            qcinp = QcInput.from_dict(fw_spec["qcinp"])
+        else:
+            qcinp = fw_spec["qcinp"]
         if 'mol' in fw_spec:
-            mol = Molecule.from_dict(fw_spec["mol"])
+            if isinstance(fw_spec["mol"], dict):
+                mol = Molecule.from_dict(fw_spec["mol"])
+            else:
+                mol = fw_spec["mol"]
             for qj in qcinp.jobs:
                 if isinstance(qj.mol, Molecule):
                     qj.mol = copy.deepcopy(mol)
@@ -146,9 +154,16 @@ class QChemTask(FireTaskBase, FWSerializable):
             qc_exe = shlex.split("qchem -np {}".format(min(8, len(mol))))
         elif 'vesta' in socket.gethostname():
             # ALCF, Blue Gene
-            num_nodes = 8
-            qc_exe = shlex.split(self._calibrate_alcf_cmd())
-            half_cpus_cmd = shlex.split(self._calibrate_alcf_cmd(num_nodes=num_nodes, scr_size_GB=8))
+            num_nodes = 4
+            num_threads = 32
+            scr_size_GB = 0.476
+            max_minutes = 4 * 60
+            qc_exe = shlex.split(self._calibrate_alcf_cmd(
+                num_nodes=num_nodes, max_minutes=max_minutes, num_threads=num_threads,
+                scr_size_GB=scr_size_GB))
+            half_cpus_cmd = shlex.split(self._calibrate_alcf_cmd(
+                num_nodes=num_nodes, max_minutes=max_minutes, num_threads=num_threads/2,
+                scr_size_GB=scr_size_GB))
             self._customize_alcf_qcinp(qcinp, num_nodes=num_nodes)
         elif "macqu" in socket.gethostname().lower():
             qc_exe = shlex.split("qchem -nt 2")

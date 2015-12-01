@@ -6,7 +6,11 @@ Created on Tue Mar 10 10:07:34 2015
 """
 
 import numpy as np
-import comradial
+try:
+    import comradial
+except:
+    import comradial2 as comradial
+
 
 class COMradialdistribution:
     

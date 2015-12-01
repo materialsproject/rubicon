@@ -2,16 +2,20 @@
 
 import re
 import glob
-
 import requests
-import pybel as pb
 import traceback
 import sys
 
+try:
+    import pybel as pb
+except Exception as ex:
+    print "WARNING: Error importing pybel, setting pb to None!"
+    pb = None
+
 from pymatgen import Element, Molecule
-from pymatgen.io.gaussianio import GaussianInput
-from pymatgen.io.babelio import BabelMolAdaptor
-from pymatgen.io.xyzio import XYZ
+from pymatgen.io.gaussian import GaussianInput
+from pymatgen.io.babel import BabelMolAdaptor
+from pymatgen.io.xyz import XYZ
 
 
 def parse_file(filename):
@@ -154,7 +158,7 @@ def insert_elements(coll):
     print "adding missing elements."
     for z in xrange(1, 19):
         el = Element.from_Z(z)
-        r = coll.find({"formula": "{}1".format(el.symbol)})
+        r = coll.find(filter={"formula": "{}1".format(el.symbol)})
         if r.count() == 0:
             try:
                 clean_mol = Molecule([el], [[0, 0, 0]])

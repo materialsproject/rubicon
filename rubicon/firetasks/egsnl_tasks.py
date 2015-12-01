@@ -1,6 +1,6 @@
 from fireworks.core.firework import FireTaskBase, FWAction
 from fireworks.utilities.fw_serializers import FWSerializable
-from pymatgen.io.babelio import BabelMolAdaptor
+from pymatgen.io.babel import BabelMolAdaptor
 from pymatgen.matproj.snl import StructureNL
 from rubicon.utils.snl.egsnl_mongo import EGSNLMongoAdapter
 
@@ -14,7 +14,10 @@ class AddEGSNLTask(FireTaskBase, FWSerializable):
     def run_task(self, fw_spec):
 
         sma = EGSNLMongoAdapter.auto_load()
-        snl = StructureNL.from_dict(fw_spec['snl'])
+        if isinstance(fw_spec['snl'], dict):
+            snl = StructureNL.from_dict(fw_spec['snl'])
+        else:
+            snl = fw_spec['snl']
         egsnl, snlgroup_id = sma.add_snl(snl)
 
         mol = egsnl.structure

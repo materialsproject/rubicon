@@ -6,9 +6,11 @@ TODO: Modify module doc.
 
 from __future__ import division
 import shlex
+import fireworks
 from monty.io import zopen
 from monty.json import jsanitize
 from monty.os.path import zpath
+from pkg_resources import parse_version
 from pymatgen import Molecule
 from pymatgen.analysis.molecule_structure_comparator import \
     MoleculeStructureComparator
@@ -33,8 +35,8 @@ import datetime
 from pymongo import MongoClient
 
 from pymatgen.apps.borg.hive import AbstractDrone
-from pymatgen.io.babelio import BabelMolAdaptor
-from pymatgen.io.xyzio import XYZ
+from pymatgen.io.babel import BabelMolAdaptor
+from pymatgen.io.xyz import XYZ
 
 from rubicon.testset.parse_mol import get_nih_names
 
@@ -85,11 +87,12 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
         self.simulate = simulate_mode
         self.update_duplicates = update_duplicates
         if not simulate_mode:
-            conn = MongoClient(self.host, self.port, j=True)
+            conn = MongoClient(self.host, self.port, j=True,
+                               connect=False)
             db = conn[self.database]
             if self.user:
                 db.authenticate(self.user, self.password)
-            if db.counter.find({"_id": "mol_taskid"}).count() == 0:
+            if db.counter.find(filter={"_id": "mol_taskid"}).count() == 0:
                 db.counter.insert({"_id": "mol_taskid", "c": 1})
             conn.close()
 
@@ -274,10 +277,14 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
                 d['run_tags'] = fw_spec['run_tags']
                 d['implicit_solvent'] = fw_spec['implicit_solvent']
                 d['user_tags'] = fw_spec["user_tags"]
-                d['snl_initial'] = fw_spec['egsnl']
+                if isinstance(fw_spec['egsnl'], dict):
+                    d['snl_initial'] = fw_spec['egsnl']
+                else:
+                    d['snl_initial'] = fw_spec['egsnl'].as_dict()
                 d['snlgroup_id_initial'] = fw_spec['snlgroup_id']
                 d['inchi_root'] = fw_spec['inchi_root']
                 d['inchi_initial'] = fw_spec['inchi']
+
                 if "geometry optimization" in d['task_type'] or "molecule dynamics" in d['task_type']:
                     new_s = Molecule.from_dict(d["molecule_final"])
                     old_snl = EGStructureNL.from_dict(d['snl_initial'])
@@ -304,7 +311,10 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
                     d['snl_final'] = egsnl.as_dict()
                     d['snlgroup_id_final'] = snlgroup_id
                 else:
-                    d['snl_final'] = fw_spec['egsnl']
+                    if isinstance(fw_spec['egsnl'], dict):
+                        d['snl_final'] = fw_spec['egsnl']
+                    else:
+                        d['snl_final'] = fw_spec['egsnl'].as_dict()
                     d['snlgroup_id_final'] = fw_spec['snlgroup_id']
                 d['snlgroup_changed'] = (d['snlgroup_id_initial'] !=
                                          d['snlgroup_id_final'])
@@ -314,13 +324,13 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
             # Perform actual insertion into db. Because db connections cannot
             # be pickled, every insertion needs to create a new connection
             # to the db.
-            conn = MongoClient(self.host, self.port)
+            conn = MongoClient(self.host, self.port, connect=False)
             db = conn[self.database]
             if self.user:
                 db.authenticate(self.user, self.password)
             coll = db[self.collection]
 
-            result = coll.find_one({"path": d["path"]})
+            result = coll.find_one(filter={"path": d["path"]})
             if result is None or self.update_duplicates:
                 d["last_updated"] = datetime.datetime.today()
                 if result is None:

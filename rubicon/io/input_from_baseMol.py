@@ -4,12 +4,11 @@
 
 from __future__ import print_function
 import os
-from pymatgen.symmetry.structure import SymmetrizedStructure
-from pymatgen.io.nwchemio import NwTask, NwInput
+
 from pymatgen.core.structure import Molecule, FunctionalGroups
-from pymatgen.io.babelio import BabelMolAdaptor
-from pymatgen.io.xyzio import XYZ
+from pymatgen.io.babel import BabelMolAdaptor
 from pymatgen.analysis.molecule_matcher import InchiMolAtomMapper
+
 from rubicon.workflows.mol_to_wf import mol_to_wf_nwchem
 
 """

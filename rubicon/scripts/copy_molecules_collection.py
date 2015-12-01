@@ -9,7 +9,8 @@ def get_molecules_collection(db_dir):
     db_path = os.path.join(db_dir, 'molecules_db.json')
     with open(db_path) as f:
         db_creds = json.load(f)
-    conn = MongoClient(db_creds['host'], db_creds['port'])
+    conn = MongoClient(db_creds['host'], db_creds['port'],
+                       connect=False)
     db = conn[db_creds['database']]
     if db_creds['admin_user']:
         db.authenticate(db_creds['admin_user'], db_creds['admin_password'])
@@ -94,8 +95,8 @@ def copy_collections():
             molname = mol_web["user_tags"]["molname"]
         else:
             molname = mol_web["inchi"]
-        mol_doc = coll_dest.find_one({"inchi_root": mol_web["inchi_root"],
-                                      "charge": mol_web["charge"]})
+        mol_doc = coll_dest.find_one(filter={"inchi_root": mol_web["inchi_root"],
+                                             "charge": mol_web["charge"]})
         if mol_doc:
             logging.info("Updating molecule \"{}\"".format(molname))
             coll_dest.update({"inchi_root": mol_web["inchi_root"]}, mol_web,

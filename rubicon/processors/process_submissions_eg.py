@@ -78,10 +78,10 @@ class SubmissionProcessorEG():
     def update_existing_workflows(self):
         # updates the state of existing workflows by querying the FireWorks
         # database
-        for submission in self.jobs.find({'state': {'$nin': ['COMPLETED',
+        for submission in self.jobs.find(filter={'state': {'$nin': ['COMPLETED',
                                                              'ERROR',
                                                              'REJECTED']}},
-                                         {'submission_id': 1}):
+                                         projection={'submission_id': 1}):
             submission_id = submission['submission_id']
             # noinspection PyBroadException
             try:

@@ -77,7 +77,7 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
         """Run the builder.
         """
         _log.info("Getting Reaction Indices")
-        reactions = list(self.source_reactions.find({}, fields=TaskKeys.reactions_fields))
+        reactions = list(self.source_reactions.find(filter={}, projection=TaskKeys.reactions_fields))
         map(self.add_item, reactions)
         _log.info("Beginning analysis")
         states = self.run_parallel()
@@ -106,7 +106,7 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
             freq_query["inchi_root"] = inchi
             freq_query["charge"] = charge
             freq_query["spin_multiplicity"] = spin
-            freq_doc = self._c.tasks.find_one(freq_query, fields=TaskKeys.tasks_fields)
+            freq_doc = self._c.tasks.find_one(filter=freq_query, projection=TaskKeys.tasks_fields)
             if not freq_doc:
                 return None
             reactant_freq_docs.append(freq_doc)
@@ -114,7 +114,7 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
             sp_query["inchi_root"] = inchi
             sp_query["charge"] = charge
             sp_query["spin_multiplicity"] = spin
-            sp_doc = self._c.tasks.find_one(sp_query, fields=TaskKeys.tasks_fields)
+            sp_doc = self._c.tasks.find_one(filter=sp_query, projection=TaskKeys.tasks_fields)
             if not sp_doc:
                 return None
             reactant_sp_docs.append(sp_doc)
@@ -122,7 +122,7 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
             sol_query["inchi_root"] = inchi
             sol_query["charge"] = charge
             sol_query["spin_multiplicity"] = spin
-            sol_doc = self._c.tasks.find_one(sol_query, fields=TaskKeys.tasks_fields)
+            sol_doc = self._c.tasks.find_one(filter=sol_query, projection=TaskKeys.tasks_fields)
             if not sol_doc:
                 return None
             reactant_sol_docs.append(sol_doc)
@@ -134,7 +134,7 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
             freq_query["inchi_root"] = inchi
             freq_query["charge"] = charge
             freq_query["spin_multiplicity"] = spin
-            freq_doc = self._c.tasks.find_one(freq_query, fields=TaskKeys.tasks_fields)
+            freq_doc = self._c.tasks.find_one(filter=freq_query, projection=TaskKeys.tasks_fields)
             if not freq_doc:
                 return None
             product_freq_docs.append(freq_doc)
@@ -142,7 +142,7 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
             sp_query["inchi_root"] = inchi
             sp_query["charge"] = charge
             sp_query["spin_multiplicity"] = spin
-            sp_doc = self._c.tasks.find_one(sp_query, fields=TaskKeys.tasks_fields)
+            sp_doc = self._c.tasks.find_one(filter=sp_query, projection=TaskKeys.tasks_fields)
             if not sp_doc:
                 return None
             product_sp_docs.append(sp_doc)
@@ -150,7 +150,7 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
             sol_query["inchi_root"] = inchi
             sol_query["charge"] = charge
             sol_query["spin_multiplicity"] = spin
-            sol_doc = self._c.tasks.find_one(sol_query, fields=TaskKeys.tasks_fields)
+            sol_doc = self._c.tasks.find_one(filter=sol_query, projection=TaskKeys.tasks_fields)
             if not sol_doc:
                 return None
             product_sol_docs.append(sol_doc)
@@ -226,10 +226,10 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
         """
         query = {'state': 'successful', 'inchi_root': {"$in": reaction["all_inchis"]},
                  'task_type': "solvation energy"}
-        solvents = self._c.tasks.find(query, fields=TaskKeys.tasks_fields).distinct(
+        solvents = self._c.tasks.find(filter=query, projection=TaskKeys.tasks_fields).distinct(
             "implicit_solvent.solvent_name"
         )
-        solvent_models = self._c.tasks.find(query, fields=TaskKeys.tasks_fields)\
+        solvent_models = self._c.tasks.find(filter=query, projection=TaskKeys.tasks_fields)\
             .distinct("implicit_solvent.model")
         fe_docs = dict()
         fe_docs["reaction_id"] = reaction["reaction_id"]

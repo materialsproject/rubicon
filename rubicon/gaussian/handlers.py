@@ -5,6 +5,7 @@ TODO: Change the module doc.
 """
 
 from __future__ import division
+from monty.json import MSONable
 
 __author__ = "Shyue Ping Ong"
 __version__ = "0.1"
@@ -15,10 +16,6 @@ __date__ = "5/20/13"
 
 
 from custodian.custodian import ErrorHandler
-from pymatgen.serializers.json_coders import MSONable
-
-from custodian.ansible.intepreter import Modder
-from custodian.ansible.actions import FileActions, DictActions
 
 
 class GaussianErrorHandler(ErrorHandler, MSONable):

@@ -15,7 +15,8 @@ class EGSNLMongoAdapter(FWSerializable):
         self.username = username
         self.password = password
 
-        self.connection = MongoClient(host, port, j=False)
+        self.connection = MongoClient(host, port, j=False,
+                                      connect=False)
         self.database = self.connection[db]
         if self.username:
             self.database.authenticate(username, password)
@@ -98,7 +99,7 @@ class EGSNLMongoAdapter(FWSerializable):
         match_found = False
         if not force_new:
             if snlgroup_guess:
-                sgp = self.snlgroups.find_one({'snlgroup_id': snlgroup_guess})
+                sgp = self.snlgroups.find_one(filter={'snlgroup_id': snlgroup_guess})
                 snlgroup = SNLGroup.from_dict(sgp)
                 match_found = self._add_if_belongs(snlgroup, egsnl,
                                                    testing_mode)
@@ -106,7 +107,7 @@ class EGSNLMongoAdapter(FWSerializable):
             if not match_found:
                 # look at all potential matches
                 for entry in self.snlgroups.find(
-                        {'snlgroup_key': egsnl.snlgroup_key},
+                        filter={'snlgroup_key': egsnl.snlgroup_key},
                         sort=[("num_snl", DESCENDING)]):
                     snlgroup = SNLGroup.from_dict(entry)
                     match_found = self._add_if_belongs(snlgroup, egsnl,
@@ -125,7 +126,7 @@ class EGSNLMongoAdapter(FWSerializable):
 
 
     def switch_canonical_snl(self, snlgroup_id, canonical_egsnl):
-        sgp = self.snlgroups.find_one({'snlgroup_id': snlgroup_id})
+        sgp = self.snlgroups.find_one(filter={'snlgroup_id': snlgroup_id})
         snlgroup = SNLGroup.from_dict(sgp)
 
         all_snl_ids = [sid for sid in snlgroup.all_snl_ids]

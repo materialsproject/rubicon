@@ -7,8 +7,8 @@ from rubicon.testset.get_g3_benchmark import get_g3_bench_collection
 
 def refname2dirname(mission):
     collection = get_g3_bench_collection()
-    result_cursor = collection.find({"user_tags.mission": mission},
-                             fields=['path', 'user_tags.fw_name'])
+    result_cursor = collection.find(filter={"user_tags.mission": mission},
+                                    projection=['path', 'user_tags.fw_name'])
     calc_result = list(result_cursor)
     fw_name_2_path = {m['user_tags']['fw_name'].strip(): m['path'] for m in calc_result}
 

@@ -8,6 +8,7 @@ import datetime
 import sys
 import re
 
+import pymongo
 from pymongo import ASCENDING
 
 from rubicon.builders import eg_shared
@@ -42,7 +43,7 @@ class TaskKeys:
         'pointgroup', 'inchi_root',
         'calculations.scf.energies', 'calculations.scf_pcm.energies',
         'calculations.scf_sm12mk.energies',
-        'formula', 'task_id_deprecated', 'svg', 'xyz')
+        'formula', 'task_id_deprecated', 'svg', 'xyz', "last_updated")
 
     base_molecules = ("quinoxaline", "anthrachinon", "thiane", "viologen")
     lei_1_group_pattern = re.compile('(?P<base_mol>\w+)_wfs_(?P<position>\d+)_'
@@ -105,7 +106,10 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
                                 {"user_tags.initial_charge": {"$exists": False}}]}
             else:
                 spec = {"user_tags.initial_charge": ch}
-            inchi_root = self._c.tasks.find(spec=spec, fields='inchi_root').distinct('inchi_root')
+            inchi_root = list(self._c.tasks.find(filter=spec,
+                                                 projection='inchi_root')
+                              .distinct('inchi_root'))
+            _log.info("There are total {} unique INCHIs".format(len(inchi_root)))
             map(self.add_item, inchi_root)
             _log.info("Beginning analysis")
             states = self.run_parallel()
@@ -118,11 +122,11 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         """
         query = {'state': 'successful', 'inchi_root': inchi_root,
                  'task_type': "single point energy"}
-        solvents = self._c.tasks.find(query, fields=TaskKeys.fields).distinct(
+        solvents = self._c.tasks.find(filter=query, projection=TaskKeys.fields).distinct(
             "implicit_solvent.solvent_name"
         )
         #solvent_model = "ief-pcm"
-        solvent_models = self._c.tasks.find(query, fields=TaskKeys.fields).distinct("implicit_solvent.model")
+        solvent_models = self._c.tasks.find(filter=query, projection=TaskKeys.fields).distinct("implicit_solvent.model")
         molecule = dict()
         molecule['charge'] = self.ref_charge
         docs_available = False
@@ -131,7 +135,7 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
             for solvent in solvents:
                 query['implicit_solvent.solvent_name'] = solvent
                 query['implicit_solvent.model'] = solvent_model
-                docs = list(self._c.tasks.find(query, fields=TaskKeys.fields))
+                docs = list(self._c.tasks.find(filter=query, projection=TaskKeys.fields))
                 if docs:
                     docs_available = True
                 d = self.build_molecule_solvated_properties(docs)
@@ -149,7 +153,7 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         else:
             return 2
         query['charge'] = self.ref_charge
-        docs = self._c.tasks.find_one(query, fields=TaskKeys.fields)
+        docs = self._c.tasks.find_one(filter=query, projection=TaskKeys.fields)
         if not docs:
             return 1
         d = self.build_molecule_common_properties(docs)
@@ -226,11 +230,29 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         docs = dict()
         for td in taskdocs:
             if td["charge"] == self.ref_charge:
-                docs["neutral"] = td
+                if "neutral" not in docs:
+                    docs["neutral"] = td
+                else:
+                    if td["last_updated"] > docs["neutral"]["last_updated"]:
+                        docs["neutral"] = td
+                    else:
+                        continue
             elif td["charge"] == self.ref_charge + 1:
-                docs["cation"] = td
+                if "cation" not in docs:
+                    docs["cation"] = td
+                else:
+                    if td["last_updated"] > docs["cation"]["last_updated"]:
+                        docs["cation"] = td
+                    else:
+                        continue
             elif td["charge"] == self.ref_charge - 1:
-                docs["anion"] = td
+                if "anion" not in docs:
+                    docs["anion"] = td
+                else:
+                    if td["last_updated"] > docs["anion"]["last_updated"]:
+                        docs["anion"] = td
+                    else:
+                        continue
         if len(docs) < 2 or ("neutral" not in docs):
             return None
         molecule = dict()
@@ -246,10 +268,12 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         docs = dict()
         for c, i in zip(["anion", "neutral", "cation"], [-1, 0, 1]):
             query['charge'] = self.ref_charge + i
-            taskdocs = self._c.tasks.find_one(query, fields=TaskKeys.fields)
-            if not taskdocs:
+            taskdocs = self._c.tasks.find(filter=query,
+                                          projection=TaskKeys.fields,
+                                          sort=[("_id", pymongo.DESCENDING)])
+            if taskdocs.count() == 0:
                 continue
-            docs[c] = taskdocs
+            docs[c] = taskdocs[0]
         if len(docs) < 2 or ("neutral" not in docs):
             return None
         molecule = dict()

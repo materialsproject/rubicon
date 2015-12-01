@@ -7,9 +7,9 @@ from __future__ import unicode_literals
 import copy
 from textwrap import TextWrapper
 from monty.io import zopen
+from monty.json import MSONable
 from pymatgen import SymmOp
 from pymatgen.core.structure import Molecule
-from pymatgen.serializers.json_coders import MSONable
 import re
 import numpy as np
 from pymatgen.util.coord_utils import get_angle
