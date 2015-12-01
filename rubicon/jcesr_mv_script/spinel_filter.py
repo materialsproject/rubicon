@@ -16,7 +16,7 @@ __author__ = 'miaoliu'
 MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
 API_KEY = ""
 
-connection= pymongo.Connection('mongodb://admin_ml_prod:ydxr!oX^@mongodb03.nersc.gov:27017/vasp_ml_prod')
+connection= pymongo.Connection('mongodb://:@mongodb03.nersc.gov:27017/')
 
 db = connection['vasp_ml_prod']
 
