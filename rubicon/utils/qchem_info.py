@@ -19,5 +19,3 @@ def get_qchem_version():
     else:
         raise Exception("Environmental Variable $QC is not defined")
 
-if __name__ == '__main__':
-    print "Current Qchem Version is:", get_qchem_version()
