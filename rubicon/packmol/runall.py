@@ -31,10 +31,11 @@ if __name__ ==  '__main__':
     from calcCOM import calcCOM
     from gettimedata import gettimedata
     from getmoldata import getmoldata
-    from COMradial import COMradialdistribution
+    from COMradialnofort import COMradialdistribution
     from getatomcharges import getatomcharges
     from calcNEconductivity import calcNEconductivity
-    
+    import json   
+ 
     c = calcCOM()
     m = MSD()
     gt = gettimedata()
@@ -43,7 +44,7 @@ if __name__ ==  '__main__':
     gc = getatomcharges()
     ne = calcNEconductivity()
     
-    trjfile=['sample_files/NaSCN.lammpstrj']
+    trjfile='sample_files/NaSCN.lammpstrj'
     datfile='sample_files/data.water_1NaSCN'
     logfile='sample_files/mol.log'
     output = {}
@@ -54,13 +55,13 @@ if __name__ ==  '__main__':
     T = 298 #get from lammpsio
 
     
-    tsjump = gt.getjump(trjfile[0])
+    tsjump = gt.getjump(trjfile)
     (nummoltype, moltypel, moltype) = gm.getmoltype(datfile)
     dt = gt.getdt(logfile)
     n = gc.findnumatoms(datfile)
     (molcharges, atomcharges,n) = gc.getmolcharges(datfile,n)
     molcharge = gc.molchargedict(molcharges, moltypel, moltype)
-    (comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2) = c.calcCOM(trjfile,datfile)
+    (comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2) = c.calcCOM([trjfile],datfile)
     
     
     output = m.runMSD(comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2, moltype, moltypel, dt, tsjump, output)
@@ -68,9 +69,9 @@ if __name__ ==  '__main__':
     
     output = ne.calcNEconductivity(output, molcharge, Lx, Ly, Lz, nummoltype, moltypel, T)
     #print(output)
-    
-    for i in range(0,len(moltypel)):
-        for j in range(i,len(moltypel)):
-            output = crd.runradial(datfile, moltypel[i], moltypel[j], comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2, output, nummoltype, moltypel, moltype, firststep=1)
-            
-    
+    print('Conductivity Finshed')
+    output = crd.runradial(datfile, comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2, output, nummoltype, moltypel, moltype, firststep=1)
+
+    #outputfile=open('test.json', 'w')
+    #json.dump(output,outputfile,indent=4)
+    #outputfile.close()

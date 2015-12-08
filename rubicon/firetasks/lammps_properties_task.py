@@ -10,7 +10,7 @@ try:
     from rubicon.packmol.calcCOM import calcCOM
     from rubicon.packmol.gettimedata import gettimedata
     from rubicon.packmol.getmoldata import getmoldata
-    from rubicon.packmol.COMradial import COMradialdistribution
+    from rubicon.packmol.COMradialnofort import COMradialdistribution
     from rubicon.packmol.getatomcharges import getatomcharges
     from rubicon.packmol.calcNEconductivity import calcNEconductivity
 except:
@@ -63,9 +63,7 @@ class ParselammpsProperties(FireTaskBase):
         gc = getatomcharges()
         ne = calcNEconductivity()
 
-        #trjfile=["mol.lammpstrj"]
-        #datafile="mol_data.lammps"
-        #logfile="mol.log"
+
         output = {}
         output['RDF'] = {}
         output['RDF']['units'] = 'unitless and angstroms'
@@ -78,21 +76,22 @@ class ParselammpsProperties(FireTaskBase):
         (nummoltype, moltypel, moltype) = gm.getmoltype(datafile)
         dt = gt.getdt(logfile)
         n = gc.findnumatoms(datafile)
-        print n
         (molcharges, atomcharges,n) = gc.getmolcharges(datafile,n)
         molcharge = gc.molchargedict(molcharges, moltypel, moltype)
-        (comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2) = c.calcCOM(trjfile,datafile)
+        (comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2) = c.calcCOM([trjfile],datafile)
+
 
         output = m.runMSD(comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2, moltype, moltypel, dt, tsjump, output)
 
 
         output = ne.calcNEconductivity(output, molcharge, Lx, Ly, Lz, nummoltype, moltypel, T)
+        #print(output)
+        print('Conductivity Finshed')
+        output = crd.runradial(datafile, comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2, output, nummoltype, moltypel, moltype, firststep=1)
 
-
-        for i in range(0,len(moltypel)):
-            for j in range(i,len(moltypel)):
-                output = crd.runradial(datafile, moltypel[i], moltypel[j], comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2, output, nummoltype, moltypel, moltype, firststep=1)
-
+        #outputfile=open('test.json', 'w')
+        #json.dump(output,outputfile,indent=4)
+        #outputfile.close()
         return output
 
     def _insert_doc(self, fw_spec = None, trjfile = None, datafile = None, logfile = None):
@@ -115,6 +114,9 @@ class ParselammpsProperties(FireTaskBase):
         mol_traj_file = fw_spec["prev_lammps_trj"]
         mol_data_file = fw_spec["prev_lammps_data"]
         mol_log_file = fw_spec["prev_lammps_log"]
+        #print "trajfile", mol_traj_file
+        #print "datafile", mol_data_file
+        #print "logfile", mol_log_file
         self._insert_doc(trjfile = mol_traj_file, datafile = mol_data_file, logfile=mol_log_file)
 
 
