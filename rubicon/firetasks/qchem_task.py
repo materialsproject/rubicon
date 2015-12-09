@@ -137,6 +137,7 @@ class QChemTask(FireTaskBase, FWSerializable):
                     min(fw_data.SUB_NPROCS, len(mol))))
                 half_cpus_cmd = shlex.split("qchem -np {}".format(
                     min(fw_data.SUB_NPROCS / 2, len(mol))))
+            openmp_cmd = shlex.split("qchem -seq -nt 24")
         elif "PBS_JOBID" in os.environ and "hopque" in os.environ["PBS_JOBID"]:
             if (not fw_data.MULTIPROCESSING) or (fw_data.SUB_NPROCS is None):
                 qc_exe = shlex.split("qchem -np {}".format(min(24, len(mol))))
@@ -149,9 +150,15 @@ class QChemTask(FireTaskBase, FWSerializable):
                     min(fw_data.SUB_NPROCS, len(mol))))
                 half_cpus_cmd = shlex.split("qchem -np {}".format(
                     min(fw_data.SUB_NPROCS / 2, len(mol))))
+            openmp_cmd = shlex.split("qchem -seq -nt 24")
+        elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"]=="cori":
+            qc_exe = shlex.split("qchem -np {}".format(min(32, len(mol))))
+            half_cpus_cmd = shlex.split("qchem -np {}".format(min(16, len(mol))))
+            openmp_cmd = shlex.split("qchem -nt 32")
         elif carver_name_pattern.match(socket.gethostname()):
             # mendel compute nodes
             qc_exe = shlex.split("qchem -np {}".format(min(8, len(mol))))
+            openmp_cmd = shlex.split("qchem -seq -nt 8")
         elif 'vesta' in socket.gethostname():
             # ALCF, Blue Gene
             num_nodes = 4
@@ -165,10 +172,13 @@ class QChemTask(FireTaskBase, FWSerializable):
                 num_nodes=num_nodes, max_minutes=max_minutes, num_threads=num_threads/2,
                 scr_size_GB=scr_size_GB))
             self._customize_alcf_qcinp(qcinp, num_nodes=num_nodes)
+            openmp_cmd = None
         elif "macqu" in socket.gethostname().lower():
             qc_exe = shlex.split("qchem -nt 2")
+            openmp_cmd = None
         else:
             qc_exe = ["qchem"]
+            openmp_cmd = None
 
         logging.basicConfig(level=logging.INFO)
         qchem_logger = logging.getLogger('QChemDrone')
@@ -180,7 +190,7 @@ class QChemTask(FireTaskBase, FWSerializable):
         scf_max_cycles = 200
         geom_max_cycles = 200
         alt_cmd = {"half_cpus": half_cpus_cmd,
-                   "openmp": shlex.split("qchem -seq -nt 24")}
+                   "openmp": openmp_cmd}
         if 'vesta' in socket.gethostname():
             alt_cmd.pop("openmp")
         if fw_spec['num_atoms'] > 50:
