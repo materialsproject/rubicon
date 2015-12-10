@@ -43,7 +43,7 @@ class MopTask(MSONable):
     available_sqm_methods = {"PM7", "PM7-TS", "PM6", "PM3", "AM1", "PM6-D3",
                              "PM6-DH+", "PM6-DH2", "PM6-DH2X"}
     jobtype2text = {"SP": "1SCF", "OPT": "EF", "OPT_BFGS": "BFGS", "FREQ": "THERMO"}
-    jobtext2type = {v: k for k, v in jobtype2text.iteritems()}
+    jobtext2type = {v: k for k, v in jobtype2text.items()}
     available_sqm_tasktext = set(jobtype2text.values())
     zmat_patt = re.compile("^(\w+)*([\s,]+(\w+)[\s,]+(\w+))*[\-\.\s,\w]*$")
     xyz_patt = re.compile("^(\w+)[\s,]+([\d\.eE\-]+)[\s,]+([\d\.eE\-]+)[\s,]+"
