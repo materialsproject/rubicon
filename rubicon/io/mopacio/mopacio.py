@@ -210,7 +210,7 @@ class MopTask(MSONable):
                 elif float_pattern.match(v):
                     d[k.upper()] = float(v)
                 else:
-                    d[k.k.upper()] = v.upper()
+                    d[k.upper()] = v.upper()
         return d
 
     @classmethod
