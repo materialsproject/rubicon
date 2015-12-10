@@ -152,8 +152,16 @@ class QChemTask(FireTaskBase, FWSerializable):
                     min(fw_data.SUB_NPROCS / 2, len(mol))))
             openmp_cmd = shlex.split("qchem -seq -nt 24")
         elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"]=="cori":
-            qc_exe = shlex.split("qchem -np {}".format(min(32, len(mol))))
-            half_cpus_cmd = shlex.split("qchem -np {}".format(min(16, len(mol))))
+            if (not fw_data.MULTIPROCESSING) or (fw_data.SUB_NPROCS is None):
+                qc_exe = shlex.split("qchem -np {}".format(min(32, len(mol))))
+                half_cpus_cmd = shlex.split("qchem -np {}".format(min(16, len(mol))))
+            else:
+                nodelist = ",".join(fw_data.NODE_LIST)
+                os.environ["QCNODE"] = nodelist
+                qc_exe = shlex.split("qchem -np {}".format(
+                    min(fw_data.SUB_NPROCS, len(mol))))
+                half_cpus_cmd = shlex.split("qchem -np {}".format(
+                    min(fw_data.SUB_NPROCS / 2, len(mol))))
             openmp_cmd = shlex.split("qchem -nt 32")
         elif carver_name_pattern.match(socket.gethostname()):
             # mendel compute nodes
