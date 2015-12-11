@@ -14,5 +14,6 @@
     "diethylcarbonate": {"dielectric": 2.8, "solvent_probe_radius": 2.91},
     "dimethylformamide": {"dielectric": 36.7, "solvent_probe_radius": 2.50},
     "diethylether": {"dielectric": 4.34, "solvent_probe_radius": 2.76},
-    "methyltetrahydrofuran": {"dielectric": 6.97, "solvent_probe_radius": 2.74}
+    "methyltetrahydrofuran": {"dielectric": 6.97, "solvent_probe_radius": 2.74},
+    "dichloromethane": {"dielectric": 8.93, "solvent_probe_radius": 2.35}
 }
