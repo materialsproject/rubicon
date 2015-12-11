@@ -70,8 +70,11 @@ class QChemFireWorkCreator:
         if len(methon_fields) == 2:
             theoretical_level, basis_set = methon_fields
             ecp = None
-        else:
+        elif len(methon_fields) == 3:
             theoretical_level, basis_set, ecp = methon_fields
+        else:
+            raise ValueError("Method must be specified in the formational of "
+                             "\"Functional/Basis[/ECP]\"")
         basis_set = basis_set.lower()
         if theoretical_level.lower() == "b3lyp-xdm":
             exchange = 'b3lyp'
