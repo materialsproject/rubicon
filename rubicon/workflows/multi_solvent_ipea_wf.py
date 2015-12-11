@@ -62,7 +62,7 @@ def multi_solvent_ipea_fws(mol, name, mission, solvents, solvent_method, use_vdW
         fw_ids = zip(* [iter(range(fwid_start, fwid_end))] * 2)
         sp_fw_ids.append(fw_ids)
         fws = (fw_creator.sp_fw(ch, spin, fwid_cal, fwid_db,
-                                solvent=solvent, use_vdW_surface=use_vdW_surface, solvent_method=solvent_method,
+                                solvent=solvent, use_vdw_surface=use_vdW_surface, solvent_method=solvent_method,
                                 qm_method=energy_method)
                for ch, spin, (fwid_cal, fwid_db)
                in zip(charges, spin_multiplicities, fw_ids))

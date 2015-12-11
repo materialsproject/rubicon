@@ -55,7 +55,7 @@ def solvation_energy_fws(mol, name, mission, solvents, solvent_method, use_vdW_s
                                   fwid_base + 4 + num_solvents*2))] * 2)
     sp_fws = (fw_creator.sp_fw(
               charge=0, spin_multiplicity=1, fw_id_cal=fwid_cal,
-              fw_id_db=fwid_db, solvent_method=solvent_method, use_vdW_surface=use_vdW_surface, solvent=solvent,
+              fw_id_db=fwid_db, solvent_method=solvent_method, use_vdw_surface=use_vdW_surface, solvent=solvent,
               qm_method=energy_method)
               for (fwid_cal, fwid_db), solvent in zip(sp_fw_ids, solvents))
     sp_cal_ids, sp_db_ids = zip(*sp_fw_ids)

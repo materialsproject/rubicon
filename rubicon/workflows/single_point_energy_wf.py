@@ -46,7 +46,7 @@ def single_point_energy_fws(mol, name, mission, solvent, solvent_method, use_vdW
     sol_cal_fwid, sol_db_fwid = fwid_base + 4, fwid_base + 5
     fw_sol = fw_creator.sp_fw(
         charge, spin_multiplicity, sol_cal_fwid, sol_db_fwid, solvent_method=solvent_method,
-        use_vdW_surface=use_vdW_surface, solvent=solvent,
+        use_vdw_surface=use_vdW_surface, solvent=solvent,
         priority=priority, qm_method=sol_qm_method, population_method=pop_method, task_type_name="solvation energy")
     fws.extend(fw_sol)
     links_dict[sol_cal_fwid] = sol_db_fwid
