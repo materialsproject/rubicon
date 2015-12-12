@@ -120,7 +120,10 @@ class QChemFireWorkCreator:
             all_elements = [el for el in mol.composition.elements]
             light_element_sybmols = [el.symbol for el in all_elements if el.Z <= Element('Ar').Z]
             heavy_element_sybmols = [el.symbol for el in all_elements if el.Z > Element('Ar').Z]
-            ecp_dict = {el: ecp for el in heavy_element_sybmols}
+            if len(heavy_element_sybmols) > 0:
+                ecp_dict = {el: ecp for el in heavy_element_sybmols}
+            else:
+                ecp_dict = None
             basis_set_dict = {}
             for el in light_element_sybmols:
                 basis_set_dict[el] = basis_set
