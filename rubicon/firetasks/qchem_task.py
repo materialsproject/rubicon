@@ -41,7 +41,7 @@ class QChemTask(FireTaskBase, FWSerializable):
     @staticmethod
     def _calibrate_alcf_cmd(input_file="mol.qcinp", max_minutes=60, num_nodes=8, ranks_per_node=1,
                             num_threads=64, scr_size_GB=2.0, use_runjob=False):
-        qc_package_path = "/projects/JCESR/pkcoff/qchem422.mod2"
+        qc_package_path = "/projects/JCESR/pkcoff/qchem43.mod1"
         qcaux_path = "/projects/JCESR/qcaux"
         qc_exe_path = "/projects/JCESR/pkcoff/public/qcprog-43-optv3.exe"
         qc_scr_dir = "/dev/local/qchem"
