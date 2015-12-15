@@ -40,7 +40,10 @@ def get_basic_update_specs(fw_spec, d):
         mixed_aux_basis = fw_spec["mixed_aux_basis"]
     if "_mixed_basis_set_generator" in fw_spec:
         bs_generator_dict = fw_spec["_mixed_basis_set_generator"]
-        mol = Molecule.from_dict(d["molecule_final"])
+        if isinstance(d["molecule_final"], dict):
+            mol = Molecule.from_dict(d["molecule_final"])
+        else:
+            mol = d["molecule_final"]
         pop_method = None
         if "scf" in d["calculations"]:
             if "nbo" in d["calculations"]["scf"]["charges"]:
@@ -50,7 +53,10 @@ def get_basic_update_specs(fw_spec, d):
         if pop_method is None:
             raise ValueError("An vacuum single point caculation is require to use mixed basis set generator")
         charges = d["calculations"]["scf"]["charges"][pop_method]
-        bs_generator = AtomicChargeMixedBasisSetGenerator.from_dict(bs_generator_dict)
+        if isinstance(bs_generator_dict, dict):
+            bs_generator = AtomicChargeMixedBasisSetGenerator.from_dict(bs_generator_dict)
+        else:
+            bs_generator = bs_generator_dict
         mixed_basis = bs_generator.get_basis(mol, charges)
     if "_mixed_aux_basis_set_generator" in fw_spec:
         aux_bs_generator_dict = fw_spec["_mixed_aux_basis_set_generator"]
@@ -170,7 +176,10 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
             "frequency elimination"
         if grid:
             for fw in [geom_fw_cal, geom_fw_db, freq_fw_cal, freq_fw_db]:
-                qcinp = QcInput.from_dict(fw.spec["qcinp"])
+                if isinstance(fw.spec["qcinp"], dict):
+                    qcinp = QcInput.from_dict(fw.spec["qcinp"])
+                else:
+                    qcinp = fw.spec["qcinp"]
                 for j in qcinp.jobs:
                     j.set_dft_grid(*grid)
                     j.set_integral_threshold(12)
@@ -401,7 +410,10 @@ class BasisSetSuperpositionErrorCalculationTask(FireTaskBase, FWSerializable):
     def run_task(self, fw_spec):
         fragment_dicts = fw_spec["fragments"]
         from rubicon.workflows.bsse_wf import BSSEFragment
-        fragments = [BSSEFragment.from_dict(d) for d in fragment_dicts]
+        if len(fragment_dicts) > 0 and isinstance(fragment_dicts[0], dict):
+            fragments = [BSSEFragment.from_dict(d) for d in fragment_dicts]
+        else:
+            fragments = fragment_dicts
         fragments_dict = dict()
         bsse = 0.0
         for frag in fragments:
@@ -516,7 +528,10 @@ class CounterpoiseCorrectionGenerationTask(FireTaskBase, FWSerializable):
         fragment_dicts = fw_spec["fragments"]
         large = fw_spec["large"]
         from rubicon.workflows.bsse_wf import bsse_wf, BSSEFragment
-        fragments = [BSSEFragment.from_dict(d) for d in fragment_dicts]
+        if len(fragment_dicts) > 0 and isinstance(fragment_dicts[0], dict):
+            fragments = [BSSEFragment.from_dict(d) for d in fragment_dicts]
+        else:
+            fragments = fragment_dicts
         priority = fw_spec.get('_priority', 1)
         dupefinder = fw_spec.get('_dupefinder', DupeFinderEG())
         cc_wf = bsse_wf(super_mol=egsnl, name=molname, super_mol_snlgroup_id=super_mol_snlgroup_id,
