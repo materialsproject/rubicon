@@ -204,12 +204,13 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
         """
         if 'egsnl' not in fw_spec:
             raise ValueError("Can't find initial SNL")
-        if 'known_bonds' not in fw_spec['egsnl']:
-            raise ValueError("Can't find known bonds information")
         if isinstance(fw_spec['egsnl'], EGStructureNL):
-            bonds = fw_spec['egsnl'].as_dict()['known_bonds']
+            egsnl_dict = fw_spec['egsnl'].as_dict()
         else:
-            bonds = fw_spec['egsnl']['known_bonds']
+            egsnl_dict = fw_spec['egsnl']
+        if 'known_bonds' not in egsnl_dict:
+            raise ValueError("Can't find known bonds information")
+        bonds = egsnl_dict['known_bonds']
         msc = MoleculeStructureComparator(priority_bonds=bonds)
         return not msc.are_equal(mol1, mol2)
 
