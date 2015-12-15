@@ -43,7 +43,7 @@ class QChemTask(FireTaskBase, FWSerializable):
                             num_threads=64, scr_size_GB=2.0, use_runjob=False):
         qc_package_path = "/projects/JCESR/pkcoff/qchem422.mod2"
         qcaux_path = "/projects/JCESR/qcaux"
-        qc_exe_path = "/projects/JCESR/pkcoff/public/qcprog-optv2.exe"
+        qc_exe_path = "/projects/JCESR/pkcoff/public/qcprog-43-optv3.exe"
         qc_scr_dir = "/dev/local/qchem"
         scr_size_bytes = int(scr_size_GB * (2 ** 30))
         qc_envs = {
@@ -55,7 +55,13 @@ class QChemTask(FireTaskBase, FWSerializable):
             "QCTMPDIR": qc_scr_dir,
             "QCTHREADS": num_threads,
             "OMP_NUM_THREADS": num_threads,
-            "QCLOCALFSSIZE": scr_size_bytes
+            "QCLOCALFSSIZE": scr_size_bytes,
+            "INT_OMP_MIN_LENSTEP_PATH1": 1,
+            "INT_OMP_MAX_LENSTEP": 1,
+            "INT_OMP_MAX_LENSTEP_PATH1": 1,
+            "INT_OMP_MIN_LENSTEP": 1,
+            "BLAS3_DFT_OMP": 1,
+            "PAMI_CLIENTS": "MPI,SharedCounter"
         }
         with open(os.path.abspath(os.path.join(os.path.dirname(__file__),
                                                "data/qc_lenstep_config_set"))) \
