@@ -513,6 +513,7 @@ class BasisSetSuperpositionErrorCalculationTask(FireTaskBase, FWSerializable):
     def get_fragment_key(cls, ghost_atoms, fragment_type):
         return "{}_fragment_{}".format(fragment_type, cls.get_fragment_name(ghost_atoms))
 
+
 class CounterpoiseCorrectionGenerationTask(FireTaskBase, FWSerializable):
     _fw_name = "Counterpoise Generation Task"
 
@@ -523,7 +524,10 @@ class CounterpoiseCorrectionGenerationTask(FireTaskBase, FWSerializable):
         charge = fw_spec["charge"]
         spin_multiplicity = fw_spec["spin_multiplicity"]
         inchi_root = fw_spec["inchi_root"]
-        egsnl = fw_spec["egsnl"]
+        if isinstance(fw_spec["egsnl"], dict):
+            egsnl = fw_spec["egsnl"]
+        else:
+            egsnl = fw_spec["egsnl"].as_dict()
         qm_method = fw_spec["qm_method"]
         fragment_dicts = fw_spec["fragments"]
         large = fw_spec["large"]
