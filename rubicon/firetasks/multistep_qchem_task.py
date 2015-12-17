@@ -415,6 +415,7 @@ class BasisSetSuperpositionErrorCalculationTask(FireTaskBase, FWSerializable):
             fragments = [BSSEFragment.from_dict(d) for d in fragment_dicts]
         else:
             fragments = fragment_dicts
+        fragments_def = [d.to_dict() for d in fragments]
         fragments_dict = dict()
         bsse = 0.0
         for frag in fragments:
@@ -434,7 +435,7 @@ class BasisSetSuperpositionErrorCalculationTask(FireTaskBase, FWSerializable):
             bsse += fragments_dict[fragment_name]["fragment_bsse"]
         result_dict = dict()
         result_dict["fragments_result"] = fragments_dict
-        result_dict["fragments_def"] = fw_spec["fragments"]
+        result_dict["fragments_def"] = fragments_def
         result_dict["bsse"] = bsse
         result_dict["mol"] = fw_spec["mol"]
         result_dict["egsnl"] = fw_spec["egsnl"]
@@ -445,7 +446,8 @@ class BasisSetSuperpositionErrorCalculationTask(FireTaskBase, FWSerializable):
         result_dict["spin_multiplicity"] = fw_spec["spin_multiplicity"]
         result_dict["inchi_root"] = fw_spec["inchi_root"]
         result_dict['task_type'] = "BSSE Counterpoise Correction"
-        t_id = self._insert_doc(result_dict, fw_spec)
+        result_dict["super_mol_snlgroup_id"] = fw_spec["snlgroup_id"]
+        t_id = self._insert_doc(result_dict)
         return FWAction(
             stored_data={'task_id': t_id},
             update_spec={"mol": fw_spec["mol"],
@@ -454,7 +456,7 @@ class BasisSetSuperpositionErrorCalculationTask(FireTaskBase, FWSerializable):
                          "inchi_root": fw_spec["inchi_root"]})
 
     @classmethod
-    def _insert_doc(cls, d, fw_spec=None, update_duplicates=True):
+    def _insert_doc(cls, d, update_duplicates=True):
         db_dir = os.environ['DB_LOC']
         db_path = os.path.join(db_dir, 'tasks_db.json')
         logging.basicConfig(level=logging.INFO)
@@ -472,8 +474,8 @@ class BasisSetSuperpositionErrorCalculationTask(FireTaskBase, FWSerializable):
             db.authenticate(db_creds['admin_user'], db_creds['admin_password'])
         coll = db[db_creds['collection']]
 
-        result = coll.find_one(filter={"super_mol_snlgroup_id": fw_spec["snlgroup_id"],
-                                "fragments_def": fw_spec["fragments"]},
+        result = coll.find_one(filter={"super_mol_snlgroup_id": d["super_mol_snlgroup_id"],
+                                       "fragments_def": d["fragments_def"]},
                                projection=["task_id", "super_mol_snlgroup_id", "fragments_def"])
         if result is None or update_duplicates:
             d["last_updated"] = datetime.datetime.today()
@@ -490,9 +492,9 @@ class BasisSetSuperpositionErrorCalculationTask(FireTaskBase, FWSerializable):
             elif update_duplicates:
                 d["task_id"] = result["task_id"]
                 logger.info("Updating BSSE for snlgroup {} with taskid = {}"
-                            .format(fw_spec["snlgroup_id"], d["task_id"]))
-            coll.update({"super_mol_snlgroup_id": fw_spec["snlgroup_id"],
-                         "fragments_def": fw_spec["fragments"]},
+                            .format(d["super_mol_snlgroup_id"], d["task_id"]))
+            coll.update({"super_mol_snlgroup_id": d["super_mol_snlgroup_id"],
+                         "fragments_def": d["fragments_def"]},
                         {"$set": d},
                         upsert=True)
             return d["task_id"]
