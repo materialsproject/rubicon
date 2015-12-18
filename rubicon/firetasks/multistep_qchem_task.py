@@ -171,7 +171,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
         geom_fw_cal.spec["run_tags"]["task_type_amend"] = "imaginary " \
             "frequency elimination"
         freq_fw_cal, freq_fw_db = fw_creator.freq_fw(
-            charge, spin_multiplicity, freq_fwid_cal, freq_fwid_db, qm_method)
+            charge, spin_multiplicity, freq_fwid_cal, freq_fwid_db, method=qm_method)
         freq_fw_cal.spec["run_tags"]["task_type_amend"] = "imaginary " \
             "frequency elimination"
         if grid:
