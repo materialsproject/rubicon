@@ -438,7 +438,11 @@ class BasisSetSuperpositionErrorCalculationTask(FireTaskBase, FWSerializable):
         result_dict["fragments_def"] = fragments_def
         result_dict["bsse"] = bsse
         result_dict["mol"] = fw_spec["mol"]
-        result_dict["egsnl"] = fw_spec["egsnl"]
+        if isinstance(fw_spec['egsnl'], EGStructureNL):
+            egsnl_dict = fw_spec['egsnl'].as_dict()
+        else:
+            egsnl_dict = fw_spec['egsnl']
+        result_dict["egsnl"] = egsnl_dict
         result_dict["snlgroup_id"] = fw_spec["snlgroup_id"]
         result_dict["user_tags"] = fw_spec["user_tags"]
         result_dict["qm_method"] = fw_spec["qm_method"]
