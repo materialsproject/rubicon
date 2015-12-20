@@ -41,6 +41,12 @@ def run_qchem(filename):
         qc_exe = shlex.split("qchem -np {}".format(min(32, low_nprocess)))
         half_cpus_cmd = shlex.split("qchem -np {}".format(min(16, low_nprocess)))
         openmp_cmd = shlex.split("qchem -nt 32")
+    elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"]=="matgen":
+        num_numa_nodes = 2
+        low_nprocess = max(int(len(mol)/num_numa_nodes) * num_numa_nodes, 1)
+        qc_exe = shlex.split("qchem -np {}".format(min(16, low_nprocess)))
+        half_cpus_cmd = shlex.split("qchem -np {}".format(min(8, low_nprocess)))
+        openmp_cmd = shlex.split("qchem -nt 8")
     elif carver_name_pattern.match(socket.gethostname()):
         # mendel compute nodes
         qc_exe = shlex.split("qchem -np {}".format(min(8, len(mol))))
