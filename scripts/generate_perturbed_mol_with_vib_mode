@@ -1,0 +1,3 @@
+import rubicon.scripts.generate_perturbed_mol_with_vib_mode as perturb
+
+perturb.main()
