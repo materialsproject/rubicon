@@ -21,10 +21,10 @@ def main():
     parser.add_argument("-s", "--scale", dest="scale", type=float,
                         default=0.3,
                         help="the scale factor to perturb molecule")
-    parser.add_argument("-r", "--reverse", dest="reverse", type=bool,
+    parser.add_argument("-r", "--reverse", dest="reverse",
                         action="store_true",
                         help="use reversed direction to perturb molecule")
-    parser.add_argument("-v", "--verbose", dest="verbose", type=bool,
+    parser.add_argument("-v", "--verbose", dest="verbose",
                         action="store_true",
                         help="print parameters")
     options = parser.parse_args()
