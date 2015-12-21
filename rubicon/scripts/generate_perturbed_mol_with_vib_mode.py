@@ -1,43 +1,12 @@
-import json
+from rubicon.scripts.run_qchem_standalone import perturb_molecule
 
 __author__ = 'xiaohuiqu'
 
 import copy
-import logging
-import re
-import shlex
-import os
-import socket
-from custodian import Custodian
-from custodian.qchem.handlers import QChemErrorHandler
-from custodian.qchem.jobs import QchemJob
-import math
-from pymatgen import Molecule
 from pymatgen.io.qchem import QcInput, QcOutput
-import sys
 
 __author__ = 'xiaohuiqu'
 
-
-
-def perturb_molecule(old_mol, vib_mode, reversed_direction=False, perturb_scale=0.3):
-    max_dis = max([math.sqrt(sum([x ** 2 for x in mode]))
-                   for mode in vib_mode])
-    scale = perturb_scale / max_dis
-    normalized_mode = [[x * scale for x in mode]
-                       for mode in vib_mode]
-    direction = 1.0
-    if reversed_direction:
-        direction = -1.0
-    new_coords = [[c+v*direction for c, v in zip(site.coords, mode)]
-                  for site, mode in zip(old_mol.sites, normalized_mode)]
-    species = [site.specie.symbol
-               for site in old_mol.sites]
-    charge = old_mol.charge
-    spin_multiplicity = old_mol.spin_multiplicity
-    new_mol = Molecule(species, new_coords, charge=charge,
-                       spin_multiplicity=spin_multiplicity)
-    return new_mol
 
 def main():
     import argparse
@@ -54,7 +23,7 @@ def main():
                         help="the scale factor to perturb molecule")
     parser.add_argument("-r", "--reverse", dest="reverse", type=bool,
                         action="store_true",
-                        help="the scale factor to perturb molecule")
+                        help="use reversed direction to perturb molecule")
     parser.add_argument("-v", "--verbose", dest="verbose", type=bool,
                         action="store_true",
                         help="print parameters")
