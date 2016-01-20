@@ -97,7 +97,12 @@ class LammpsLog():
                     footer_blank_line += 1
             print int(md_step/log_save_freq)
 
-            rawdata = np.genfromtxt(fname=filename,dtype=float,skip_header=header,skip_footer=int(total_lines-header-md_step/log_save_freq-1 )-footer_blank_line)
+            if total_lines >= header + md_step/log_save_freq:
+                rawdata = np.genfromtxt(fname=filename,dtype=float,skip_header=header,skip_footer=int(total_lines-header-md_step/log_save_freq-1 )-footer_blank_line)
+
+            else:
+                rawdata = np.genfromtxt(fname=filename,dtype=float,skip_header=header,skip_footer=1)
+
 
             for column, property in enumerate(data_format):
                 llog[property] = rawdata[:, column]
@@ -129,8 +134,6 @@ class LammpsLog():
         a4=self.llog['pxx'][cutoff:]-self.llog['pyy'][cutoff:]
         a5=self.llog['pyy'][cutoff:]-self.llog['pzz'][cutoff:]
         a6=self.llog['pxx'][cutoff:]-self.llog['pzz'][cutoff:]
-        print len(a1)
-        time.sleep(100)
         array_array=[a1,a2,a3,a4,a5,a6]
         pv=p.map(autocorrelate,array_array)
         pcorr = (pv[0]+pv[1]+pv[2])/6+(pv[3]+pv[4]+pv[5])/24
@@ -143,6 +146,7 @@ class LammpsLog():
         for line in zip(np.array(self.llog['step'][:len(pcorr)-1])*self.llog['timestep'],pcorr,visco):
             output.write(' '.join(str(x) for x in line)+'\n')
         output.close()
+        p.close()
 
 
     @property
