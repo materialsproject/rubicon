@@ -165,15 +165,20 @@ if __name__ == '__main__':
     #depen = {1:2}
 
 
+    coords = []
+    sp = []
     moleculelist = glob.glob("/Users/navnidhirajput/Dropbox/solvent_molecules/*")
     for filename in moleculelist:
          mol = Molecule.from_file(filename)
-         mol.site_properties={"mol_name":filename[:3]*len(mol)}
-         fw1 = Firework([task1],name = 'Run Lammps', spec={"molecules": [mol.as_dict()]}, fw_id=1)
+         for site in mol:
+            coords.append([c for c in site.coords])
+            sp.append(site.specie.symbol)
+
+         mol2 = Molecule(sp, coords, site_properties={"mol_name":filename[48:-4]*len(coords)})
+         #mol.site_properties={"mol_name":filename[48:-4]*len(coords)}
+         fw1 = Firework([task1],name = 'Run Lammps', spec={"molecules": [mol2.as_dict()]}, fw_id=1)
          fw2 = Firework([task2],name='Lammps Log Parsing', fw_id=2)
          fw3 = Firework([task3],name='Lammps Properties Parser', fw_id=3)
-         #fw1 = Firework([task1], spec={"molecules": [mg.as_dict()]})
-         #fw1 = Firework([task1], spec={"molecules": [mol.as_dict()]})
          depen = {1:[2,3]}
          wf = Workflow([fw1,fw2, fw3], name="LAMMPS", links_dict=depen)
 
