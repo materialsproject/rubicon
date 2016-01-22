@@ -166,8 +166,9 @@ if __name__ == '__main__':
 
 
     moleculelist = glob.glob("/Users/navnidhirajput/Dropbox/solvent_molecules/*")
-    for mol in moleculelist:
-         mol = Molecule.from_file(mol)
+    for filename in moleculelist:
+         mol = Molecule.from_file(filename)
+         mol.site_properties={"mol_name":filename[:3]*len(mol)}
          fw1 = Firework([task1],name = 'Run Lammps', spec={"molecules": [mol.as_dict()]}, fw_id=1)
          fw2 = Firework([task2],name='Lammps Log Parsing', fw_id=2)
          fw3 = Firework([task3],name='Lammps Properties Parser', fw_id=3)
