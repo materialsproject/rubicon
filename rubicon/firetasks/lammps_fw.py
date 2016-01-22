@@ -161,7 +161,7 @@ if __name__ == '__main__':
     #fw2 = Firework([task2],name='Lammps Log Parsing', fw_id=2)
     #fw3 = Firework([task3],name='Lammps Properties Parser', fw_id=3)
 
-    depen = {1:[2,3]}
+    #depen = {1:[2,3]}
     #depen = {1:2}
 
 
@@ -173,12 +173,9 @@ if __name__ == '__main__':
          fw3 = Firework([task3],name='Lammps Properties Parser', fw_id=3)
          #fw1 = Firework([task1], spec={"molecules": [mg.as_dict()]})
          #fw1 = Firework([task1], spec={"molecules": [mol.as_dict()]})
-
          depen = {1:[2,3]}
+         wf = Workflow([fw1,fw2, fw3], name="LAMMPS", links_dict=depen)
 
-    wf = Workflow([fw1,fw2, fw3], name="LAMMPS", links_dict=depen)
-    #wf = Workflow([fw1, fw2], name="LAMMPS", links_dict=depen)
-
-    lp = LaunchPad.auto_load()
-    lp.add_wf(wf)
+         lp = LaunchPad.auto_load()
+         lp.add_wf(wf)
 
