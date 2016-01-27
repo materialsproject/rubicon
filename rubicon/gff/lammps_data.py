@@ -348,12 +348,11 @@ class LmpInput():
             for imol in range(num_mols):
                 mol_coords = mols_in_box.mols_coords.cart_coords[i:i + num_atoms]
                 mol_index += 1
-
+                print "mol_name", mol.site_properties["mol_name"][0]
                 d = {}
                 for k, v in enumerate(mol_coords):
                     print "gff atom index",gff.atom_index[
                              k + 1]
-                    print "mol_name", mol.site_properties["mol_name"][0]
 
                     lines.append(
                         '{}  {}  {}  {}  {}  {} {} {}  {} {} {} {}'.format(k + i + 1,
