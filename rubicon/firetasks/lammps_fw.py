@@ -175,7 +175,7 @@ if __name__ == '__main__':
             sp.append(site.specie.symbol)
 
          mol2 = Molecule(sp, coords, site_properties={"mol_name":filename[48:-4]*len(coords)})
-         #mol.site_properties={"mol_name":filename[48:-4]*len(coords)}
+         print "testing mol name",mol.site_properties["mol_name"][0]
          fw1 = Firework([task1],name = 'Run Lammps', spec={"molecules": [mol2.as_dict()]}, fw_id=1)
          fw2 = Firework([task2],name='Lammps Log Parsing', fw_id=2)
          fw3 = Firework([task3],name='Lammps Properties Parser', fw_id=3)
