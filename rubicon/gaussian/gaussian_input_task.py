@@ -58,7 +58,7 @@ class WritegaussianGeoTask(FireTaskBase):
 
 
 
-
+@explicit_serialize
 class WritegaussianFreqTask(FireTaskBase):
     """
     Writes Gaussian Input files for frequency and charge calculation.
