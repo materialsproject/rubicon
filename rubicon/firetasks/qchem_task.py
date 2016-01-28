@@ -200,8 +200,8 @@ class QChemTask(FireTaskBase, FWSerializable):
             # ALCF, Blue Gene
             num_nodes = 4
             num_threads = 32
-            scr_size_GB = 0.476
-            max_minutes = 4 * 60
+            scr_size_GB = 0.9313
+            max_minutes = 8 * 60
             qc_exe = shlex.split(self._calibrate_alcf_cmd(
                 num_nodes=num_nodes, max_minutes=max_minutes, num_threads=num_threads,
                 scr_size_GB=scr_size_GB))
