@@ -1,6 +1,6 @@
 import shlex
 import subprocess
-from rubicon.gff.gaussian_input_old import GaussianInput
+
 
 __author__ = 'navnidhirajput'
 
