@@ -157,26 +157,31 @@ if __name__ == '__main__':
 
     #fw1 = Firework([task1], spec={"molecules": [tfn.as_dict(),n1c.as_dict(),pc.as_dict()]})
     #fw1 = Firework([task1], spec={"molecules": [mg.as_dict(),tfsi.as_dict(),diglyme.as_dict()]})
-    fw1 = Firework([task1],name = 'Run Lammps', spec={"molecules": [diglyme.as_dict()]}, fw_id=1)
-    fw2 = Firework([task2],name='Lammps Log Parsing', fw_id=2)
-    fw3 = Firework([task3],name='Lammps Properties Parser', fw_id=3)
+    #fw1 = Firework([task1],name = 'Run Lammps', spec={"molecules": [diglyme.as_dict()]}, fw_id=1)
+    #fw2 = Firework([task2],name='Lammps Log Parsing', fw_id=2)
+    #fw3 = Firework([task3],name='Lammps Properties Parser', fw_id=3)
 
-    depen = {1:[2,3]}
+    #depen = {1:[2,3]}
     #depen = {1:2}
 
 
-    #filelist = glob.glob("/Users/navnidhirajput/Dropbox/solvent_molecules/*")
-    #for mol in filelist:
-     #    mol = Molecule.from_file(mol)
-      #   fw1 = Firework([task1],name = 'Run Lammps', spec={"molecules": [mol.as_dict()]}, fw_id=1)
-      #   fw2 = Firework([task2],name='Lammps Log Parsing', fw_id=2)
-      #   fw3 = Firework([task3],name='Lammps Properties Parser', fw_id=3)
-         #fw1 = Firework([task1], spec={"molecules": [mg.as_dict()]})
-         #fw1 = Firework([task1], spec={"molecules": [mol.as_dict()]})
+    coords = []
+    sp = []
+    moleculelist = glob.glob("/Users/navnidhirajput/Dropbox/solvent_molecules/*")
+    for filename in moleculelist:
+         mol = Molecule.from_file(filename)
+         for site in mol:
+            coords.append([c for c in site.coords])
+            sp.append(site.specie.symbol)
 
-    wf = Workflow([fw1,fw2, fw3], name="LAMMPS", links_dict=depen)
-    #wf = Workflow([fw1, fw2], name="LAMMPS", links_dict=depen)
+         mol2 = Molecule(sp, coords, site_properties={"mol_name":filename[48:-4]*len(coords)})
+         print "testing mol name",mol.site_properties["mol_name"][0]
+         fw1 = Firework([task1],name = 'Run Lammps', spec={"molecules": [mol2.as_dict()]}, fw_id=1)
+         fw2 = Firework([task2],name='Lammps Log Parsing', fw_id=2)
+         fw3 = Firework([task3],name='Lammps Properties Parser', fw_id=3)
+         depen = {1:[2,3]}
+         wf = Workflow([fw1,fw2, fw3], name="LAMMPS", links_dict=depen)
 
-    lp = LaunchPad.auto_load()
-    lp.add_wf(wf)
+         lp = LaunchPad.auto_load()
+         lp.add_wf(wf)
 

@@ -342,6 +342,7 @@ class LmpInput():
                     atom_type_index[gff.masses.keys()[m]] = masses_index
             num_atoms = len(mol)
             num_this_mol = num_mols
+            print "mol_name", mol.site_properties["mol_name"][0]
 
 
             #iterate every molecule of molecule type
@@ -351,6 +352,8 @@ class LmpInput():
 
                 d = {}
                 for k, v in enumerate(mol_coords):
+                    print "gff atom index",gff.atom_index[
+                             k + 1]
 
                     lines.append(
                         '{}  {}  {}  {}  {}  {} {} {}  {} {} {} {}'.format(k + i + 1,
