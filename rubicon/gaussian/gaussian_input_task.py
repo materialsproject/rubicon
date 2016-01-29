@@ -8,6 +8,7 @@ from fireworks import FireTaskBase, explicit_serialize, FWAction
 from pymatgen import write_mol, Molecule
 import glob
 from pymatgen.io import gaussian
+import os
 
 
 @explicit_serialize
@@ -22,10 +23,10 @@ class WritegaussianGeoTask(FireTaskBase):
     def run_task(self, mol, charge=None, spin_multiplicity=None):
         moleculelist = glob.glob(
             "/Users/navnidhirajput/Dropbox/solvent_molecules/*")
-        mol_name =[]
         for filename in moleculelist:
             mol = Molecule.from_file(filename)
-            mol_name = filename[48:-4]
+            file_name = os.path.basename(filename)
+            mol_name = os.path.splitext(file_name)[0]
             gaus_lines = gaussian.GaussianInput(mol, charge=charge,
                                                 spin_multiplicity = spin_multiplicity,
                                                 title='created by gaussian_geo_task from' + ' ' + filename[
