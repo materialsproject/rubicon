@@ -22,8 +22,10 @@ class WritegaussianGeoTask(FireTaskBase):
     def run_task(self, mol, charge=None, spin_multiplicity=None):
         moleculelist = glob.glob(
             "/Users/navnidhirajput/Dropbox/solvent_molecules/*")
+        mol_name =[]
         for filename in moleculelist:
             mol = Molecule.from_file(filename)
+            mol_name = filename[48:-4]
             gaus_lines = gaussian.GaussianInput(mol, charge=charge,
                                                 spin_multiplicity = spin_multiplicity,
                                                 title='created by gaussian_geo_task from' + ' ' + filename[
@@ -39,8 +41,7 @@ class WritegaussianGeoTask(FireTaskBase):
                                                     "%mem": "256MW",
                                                     "%NProcShared": 4,
                                                     "%LindaWorker": "localhost",
-                                                    "%chk": filename[
-                                                            48:-4] + ".chk"},
+                                                    "%chk": mol_name + ".chk"},
                                                 dieze_tag="#",
                                                 gen_basis=None)
 
@@ -50,8 +51,7 @@ class WritegaussianGeoTask(FireTaskBase):
             with open('mol_geo.gau', 'w') as f:
                 subprocess.check_call(shlex.split("g09 "), stdin=f)
 
-        prev_gaussian_geo = shlex.os.path.join(shlex.os.getcwd(), filename[
-                                                            48:-4]+'.out')
+        prev_gaussian_geo = shlex.os.path.join(shlex.os.getcwd(), mol_name+'.out')
 
         update_spec = {'prev_gaussian_geo': prev_gaussian_geo}
 
