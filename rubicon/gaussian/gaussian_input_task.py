@@ -50,7 +50,7 @@ class WritegaussianGeoTask(FireTaskBase):
 
 
         with open('mol_geo.gau') as f, open("mol_geo.out", 'w') as fo :
-           subprocess.check_call(shlex.split(("g09launch"), stdin=f, stdout = fo))
+           subprocess.call(shlex.split("g09launch"), stdin=f, stdout = fo)
 
         prev_gaussian_geo = shlex.os.path.join(shlex.os.getcwd(), mol_name+'.out')
         update_spec = {'prev_gaussian_geo': prev_gaussian_geo}
