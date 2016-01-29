@@ -21,6 +21,7 @@ class WritegaussianGeoTask(FireTaskBase):
     _fw_name = "Gaussian Geometry Writer"
 
     def run_task(self, fw_spec):
+        print "dir",os.getcwd()
         mol = fw_spec["molecule"]
         mol_name = fw_spec["mol_name"]
         charge = fw_spec["charge"]
@@ -47,7 +48,8 @@ class WritegaussianGeoTask(FireTaskBase):
 
         gaus_lines.write_file('mol_geo.gau', cart_coords=True)
 
-        with open('mol_geo.gau', 'w') as f:
+
+        with open('mol_geo.gau') as f:
            subprocess.check_call(shlex.split("g09 "), stdin=f)
 
         prev_gaussian_geo = shlex.os.path.join(shlex.os.getcwd(), mol_name+'.out')
@@ -106,4 +108,5 @@ if __name__ == '__main__':
     moleculelist = glob.glob("/Users/navnidhirajput/Dropbox/solvent_molecules/*")
     for filename in moleculelist:
         mol = Molecule.from_file(filename)
-        task_geo.run_task(mol)
+        file_name = os.path.basename(filename)
+        task_geo.run_task({"molecule":mol, "mol_name": os.path.splitext(file_name)[0], "charge": 1,"spin_multiplicity":-1})
