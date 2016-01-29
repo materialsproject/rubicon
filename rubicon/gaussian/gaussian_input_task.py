@@ -44,10 +44,11 @@ class WritegaussianGeoTask(FireTaskBase):
                                                 dieze_tag="#",
                                                 gen_basis=None)
 
-        with open('mol_geo.gau', 'w') as f:
+        #with open('mol_geo.gau', 'w') as f:
             gaus_lines.write_file('mol_geo.gau', cart_coords=True)
 
-        subprocess.check_call(shlex.split("g09 "), stdin=f)
+            with open('mol_geo.gau', 'w') as f:
+                subprocess.check_call(shlex.split("g09 "), stdin=f)
 
         prev_gaussian_geo = shlex.os.path.join(shlex.os.getcwd(), filename[
                                                             48:-4]+'.out')
@@ -96,17 +97,8 @@ class WritegaussianFreqTask(FireTaskBase):
         with open('mol_freq.gau', 'w') as f:
             gaus_freq_charge.write_file('mol_freq.gau', cart_coords=True)
 
-        #with open("mol_freq.gau") as f:
+
         subprocess.check_call(shlex.split("g09 "), stdin=f)
 
         return FWAction()
-
-
-# moleculelist = glob.glob("/Users/navnidhirajput/Dropbox/solvent_molecules/*")
-# for filename in moleculelist:
-#     mol = Molecule.from_file(filename)
-#     task_geo = WritegaussianGeoTask()
-#     task_geo.run_task(mol, -1,1)
-#     task_freq = WritegaussianFreqTask()
-#     task_freq.run_task(mol, -1, 1)
 
