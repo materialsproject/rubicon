@@ -20,38 +20,35 @@ class WritegaussianGeoTask(FireTaskBase):
 
     _fw_name = "Gaussian Geometry Writer"
 
-    def run_task(self, mol, charge=None, spin_multiplicity=None):
-        moleculelist = glob.glob(
-            "/Users/navnidhirajput/Dropbox/solvent_molecules/*")
-        for filename in moleculelist:
-            mol = Molecule.from_file(filename)
-            file_name = os.path.basename(filename)
-            mol_name = os.path.splitext(file_name)[0]
-            gaus_lines = gaussian.GaussianInput(mol, charge=charge,
-                                                spin_multiplicity = spin_multiplicity,
-                                                title='created by gaussian_geo_task from' + ' ' + filename[
-                                                                                                    48:],
-                                                functional="b3lyp",
-                                                basis_set="aug-cc-pvdz",
-                                                route_parameters={
-                                                    'opt': "(calcfc,tight)",
-                                                    'int': "ultrafine",
-                                                    "\n# SCF": "tight  nosymm test"},
-                                                input_parameters=None,
-                                                link0_parameters={
-                                                    "%mem": "256MW",
-                                                    "%NProcShared": 4,
-                                                    "%LindaWorker": "localhost",
-                                                    "%chk": mol_name + ".chk"},
-                                                dieze_tag="#",
-                                                gen_basis=None)
+    def run_task(self, fw_spec):
+        mol = fw_spec["molecule"]
+        mol_name = fw_spec["mol_name"]
+        charge = fw_spec["charge"]
+        spin_multiplicity = fw_spec["spin_multiplicity"]
 
-        #with open('mol_geo.gau', 'w') as f:
-            gaus_lines.write_file('mol_geo.gau', cart_coords=True)
-            print mol_name+".out"
+        gaus_lines = gaussian.GaussianInput(mol, charge = charge,
+                                            spin_multiplicity = spin_multiplicity,
+                                            title='created by gaussian_geo_task from' + ' ' + mol_name,
+                                            functional="b3lyp",
+                                            basis_set="aug-cc-pvdz",
+                                            route_parameters={
+                                                'opt': "(calcfc,tight)",
+                                                'int': "ultrafine",
+                                                "\n# SCF": "tight  nosymm test"},
+                                            input_parameters=None,
+                                            link0_parameters={
+                                                "%mem": "256MW",
+                                                "%NProcShared": 4,
+                                                "%LindaWorker": "localhost",
+                                                "%chk": mol_name + ".chk"},
+                                            dieze_tag="#",
+                                            gen_basis=None)
 
-            with open('mol_geo.gau', 'w') as f:
-               subprocess.check_call(shlex.split("g09 "), stdin=f)
+
+        gaus_lines.write_file('mol_geo.gau', cart_coords=True)
+
+        with open('mol_geo.gau', 'w') as f:
+           subprocess.check_call(shlex.split("g09 "), stdin=f)
 
         prev_gaussian_geo = shlex.os.path.join(shlex.os.getcwd(), mol_name+'.out')
 
