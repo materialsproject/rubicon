@@ -41,18 +41,18 @@ class WritegaussianGeoTask(FireTaskBase):
                                                     "%mem": "256MW",
                                                     "%NProcShared": 4,
                                                     "%LindaWorker": "localhost",
-                                                    "%chk": str(mol_name) + ".chk"},
+                                                    "%chk": mol_name + ".chk"},
                                                 dieze_tag="#",
                                                 gen_basis=None)
 
         #with open('mol_geo.gau', 'w') as f:
             gaus_lines.write_file('mol_geo.gau', cart_coords=True)
-            print (str(mol_name))+'.out'
+            print mol_name+".out"
 
- #           with open('mol_geo.gau', 'w') as f:
-#                subprocess.check_call(shlex.split("g09 "), stdin=f)
+            with open('mol_geo.gau', 'w') as f:
+               subprocess.check_call(shlex.split("g09 "), stdin=f)
 
-        prev_gaussian_geo = shlex.os.path.join(shlex.os.getcwd(), str(mol_name)+'.out')
+        prev_gaussian_geo = shlex.os.path.join(shlex.os.getcwd(), mol_name+'.out')
 
         update_spec = {'prev_gaussian_geo': prev_gaussian_geo}
 
@@ -103,9 +103,9 @@ class WritegaussianFreqTask(FireTaskBase):
 
         return FWAction()
 
-
-# task_geo = WritegaussianGeoTask()
-# moleculelist = glob.glob("/Users/navnidhirajput/Dropbox/solvent_molecules/*")
-# for filename in moleculelist:
-#     mol = Molecule.from_file(filename)
-#     task_geo.run_task(mol)
+if __name__ == '__main__':
+    task_geo = WritegaussianGeoTask()
+    moleculelist = glob.glob("/Users/navnidhirajput/Dropbox/solvent_molecules/*")
+    for filename in moleculelist:
+        mol = Molecule.from_file(filename)
+        task_geo.run_task(mol)
