@@ -34,7 +34,8 @@ class WritegaussianGeoTask(FireTaskBase):
                                             route_parameters={
                                                 'opt': "(calcfc,tight)",
                                                 'int': "ultrafine",
-                                                "\n# SCF": "tight  nosymm test"},
+                                                'nosymm': "test",
+                                                "\n# SCF": "tight"},
                                             input_parameters=None,
                                             link0_parameters={
                                                 "%mem": "256MW",
@@ -99,7 +100,7 @@ class WritegaussianFreqTask(FireTaskBase):
         return FWAction()
 
 # if __name__ == '__main__':
-#     task_geo = WritegaussianGeoTask()
+#     task_geo = WritegaussianInputTask()
 #     moleculelist = glob.glob("/Users/navnidhirajput/Dropbox/solvent_molecules/*")
 #     for filename in moleculelist:
 #         mol = Molecule.from_file(filename)
