@@ -25,7 +25,7 @@ class GaussianGeomOptDBInsertionTask(FireTaskBase):
         if gaus_geo_parser.properly_terminated == True:
             docs = gaus_geo_parser.final_structure
             #docs = {k: list(v) if isinstance(v, numpy.ndarray) else v for k, v in docs.items()}
-            coll.insert(docs)
+            coll.insert(docs.as_dict())
 
     def run_task(self, fw_spec):
         mol_geo_file = fw_spec["prev_gaussian_geo"]
