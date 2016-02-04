@@ -55,6 +55,7 @@ class WritegaussianGeoTask(FireTaskBase):
         update_spec = {'prev_gaussian_geo': prev_gaussian_geo}
 
         return FWAction(update_spec=update_spec)
+    #print "dddd"
 
 
 
