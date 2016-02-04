@@ -1,6 +1,7 @@
 import shlex
 import subprocess
-
+from rubicon.firetasks.multistep_gauss_task import \
+    GaussianGeomOptDBInsertionTask
 
 __author__ = 'navnidhirajput'
 
@@ -59,7 +60,7 @@ class WritegaussianGeoTask(FireTaskBase):
 
 
 @explicit_serialize
-class WritegaussianFreqTask(FireTaskBase):
+class WritegaussianFreqESPTask(FireTaskBase):
     """
     Writes Gaussian Input files for frequency and charge calculation.
 
@@ -67,14 +68,15 @@ class WritegaussianFreqTask(FireTaskBase):
 
     _fw_name = "Gaussian frequency and charge Writer"
 
-    def run_task(self, fw_spec):
-        mol = fw_spec["molecule"]
+    def run_task(self, fw_spec, filename = "mol_geo.out"):
+        gaus_geo = gaussian.GaussianOutput(filename)
+        mol_opt = gaus_geo.final_structure
         mol_name = fw_spec["mol_name"]
         charge = fw_spec["charge"]
         spin_multiplicity = fw_spec["spin_multiplicity"]
 
 
-        gaus_freq_charge = gaussian.GaussianInput(mol, charge = charge,
+        gaus_freq_charge = gaussian.GaussianInput(mol_opt, charge = charge,
                                                   spin_multiplicity=spin_multiplicity,
                                                   title='created by gaussian_frq_task from' + ' ' + mol_name,
                                                   functional="b3lyp",
@@ -82,7 +84,7 @@ class WritegaussianFreqTask(FireTaskBase):
                                                   route_parameters={
                                                       '\n# geom': "allcheck",
                                                       'guess': "read",
-                                                      "SCF": "tight  nosymm test",
+                                                      "SCF": "tight",
                                                   "pop":"MK iop(6/33=2,6/41=10,6/42=10,7/33=1)"},
                                                   input_parameters=None,
                                                   link0_parameters={
