@@ -1,5 +1,4 @@
-from rubicon.gaussian.gaussian_input_task import WritegaussianGeoTask, \
-    WritegaussianFreqTask
+from rubicon.gaussian.gaussian_input_task import WritegaussianGeoTask
 
 __author__ = 'navnidhirajput'
 
