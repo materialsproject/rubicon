@@ -34,7 +34,6 @@ class WritegaussianGeoTask(FireTaskBase):
                                             route_parameters={
                                                 'opt': "(calcfc,tight)",
                                                 'int': "ultrafine",
-                                                'nosymm': "test",
                                                 "\n# SCF": "tight"},
                                             input_parameters=None,
                                             link0_parameters={
