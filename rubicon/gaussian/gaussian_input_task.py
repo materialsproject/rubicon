@@ -68,8 +68,8 @@ class WritegaussianFreqESPTask(FireTaskBase):
 
     _fw_name = "Gaussian frequency and charge Writer"
 
-    def run_task(self, fw_spec, filename = "mol_geo.out"):
-        gaus_geo = gaussian.GaussianOutput(filename)
+    def run_task(self, fw_spec):
+        gaus_geo = gaussian.GaussianOutput(fw_spec["prev_gaussian_geo"])
         mol_opt = gaus_geo.final_structure
         mol_name = fw_spec["mol_name"]
         charge = fw_spec["charge"]
