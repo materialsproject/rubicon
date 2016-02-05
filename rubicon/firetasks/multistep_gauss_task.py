@@ -26,14 +26,20 @@ class GaussianGeomOptDBInsertionTask(FireTaskBase):
             docs = gaus_geo_parser.final_structure
             coll.insert(docs.as_dict())
 
-        prev_gaussian_geo = shlex.os.path.join(shlex.os.getcwd(), 'mol_geo.out')
-        update_spec = {'prev_gaussian_geo': prev_gaussian_geo}
 
-        return FWAction(update_spec=update_spec)
+
+
+
 
     def run_task(self, fw_spec):
         mol_geo_file = fw_spec["prev_gaussian_geo"]
         self._insert_doc(filename=mol_geo_file)
+        #prev_gaussian_geo = shlex.os.path.join(shlex.os.getcwd(), 'mol_geo.out')
+
+
+        file_path = fw_spec["prev_gaussian_geo"]
+        update_spec = {'prev_gaussian_geo': file_path}
+        return FWAction(update_spec=update_spec)
 
 
 
