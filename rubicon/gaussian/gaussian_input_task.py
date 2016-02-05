@@ -85,7 +85,7 @@ class WritegaussianFreqESPTask(FireTaskBase):
                                                   route_parameters={
                                                       '\n# geom': "allcheck",
                                                       'guess': "read",
-                                                      "SCF": "tight",
+                                                      "SCF": "tight nosymm test",
                                                   "pop":"MK iop(6/33=2,6/41=10,6/42=10,7/33=1)"},
                                                   input_parameters=None,
                                                   link0_parameters={
@@ -100,7 +100,11 @@ class WritegaussianFreqESPTask(FireTaskBase):
         with open('mol_freq.gau') as f, open ("mol_freq.out", 'w') as fo:
             subprocess.call(shlex.split("g09launch"), stdin=f, stdout = fo)
 
-        return FWAction()
+        prev_gaussian_freq = shlex.os.path.join(shlex.os.getcwd(), 'mol_freq.out')
+        update_spec = {'prev_gaussian_freq': prev_gaussian_freq}
+
+        return FWAction(update_spec=update_spec)
+
 
 # if __name__ == '__main__':
 #     task_geo = WritegaussianInputTask()
