@@ -1,5 +1,5 @@
 import shlex
-from fireworks import explicit_serialize, FireTaskBase
+from fireworks import explicit_serialize, FireTaskBase, FWAction
 from flask import json
 import numpy
 from pymatgen.io import gaussian
@@ -24,8 +24,12 @@ class GaussianGeomOptDBInsertionTask(FireTaskBase):
         gaus_geo_parser = gaussian.GaussianOutput(filename)
         if gaus_geo_parser.properly_terminated == True:
             docs = gaus_geo_parser.final_structure
-            #docs = {k: list(v) if isinstance(v, numpy.ndarray) else v for k, v in docs.items()}
             coll.insert(docs.as_dict())
+
+        prev_gaussian_geo = shlex.os.path.join(shlex.os.getcwd(), 'mol_geo.out')
+        update_spec = {'prev_gaussian_geo': prev_gaussian_geo}
+
+        return FWAction(update_spec=update_spec)
 
     def run_task(self, fw_spec):
         mol_geo_file = fw_spec["prev_gaussian_geo"]
