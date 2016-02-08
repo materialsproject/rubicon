@@ -82,14 +82,11 @@ class WritegaussianFreqESPTask(FireTaskBase):
                                                   title='created by gaussian_frq_task from' + ' ' + mol_name,
                                                   functional="b3lyp",
                                                   basis_set="aug-cc-pvdz  freq",
-                                                  route_parameters={
-                                                      '\n# geom': "allcheck",
-                                                      'guess': "read",
-                                                      "SCF": "tight nosymm test",
+                                                  route_parameters={"SCF": "tight",
                                                   "pop":"MK iop(6/33=2,6/41=10,6/42=10,7/33=1)"},
                                                   input_parameters=None,
                                                   link0_parameters={
-                                                      "%mem": "256MW",
+                                                      "%mem": "30GB",
                                                       "%NProcShared": 4,
                                                       "%LindaWorker": "localhost",
                                                       "%chk": mol_name + ".chk"},
