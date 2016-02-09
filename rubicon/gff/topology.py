@@ -7,11 +7,22 @@ __author__ = 'navnidhirajput'
 class TopMol(object):
 
 
+    """
+    gff_atom: GAFF atom name in .rtf file
+    atom: List to map atom names with gaff atom name, [['C1', 'c'],...]
+    bonds: List of bonds in .rtf files(atom name)
+    angles: List of angles in .rtf files (atom name)
+    dihedrals: List of dihedrals in .rtf files (atom name)
+    improper dihedrals: List of improper dihedrlas in .rtf files (atom name)
+    """
 
-    def __init__(self,atoms,bonds,angles,dihedrals,imdihedrals,num_bonds, num_gaff_atoms, gaff_atoms):
+
+
+    def __init__(self,atoms,charges,bonds,angles,dihedrals,imdihedrals,num_bonds, num_gaff_atoms, gaff_atoms):
 
         self.atoms=atoms
         self.bonds=bonds
+        self.charges = charges
         self.angles=angles
         self.dihedrals=dihedrals
         self.imdihedrals= imdihedrals
@@ -23,15 +34,17 @@ class TopMol(object):
         self.num_gaff_atoms = num_gaff_atoms
         self.gaff_atoms = gaff_atoms
 
+
     @classmethod
     def from_file(cls,filename, continue_on_corrupt_file = False):
 
         """
         read the .rtf file created by antechamber and stores
-        the atoms, bonds, angles, dihedrals and improper dihedrals of
+        the atoms, charges, bonds, angles, dihedrals and improper dihedrals of
         a molecule
         """
         atoms=[]
+        charges = []
         bonds=[]
         angles=[]
         dihedrals=[]
@@ -51,6 +64,7 @@ class TopMol(object):
                     number_gaff_atoms.append(token[1])
                 if token[0]=='ATOM':
                     atoms.append(token[1:3])
+                    charges.append(token[1:4])
                 if token[0]=='BOND':
                     bonds.append(token[1:3])
                 elif token[0]=='ANGL':
@@ -60,8 +74,7 @@ class TopMol(object):
                 elif token[0]=='IMPH':
                     imdihedrals.append(token[1:5])
 
-
-            topology=TopMol(atoms,bonds,angles,dihedrals,imdihedrals,len(bonds), number_gaff_atoms, gaff_atoms)
+            topology=TopMol(atoms,charges, bonds,angles,dihedrals,imdihedrals,len(bonds), number_gaff_atoms, gaff_atoms)
             return topology
 
 
@@ -235,6 +248,10 @@ def correct_corrupted_top_files(corrupted_file = None, gaff_file = None):
     with open('mol.rtf', 'w') as f:
         f.writelines(rtf_lines)
 
+
+#
+# if __name__ == '__main__':
+#      top = TopMol.from_file("dmf.gaff-default.charmm.rtf")
 
 
 
