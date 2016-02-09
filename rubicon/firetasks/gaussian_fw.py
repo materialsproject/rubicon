@@ -36,7 +36,7 @@ if __name__ == '__main__':
         fw2 = Firework([task_geo_dbinsert],name='Gaussian Geometry DB insertion', spec= {"molecule":mol, "mol_name": os.path.splitext(file_name)[0], "charge": 0,"spin_multiplicity":1}, fw_id=2)
         fw3 = Firework([task_freq_esp],name='Gaussian Frequency and ESP', spec= {"mol_name": os.path.splitext(file_name)[0], "charge": 0,"spin_multiplicity":1}, fw_id=3)
         #fw4 = Firework([task_freq_esp_dbinsert],name='Gaussian Frequency and ESP DB insertion', spec= {"molecule":mol, "mol_name": os.path.splitext(file_name)[0], "charge": 0,"spin_multiplicity":1}, fw_id=4)
-        fw4 = Firework([task_lammps_inp],name = 'Run Lammps', spec={"molecules":mol, "mol_name": os.path.splitext(file_name)[0]}, fw_id=4)
+        fw4 = Firework([task_lammps_inp],name = 'Run Lammps', spec={"molecule":mol, "mol_name": os.path.splitext(file_name)[0]}, fw_id=4)
 
 
         depen = {1:2, 2:3,3:4}
