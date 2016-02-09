@@ -42,14 +42,14 @@ class WritelammpsInputTask(FireTaskBase):
 
     def run_task(self, fw_spec):
         filename = fw_spec['prev_gaussian_freq']
-        mols_dict = fw_spec["molecules"]
-        mols = mols_dict
+        mols_dict = fw_spec["molecule"]
+        mol = mols_dict
         ffmol_list = []
-        for mol in mols:
-            acr = AntechamberRunner(mol)
-            ffmol_list.append(acr.get_ff_top_mol(mol,filename))
+        #for mol in mols:
+        acr = AntechamberRunner(mol)
+        ffmol_list.append(acr.get_ff_top_mol(mol,filename))
             #ffmol_list.append(acr.get_ff_top_mol(mol,'mol.pdb'))
-        pmr = PackmolRunner(mols, [{"number":100,"inside box":[0.,0.,0.,50.,50.,50.]}])
+        pmr = PackmolRunner(mol, [{"number":100,"inside box":[0.,0.,0.,50.,50.,50.]}])
         #pmr = PackmolRunner(mols, [{"number":15,"inside box":[0.,0.,0.,100.,100.,100.]},{"number":30,"inside box":[0.,0.,0.,100.,100.,100.]},{"number":232,"inside box":[0.,0.,0.,100.,100.,100.]}])
 
         mols_coord = pmr.run()
