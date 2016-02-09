@@ -77,12 +77,10 @@ class LmpInput():
         num_dihedrals = 0
         num_impropers = 0
         num_total_dih = 0
-        #num_mol = 0
         for ffmol,num_mols in zip(ffmol_list, mols_in_box.num_mols):
             gff = ffmol.gff
             top = ffmol.top
             top._get_ff_dihedrals(gff.dihedrals, top.dihedrals, gff.atom_gaff)
-            #num_mol = v['number']
             num_atoms += (len(top.atoms)) * num_mols
             num_bonds += len((top.bonds) * num_mols)
             num_angles += (len(top.angles) * num_mols)
@@ -129,7 +127,6 @@ class LmpInput():
         num_atoms = 0
         mol_index = 1
         element_list = []
-        #lines.append('{} {}'.format('Masses', '\n'))
         lines.append('Masses\n')
         for ffmol, mol,num_mols in zip(ffmol_list, mols_in_box.mols,
                                   mols_in_box.num_mols):
@@ -191,9 +188,6 @@ class LmpInput():
         for ffmol,mol in zip(ffmol_list, mols_in_box.mols):
             gff = ffmol.gff
         #     top = ffmol.top
-        # for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
-        #                                mols_in_box.mols,
-        #                                mols_in_box.param_list):
             if gff.bonds:
                 for i, v in enumerate(gff.bonds.values()):
                     lines.append(
@@ -221,9 +215,6 @@ class LmpInput():
         for ffmol,mol in zip(ffmol_list, mols_in_box.mols):
             gff = ffmol.gff
             top = ffmol.top
-        # for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
-        #                                mols_in_box.mols,
-        #                                mols_in_box.param_list):
             if gff.angles:
                 for i, v in enumerate(gff.angles.values()):
                     lines.append(
@@ -255,9 +246,6 @@ class LmpInput():
         for ffmol,mol in zip(ffmol_list, mols_in_box.mols):
             gff = ffmol.gff
             top = ffmol.top
-        # for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
-        #                                mols_in_box.mols,
-        #                                mols_in_box.param_list):
             if gff.dihedrals is not None:
                 for i, v in enumerate(gff.dihedrals.values()):
                     for func_form, d in v.iteritems():
@@ -293,9 +281,6 @@ class LmpInput():
         for ffmol,mol in zip(ffmol_list, mols_in_box.mols):
             gff = ffmol.gff
             top = ffmol.top
-        # for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
-        #                                mols_in_box.mols,
-        #                                mols_in_box.param_list):
             if gff.imdihedrals:
                 for i, v in enumerate(gff.imdihedrals.values()):
                     lines.append('{} {}  {}  {} {} {} {} {} {} {} {}'.format
@@ -342,7 +327,6 @@ class LmpInput():
                     atom_type_index[gff.masses.keys()[m]] = masses_index
             num_atoms = len(mol)
             num_this_mol = num_mols
-            print "mol_name", mol.site_properties["mol_name"][0]
 
 
             #iterate every molecule of molecule type
@@ -352,8 +336,6 @@ class LmpInput():
 
                 d = {}
                 for k, v in enumerate(mol_coords):
-                    print "gff atom index",gff.atom_index[
-                             k + 1]
 
                     lines.append(
                         '{}  {}  {}  {}  {}  {} {} {}  {} {} {} {}'.format(k + i + 1,
@@ -541,10 +523,6 @@ class LmpInput():
                                         self.box_mol_index[mol_index - 1][C],
                                         self.box_mol_index[mol_index - 1][D],
                                         '#', mol_index,
-                                        #top.dihedrals[l][0],
-                                        #top.dihedrals[l][1],
-                                        #top.dihedrals[l][2],
-                                        #top.dihedrals[l][3],
                                         mol.site_properties["mol_name"][0]))
                     i += len(top.dihedrals)
         if len(lines)==1:
@@ -610,7 +588,6 @@ class LmpInput():
                     i += len(top.imdihedrals)
         if len(lines)==1:
             return ''
-        print len(top.imdihedrals)
         lines.append('\n')
         self.lines.extend(lines)
         return '\n'.join(lines)
