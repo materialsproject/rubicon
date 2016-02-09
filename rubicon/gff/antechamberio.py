@@ -71,8 +71,8 @@ class AntechamberRunner():
 
             #self._convert_to_pdb(mol, 'mol.pdb')
             command = (
-                'antechamber -i ' + filename + ' -fi gout -o ' + filename[:-4] +
-                " -fo charmm -c resp -s 2 >& runinfo")
+                'antechamber -i ' + filename + ' -fi gout -o ' +
+                "mol -fo charmm -c resp -s 2 >& runinfo")
             return_cmd = subprocess.call(shlex.split(command))
             self.molname = filename.split('.')[0]
             self._run_parmchk()
