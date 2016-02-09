@@ -94,7 +94,8 @@ class AntechamberRunner():
                 gff = Gff.from_forcefield_para('ANTECHAMBER.FRCMOD')
             gff.read_atom_index(mol, 'ANTECHAMBER_AC.AC')
             #gff.read_charges()
-            print "reading"
+            print "mol", mol
+            print "atom index", gff.atom_index
 
             mol.add_site_property("atomname", (gff.atom_index.values()))
         ffmol = FFmol(gff, top)
