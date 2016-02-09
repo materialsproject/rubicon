@@ -73,7 +73,7 @@ class AntechamberRunner():
             print "filename",filename
             command = (
                 'antechamber -i ' + filename + ' -fi gout -o ' +
-                "mol -fo charmm -c resp -s 2 >& runinfo")
+                "mol -fo charmm -c resp -s 2 runinfo")
             return_cmd = subprocess.call(shlex.split(command))
             self.molname = filename.split('.')[0]
             self._run_parmchk()
