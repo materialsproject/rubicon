@@ -92,7 +92,7 @@ class AntechamberRunner():
                 correct_corrupted_frcmod_files('ANTECHAMBER.FRCMOD','gaff_nidhi.txt')
                 gff = Gff.from_forcefield_para('ANTECHAMBER.FRCMOD')
             gff.read_atom_index(mol, 'ANTECHAMBER_AC.AC')
-            gff.read_charges()
+            #gff.read_charges()
 
             mol.add_site_property("atomname", (gff.atom_index.values()))
         ffmol = FFmol(gff, top)
