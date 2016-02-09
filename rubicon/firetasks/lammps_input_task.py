@@ -41,16 +41,17 @@ class WritelammpsInputTask(FireTaskBase):
 
 
     def run_task(self, fw_spec):
+        filename = fw_spec['prev_gaussian_freq']
+        print filename
+        #gaus_geo = gaussian.GaussianOutput(filename)
         mols_dict = fw_spec["molecules"]
+        gaus_esp = fw_spec[""]
         mols = mols_dict
         ffmol_list = []
         for mol in mols:
             acr = AntechamberRunner(mol)
-            ffmol_list.append(acr.get_ff_top_mol(mol,'mol.pdb'))
-        #pmr = PackmolRunner(mols, [{"number":6,"inside box":[0.,0.,0.,70.,70.,70.]},{"number":12},{"number":48},{"number":2538}])
-        #pmr = PackmolRunner(mols, [{"number":15,"inside box":[0.,0.,0.,50.,50.,50.]},{"number":30},{"number":232}])
-        #pmr = PackmolRunner(mols, [{"number":15},{"number":30},{"number":232}])
-        #pmr = PackmolRunner(mols, [{"number":15}])
+            ffmol_list.append(acr.get_ff_top_mol(mol,filename))
+            #ffmol_list.append(acr.get_ff_top_mol(mol,'mol.pdb'))
         pmr = PackmolRunner(mols, [{"number":100,"inside box":[0.,0.,0.,50.,50.,50.]}])
         #pmr = PackmolRunner(mols, [{"number":15,"inside box":[0.,0.,0.,100.,100.,100.]},{"number":30,"inside box":[0.,0.,0.,100.,100.,100.]},{"number":232,"inside box":[0.,0.,0.,100.,100.,100.]}])
 
@@ -75,6 +76,11 @@ class WritelammpsInputTask(FireTaskBase):
                        'prev_lammps_log': prev_lammps_log}
 
         return FWAction(update_spec=update_spec)
+
+
+if __name__ == '__main__':
+     test = WritelammpsInputTask()
+     test.run_task()
 
 
 
