@@ -70,7 +70,6 @@ class AntechamberRunner():
                         copy_to_current_on_exit=True) as d:
 
             #self._convert_to_pdb(mol, 'mol.pdb')
-            print "filename",filename
             command = (
                 'antechamber -i ' + filename + ' -fi gout -o ' +
                 "mol -fo charmm -c resp -s 2 runinfo")
