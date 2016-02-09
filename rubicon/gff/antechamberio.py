@@ -30,12 +30,12 @@ class AntechamberRunner():
 
         self.mols = mols
 
-
-    def _convert_to_pdb(self, molecule, filename=None):
-        """
-        generate pdb file for a given molecule
-        """
-        write_mol(molecule, filename)
+    #
+    # def _convert_to_pdb(self, molecule, filename=None):
+    #     """
+    #     generate pdb file for a given molecule
+    #     """
+    #     write_mol(molecule, filename)
 
 
     def _run_parmchk(self, filename='ANTECHAMBER_AC.AC'):
