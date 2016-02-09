@@ -42,10 +42,7 @@ class WritelammpsInputTask(FireTaskBase):
 
     def run_task(self, fw_spec):
         filename = fw_spec['prev_gaussian_freq']
-        print filename
-        #gaus_geo = gaussian.GaussianOutput(filename)
         mols_dict = fw_spec["molecules"]
-        gaus_esp = fw_spec[""]
         mols = mols_dict
         ffmol_list = []
         for mol in mols:
