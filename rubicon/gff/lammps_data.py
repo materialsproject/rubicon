@@ -35,6 +35,8 @@ class LmpInput():
         improper_type_list = []
         lines.append('LAMMPS data File\n')
         for  mol, num_mols in zip(mols_in_box.mols,mols_in_box.num_mols):
+            print "====", mol
+            print "====", mol.site_properties
             lines.append("{} {} {} {}".format('#',num_mols,
                                               mol.site_properties["mol_name"][0],
                                               "molecules"))
