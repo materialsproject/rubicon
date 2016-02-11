@@ -74,10 +74,10 @@ class WritelammpsInputTask(FireTaskBase):
 
         return FWAction(update_spec=update_spec)
 
-
-if __name__ == '__main__':
-     test = WritelammpsInputTask()
-     test.run_task()
+#
+# if __name__ == '__main__':
+#      test = WritelammpsInputTask()
+#      test.run_task()
 
 
 
