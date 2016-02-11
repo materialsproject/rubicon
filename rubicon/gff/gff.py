@@ -2,6 +2,7 @@ from collections import defaultdict
 import json
 import os
 from monty.json import MSONable
+from pymatgen import Molecule
 
 __author__ = 'navnidhirajput'
 
@@ -174,8 +175,6 @@ class Gff(MSONable):
 
             gff = Gff(None, bonds,angles,dihedrals,imdihedrals,vdws, masses, None)
             return gff
-            #return atoms, bonds,angles,dihedrals,imdihedrals,vdws
-
 
 
 
@@ -312,7 +311,6 @@ class Gff(MSONable):
                     self.atom_index_gaff[index]=gaff_name
             self.atom_gaff.update(self.atom_gaff)
         self.num_types = len(set(self.atom_gaff.values()))
-        
         return self.atom_index_gaff
 
 
@@ -326,6 +324,7 @@ class Gff(MSONable):
         jsonfile = open(filename)
         self.charges = json.load(jsonfile, encoding="utf-8")
         return self.charges
+
 
     def return_charges(self):
         return self.charges, self.atom_index_gaff
@@ -428,6 +427,13 @@ def correct_corrupted_frcmod_files(corrupted_file = None, gaff_file = None):
 
     with open('ANTECHAMBER.FRCMOD', 'w') as f:
         f.writelines(frc_lines)
+
+
+
+
+
+
+
 
 
 
