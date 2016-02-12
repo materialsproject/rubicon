@@ -12,7 +12,7 @@ from fireworks.core.firework import Firework
 
 from pymatgen import write_mol, Molecule
 import glob
-from pymatgen.io import gaussian
+from pymatgen.io import gaussianio
 
 import glob
 from pymatgen import Molecule
@@ -43,8 +43,6 @@ if __name__ == '__main__':
         depen = {1:2, 2:3,3:4}
         wf = Workflow([fw1,fw2,fw3, fw4], name="GAUSSIAN", links_dict=depen)
 
-        #depen = {1:2, 2:3}
-        #wf = Workflow([fw1,fw2,fw3], name="GAUSSIAN", links_dict=depen)
 
         lp = LaunchPad.auto_load()
         lp.add_wf(wf)
