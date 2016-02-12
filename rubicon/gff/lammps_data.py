@@ -35,9 +35,6 @@ class LmpInput():
         improper_type_list = []
         lines.append('LAMMPS data File\n')
         for  mol, num_mols in zip(mols_in_box.mols,mols_in_box.num_mols):
-            print "mol===", mol
-            print "mol_site_prop", mol.site_properties
-            print "num_mol",num_mols
             lines.append("{} {} {} {}".format('#',num_mols,
                                               mol.site_properties["mol_name"][0],
                                               "molecules"))
@@ -55,6 +52,7 @@ class LmpInput():
             num_bonds_types += len(gff.bonds)
             num_angles_types += len(gff.angles)
             num_impropers_types += (len(gff.imdihedrals))
+            print "== atom type list", atom_type_list
             for k, v in gff.dihedrals.iteritems():
                 num_dih += len(v)
         num_dihedrals_types += num_dih
