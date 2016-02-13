@@ -152,6 +152,7 @@ if __name__ == '__main__':
     thf = Molecule(["C","C","C","H","H","C","H","H","O","H","H","H","H"], coords_thf,site_properties={"mol_name":["THF"]*len(coords_thf)})
     tfsi = Molecule(["N","S","O","O","C","F","F","F","S","O","O","C","F","F","F"], coords_tfsi,site_properties={"mol_name":["tfsi"]*len(coords_tfsi)})
     diglyme = Molecule(["O","C","C","C","C","O","O","C","C","H","H","H","H","H","H","H","H","H","H","H","H","H","H"], coords_diglyme,site_properties={"mol_name":["diglyme"]*len(coords_diglyme)})
+    print tfsi.species
 
 
 
