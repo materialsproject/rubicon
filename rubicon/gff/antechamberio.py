@@ -9,6 +9,7 @@ __author__ = 'navnidhirajput'
 
 import subprocess
 from pymatgen import write_mol
+import os
 import shlex
 from gff import Gff, FFCorruptionException, correct_corrupted_frcmod_files
 from monty.tempfile import ScratchDir
@@ -70,9 +71,7 @@ class AntechamberRunner():
                         copy_to_current_on_exit=True) as d:
 
             #self._convert_to_pdb(mol, 'mol.pdb')
-            command = (
-                'antechamber -i ' + filename + ' -fi gout -o ' +
-                "mol -fo charmm -c resp -s 2 runinfo")
+            command = 'antechamber -i ' + filename + " -fi gout -o mol -fo charmm -c resp -s 2 runinfo"
             return_cmd = subprocess.call(shlex.split(command))
             self.molname = filename.split('.')[0]
             self._run_parmchk()
@@ -93,7 +92,7 @@ class AntechamberRunner():
                 gff = Gff.from_forcefield_para('ANTECHAMBER.FRCMOD')
             gff.read_atom_index(mol, 'ANTECHAMBER_AC.AC')
             #gff.read_charges()
-            print "reading antechamber"
+
             mol.add_site_property("atomname", (gff.atom_index.values()))
         ffmol = FFmol(gff, top)
         return ffmol
