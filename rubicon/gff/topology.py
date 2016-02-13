@@ -22,7 +22,7 @@ class TopMol(object):
 
         self.atoms=atoms
         self.bonds=bonds
-        self.charges = charges
+        self.charges = dict() if charges is None else  charges
         self.angles=angles
         self.dihedrals=dihedrals
         self.imdihedrals= imdihedrals
@@ -64,7 +64,7 @@ class TopMol(object):
                     number_gaff_atoms.append(token[1])
                 if token[0]=='ATOM':
                     atoms.append(token[1:3])
-                    charges.append(token[1:4])
+                    charges.append(token[3:4])
                 if token[0]=='BOND':
                     bonds.append(token[1:3])
                 elif token[0]=='ANGL':
@@ -73,6 +73,7 @@ class TopMol(object):
                     dihedrals.append(token[1:5])
                 elif token[0]=='IMPH':
                     imdihedrals.append(token[1:5])
+            
 
             topology=TopMol(atoms,charges, bonds,angles,dihedrals,imdihedrals,len(bonds), number_gaff_atoms, gaff_atoms)
             return topology
