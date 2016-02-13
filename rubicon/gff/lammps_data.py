@@ -52,7 +52,6 @@ class LmpInput():
             num_bonds_types += len(gff.bonds)
             num_angles_types += len(gff.angles)
             num_impropers_types += (len(gff.imdihedrals))
-            print "== atom type list", atom_type_list
             for k, v in gff.dihedrals.iteritems():
                 num_dih += len(v)
         num_dihedrals_types += num_dih
@@ -319,6 +318,7 @@ class LmpInput():
                                   mols_in_box.num_mols):
             gff = ffmol.gff
             top = ffmol.top
+            #print "top charges", top.charges
             if gff.masses is not None:
                 for m, v in enumerate(gff.masses.values()):
                     if gff.masses.keys()[m] in element_list:
@@ -334,19 +334,18 @@ class LmpInput():
             for imol in range(num_mols):
                 mol_coords = mols_in_box.mols_coords.cart_coords[i:i + num_atoms]
                 mol_index += 1
-
                 d = {}
                 for k, v in enumerate(mol_coords):
-
+                    # print gff.atom_index_gaff[
+                    #          k + 1],top.charges[k]
                     lines.append(
                         '{}  {}  {}  {}  {}  {} {} {}  {} {} {} {}'.format(k + i + 1,
                          mol_index,
                          atom_type_index[
                              gff.atom_index_gaff
                              [
-                                 k + 1].lower()],
-                         gff.charges[mol.site_properties["mol_name"][0]][gff.atom_index[
-                             k + 1]],
+                                 k + 1].lower()],str(top.charges[k][0])
+                         ,
                          v[0], v[1],
                          v[2], '#',
                          mol_index,
