@@ -34,7 +34,6 @@ if __name__ == '__main__':
         file_name = os.path.basename(filename)
         #print "++",[os.path.splitext(file_name)[0]]*len(mol.cart_coords)
         mol_with_site_prop = Molecule(mol.species, mol.cart_coords,site_properties={"mol_name":[os.path.splitext(file_name)[0]]*len(mol.cart_coords)})
-        print mol_with_site_prop.site_properties["mol_name"]
         fw1 = Firework([task_geo],name = 'Gaussian geometry optimization', spec= {"molecule":mol, "mol_name": os.path.splitext(file_name)[0], "charge": 0,"spin_multiplicity":1}, fw_id=1)
         fw2 = Firework([task_geo_dbinsert],name='Gaussian Geometry DB insertion', spec= {"molecule":mol, "mol_name": os.path.splitext(file_name)[0], "charge": 0,"spin_multiplicity":1}, fw_id=2)
         fw3 = Firework([task_freq_esp],name='Gaussian Frequency and ESP', spec= {"mol_name": os.path.splitext(file_name)[0], "charge": 0,"spin_multiplicity":1}, fw_id=3)
