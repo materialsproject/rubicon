@@ -45,13 +45,9 @@ class WritelammpsInputTask(FireTaskBase):
         mols_dict = fw_spec["molecule"]
         mol = mols_dict
         ffmol_list = []
-        #for mol in mols:
         acr = AntechamberRunner(mol)
         ffmol_list.append(acr.get_ff_top_mol(mol,filename))
-        #ffmol_list.append(acr.get_ff_top_mol(mol,'mol.pdb'))
         pmr = PackmolRunner([mol], [{"number":100,"inside box":[0.,0.,0.,50.,50.,50.]}])
-        #pmr = PackmolRunner(mols, [{"number":15,"inside box":[0.,0.,0.,100.,100.,100.]},{"number":30,"inside box":[0.,0.,0.,100.,100.,100.]},{"number":232,"inside box":[0.,0.,0.,100.,100.,100.]}])
-
         mols_coord = pmr.run()
         boxmol= BoxMol.from_packmol(pmr, mols_coord)
 
@@ -73,12 +69,6 @@ class WritelammpsInputTask(FireTaskBase):
                        'prev_lammps_log': prev_lammps_log}
 
         return FWAction(update_spec=update_spec)
-
-#
-# if __name__ == '__main__':
-#      test = WritelammpsInputTask()
-#      test.run_task()
-
 
 
 
