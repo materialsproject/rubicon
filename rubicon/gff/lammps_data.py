@@ -43,7 +43,6 @@ class LmpInput():
         for ffmol in ffmol_list:
             gff = ffmol.gff
             atom_type_list.extend(gff.masses.keys())
-         #   atom_type_list.extend(gff.masses.keys())
             bond_type_list.extend(gff.bonds.keys())
             angle_type_list.extend(gff.angles.keys())
             dihedral_type_list.extend(gff.dihedrals.keys())
@@ -131,8 +130,6 @@ class LmpInput():
         for ffmol, mol,num_mols in zip(ffmol_list, mols_in_box.mols,
                                   mols_in_box.num_mols):
             gff = ffmol.gff
-            #top = ffmol.top
-
             if gff.masses is not None:
                 for i, v in enumerate(gff.masses.values()):
                     if gff.masses.keys()[i] in element_list:
@@ -187,7 +184,6 @@ class LmpInput():
         lines.append('Bond Coeffs\n')
         for ffmol,mol in zip(ffmol_list, mols_in_box.mols):
             gff = ffmol.gff
-        #     top = ffmol.top
             if gff.bonds:
                 for i, v in enumerate(gff.bonds.values()):
                     lines.append(
@@ -310,7 +306,6 @@ class LmpInput():
         masses_index = 0
         atom_type_index = {}
         lines.append('Atoms\n')
-        #mol_pack = mols_in_box
         self.box_mol_index = []
         i = 0
         mol_index = 0
@@ -318,7 +313,6 @@ class LmpInput():
                                   mols_in_box.num_mols):
             gff = ffmol.gff
             top = ffmol.top
-            #print "top charges", top.charges
             if gff.masses is not None:
                 for m, v in enumerate(gff.masses.values()):
                     if gff.masses.keys()[m] in element_list:
@@ -336,8 +330,6 @@ class LmpInput():
                 mol_index += 1
                 d = {}
                 for k, v in enumerate(mol_coords):
-                    # print gff.atom_index_gaff[
-                    #          k + 1],top.charges[k]
                     lines.append(
                         '{}  {}  {}  {}  {}  {} {} {}  {} {} {} {}'.format(k + i + 1,
                          mol_index,
@@ -378,14 +370,11 @@ class LmpInput():
                                   mols_in_box.num_mols):
             gff = ffmol.gff
             top = ffmol.top
-        # for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
-        #                                mols_in_box.mols,
-        #                                mols_in_box.param_list):
             if gff.bonds:
                 for m, v in enumerate(gff.bonds.values()):
                     bond_index = bond_index + 1
                     bond_type_index[gff.bonds.keys()[m]] = bond_index
-            #num_this_mol = parm['number']
+
             for imol in range(num_mols):
                 mol_bonds = top.bonds
                 mol_index += 1
@@ -431,15 +420,10 @@ class LmpInput():
                                   mols_in_box.num_mols):
             gff = ffmol.gff
             top = ffmol.top
-        # for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
-        #                                mols_in_box.mols,
-        #                                mols_in_box.param_list):
             if gff.angles:
                 for m, v in enumerate(gff.angles.values()):
                     angle_index = angle_index + 1
                     angle_type_index[gff.angles.keys()[m]] = angle_index
-                #num_atoms = len(mol)
-            #num_this_mol = parm['number']
             #iterate over first molecule
             for imol in range(num_mols):
                 mol_angles = top.angles
@@ -513,7 +497,6 @@ class LmpInput():
                             dihedral_label = tuple(
                                 reversed(list(dihedral_label)))
                         for func_form, d in v[1].iteritems():
-                            #print l,top.dihedrals[l]
                             j += 1
                             lines.append(
                                 '{}  {}  {}  {}  {}  {}  {}  {}  {}'
@@ -549,9 +532,6 @@ class LmpInput():
                                   mols_in_box.num_mols):
             gff = ffmol.gff
             top = ffmol.top
-        # for gff, top, mol, parm in zip(ffmol.gff_list, ffmol.top_list,
-        #                                mols_in_box.mols,
-        #                                mols_in_box.param_list):
             if gff.imdihedrals is not None:
                 for m, v in enumerate(gff.imdihedrals.values()):
                     imdihedrals_index = imdihedrals_index + 1
@@ -559,7 +539,6 @@ class LmpInput():
                         gff.imdihedrals.keys()[m]] = imdihedrals_index
 
                 #iterate over types of mol
-               # num_this_mol = parm['number']
                 #iterate over first molecule
                 for imol in range(num_mols):
                     mol_impropers = top.imdihedrals
