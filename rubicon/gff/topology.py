@@ -250,12 +250,6 @@ def correct_corrupted_top_files(corrupted_file = None, gaff_file = None):
         f.writelines(rtf_lines)
 
 
-#
-# if __name__ == '__main__':
-#      top = TopMol.from_file("dmf.gaff-default.charmm.rtf")
-
-
-
 
 
 
