@@ -2,6 +2,8 @@ import json
 from pymongo import MongoClient
 import shlex
 import numpy
+from pymatgen.packmol.packmol import PackmolRunner
+from pymatgen.packmol.lammpsio import LammpsLog
 
 try:
     # just a walkaround before the packmol is merged to master branch
@@ -14,21 +16,6 @@ except:
 from fireworks import FireTaskBase, explicit_serialize, Firework, Workflow
 
 __author__ = 'navnidhirajput'
-
-
-
-# try:
-#     # just a walkaround before the packmol is merged to master branch
-#     # after packmol is merged to master branch, the try...catch block
-#     # should be removed
-#     import pymatgen
-#     if 'packmol' in pymatgen.__dict__:
-#         from pymatgen.packmol.packmol import PackmolRunner
-#         from pymatgen.packmol.lammpsio import LammpsLog
-# except:
-#     pass
-
-
 
 
 
@@ -61,7 +48,6 @@ class WritelammpsOutputTask(FireTaskBase):
         docs = parse_lammps.llog
         docs = {k: list(v) if isinstance(v, numpy.ndarray) else v for k, v in docs.items()}
         coll.insert(docs)
-        #coll.update(docs)
 
     def run_task(self, fw_spec):
         mol_log_file = fw_spec["prev_lammps_log"]
