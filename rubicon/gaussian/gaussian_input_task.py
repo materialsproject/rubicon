@@ -102,11 +102,3 @@ class WritegaussianFreqESPTask(FireTaskBase):
 
         return FWAction(update_spec=update_spec)
 
-
-# if __name__ == '__main__':
-#     task_geo = WritegaussianInputTask()
-#     moleculelist = glob.glob("/Users/navnidhirajput/Dropbox/solvent_molecules/*")
-#     for filename in moleculelist:
-#         mol = Molecule.from_file(filename)
-#         file_name = os.path.basename(filename)
-#         task_geo.run_task({"molecule":mol, "mol_name": os.path.splitext(file_name)[0], "charge": 1,"spin_multiplicity":-1})
