@@ -52,9 +52,9 @@ class WritelammpsOutputTask(FireTaskBase):
     def run_task(self, fw_spec):
         mol_log_file = fw_spec["prev_lammps_log"]
         self._insert_doc(filename=mol_log_file)
-        file_path = fw_spec["prev_lammps_log"]
-        update_spec = {'prev_lammps_log': file_path}
-        return FWAction(update_spec=update_spec)
+        #file_path = fw_spec["prev_lammps_log"]
+        #update_spec = {'prev_lammps_log': file_path}
+        #return FWAction(update_spec=update_spec)
 
 
 
