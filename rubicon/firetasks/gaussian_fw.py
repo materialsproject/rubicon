@@ -45,9 +45,9 @@ if __name__ == '__main__':
         fw3 = Firework([task_freq_esp],name='Gaussian Frequency and ESP', spec= {"mol_name": os.path.splitext(file_name)[0], "charge": 0,"spin_multiplicity":1}, fw_id=3)
         fw4 = Firework([task_lammps_inp],name = 'Run Lammps', spec={"molecule":mol_with_site_prop}, fw_id=4)
         fw5 = Firework([task_lammps_log_dbinsert],name='Lammps Log Parsing', fw_id=5)
-        #fw6 = Firework([task_lammps_prop_dbinsert],name='Lammps Properties Parser', fw_id=6)
+        fw6 = Firework([task_lammps_prop_dbinsert],name='Lammps Properties Parser', fw_id=6)
 
-        depen = {1:2, 2:3,3:4,4:[5]}
+        depen = {1:2, 2:3,3:4,4:[5,6]}
         wf = Workflow([fw1,fw2,fw3, fw4,fw5], name="LAMMPS", links_dict=depen)
 
         # depen = {1:2, 2:3,3:4}
