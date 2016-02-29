@@ -2,7 +2,6 @@ import json
 from pymongo import MongoClient
 import shlex
 import numpy
-from pymatgen.packmol.packmol import PackmolRunner
 from rubicon.packmol.lammpsio import LammpsLog
 
 
