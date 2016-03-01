@@ -47,7 +47,7 @@ class COMradialdistribution:
                 r2 = dx**2 + dy**2 + dz**2
                 r = np.sqrt(r2)
                 
-                if r <= maxr+binsize:
+                if r <= maxr:
                     g[moltype[molecule1]][moltype[molecule2]][int(round(r/(binsize))-1)] += 1
                     g[moltype[molecule2]][moltype[molecule1]][int(round(r/(binsize))-1)] += 1
 
