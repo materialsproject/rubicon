@@ -152,19 +152,6 @@ if __name__ == '__main__':
     thf = Molecule(["C","C","C","H","H","C","H","H","O","H","H","H","H"], coords_thf,site_properties={"mol_name":["THF"]*len(coords_thf)})
     tfsi = Molecule(["N","S","O","O","C","F","F","F","S","O","O","C","F","F","F"], coords_tfsi,site_properties={"mol_name":["tfsi"]*len(coords_tfsi)})
     diglyme = Molecule(["O","C","C","C","C","O","O","C","C","H","H","H","H","H","H","H","H","H","H","H","H","H","H"], coords_diglyme,site_properties={"mol_name":["diglyme"]*len(coords_diglyme)})
-    print tfsi.species
-
-
-
-    #fw1 = Firework([task1], spec={"molecules": [tfn.as_dict(),n1c.as_dict(),pc.as_dict()]})
-    #fw1 = Firework([task1], spec={"molecules": [mg.as_dict(),tfsi.as_dict(),diglyme.as_dict()]})
-    #fw1 = Firework([task1],name = 'Run Lammps', spec={"molecules": [diglyme.as_dict()]}, fw_id=1)
-    #fw2 = Firework([task2],name='Lammps Log Parsing', fw_id=2)
-    #fw3 = Firework([task3],name='Lammps Properties Parser', fw_id=3)
-
-    #depen = {1:[2,3]}
-    #depen = {1:2}
-
 
     coords = []
     sp = []
