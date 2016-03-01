@@ -48,10 +48,6 @@ if __name__ == '__main__':
         depen = {1:2, 2:3,3:4,4:[5,6]}
         wf = Workflow([fw1,fw2,fw3, fw4,fw5,fw6], name="LAMMPS", links_dict=depen)
 
-        # depen = {1:2, 2:3,3:4}
-        # wf = Workflow([fw1,fw2,fw3, fw4], name="GAUSSIAN", links_dict=depen)
-
-
         lp = LaunchPad.auto_load()
         lp.add_wf(wf)
 
