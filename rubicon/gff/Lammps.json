@@ -100,7 +100,7 @@
             "file2": "restart.mol.2"
         },
          "run": {
-            "N": 20000
+            "N": 2000000
         },
           "write_restart": {
             "file": "restart.mol"
