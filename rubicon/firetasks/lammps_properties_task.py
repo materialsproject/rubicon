@@ -105,7 +105,7 @@ class ParselammpsProperties(FireTaskBase):
             db.authenticate(db_creds['admin_user'], db_creds['admin_password'])
             coll = db['lammps_properties']
         parse_lammps_prop = self.lampps_properties(trjfile, datafile, logfile)
-        docs = parse_lammps_prop.output
+        docs = parse_lammps_prop
         docs = {k: list(v) if isinstance(v, numpy.ndarray) else v for k, v in docs.items()}
         coll.insert(docs)
 
