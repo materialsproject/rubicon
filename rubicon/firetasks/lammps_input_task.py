@@ -13,6 +13,7 @@ from rubicon.gff.boxmol import BoxMol
 from rubicon.gff.lammps_control import DictLammpsInputSet
 from rubicon.gff.lammps_data import LmpInput
 from rubicon.gff.antechamberio import AntechamberRunner
+from rubicon.gff.lamms_control_nvt import DictLammpsInputSet
 
 
 __author__ = 'navnidhirajput'
@@ -54,7 +55,8 @@ class WritelammpsInputTask(FireTaskBase):
         data_lammps=LmpInput(ffmol_list, boxmol)
         data_lammps.write_lammps_data('mol_data.lammps')
         control_lammps = DictLammpsInputSet()
-        control_lammps.get_lammps_control('Lammps.json',ensemble='npt',temp=300)
+        #control_lammps.get_lammps_control('Lammps.json',ensemble='npt',temp=300)
+        control_lammps.get_lammps_control('Lammps.json',ensemble1='npt',ensemble2='nvt',temp=298)
         control_lammps.write_lampps_control('mol_control.lammps')
 
         with open("mol_control.lammps") as f:
