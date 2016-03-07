@@ -11,7 +11,7 @@
             "args": 12
         },
         "kspace_style": {
-            "ewald": 0.0001
+            "pppm": 0.0001
         },
         "pair_modify": {
             "tail": "yes",
