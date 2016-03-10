@@ -48,7 +48,7 @@ class WritelammpsInputTask(FireTaskBase):
         ffmol_list = []
         acr = AntechamberRunner(mol)
         ffmol_list.append(acr.get_ff_top_mol(mol,filename))
-        pmr = PackmolRunner([mol], [{"number":1000,"inside box":[0.,0.,0.,50.,50.,50.]}])
+        pmr = PackmolRunner([mol], [{"number":100,"inside box":[-14.82,-14.82,-14.82,14.82,14.82,14.82]}])
         mols_coord = pmr.run()
         boxmol= BoxMol.from_packmol(pmr, mols_coord)
 
