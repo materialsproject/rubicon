@@ -1,6 +1,8 @@
 import subprocess
+
 from fireworks.core.firework import FireTaskBase
 from fireworks.utilities.fw_serializers import FWSerializable
+
 from pymatgen import Molecule
 from pymatgen.io.gaussian import GaussianInput
 
@@ -32,4 +34,5 @@ class GaussianTask(FireTaskBase, FWSerializable):
             f.write(str(gi))
 
         # TODO: replace with a custodian
-        subprocess.call(['g09l',fw_spec['name']+'.in',fw_spec['name']+'.out'])
+        subprocess.call(
+            ['g09l', fw_spec['name'] + '.in', fw_spec['name'] + '.out'])

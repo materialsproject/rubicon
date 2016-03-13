@@ -2,16 +2,16 @@
 Build derived collections for Electrolyte Genome.
 """
 import logging
-import traceback
-import time
 import sys
+import time
+import traceback
+
 import eg_molecules_builder as mols
 import eg_reactions_builder as reactions
 from rubicon.builders import eg_shared
 
 __author__ = 'Xiaohui Qu <xqu@lbl.gov>'
 __date__ = '1/1/14'
-
 
 _logname = 'eg.' + __name__
 
@@ -63,5 +63,5 @@ def _run_one(obj):
     else:
         _log.error("run.end builder={} status={:d} duration_sec="
                    "{:g}".format(name, status, dur))
-        raise eg_shared.BuildError(name, "unknown")   # TODO: get better error
+        raise eg_shared.BuildError(name, "unknown")  # TODO: get better error
         # message

@@ -19,7 +19,8 @@ class DupeFinderEG(DupeFinderBase):
         comp_tags1['implicit_solvent'] = spec1['implicit_solvent']
         comp_tags2['run_tags'] = spec2['run_tags']
         comp_tags2['implicit_solvent'] = spec2['implicit_solvent']
-        essential_keys = ['run_tags', 'implicit_solvent', 'run_tags', 'implicit_solvent',
+        essential_keys = ['run_tags', 'implicit_solvent', 'run_tags',
+                          'implicit_solvent',
                           'mixed_basis', 'mixed_aux_basis']
         for k in essential_keys:
             if k in spec1:

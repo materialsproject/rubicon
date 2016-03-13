@@ -1,237 +1,237 @@
 {
-    "name": "h2o", 
-    "launches": [
+  "name": "h2o",
+  "launches": [
+    {
+      "fworker": {
+        "category": "",
+        "query": "{}",
+        "name": "Automatically generated Worker"
+      },
+      "ip": "192.168.2.2",
+      "fw_id": 1,
+      "state": "RUNNING",
+      "host": "MacQu.local",
+      "launch_dir": "/Users/xiaohuiqu/temp/fw_test/scratch/shyue/launcher_Process-2_2013-09-07-03-16-08-268888",
+      "action": null,
+      "launch_id": 1,
+      "state_history": [
         {
-            "fworker": {
-                "category": "", 
-                "query": "{}", 
-                "name": "Automatically generated Worker"
-            }, 
-            "ip": "192.168.2.2", 
-            "fw_id": 1, 
-            "state": "RUNNING", 
-            "host": "MacQu.local", 
-            "launch_dir": "/Users/xiaohuiqu/temp/fw_test/scratch/shyue/launcher_Process-2_2013-09-07-03-16-08-268888", 
-            "action": null, 
-            "launch_id": 1, 
-            "state_history": [
-                {
-                    "updated_on": "2013-09-07T03:16:08.424202", 
-                    "state": "RUNNING", 
-                    "created_on": "2013-09-07T03:16:08.424137"
-                }
-            ]
+          "updated_on": "2013-09-07T03:16:08.424202",
+          "state": "RUNNING",
+          "created_on": "2013-09-07T03:16:08.424137"
         }
-    ], 
-    "fw_id": 1, 
-    "state": "RUNNING", 
-    "created_on": "2013-09-07T03:14:56.735920", 
-    "spec": {
-        "_tasks": [
-            {
-                "_fw_name": "NWChem Task"
-            }, 
-            {
-                "_fw_name": "NWChem DB Insertion Task"
-            }
-        ], 
-        "tasks": [
-            {
-                "theory": "dft", 
-                "title": "H4O2 dft optimize", 
-                "@module": "pymatgen.io.nwchemio", 
-                "charge": 0, 
-                "theory_directives": {
-                    "xc": "b3lyp", 
-                    "iterations": 300, 
-                    "mult": 1
-                }, 
-                "spin_multiplicity": 1, 
-                "operation": "optimize", 
-                "basis_set": {
-                    "H": "6-31+G*", 
-                    "O": "6-31+G*"
-                }, 
-                "@class": "NwTask"
-            }, 
-            {
-                "theory": "dft", 
-                "title": "H4O2 dft freq", 
-                "@module": "pymatgen.io.nwchemio", 
-                "charge": 0, 
-                "theory_directives": {
-                    "xc": "b3lyp", 
-                    "iterations": 300, 
-                    "mult": 1
-                }, 
-                "spin_multiplicity": 1, 
-                "operation": "freq", 
-                "basis_set": {
-                    "H": "6-31+G*", 
-                    "O": "6-31+G*"
-                }, 
-                "@class": "NwTask"
-            }, 
-            {
-                "theory": "dft", 
-                "title": "H4O2 dft energy", 
-                "@module": "pymatgen.io.nwchemio", 
-                "charge": 0, 
-                "theory_directives": {
-                    "xc": "b3lyp", 
-                    "iterations": 300, 
-                    "mult": 1
-                }, 
-                "spin_multiplicity": 1, 
-                "operation": "energy", 
-                "basis_set": {
-                    "H": "6-311++G(2d,2p)", 
-                    "O": "6-311++G(2d,2p)"
-                }, 
-                "@class": "NwTask"
-            }, 
-            {
-                "theory": "dft", 
-                "title": "H4O2 dft energy", 
-                "@module": "pymatgen.io.nwchemio", 
-                "charge": 1, 
-                "theory_directives": {
-                    "xc": "b3lyp", 
-                    "iterations": 300, 
-                    "mult": 2
-                }, 
-                "spin_multiplicity": 2, 
-                "operation": "energy", 
-                "basis_set": {
-                    "H": "6-311++G(2d,2p)", 
-                    "O": "6-311++G(2d,2p)"
-                }, 
-                "@class": "NwTask"
-            }, 
-            {
-                "theory": "dft", 
-                "title": "H4O2 dft energy", 
-                "@module": "pymatgen.io.nwchemio", 
-                "charge": -1, 
-                "theory_directives": {
-                    "xc": "b3lyp", 
-                    "iterations": 300, 
-                    "mult": 2
-                }, 
-                "spin_multiplicity": 2, 
-                "operation": "energy", 
-                "basis_set": {
-                    "H": "6-311++G(2d,2p)", 
-                    "O": "6-311++G(2d,2p)"
-                }, 
-                "@class": "NwTask"
-            }
-        ], 
-        "user_tags": {
-            "mission": "G3 Test Set Benchmark (Shyue Scheme)"
-        }, 
-        "directives": [], 
-        "mol": {
-            "charge": 0, 
-            "@module": "pymatgen.core.structure", 
-            "sites": [
-                {
-                    "xyz": [
-                        0.0, 
-                        0.0, 
-                        0.0
-                    ], 
-                    "properties": {}, 
-                    "name": "O", 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "O"
-                        }
-                    ]
-                }, 
-                {
-                    "xyz": [
-                        0.0, 
-                        0.0, 
-                        2.91290214
-                    ], 
-                    "properties": {}, 
-                    "name": "O", 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "O"
-                        }
-                    ]
-                }, 
-                {
-                    "xyz": [
-                        0.8925964926658873, 
-                        0.0, 
-                        -0.37326573139066693
-                    ], 
-                    "properties": {}, 
-                    "name": "H", 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "H"
-                        }
-                    ]
-                }, 
-                {
-                    "xyz": [
-                        0.14396993837109134, 
-                        0.00021929468789043922, 
-                        0.964351025169775
-                    ], 
-                    "properties": {}, 
-                    "name": "H", 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "H"
-                        }
-                    ]
-                }, 
-                {
-                    "xyz": [
-                        -0.5825540041717601, 
-                        0.765401220892045, 
-                        3.0427832075840446
-                    ], 
-                    "properties": {}, 
-                    "name": "H", 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "H"
-                        }
-                    ]
-                }, 
-                {
-                    "xyz": [
-                        -0.5807109765047648, 
-                        -0.7667614351323815, 
-                        3.0430117296464134
-                    ], 
-                    "properties": {}, 
-                    "name": "H", 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "H"
-                        }
-                    ]
-                }
-            ], 
-            "@class": "Molecule", 
-            "spin_multiplicity": 1
-        }, 
-        "geometry_options": [
-            "units", 
-            "angstroms"
-        ]
+      ]
     }
+  ],
+  "fw_id": 1,
+  "state": "RUNNING",
+  "created_on": "2013-09-07T03:14:56.735920",
+  "spec": {
+    "_tasks": [
+      {
+        "_fw_name": "NWChem Task"
+      },
+      {
+        "_fw_name": "NWChem DB Insertion Task"
+      }
+    ],
+    "tasks": [
+      {
+        "theory": "dft",
+        "title": "H4O2 dft optimize",
+        "@module": "pymatgen.io.nwchemio",
+        "charge": 0,
+        "theory_directives": {
+          "xc": "b3lyp",
+          "iterations": 300,
+          "mult": 1
+        },
+        "spin_multiplicity": 1,
+        "operation": "optimize",
+        "basis_set": {
+          "H": "6-31+G*",
+          "O": "6-31+G*"
+        },
+        "@class": "NwTask"
+      },
+      {
+        "theory": "dft",
+        "title": "H4O2 dft freq",
+        "@module": "pymatgen.io.nwchemio",
+        "charge": 0,
+        "theory_directives": {
+          "xc": "b3lyp",
+          "iterations": 300,
+          "mult": 1
+        },
+        "spin_multiplicity": 1,
+        "operation": "freq",
+        "basis_set": {
+          "H": "6-31+G*",
+          "O": "6-31+G*"
+        },
+        "@class": "NwTask"
+      },
+      {
+        "theory": "dft",
+        "title": "H4O2 dft energy",
+        "@module": "pymatgen.io.nwchemio",
+        "charge": 0,
+        "theory_directives": {
+          "xc": "b3lyp",
+          "iterations": 300,
+          "mult": 1
+        },
+        "spin_multiplicity": 1,
+        "operation": "energy",
+        "basis_set": {
+          "H": "6-311++G(2d,2p)",
+          "O": "6-311++G(2d,2p)"
+        },
+        "@class": "NwTask"
+      },
+      {
+        "theory": "dft",
+        "title": "H4O2 dft energy",
+        "@module": "pymatgen.io.nwchemio",
+        "charge": 1,
+        "theory_directives": {
+          "xc": "b3lyp",
+          "iterations": 300,
+          "mult": 2
+        },
+        "spin_multiplicity": 2,
+        "operation": "energy",
+        "basis_set": {
+          "H": "6-311++G(2d,2p)",
+          "O": "6-311++G(2d,2p)"
+        },
+        "@class": "NwTask"
+      },
+      {
+        "theory": "dft",
+        "title": "H4O2 dft energy",
+        "@module": "pymatgen.io.nwchemio",
+        "charge": -1,
+        "theory_directives": {
+          "xc": "b3lyp",
+          "iterations": 300,
+          "mult": 2
+        },
+        "spin_multiplicity": 2,
+        "operation": "energy",
+        "basis_set": {
+          "H": "6-311++G(2d,2p)",
+          "O": "6-311++G(2d,2p)"
+        },
+        "@class": "NwTask"
+      }
+    ],
+    "user_tags": {
+      "mission": "G3 Test Set Benchmark (Shyue Scheme)"
+    },
+    "directives": [],
+    "mol": {
+      "charge": 0,
+      "@module": "pymatgen.core.structure",
+      "sites": [
+        {
+          "xyz": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "properties": {},
+          "name": "O",
+          "species": [
+            {
+              "occu": 1,
+              "element": "O"
+            }
+          ]
+        },
+        {
+          "xyz": [
+            0.0,
+            0.0,
+            2.91290214
+          ],
+          "properties": {},
+          "name": "O",
+          "species": [
+            {
+              "occu": 1,
+              "element": "O"
+            }
+          ]
+        },
+        {
+          "xyz": [
+            0.8925964926658873,
+            0.0,
+            -0.37326573139066693
+          ],
+          "properties": {},
+          "name": "H",
+          "species": [
+            {
+              "occu": 1,
+              "element": "H"
+            }
+          ]
+        },
+        {
+          "xyz": [
+            0.14396993837109134,
+            0.00021929468789043922,
+            0.964351025169775
+          ],
+          "properties": {},
+          "name": "H",
+          "species": [
+            {
+              "occu": 1,
+              "element": "H"
+            }
+          ]
+        },
+        {
+          "xyz": [
+            -0.5825540041717601,
+            0.765401220892045,
+            3.0427832075840446
+          ],
+          "properties": {},
+          "name": "H",
+          "species": [
+            {
+              "occu": 1,
+              "element": "H"
+            }
+          ]
+        },
+        {
+          "xyz": [
+            -0.5807109765047648,
+            -0.7667614351323815,
+            3.0430117296464134
+          ],
+          "properties": {},
+          "name": "H",
+          "species": [
+            {
+              "occu": 1,
+              "element": "H"
+            }
+          ]
+        }
+      ],
+      "@class": "Molecule",
+      "spin_multiplicity": 1
+    },
+    "geometry_options": [
+      "units",
+      "angstroms"
+    ]
+  }
 }

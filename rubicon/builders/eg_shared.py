@@ -10,11 +10,10 @@ documentation of this class for details.
 __author__ = 'Xiaohui Qu <xqu@lbl.gov>'
 __date__ = '12/31/13'
 
-
-import logging
 import Queue
-import threading
+import logging
 import multiprocessing
+import threading
 
 _log = logging.getLogger("eg.build")
 
@@ -122,6 +121,7 @@ class ParallelBuilder(Builder):
     2) process_item(item) - Do the work for one item. Return integer status
             code, 0 for OK and non-zero for failure.
     """
+
     def __init__(self, ncores=0, threads=False):
         """Create new builder for threaded or multiprocess execution.
 
@@ -191,7 +191,7 @@ class ParallelBuilder(Builder):
             threads.append(thr)
         for i in xrange(self._ncores):
             threads[i].join()
-            if threads[i].isAlive():    # timed out
+            if threads[i].isAlive():  # timed out
                 _log.warn("run.parallel.threaded: timeout for thread="
                           "{:d}".format(i))
         _log.debug("run.parallel.threaded.end states="

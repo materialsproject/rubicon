@@ -2,11 +2,11 @@ import time
 import traceback
 
 from fireworks.core.launchpad import LaunchPad
-from pymatgen.matproj.snl import StructureNL
 
+from pymatgen.matproj.snl import StructureNL
 from rubicon.submission.submission_mongo_eg import SubmissionMongoAdapterEG
-from rubicon.utils.snl.egsnl import EGStructureNL
 from rubicon.utils.qchem_firework_creator import QChemFireWorkCreator
+from rubicon.utils.snl.egsnl import EGStructureNL
 from rubicon.workflows.snl_to_eg_wf import snl_to_eg_wf
 
 
@@ -78,16 +78,17 @@ class SubmissionProcessorEG():
     def update_existing_workflows(self):
         # updates the state of existing workflows by querying the FireWorks
         # database
-        for submission in self.jobs.find(filter={'state': {'$nin': ['COMPLETED',
-                                                             'ERROR',
-                                                             'REJECTED']}},
-                                         projection={'submission_id': 1}):
+        for submission in self.jobs.find(
+                filter={'state': {'$nin': ['COMPLETED',
+                                           'ERROR',
+                                           'REJECTED']}},
+                projection={'submission_id': 1}):
             submission_id = submission['submission_id']
             # noinspection PyBroadException
             try:
                 # get a wf with this submission id
                 fw_id = self.launchpad.get_wf_ids({'metadata.submission_id':
-                                                   submission_id},
+                                                       submission_id},
                                                   limit=1)[0]
                 # get a workflow
                 wf = self.launchpad.get_wf_by_fw_id(fw_id)
@@ -132,15 +133,15 @@ class SubmissionProcessorEG():
                     for l in fw.launches:
                         # if task_id is not there, it means we went on DETOUR...
                         if l.state == 'COMPLETED' and \
-                                      'task_id' in l.action.stored_data:
+                                        'task_id' in l.action.stored_data:
                             t_id = l.action.stored_data['task_id']
                             if 'task_type' in fw.spec:
-                                state_name = QChemFireWorkCreator\
+                                state_name = QChemFireWorkCreator \
                                     .get_state_name(
-                                        fw.spec["charge"],
-                                        fw.spec["spin_multiplicity"])
+                                    fw.spec["charge"],
+                                    fw.spec["spin_multiplicity"])
                                 task_name = state_name + ' ' + \
-                                    fw.spec['task_type']
+                                            fw.spec['task_type']
                                 m_taskdict[task_name] = t_id
                             break
 

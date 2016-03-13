@@ -1,16 +1,16 @@
 import json
 import os
-from unittest import TestCase
 import unittest
+from unittest import TestCase
 
 from pymatgen.io.smart import read_mol
-
 from rubicon.utils.snl.egsnl import get_meta_from_structure
 
 __author__ = 'xiaohuiqu'
 
 test_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "..",
                         "test_files")
+
 
 class TestEGStructureNL(TestCase):
     def test_get_meta_from_structure(self):
@@ -34,6 +34,7 @@ class TestEGStructureNL(TestCase):
 }'''
         meta_ref = json.loads(meta_ref_text)
         self.assertEqual(meta, meta_ref)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,16 +1,19 @@
 import os
-import subprocess
-from custodian.custodian import Job, gzip_dir
 import shutil
+import subprocess
+
+from custodian.custodian import Job, gzip_dir
 
 __author__ = 'xiaohuiqu'
+
 
 class MopacJob(Job):
     """
     A basic MOPAC job.
     """
 
-    def __init__(self, mopac_cmd="mopac", input_file="mol.mop", gzipped=False, backup=True):
+    def __init__(self, mopac_cmd="mopac", input_file="mol.mop", gzipped=False,
+                 backup=True):
         self.mopac_cmd = mopac_cmd
         self.input_file = input_file
         basename = os.path.splitext(self.input_file)[0]
@@ -24,11 +27,14 @@ class MopacJob(Job):
             i = 0
             while os.path.exists("{}.{}.orig".format(self.input_file, i)):
                 i += 1
-            shutil.copy(self.input_file, "{}.{}.orig".format(self.input_file, i))
+            shutil.copy(self.input_file,
+                        "{}.{}.orig".format(self.input_file, i))
             if os.path.exists(self.output_file):
-                shutil.copy(self.output_file, "{}.{}.orig".format(self.output_file, i))
+                shutil.copy(self.output_file,
+                            "{}.{}.orig".format(self.output_file, i))
             if os.path.exists(self.arc_file):
-                shutil.copy(self.arc_file, "{}.{}.orig".format(self.arc_file, i))
+                shutil.copy(self.arc_file,
+                            "{}.{}.orig".format(self.arc_file, i))
 
     def run(self):
         cmd = [self.mopac_cmd, self.input_file]

@@ -1,8 +1,10 @@
 import json
 import os
-from unittest import TestCase
 import unittest
+from unittest import TestCase
+
 from pymatgen import Molecule
+
 try:
     from pymatgen.packmol.packmol import PackmolRunner
 except:
@@ -12,101 +14,102 @@ from rubicon.gff.lammps_data import LmpInput
 
 __author__ = 'navnidhirajput'
 
+coords_n1c = [[4.522, 8.999, 5.512],
+              [6.666, 9.383, 5.971],
+              [7.522, 9.623, 6.578],
+              [6.567, 9.114, 4.645],
+              [7.322, 9.072, 3.879],
+              [5.388, 9.312, 6.496],
+              [5.231, 8.881, 4.373],
+              [5.041, 9.544, 7.906],
+              [5.944, 9.842, 8.432],
+              [4.305, 10.344, 7.985],
+              [4.653, 8.630, 8.355],
+              [4.699, 8.519, 3.03],
+              [3.676, 8.890, 2.982],
+              [5.285, 9.084, 2.312],
+              [4.774, 7.019, 2.765],
+              [4.386, 6.818, 1.765],
+              [5.802, 6.657, 2.807],
+              [4.176, 6.448, 3.480],
+              [3.050, 8.855, 5.663],
+              [2.657, 8.107, 4.974],
+              [2.796, 8.543, 6.676],
+              [2.542, 9.803, 5.463]]
 
-coords_n1c=[[4.522,   8.999,   5.512],
-           [6.666,   9.383,   5.971],
-           [7.522,   9.623,   6.578],
-           [6.567,   9.114,   4.645],
-           [7.322,   9.072,   3.879],
-           [5.388,   9.312,   6.496],
-           [5.231,   8.881,   4.373],
-           [5.041,   9.544,   7.906],
-           [5.944,   9.842,   8.432],
-           [4.305,  10.344,   7.985],
-           [4.653,   8.630,   8.355],
-           [4.699,   8.519,   3.03],
-           [3.676,   8.890,   2.982],
-           [5.285,   9.084,   2.312],
-           [4.774,   7.019,   2.765],
-           [4.386,   6.818,   1.765],
-           [5.802,   6.657,   2.807],
-           [4.176,   6.448,   3.480],
-           [3.050,   8.855,   5.663],
-           [2.657,   8.107,   4.974],
-           [2.796,   8.543,   6.676],
-           [2.542,   9.803,   5.463]]
+coords_pc = [[2.516, 1.762, 7.803],
+             [3.382, 2.859, 7.178],
+             [4.673, 2.240, 7.066],
+             [3.476, 3.751, 7.797],
+             [3.037, 3.136, 6.177],
+             [4.526, 0.887, 7.121],
+             [3.246, 0.565, 7.439],
+             [5.398, 0.103, 6.918],
+             [1.090, 1.684, 7.302],
+             [2.539, 1.829, 8.896],
+             [1.069, 1.564, 6.216],
+             [0.552, 2.599, 7.564],
+             [0.568, 0.839, 7.755]]
 
-coords_pc=[[2.516,   1.762,   7.803],
-           [3.382,   2.859,   7.178],
-           [4.673,   2.240,   7.066],
-           [3.476,   3.751,   7.797],
-           [3.037,   3.136,   6.177],
-           [4.526,   0.887,   7.121],
-           [3.246,   0.565,   7.439],
-           [5.398,   0.103,   6.918],
-           [1.090,   1.684,   7.302],
-           [2.539,   1.829,  8.896],
-           [1.069,   1.564,   6.216],
-           [0.552,   2.599,   7.564],
-           [0.568,   0.839,   7.755]]
+coords_tfn = [[3.734, 8.436, 10.848],
+              [5.713, 9.869, 7.928],
+              [4.712, 9.816, 8.816],
+              [4.981, 8.437, 10.088],
+              [6.222, 8.807, 10.764],
+              [4.651, 11.005, 9.445],
+              [5.009, 7.118, 9.161],
+              [5.914, 5.626, 7.385],
+              [3.564, 9.647, 8.144],
+              [6.318, 6.404, 8.552],
+              [7.545, 7.196, 8.484],
+              [7.774, 4.365, 9.475],
+              [5.668, 4.219, 9.986],
+              [6.692, 5.074, 9.850],
+              [6.947, 5.614, 11.049]]
 
+tfn = Molecule(
+    ["O", "F", "C", "S", "O", "F", "N", "O", "F", "S", "O", "F", "F", "C",
+     "F"], coords_tfn, site_properties={"mol_name": ["TFN"] * len(coords_tfn)})
+n1c = Molecule(
+    ["C", "C", "H", "C", "H", "N", "N", "C", "H", "H", "H", "C", "H", "H", "C",
+     "H", "H", "H", "C", "H", "H", "H"], coords_n1c,
+    site_properties={"mol_name": ["N1C"] * len(coords_n1c)})
+pc = Molecule(
+    ["C", "C", "O", "H", "H", "C", "O", "O", "C", "H", "H", "H", "H"],
+    coords_pc, site_properties={"mol_name": ["PC"] * len(coords_pc)})
 
-
-coords_tfn=[[3.734,   8.436,  10.848],
-           [5.713,   9.869,   7.928],
-           [4.712,   9.816,   8.816],
-           [4.981,   8.437,  10.088],
-           [6.222,   8.807,  10.764],
-           [4.651,  11.005,  9.445],
-           [5.009,   7.118,   9.161],
-           [5.914,   5.626,   7.385],
-           [3.564,   9.647,   8.144],
-           [6.318,   6.404,   8.552],
-           [7.545,   7.196,   8.484],
-           [7.774,   4.365,   9.475],
-           [5.668,   4.219,   9.986],
-           [6.692,   5.074,   9.850],
-           [6.947,   5.614,  11.049]]
-
-tfn = Molecule(["O", "F", "C", "S", "O", "F", "N", "O", "F", "S", "O", "F", "F", "C", "F"], coords_tfn,site_properties={"mol_name":["TFN"]*len(coords_tfn)})
-n1c = Molecule(["C", "C", "H", "C", "H", "N", "N", "C", "H", "H", "H", "C", "H", "H", "C", "H", "H", "H", "C", "H", "H", "H"], coords_n1c,site_properties={"mol_name":["N1C"]*len(coords_n1c)})
-pc = Molecule(["C", "C", "O", "H", "H", "C", "O", "O", "C", "H", "H", "H", "H"], coords_pc,site_properties={"mol_name":["PC"]*len(coords_pc)})
 
 class TestLmpInput(TestCase):
-
     def tearDown(self):
-
         super(TestLmpInput, self).tearDown()
 
     @classmethod
     def setUpClass(cls):
-        mols=[tfn,n1c,pc]
+        mols = [tfn, n1c, pc]
         cls.ffmol = AntechamberRunner(mols)
-        cls.gff_list, top_list = cls.ffmol.get_ff_top_mol(mols,'mol.pdb')
-        #cls.mols_in_box = PackmolRunner(mols, [{"number":1,"inside box":[0.,0.,0.,40.,40.,40.]},{"number":1},{"number":1}])
+        cls.gff_list, top_list = cls.ffmol.get_ff_top_mol(mols, 'mol.pdb')
+        # cls.mols_in_box = PackmolRunner(mols, [{"number":1,"inside box":[0.,0.,0.,40.,40.,40.]},{"number":1},{"number":1}])
         # mols_in_box_dict={"mols":[m.as_dict for m in cls.mols_in_box.mols],"param_list":cls.mols_in_box.param_list}
         # with open("packmol_data.json",'w') as f:
         #     json.dump(mols_in_box_dict,f,indent=4)
-        with open("packmol_data.json") as f :
+        with open("packmol_data.json") as f:
             mol_in_box = json.load(f)
-            mol_in_box["mols"] = [Molecule.from_dict(m) for m in mol_in_box["mols"]]
+            mol_in_box["mols"] = [Molecule.from_dict(m) for m in
+                                  mol_in_box["mols"]]
 
-            packmol=PackmolRunner([], [])
+            packmol = PackmolRunner([], [])
 
-            packmol.mols=mol_in_box["mols"]
-            packmol.param_list=mol_in_box["param_list"]
+            packmol.mols = mol_in_box["mols"]
+            packmol.param_list = mol_in_box["param_list"]
             cls.mols_in_box = packmol
         super(TestLmpInput, cls).setUpClass()
 
-
-
     def test_str_(self):
-        data_lammps=LmpInput(self.ffmol,self.mols_in_box)
+        data_lammps = LmpInput(self.ffmol, self.mols_in_box)
         data_lammps._set_atom(self.ffmol, self.mols_in_box)
         lammps_data = data_lammps.__str__()
 
-
-        ans="""LAMMPS Data File
+        ans = """LAMMPS Data File
 
 # 1 mol 1 molecule
 # 1 mol 2 molecule
@@ -633,9 +636,7 @@ Impropers
 6  6  45  44  43  40  #  3  O2  O1  C2  O PC
 
 """
-        self.assertEqual(ans,lammps_data)
-
-
+        self.assertEqual(ans, lammps_data)
 
 
 if __name__ == '__main__':

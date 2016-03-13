@@ -1,17 +1,20 @@
 import os
 from unittest import TestCase
+
+import numpy as np
+
 from pymatgen import Molecule
 from pymatgen.io.babel import BabelMolAdaptor
 from pymatgen.io.qchem import QcOutput
-from rubicon.utils.ion_arranger.hard_sphere_energy_evaluators import AtomicRadiusUtils, ContactDetector
+from rubicon.utils.ion_arranger.hard_sphere_energy_evaluators import \
+    AtomicRadiusUtils, ContactDetector
 from rubicon.utils.ion_arranger.ion_arranger import IonPlacer
-import numpy as np
 
 __author__ = 'xiaohuiqu'
 
-
 test_dir = os.path.join(os.path.dirname(__file__),
                         "../../../../test_files")
+
 
 class TestContactDetector(TestCase):
     def setUp(self):
@@ -32,14 +35,16 @@ class TestContactDetector(TestCase):
         nums_fragments = [1, 1]
         self.acetoxyq_natfsi_placer = IonPlacer(
             acetoxyq_obmol, fragments, nums_fragments, None)
-        rad_util = AtomicRadiusUtils(covalent_radius_scale=3.0, metal_radius_scale=1.5)
+        rad_util = AtomicRadiusUtils(covalent_radius_scale=3.0,
+                                     metal_radius_scale=1.5)
         mol_radius = rad_util.get_radius(acetoxyq_obmol)
         cation_radius = rad_util.get_radius(sodium_obmol)
         anion_radius = rad_util.get_radius(tfsi_obmol)
         mol_coords = IonPlacer.normalize_molecule(acetoxyq_obmol)
         fragments_atom_radius = [cation_radius, anion_radius]
         nums_fragments = [1, 1]
-        self.detector = ContactDetector(mol_coords, mol_radius, fragments_atom_radius, nums_fragments)
+        self.detector = ContactDetector(mol_coords, mol_radius,
+                                        fragments_atom_radius, nums_fragments)
 
     def test_get_contact_matrix(self):
         c = [-40.0, 0.0, 0.0, 20.0, 0.0, 0.0, 1.0, 2.0]
@@ -94,4 +99,3 @@ class TestContactDetector(TestCase):
         fragments_coords = self.acetoxyq_natfsi_placer.decode_solution(c)
         is_contact = self.detector.is_contact(fragments_coords)
         self.assertTrue(is_contact)
-

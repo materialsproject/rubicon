@@ -1,8 +1,10 @@
 import datetime
 import os
+
 from fireworks.utilities.fw_serializers import FWSerializable
-from pymatgen.symmetry.analyzer import PointGroupAnalyzer
 from pymongo import MongoClient, DESCENDING
+
+from pymatgen.symmetry.analyzer import PointGroupAnalyzer
 from rubicon.utils.snl.egsnl import EGStructureNL, SNLGroup
 
 
@@ -84,7 +86,7 @@ class EGSNLMongoAdapter(FWSerializable):
 
     def _add_if_belongs(self, snlgroup, egsnl, testing_mode):
         if snlgroup.add_if_belongs(egsnl):
-            print 'MATCH FOUND, grouping (snl_id, snlgroup): {}'.\
+            print 'MATCH FOUND, grouping (snl_id, snlgroup): {}'. \
                 format((egsnl.snl_id, snlgroup.snlgroup_id))
             if not testing_mode:
                 self.snlgroups.update({'snlgroup_id': snlgroup.snlgroup_id},
@@ -99,7 +101,8 @@ class EGSNLMongoAdapter(FWSerializable):
         match_found = False
         if not force_new:
             if snlgroup_guess:
-                sgp = self.snlgroups.find_one(filter={'snlgroup_id': snlgroup_guess})
+                sgp = self.snlgroups.find_one(
+                    filter={'snlgroup_id': snlgroup_guess})
                 snlgroup = SNLGroup.from_dict(sgp)
                 match_found = self._add_if_belongs(snlgroup, egsnl,
                                                    testing_mode)
@@ -124,7 +127,6 @@ class EGSNLMongoAdapter(FWSerializable):
 
         return snlgroup, not match_found
 
-
     def switch_canonical_snl(self, snlgroup_id, canonical_egsnl):
         sgp = self.snlgroups.find_one(filter={'snlgroup_id': snlgroup_id})
         snlgroup = SNLGroup.from_dict(sgp)
@@ -135,8 +137,8 @@ class EGSNLMongoAdapter(FWSerializable):
                              'switch!')
 
         new_group = SNLGroup(snlgroup_id, canonical_egsnl, all_snl_ids)
-        self.snlgroups.update({'snlgroup_id': snlgroup_id}, new_group.as_dict())
-
+        self.snlgroups.update({'snlgroup_id': snlgroup_id},
+                              new_group.as_dict())
 
     def to_dict(self):
         """
@@ -148,7 +150,7 @@ class EGSNLMongoAdapter(FWSerializable):
     @classmethod
     def from_dict(cls, d):
         return EGSNLMongoAdapter(d['host'], d['port'], d['db'], d['username'],
-                               d['password'])
+                                 d['password'])
 
     @classmethod
     def auto_load(cls):
