@@ -5,6 +5,7 @@ This module implements basic kinds of jobs for Gaussian runs.
 """
 
 from __future__ import division
+
 from monty.io import zopen
 from monty.json import MSONable
 
@@ -15,12 +16,9 @@ __email__ = "shyuep@gmail.com"
 __status__ = "Beta"
 __date__ = "5/20/13"
 
-
 import subprocess
 import os
 import shutil
-
-
 
 from custodian.custodian import Job
 
@@ -71,7 +69,7 @@ class GaussianJob(Job, MSONable):
 
     def run(self):
         with zopen(self.input_file) as fin, \
-            zopen(self.output_file, 'w') as fout:
+                zopen(self.output_file, 'w') as fout:
             return subprocess.Popen(self.gau_cmd, stdin=fin, stdout=fout)
 
     def postprocess(self):

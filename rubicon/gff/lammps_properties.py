@@ -1,10 +1,13 @@
-from pymongo import MongoClient
 import shlex
-from monty import json
+
 import numpy
+from monty import json
+from pymongo import MongoClient
+
 from rubicon.packmol.lammpsio import LammpsLog
 
 __author__ = 'navnidhirajput'
+
 
 class LammpsProperties():
     """
@@ -17,19 +20,20 @@ class LammpsProperties():
 
     _fw_name = "Lammps Properties Writer"
 
-    def _insert_doc(self, fw_spec = None):
+    def _insert_doc(self, fw_spec=None):
         db_dir = shlex.os.environ['DB_LOC']
         db_path = shlex.os.path.join(db_dir, 'tasks_db.json')
         with open(db_path) as f:
             db_creds = json.load(f)
-        conn = MongoClient(db_creds['host'], db_creds['port'],)
+        conn = MongoClient(db_creds['host'], db_creds['port'], )
         db = conn[db_creds['database']]
         if db_creds['admin_user']:
             db.authenticate(db_creds['admin_user'], db_creds['admin_password'])
             coll = db['lammps_output']
         parse_lammps = LammpsLog.from_file('mol.log')
         docs = parse_lammps.llog
-        docs = {k: list(v) if isinstance(v, numpy.ndarray) else v for k, v in docs.items()}
+        docs = {k: list(v) if isinstance(v, numpy.ndarray) else v for k, v in
+                docs.items()}
         coll.insert(docs)
         coll.update(docs)
 

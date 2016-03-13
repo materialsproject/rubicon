@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
-import re
 import glob
-import requests
-import traceback
+import re
 import sys
+import traceback
+
+import requests
 
 try:
     import pybel as pb
@@ -40,7 +41,8 @@ def get_nih_names(smiles):
     try:
         smi = re.sub("#", "%23", smiles)
         response = session.get(
-            "http://cactus.nci.nih.gov/chemical/structure/{}/names".format(smi))
+            "http://cactus.nci.nih.gov/chemical/structure/{}/names".format(
+                smi))
         if response.status_code == 200:
             names = response.text.split("\n")
             return [n.strip() for n in names if n.strip() != ""]
@@ -81,7 +83,7 @@ def insert_g3testset(coll):
                 d["smiles"] = smiles
                 d["can"] = can
                 d["inchi"] = inchi
-                #d["names"] = get_nih_names(smiles)
+                # d["names"] = get_nih_names(smiles)
                 d["svg"] = svg
                 d["xyz"] = str(xyz)
                 d["tags"] = ["G305 test set"]
@@ -143,7 +145,7 @@ def insert_solvents(coll):
             d["smiles"] = smiles
             d["can"] = can
             d["inchi"] = inchi
-            #d["names"] = get_nih_names(smiles)
+            # d["names"] = get_nih_names(smiles)
             d["svg"] = svg
             d["xyz"] = str(xyz)
             d["tags"] = ["Solvents"]
@@ -181,7 +183,7 @@ def insert_elements(coll):
                 d["smiles"] = smiles
                 d["can"] = can
                 d["inchi"] = inchi
-                #d["names"] = get_nih_names(smiles)
+                # d["names"] = get_nih_names(smiles)
                 d["svg"] = svg
                 d["xyz"] = str(xyz)
                 d["tags"] = ["G305 test set"]
@@ -202,7 +204,7 @@ if __name__ == "__main__":
     qe = MongoQueryEngine()
     db = qe.db
     coll = db["molecules"]
-    #coll.remove({})
+    # coll.remove({})
     insert_g3testset(coll)
-    #insert_solvents(coll)
-    #insert_elements(coll)
+    # insert_solvents(coll)
+    # insert_elements(coll)

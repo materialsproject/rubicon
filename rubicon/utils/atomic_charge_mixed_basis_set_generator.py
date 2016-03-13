@@ -1,4 +1,5 @@
 from fireworks.utilities.fw_serializers import FWSerializable
+
 from pymatgen.core.structure import Molecule
 
 __author__ = 'xiaohuiqu'
@@ -31,7 +32,8 @@ class AtomicChargeMixedBasisSetGenerator(FWSerializable):
             normal_basis_set=m_dict["normal_basis_set"],
             diffuse_basis_set=m_dict["diffuse_basis_set"])
 
-    def __init__(self, charge_threshold=-0.5, normal_basis_set="6-31G*", diffuse_basis_set="6-31+G*"):
+    def __init__(self, charge_threshold=-0.5, normal_basis_set="6-31G*",
+                 diffuse_basis_set="6-31+G*"):
         self.charge_threshold = charge_threshold
         self.normal_basis_set = normal_basis_set.lower()
         self.diffuse_basis_set = diffuse_basis_set.lower()
@@ -42,6 +44,7 @@ class AtomicChargeMixedBasisSetGenerator(FWSerializable):
         if len(mol) != len(charges):
             raise ValueError("Number of atoms and charges must match")
         elements = [site.species_string for site in mol.sites]
-        basis = [self.normal_basis_set if c >= self.charge_threshold else self.diffuse_basis_set
-                 for c in charges]
+        basis = [
+            self.normal_basis_set if c >= self.charge_threshold else self.diffuse_basis_set
+            for c in charges]
         return zip(elements, basis)

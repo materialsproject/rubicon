@@ -1,15 +1,10 @@
 import shlex
 import subprocess
-from rubicon.firetasks.multistep_gauss_task import \
-    GaussianGeomOptDBInsertionTask
 
 __author__ = 'navnidhirajput'
 
 from fireworks import FireTaskBase, explicit_serialize, FWAction
-from pymatgen import write_mol, Molecule
-import glob
 from pymatgen.io import gaussian
-import os
 
 
 @explicit_serialize
@@ -27,8 +22,8 @@ class WritegaussianGeoTask(FireTaskBase):
         charge = fw_spec["charge"]
         spin_multiplicity = fw_spec["spin_multiplicity"]
 
-        gaus_lines = gaussian.GaussianInput(mol, charge = charge,
-                                            spin_multiplicity = spin_multiplicity,
+        gaus_lines = gaussian.GaussianInput(mol, charge=charge,
+                                            spin_multiplicity=spin_multiplicity,
                                             title='created by gaussian_geo_task from' + ' ' + mol_name,
                                             functional="b3lyp",
                                             basis_set="aug-cc-pvdz",
@@ -45,18 +40,16 @@ class WritegaussianGeoTask(FireTaskBase):
                                             dieze_tag="#",
                                             gen_basis=None)
 
-
         gaus_lines.write_file('mol_geo.gau', cart_coords=True)
 
-        with open('mol_geo.gau') as f, open("mol_geo.out", 'w') as fo :
-           subprocess.call(shlex.split("g09launch"), stdin=f, stdout = fo)
+        with open('mol_geo.gau') as f, open("mol_geo.out", 'w') as fo:
+            subprocess.call(shlex.split("g09launch"), stdin=f, stdout=fo)
 
-        prev_gaussian_geo = shlex.os.path.join(shlex.os.getcwd(), 'mol_geo.out')
+        prev_gaussian_geo = shlex.os.path.join(shlex.os.getcwd(),
+                                               'mol_geo.out')
         update_spec = {'prev_gaussian_geo': prev_gaussian_geo}
 
         return FWAction(update_spec=update_spec)
-
-
 
 
 @explicit_serialize
@@ -76,14 +69,14 @@ class WritegaussianFreqESPTask(FireTaskBase):
         charge = fw_spec["charge"]
         spin_multiplicity = fw_spec["spin_multiplicity"]
 
-
-        gaus_freq_charge = gaussian.GaussianInput(mol_opt, charge = charge,
+        gaus_freq_charge = gaussian.GaussianInput(mol_opt, charge=charge,
                                                   spin_multiplicity=spin_multiplicity,
                                                   title='created by gaussian_frq_task from' + ' ' + mol_name,
                                                   functional="b3lyp",
                                                   basis_set="aug-cc-pvdz  freq",
-                                                  route_parameters={"SCF": "tight",
-                                                  "pop":"MK iop(6/33=2,6/41=10,6/42=10,7/33=1)"},
+                                                  route_parameters={
+                                                      "SCF": "tight",
+                                                      "pop": "MK iop(6/33=2,6/41=10,6/42=10,7/33=1)"},
                                                   input_parameters=None,
                                                   link0_parameters={
                                                       "%mem": "30GB",
@@ -94,11 +87,11 @@ class WritegaussianFreqESPTask(FireTaskBase):
                                                   gen_basis=None)
         gaus_freq_charge.write_file('mol_freq.gau', cart_coords=True)
 
-        with open('mol_freq.gau') as f, open ("mol_freq.out", 'w') as fo:
-            subprocess.call(shlex.split("g09launch"), stdin=f, stdout = fo)
+        with open('mol_freq.gau') as f, open("mol_freq.out", 'w') as fo:
+            subprocess.call(shlex.split("g09launch"), stdin=f, stdout=fo)
 
-        prev_gaussian_freq = shlex.os.path.join(shlex.os.getcwd(), 'mol_freq.out')
+        prev_gaussian_freq = shlex.os.path.join(shlex.os.getcwd(),
+                                                'mol_freq.out')
         update_spec = {'prev_gaussian_freq': prev_gaussian_freq}
 
         return FWAction(update_spec=update_spec)
-

@@ -18,4 +18,3 @@ def get_qchem_version():
                             "file \"{}\"".format(version_file_path))
     else:
         raise Exception("Environmental Variable $QC is not defined")
-

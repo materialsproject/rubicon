@@ -1,8 +1,10 @@
 from fireworks.core.firework import FireTaskBase, FWAction
 from fireworks.utilities.fw_serializers import FWSerializable
+
 from pymatgen.io.babel import BabelMolAdaptor
 from pymatgen.matproj.snl import StructureNL
 from rubicon.utils.snl.egsnl_mongo import EGSNLMongoAdapter
+
 
 class AddEGSNLTask(FireTaskBase, FWSerializable):
     """

@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+
 from rubicon.processors.process_submissions_eg import SubmissionProcessorEG
 
 
@@ -18,6 +19,7 @@ def go_eg_submissions():
 
     sp = SubmissionProcessorEG.auto_load()
     sp.run(args.sleep, args.infinite)
+
 
 if __name__ == '__main__':
     go_eg_submissions()

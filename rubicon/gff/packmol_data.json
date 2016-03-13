@@ -1,947 +1,947 @@
 {
-    "param_list": [
+  "param_list": [
+    {
+      "number": 1,
+      "inside box": [
+        0.0,
+        0.0,
+        0.0,
+        40.0,
+        40.0,
+        40.0
+      ]
+    },
+    {
+      "number": 1
+    },
+    {
+      "number": 1
+    }
+  ],
+  "mols": [
+    {
+      "charge": 0,
+      "spin_multiplicity": 2,
+      "sites": [
         {
-            "number": 1, 
-            "inside box": [
-                0.0, 
-                0.0, 
-                0.0, 
-                40.0, 
-                40.0, 
-                40.0
-            ]
-        }, 
+          "name": "O",
+          "xyz": [
+            3.734,
+            8.436,
+            10.848
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "O"
+            }
+          ],
+          "properties": {
+            "atomname": "O",
+            "mol_name": "TFN"
+          }
+        },
         {
-            "number": 1
-        }, 
+          "name": "F",
+          "xyz": [
+            5.713,
+            9.869,
+            7.928
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "F"
+            }
+          ],
+          "properties": {
+            "atomname": "F",
+            "mol_name": "TFN"
+          }
+        },
         {
-            "number": 1
+          "name": "C",
+          "xyz": [
+            4.712,
+            9.816,
+            8.816
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "C"
+            }
+          ],
+          "properties": {
+            "atomname": "C",
+            "mol_name": "TFN"
+          }
+        },
+        {
+          "name": "S",
+          "xyz": [
+            4.981,
+            8.437,
+            10.088
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "S"
+            }
+          ],
+          "properties": {
+            "atomname": "S",
+            "mol_name": "TFN"
+          }
+        },
+        {
+          "name": "O",
+          "xyz": [
+            6.222,
+            8.807,
+            10.764
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "O"
+            }
+          ],
+          "properties": {
+            "atomname": "O1",
+            "mol_name": "TFN"
+          }
+        },
+        {
+          "name": "F",
+          "xyz": [
+            4.651,
+            11.005,
+            9.445
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "F"
+            }
+          ],
+          "properties": {
+            "atomname": "F1",
+            "mol_name": "TFN"
+          }
+        },
+        {
+          "name": "N",
+          "xyz": [
+            5.009,
+            7.118,
+            9.161
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "N"
+            }
+          ],
+          "properties": {
+            "atomname": "N",
+            "mol_name": "TFN"
+          }
+        },
+        {
+          "name": "O",
+          "xyz": [
+            5.914,
+            5.626,
+            7.385
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "O"
+            }
+          ],
+          "properties": {
+            "atomname": "O2",
+            "mol_name": "TFN"
+          }
+        },
+        {
+          "name": "F",
+          "xyz": [
+            3.564,
+            9.647,
+            8.144
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "F"
+            }
+          ],
+          "properties": {
+            "atomname": "F2",
+            "mol_name": "TFN"
+          }
+        },
+        {
+          "name": "S",
+          "xyz": [
+            6.318,
+            6.404,
+            8.552
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "S"
+            }
+          ],
+          "properties": {
+            "atomname": "S1",
+            "mol_name": "TFN"
+          }
+        },
+        {
+          "name": "O",
+          "xyz": [
+            7.545,
+            7.196,
+            8.484
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "O"
+            }
+          ],
+          "properties": {
+            "atomname": "O3",
+            "mol_name": "TFN"
+          }
+        },
+        {
+          "name": "F",
+          "xyz": [
+            7.774,
+            4.365,
+            9.475
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "F"
+            }
+          ],
+          "properties": {
+            "atomname": "F3",
+            "mol_name": "TFN"
+          }
+        },
+        {
+          "name": "F",
+          "xyz": [
+            5.668,
+            4.219,
+            9.986
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "F"
+            }
+          ],
+          "properties": {
+            "atomname": "F4",
+            "mol_name": "TFN"
+          }
+        },
+        {
+          "name": "C",
+          "xyz": [
+            6.692,
+            5.074,
+            9.85
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "C"
+            }
+          ],
+          "properties": {
+            "atomname": "C1",
+            "mol_name": "TFN"
+          }
+        },
+        {
+          "name": "F",
+          "xyz": [
+            6.947,
+            5.614,
+            11.049
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "F"
+            }
+          ],
+          "properties": {
+            "atomname": "F5",
+            "mol_name": "TFN"
+          }
         }
-    ], 
-    "mols": [
+      ],
+      "@class": "Molecule",
+      "@module": "pymatgen.core.structure"
+    },
+    {
+      "charge": 0,
+      "spin_multiplicity": 2,
+      "sites": [
         {
-            "charge": 0, 
-            "spin_multiplicity": 2, 
-            "sites": [
-                {
-                    "name": "O", 
-                    "xyz": [
-                        3.734, 
-                        8.436, 
-                        10.848
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "O"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "O", 
-                        "mol_name": "TFN"
-                    }
-                }, 
-                {
-                    "name": "F", 
-                    "xyz": [
-                        5.713, 
-                        9.869, 
-                        7.928
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "F"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "F", 
-                        "mol_name": "TFN"
-                    }
-                }, 
-                {
-                    "name": "C", 
-                    "xyz": [
-                        4.712, 
-                        9.816, 
-                        8.816
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "C"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "C", 
-                        "mol_name": "TFN"
-                    }
-                }, 
-                {
-                    "name": "S", 
-                    "xyz": [
-                        4.981, 
-                        8.437, 
-                        10.088
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "S"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "S", 
-                        "mol_name": "TFN"
-                    }
-                }, 
-                {
-                    "name": "O", 
-                    "xyz": [
-                        6.222, 
-                        8.807, 
-                        10.764
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "O"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "O1", 
-                        "mol_name": "TFN"
-                    }
-                }, 
-                {
-                    "name": "F", 
-                    "xyz": [
-                        4.651, 
-                        11.005, 
-                        9.445
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "F"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "F1", 
-                        "mol_name": "TFN"
-                    }
-                }, 
-                {
-                    "name": "N", 
-                    "xyz": [
-                        5.009, 
-                        7.118, 
-                        9.161
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "N"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "N", 
-                        "mol_name": "TFN"
-                    }
-                }, 
-                {
-                    "name": "O", 
-                    "xyz": [
-                        5.914, 
-                        5.626, 
-                        7.385
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "O"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "O2", 
-                        "mol_name": "TFN"
-                    }
-                }, 
-                {
-                    "name": "F", 
-                    "xyz": [
-                        3.564, 
-                        9.647, 
-                        8.144
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "F"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "F2", 
-                        "mol_name": "TFN"
-                    }
-                }, 
-                {
-                    "name": "S", 
-                    "xyz": [
-                        6.318, 
-                        6.404, 
-                        8.552
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "S"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "S1", 
-                        "mol_name": "TFN"
-                    }
-                }, 
-                {
-                    "name": "O", 
-                    "xyz": [
-                        7.545, 
-                        7.196, 
-                        8.484
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "O"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "O3", 
-                        "mol_name": "TFN"
-                    }
-                }, 
-                {
-                    "name": "F", 
-                    "xyz": [
-                        7.774, 
-                        4.365, 
-                        9.475
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "F"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "F3", 
-                        "mol_name": "TFN"
-                    }
-                }, 
-                {
-                    "name": "F", 
-                    "xyz": [
-                        5.668, 
-                        4.219, 
-                        9.986
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "F"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "F4", 
-                        "mol_name": "TFN"
-                    }
-                }, 
-                {
-                    "name": "C", 
-                    "xyz": [
-                        6.692, 
-                        5.074, 
-                        9.85
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "C"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "C1", 
-                        "mol_name": "TFN"
-                    }
-                }, 
-                {
-                    "name": "F", 
-                    "xyz": [
-                        6.947, 
-                        5.614, 
-                        11.049
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "F"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "F5", 
-                        "mol_name": "TFN"
-                    }
-                }
-            ], 
-            "@class": "Molecule", 
-            "@module": "pymatgen.core.structure"
-        }, 
+          "name": "C",
+          "xyz": [
+            4.522,
+            8.999,
+            5.512
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "C"
+            }
+          ],
+          "properties": {
+            "atomname": "C",
+            "mol_name": "N1C"
+          }
+        },
         {
-            "charge": 0, 
-            "spin_multiplicity": 2, 
-            "sites": [
-                {
-                    "name": "C", 
-                    "xyz": [
-                        4.522, 
-                        8.999, 
-                        5.512
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "C"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "C", 
-                        "mol_name": "N1C"
-                    }
-                }, 
-                {
-                    "name": "C", 
-                    "xyz": [
-                        6.666, 
-                        9.383, 
-                        5.971
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "C"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "C1", 
-                        "mol_name": "N1C"
-                    }
-                }, 
-                {
-                    "name": "H", 
-                    "xyz": [
-                        7.522, 
-                        9.623, 
-                        6.578
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "H"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "H", 
-                        "mol_name": "N1C"
-                    }
-                }, 
-                {
-                    "name": "C", 
-                    "xyz": [
-                        6.567, 
-                        9.114, 
-                        4.645
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "C"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "C2", 
-                        "mol_name": "N1C"
-                    }
-                }, 
-                {
-                    "name": "H", 
-                    "xyz": [
-                        7.322, 
-                        9.072, 
-                        3.879
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "H"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "H1", 
-                        "mol_name": "N1C"
-                    }
-                }, 
-                {
-                    "name": "N", 
-                    "xyz": [
-                        5.388, 
-                        9.312, 
-                        6.496
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "N"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "N", 
-                        "mol_name": "N1C"
-                    }
-                }, 
-                {
-                    "name": "N", 
-                    "xyz": [
-                        5.231, 
-                        8.881, 
-                        4.373
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "N"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "N1", 
-                        "mol_name": "N1C"
-                    }
-                }, 
-                {
-                    "name": "C", 
-                    "xyz": [
-                        5.041, 
-                        9.544, 
-                        7.906
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "C"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "C3", 
-                        "mol_name": "N1C"
-                    }
-                }, 
-                {
-                    "name": "H", 
-                    "xyz": [
-                        5.944, 
-                        9.842, 
-                        8.432
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "H"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "H2", 
-                        "mol_name": "N1C"
-                    }
-                }, 
-                {
-                    "name": "H", 
-                    "xyz": [
-                        4.305, 
-                        10.344, 
-                        7.985
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "H"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "H3", 
-                        "mol_name": "N1C"
-                    }
-                }, 
-                {
-                    "name": "H", 
-                    "xyz": [
-                        4.653, 
-                        8.63, 
-                        8.355
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "H"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "H4", 
-                        "mol_name": "N1C"
-                    }
-                }, 
-                {
-                    "name": "C", 
-                    "xyz": [
-                        4.699, 
-                        8.519, 
-                        3.03
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "C"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "C4", 
-                        "mol_name": "N1C"
-                    }
-                }, 
-                {
-                    "name": "H", 
-                    "xyz": [
-                        3.676, 
-                        8.89, 
-                        2.982
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "H"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "H5", 
-                        "mol_name": "N1C"
-                    }
-                }, 
-                {
-                    "name": "H", 
-                    "xyz": [
-                        5.285, 
-                        9.084, 
-                        2.312
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "H"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "H6", 
-                        "mol_name": "N1C"
-                    }
-                }, 
-                {
-                    "name": "C", 
-                    "xyz": [
-                        4.774, 
-                        7.019, 
-                        2.765
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "C"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "C5", 
-                        "mol_name": "N1C"
-                    }
-                }, 
-                {
-                    "name": "H", 
-                    "xyz": [
-                        4.386, 
-                        6.818, 
-                        1.765
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "H"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "H7", 
-                        "mol_name": "N1C"
-                    }
-                }, 
-                {
-                    "name": "H", 
-                    "xyz": [
-                        5.802, 
-                        6.657, 
-                        2.807
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "H"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "H8", 
-                        "mol_name": "N1C"
-                    }
-                }, 
-                {
-                    "name": "H", 
-                    "xyz": [
-                        4.176, 
-                        6.448, 
-                        3.48
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "H"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "H9", 
-                        "mol_name": "N1C"
-                    }
-                }, 
-                {
-                    "name": "C", 
-                    "xyz": [
-                        3.05, 
-                        8.855, 
-                        5.663
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "C"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "C6", 
-                        "mol_name": "N1C"
-                    }
-                }, 
-                {
-                    "name": "H", 
-                    "xyz": [
-                        2.657, 
-                        8.107, 
-                        4.974
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "H"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "H10", 
-                        "mol_name": "N1C"
-                    }
-                }, 
-                {
-                    "name": "H", 
-                    "xyz": [
-                        2.796, 
-                        8.543, 
-                        6.676
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "H"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "H11", 
-                        "mol_name": "N1C"
-                    }
-                }, 
-                {
-                    "name": "H", 
-                    "xyz": [
-                        2.542, 
-                        9.803, 
-                        5.463
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "H"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "H12", 
-                        "mol_name": "N1C"
-                    }
-                }
-            ], 
-            "@class": "Molecule", 
-            "@module": "pymatgen.core.structure"
-        }, 
+          "name": "C",
+          "xyz": [
+            6.666,
+            9.383,
+            5.971
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "C"
+            }
+          ],
+          "properties": {
+            "atomname": "C1",
+            "mol_name": "N1C"
+          }
+        },
         {
-            "charge": 0, 
-            "spin_multiplicity": 1, 
-            "sites": [
-                {
-                    "name": "C", 
-                    "xyz": [
-                        2.516, 
-                        1.762, 
-                        7.803
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "C"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "C", 
-                        "mol_name": "PC"
-                    }
-                }, 
-                {
-                    "name": "C", 
-                    "xyz": [
-                        3.382, 
-                        2.859, 
-                        7.178
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "C"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "C1", 
-                        "mol_name": "PC"
-                    }
-                }, 
-                {
-                    "name": "O", 
-                    "xyz": [
-                        4.673, 
-                        2.24, 
-                        7.066
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "O"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "O", 
-                        "mol_name": "PC"
-                    }
-                }, 
-                {
-                    "name": "H", 
-                    "xyz": [
-                        3.476, 
-                        3.751, 
-                        7.797
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "H"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "H", 
-                        "mol_name": "PC"
-                    }
-                }, 
-                {
-                    "name": "H", 
-                    "xyz": [
-                        3.037, 
-                        3.136, 
-                        6.177
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "H"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "H1", 
-                        "mol_name": "PC"
-                    }
-                }, 
-                {
-                    "name": "C", 
-                    "xyz": [
-                        4.526, 
-                        0.887, 
-                        7.121
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "C"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "C2", 
-                        "mol_name": "PC"
-                    }
-                }, 
-                {
-                    "name": "O", 
-                    "xyz": [
-                        3.246, 
-                        0.565, 
-                        7.439
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "O"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "O1", 
-                        "mol_name": "PC"
-                    }
-                }, 
-                {
-                    "name": "O", 
-                    "xyz": [
-                        5.398, 
-                        0.103, 
-                        6.918
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "O"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "O2", 
-                        "mol_name": "PC"
-                    }
-                }, 
-                {
-                    "name": "C", 
-                    "xyz": [
-                        1.09, 
-                        1.684, 
-                        7.302
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "C"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "C3", 
-                        "mol_name": "PC"
-                    }
-                }, 
-                {
-                    "name": "H", 
-                    "xyz": [
-                        2.539, 
-                        1.829, 
-                        8.896
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "H"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "H2", 
-                        "mol_name": "PC"
-                    }
-                }, 
-                {
-                    "name": "H", 
-                    "xyz": [
-                        1.069, 
-                        1.564, 
-                        6.216
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "H"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "H3", 
-                        "mol_name": "PC"
-                    }
-                }, 
-                {
-                    "name": "H", 
-                    "xyz": [
-                        0.552, 
-                        2.599, 
-                        7.564
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "H"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "H4", 
-                        "mol_name": "PC"
-                    }
-                }, 
-                {
-                    "name": "H", 
-                    "xyz": [
-                        0.568, 
-                        0.839, 
-                        7.755
-                    ], 
-                    "species": [
-                        {
-                            "occu": 1, 
-                            "element": "H"
-                        }
-                    ], 
-                    "properties": {
-                        "atomname": "H5", 
-                        "mol_name": "PC"
-                    }
-                }
-            ], 
-            "@class": "Molecule", 
-            "@module": "pymatgen.core.structure"
+          "name": "H",
+          "xyz": [
+            7.522,
+            9.623,
+            6.578
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "H"
+            }
+          ],
+          "properties": {
+            "atomname": "H",
+            "mol_name": "N1C"
+          }
+        },
+        {
+          "name": "C",
+          "xyz": [
+            6.567,
+            9.114,
+            4.645
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "C"
+            }
+          ],
+          "properties": {
+            "atomname": "C2",
+            "mol_name": "N1C"
+          }
+        },
+        {
+          "name": "H",
+          "xyz": [
+            7.322,
+            9.072,
+            3.879
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "H"
+            }
+          ],
+          "properties": {
+            "atomname": "H1",
+            "mol_name": "N1C"
+          }
+        },
+        {
+          "name": "N",
+          "xyz": [
+            5.388,
+            9.312,
+            6.496
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "N"
+            }
+          ],
+          "properties": {
+            "atomname": "N",
+            "mol_name": "N1C"
+          }
+        },
+        {
+          "name": "N",
+          "xyz": [
+            5.231,
+            8.881,
+            4.373
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "N"
+            }
+          ],
+          "properties": {
+            "atomname": "N1",
+            "mol_name": "N1C"
+          }
+        },
+        {
+          "name": "C",
+          "xyz": [
+            5.041,
+            9.544,
+            7.906
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "C"
+            }
+          ],
+          "properties": {
+            "atomname": "C3",
+            "mol_name": "N1C"
+          }
+        },
+        {
+          "name": "H",
+          "xyz": [
+            5.944,
+            9.842,
+            8.432
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "H"
+            }
+          ],
+          "properties": {
+            "atomname": "H2",
+            "mol_name": "N1C"
+          }
+        },
+        {
+          "name": "H",
+          "xyz": [
+            4.305,
+            10.344,
+            7.985
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "H"
+            }
+          ],
+          "properties": {
+            "atomname": "H3",
+            "mol_name": "N1C"
+          }
+        },
+        {
+          "name": "H",
+          "xyz": [
+            4.653,
+            8.63,
+            8.355
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "H"
+            }
+          ],
+          "properties": {
+            "atomname": "H4",
+            "mol_name": "N1C"
+          }
+        },
+        {
+          "name": "C",
+          "xyz": [
+            4.699,
+            8.519,
+            3.03
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "C"
+            }
+          ],
+          "properties": {
+            "atomname": "C4",
+            "mol_name": "N1C"
+          }
+        },
+        {
+          "name": "H",
+          "xyz": [
+            3.676,
+            8.89,
+            2.982
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "H"
+            }
+          ],
+          "properties": {
+            "atomname": "H5",
+            "mol_name": "N1C"
+          }
+        },
+        {
+          "name": "H",
+          "xyz": [
+            5.285,
+            9.084,
+            2.312
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "H"
+            }
+          ],
+          "properties": {
+            "atomname": "H6",
+            "mol_name": "N1C"
+          }
+        },
+        {
+          "name": "C",
+          "xyz": [
+            4.774,
+            7.019,
+            2.765
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "C"
+            }
+          ],
+          "properties": {
+            "atomname": "C5",
+            "mol_name": "N1C"
+          }
+        },
+        {
+          "name": "H",
+          "xyz": [
+            4.386,
+            6.818,
+            1.765
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "H"
+            }
+          ],
+          "properties": {
+            "atomname": "H7",
+            "mol_name": "N1C"
+          }
+        },
+        {
+          "name": "H",
+          "xyz": [
+            5.802,
+            6.657,
+            2.807
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "H"
+            }
+          ],
+          "properties": {
+            "atomname": "H8",
+            "mol_name": "N1C"
+          }
+        },
+        {
+          "name": "H",
+          "xyz": [
+            4.176,
+            6.448,
+            3.48
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "H"
+            }
+          ],
+          "properties": {
+            "atomname": "H9",
+            "mol_name": "N1C"
+          }
+        },
+        {
+          "name": "C",
+          "xyz": [
+            3.05,
+            8.855,
+            5.663
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "C"
+            }
+          ],
+          "properties": {
+            "atomname": "C6",
+            "mol_name": "N1C"
+          }
+        },
+        {
+          "name": "H",
+          "xyz": [
+            2.657,
+            8.107,
+            4.974
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "H"
+            }
+          ],
+          "properties": {
+            "atomname": "H10",
+            "mol_name": "N1C"
+          }
+        },
+        {
+          "name": "H",
+          "xyz": [
+            2.796,
+            8.543,
+            6.676
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "H"
+            }
+          ],
+          "properties": {
+            "atomname": "H11",
+            "mol_name": "N1C"
+          }
+        },
+        {
+          "name": "H",
+          "xyz": [
+            2.542,
+            9.803,
+            5.463
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "H"
+            }
+          ],
+          "properties": {
+            "atomname": "H12",
+            "mol_name": "N1C"
+          }
         }
-    ]
+      ],
+      "@class": "Molecule",
+      "@module": "pymatgen.core.structure"
+    },
+    {
+      "charge": 0,
+      "spin_multiplicity": 1,
+      "sites": [
+        {
+          "name": "C",
+          "xyz": [
+            2.516,
+            1.762,
+            7.803
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "C"
+            }
+          ],
+          "properties": {
+            "atomname": "C",
+            "mol_name": "PC"
+          }
+        },
+        {
+          "name": "C",
+          "xyz": [
+            3.382,
+            2.859,
+            7.178
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "C"
+            }
+          ],
+          "properties": {
+            "atomname": "C1",
+            "mol_name": "PC"
+          }
+        },
+        {
+          "name": "O",
+          "xyz": [
+            4.673,
+            2.24,
+            7.066
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "O"
+            }
+          ],
+          "properties": {
+            "atomname": "O",
+            "mol_name": "PC"
+          }
+        },
+        {
+          "name": "H",
+          "xyz": [
+            3.476,
+            3.751,
+            7.797
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "H"
+            }
+          ],
+          "properties": {
+            "atomname": "H",
+            "mol_name": "PC"
+          }
+        },
+        {
+          "name": "H",
+          "xyz": [
+            3.037,
+            3.136,
+            6.177
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "H"
+            }
+          ],
+          "properties": {
+            "atomname": "H1",
+            "mol_name": "PC"
+          }
+        },
+        {
+          "name": "C",
+          "xyz": [
+            4.526,
+            0.887,
+            7.121
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "C"
+            }
+          ],
+          "properties": {
+            "atomname": "C2",
+            "mol_name": "PC"
+          }
+        },
+        {
+          "name": "O",
+          "xyz": [
+            3.246,
+            0.565,
+            7.439
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "O"
+            }
+          ],
+          "properties": {
+            "atomname": "O1",
+            "mol_name": "PC"
+          }
+        },
+        {
+          "name": "O",
+          "xyz": [
+            5.398,
+            0.103,
+            6.918
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "O"
+            }
+          ],
+          "properties": {
+            "atomname": "O2",
+            "mol_name": "PC"
+          }
+        },
+        {
+          "name": "C",
+          "xyz": [
+            1.09,
+            1.684,
+            7.302
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "C"
+            }
+          ],
+          "properties": {
+            "atomname": "C3",
+            "mol_name": "PC"
+          }
+        },
+        {
+          "name": "H",
+          "xyz": [
+            2.539,
+            1.829,
+            8.896
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "H"
+            }
+          ],
+          "properties": {
+            "atomname": "H2",
+            "mol_name": "PC"
+          }
+        },
+        {
+          "name": "H",
+          "xyz": [
+            1.069,
+            1.564,
+            6.216
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "H"
+            }
+          ],
+          "properties": {
+            "atomname": "H3",
+            "mol_name": "PC"
+          }
+        },
+        {
+          "name": "H",
+          "xyz": [
+            0.552,
+            2.599,
+            7.564
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "H"
+            }
+          ],
+          "properties": {
+            "atomname": "H4",
+            "mol_name": "PC"
+          }
+        },
+        {
+          "name": "H",
+          "xyz": [
+            0.568,
+            0.839,
+            7.755
+          ],
+          "species": [
+            {
+              "occu": 1,
+              "element": "H"
+            }
+          ],
+          "properties": {
+            "atomname": "H5",
+            "mol_name": "PC"
+          }
+        }
+      ],
+      "@class": "Molecule",
+      "@module": "pymatgen.core.structure"
+    }
+  ]
 }
