@@ -1,0 +1,7 @@
+TITLE     Great Red Owns Many ACres of Sand 
+MODEL        1
+ATOM      1  OW  SOL     1      -0.222   0.295  -0.012  1.00  0.00           O
+ATOM      2  HW1 SOL     1       0.706   0.308   0.234  1.00  0.00           H
+ATOM      3  HW2 SOL     1      -0.485  -0.604  -0.222  1.00  0.00           H
+TER
+ENDMDL
