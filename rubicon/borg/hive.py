@@ -5,18 +5,21 @@ TODO: Modify module doc.
 """
 
 from __future__ import division
+
 import shlex
+import subprocess
+
 import fireworks
 from monty.io import zopen
 from monty.json import jsanitize
 from monty.os.path import zpath
 from pkg_resources import parse_version
+
 from pymatgen import Molecule
 from pymatgen.analysis.molecule_structure_comparator import \
     MoleculeStructureComparator
 from pymatgen.io.qchem import QcOutput
 from pymatgen.symmetry.analyzer import PointGroupAnalyzer
-import subprocess
 from rubicon.utils.snl.egsnl import EGStructureNL
 from rubicon.utils.snl.egsnl_mongo import EGSNLMongoAdapter
 
@@ -26,7 +29,6 @@ __version__ = "0.1"
 __maintainer__ = "Shyue Ping Ong"
 __email__ = "shyuep@gmail.com"
 __date__ = "6/15/13"
-
 
 import os
 import logging
@@ -51,11 +53,11 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
     Assimilates a delta scf nwchem run and inserts it into the database.
     """
 
-    #Version of this db creator document.
+    # Version of this db creator document.
     __version__ = "0.1.0"
 
     def __init__(self, host="127.0.0.1", port=27017, database="mg_core_dev",
-                 user=None, password=None,  collection="mol_tasks",
+                 user=None, password=None, collection="mol_tasks",
                  simulate_mode=False, update_duplicates=True):
         """
         Args:
@@ -267,57 +269,58 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
     @staticmethod
     def update_tags(fw_spec, d, task_id):
         if fw_spec:
-                d['task_type'] = fw_spec['task_type']
-                if '_fizzled_parents' in fw_spec and not 'prev_task_type' in \
-                        fw_spec:
-                    d['task_type'] = fw_spec['_fizzled_parents'][0][
-                        'task_type']
-                else:
-                    d['task_type'] = fw_spec['prev_task_type']
-                d['run_tags'] = fw_spec['run_tags']
-                d['implicit_solvent'] = fw_spec['implicit_solvent']
-                d['user_tags'] = fw_spec["user_tags"]
+            d['task_type'] = fw_spec['task_type']
+            if '_fizzled_parents' in fw_spec and not 'prev_task_type' in \
+                    fw_spec:
+                d['task_type'] = fw_spec['_fizzled_parents'][0][
+                    'task_type']
+            else:
+                d['task_type'] = fw_spec['prev_task_type']
+            d['run_tags'] = fw_spec['run_tags']
+            d['implicit_solvent'] = fw_spec['implicit_solvent']
+            d['user_tags'] = fw_spec["user_tags"]
+            if isinstance(fw_spec['egsnl'], dict):
+                d['snl_initial'] = fw_spec['egsnl']
+            else:
+                d['snl_initial'] = fw_spec['egsnl'].as_dict()
+            d['snlgroup_id_initial'] = fw_spec['snlgroup_id']
+            d['inchi_root'] = fw_spec['inchi_root']
+            d['inchi_initial'] = fw_spec['inchi']
+
+            if "geometry optimization" in d[
+                'task_type'] or "molecule dynamics" in d['task_type']:
+                new_s = Molecule.from_dict(d["molecule_final"])
+                old_snl = EGStructureNL.from_dict(d['snl_initial'])
+                history = old_snl.history
+                history.append(
+                    {'name': 'Electrolyte Genome Project structure '
+                             'optimization',
+                     'url': 'http://www.materialsproject.org',
+                     'description': {'task_type': d['task_type'],
+                                     'task_id': task_id,
+                                     'when': datetime.datetime.utcnow()}})
+                new_snl = EGStructureNL(new_s, old_snl.authors,
+                                        old_snl.projects,
+                                        old_snl.references, old_snl.remarks,
+                                        old_snl.data, history)
+
+                # enter new SNL into SNL db
+                # get the SNL mongo adapter
+                sma = EGSNLMongoAdapter.auto_load()
+
+                # add snl
+                egsnl, snlgroup_id = sma.add_snl(
+                    new_snl, snlgroup_guess=d['snlgroup_id_initial'])
+                d['snl_final'] = egsnl.as_dict()
+                d['snlgroup_id_final'] = snlgroup_id
+            else:
                 if isinstance(fw_spec['egsnl'], dict):
-                    d['snl_initial'] = fw_spec['egsnl']
+                    d['snl_final'] = fw_spec['egsnl']
                 else:
-                    d['snl_initial'] = fw_spec['egsnl'].as_dict()
-                d['snlgroup_id_initial'] = fw_spec['snlgroup_id']
-                d['inchi_root'] = fw_spec['inchi_root']
-                d['inchi_initial'] = fw_spec['inchi']
-
-                if "geometry optimization" in d['task_type'] or "molecule dynamics" in d['task_type']:
-                    new_s = Molecule.from_dict(d["molecule_final"])
-                    old_snl = EGStructureNL.from_dict(d['snl_initial'])
-                    history = old_snl.history
-                    history.append(
-                        {'name': 'Electrolyte Genome Project structure '
-                                 'optimization',
-                         'url': 'http://www.materialsproject.org',
-                         'description': {'task_type': d['task_type'],
-                                         'task_id': task_id,
-                                         'when': datetime.datetime.utcnow()}})
-                    new_snl = EGStructureNL(new_s, old_snl.authors,
-                                            old_snl.projects,
-                                            old_snl.references, old_snl.remarks,
-                                            old_snl.data, history)
-
-                    # enter new SNL into SNL db
-                    # get the SNL mongo adapter
-                    sma = EGSNLMongoAdapter.auto_load()
-
-                    # add snl
-                    egsnl, snlgroup_id = sma.add_snl(
-                        new_snl, snlgroup_guess=d['snlgroup_id_initial'])
-                    d['snl_final'] = egsnl.as_dict()
-                    d['snlgroup_id_final'] = snlgroup_id
-                else:
-                    if isinstance(fw_spec['egsnl'], dict):
-                        d['snl_final'] = fw_spec['egsnl']
-                    else:
-                        d['snl_final'] = fw_spec['egsnl'].as_dict()
-                    d['snlgroup_id_final'] = fw_spec['snlgroup_id']
-                d['snlgroup_changed'] = (d['snlgroup_id_initial'] !=
-                                         d['snlgroup_id_final'])
+                    d['snl_final'] = fw_spec['egsnl'].as_dict()
+                d['snlgroup_id_final'] = fw_spec['snlgroup_id']
+            d['snlgroup_changed'] = (d['snlgroup_id_initial'] !=
+                                     d['snlgroup_id_final'])
 
     def _insert_doc(self, d, fw_spec=None):
         if not self.simulate:

@@ -13,7 +13,6 @@ __maintainer__ = "Shyue Ping Ong"
 __email__ = "shyuep@gmail.com"
 __date__ = "6/15/13"
 
-
 from pymatgen.io.nwchem import NwTask, NwInput
 
 
@@ -34,7 +33,7 @@ class JCESRDeltaSCFInputSet(object):
             scf_bset[el.symbol] = "6-31++g**" if el.Z <= 18 else "6-31+g*"
 
         if len(mol) > 1:
-            #Insert opt and freq job for molecules with more than one atom.
+            # Insert opt and freq job for molecules with more than one atom.
             tasks = [
                 NwTask.dft_task(mol, operation="optimize", xc=functional,
                                 basis_set=geom_opt_bset),
@@ -66,13 +65,12 @@ from pymatgen import Molecule
 
 
 class JCESRDeltaSCFInputSetTest(unittest.TestCase):
-
     def setUp(self):
         coords = [[0.000000, 0.000000, 0.000000],
-          [0.000000, 0.000000, 1.089000],
-          [1.026719, 0.000000, -0.363000],
-          [-0.513360, -0.889165, -0.363000],
-          [-0.513360, 0.889165, -0.363000]]
+                  [0.000000, 0.000000, 1.089000],
+                  [1.026719, 0.000000, -0.363000],
+                  [-0.513360, -0.889165, -0.363000],
+                  [-0.513360, 0.889165, -0.363000]]
         self.mol = Molecule(["C", "H", "H", "H", "H"], coords)
 
     def test_get_nwinput(self):
@@ -86,6 +84,7 @@ class JCESRDeltaSCFInputSetTest(unittest.TestCase):
         atom = Molecule(["C"], [[0, 0, 0]])
         nwi = jis.get_nwinput(atom)
         self.assertEqual(len(nwi.tasks), 4)
+
 
 if __name__ == "__main__":
     unittest.main()

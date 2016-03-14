@@ -1,8 +1,9 @@
 import json
 import logging
 import os
-from pymongo import MongoClient
 import sys
+
+from pymongo import MongoClient
 
 
 def get_molecules_collection(db_dir):
@@ -16,6 +17,7 @@ def get_molecules_collection(db_dir):
         db.authenticate(db_creds['admin_user'], db_creds['admin_password'])
     ipea_coll = db['molecules']
     return ipea_coll
+
 
 def transform_molecule_doc(mol1):
     mol2 = dict()
@@ -36,10 +38,13 @@ def transform_molecule_doc(mol1):
     mol2["pointgroup"] = mol1["pointgroup"]
 
     mol2["task_id"] = mol1["vacuum_properties"]["task_id"]["neutral"]
-    mol2["task_id_deprecated"] = mol1["vacuum_properties"]["task_id_deprecated"]["neutral"]
-    mol2["snlgroup_id_final"] = mol1["vacuum_properties"]["snlgroup_id_final"]["neutral"]
+    mol2["task_id_deprecated"] = \
+    mol1["vacuum_properties"]["task_id_deprecated"]["neutral"]
+    mol2["snlgroup_id_final"] = mol1["vacuum_properties"]["snlgroup_id_final"][
+        "neutral"]
     mol2["charge"] = mol1["charge"]
-    mol2["spin_multiplicity"] = mol1["vacuum_properties"]["spin_multiplicity"]["neutral"]
+    mol2["spin_multiplicity"] = mol1["vacuum_properties"]["spin_multiplicity"][
+        "neutral"]
     mol2["snl_final"] = mol1["vacuum_properties"]["snl_final"]["neutral"]
     mol2["molecule"] = mol1["vacuum_properties"]["molecule"]["neutral"]
     mol2["xyz"] = mol1["vacuum_properties"]["xyz"]["neutral"]
@@ -68,20 +73,27 @@ def transform_molecule_doc(mol1):
             #     mol2["IE"] = mol1["solvated_properties"][solname]["IP"]
             # if "EA" in mol1["solvated_properties"][solname]:
             #     mol2["EA"] = mol1["solvated_properties"][solname]["EA"]
-            if "electrochemical_window_width" in mol1["solvated_properties"][solname]:
-                mol2["electrochemical_window_width"] = mol1["solvated_properties"][
+            if "electrochemical_window_width" in mol1["solvated_properties"][
+                solname]:
+                mol2["electrochemical_window_width"] = \
+                mol1["solvated_properties"][
                     solname]["electrochemical_window_width"]
             if "implicit_solvent" in mol1["solvated_properties"][solname]:
-                mol2["implicit_solvent"] = mol1["solvated_properties"][solname]["implicit_solvent"]
+                mol2["implicit_solvent"] = \
+                mol1["solvated_properties"][solname]["implicit_solvent"]
             if "electrode_potentials" in mol1["solvated_properties"][solname]:
-                mol2["electrode_potentials"] = mol1["solvated_properties"][solname]["electrode_potentials"]
+                mol2["electrode_potentials"] = \
+                mol1["solvated_properties"][solname]["electrode_potentials"]
                 if "oxidation" in mol2["electrode_potentials"]:
-                    mol2["IE"] = mol2["electrode_potentials"]["oxidation"]["lithium"]
+                    mol2["IE"] = mol2["electrode_potentials"]["oxidation"][
+                        "lithium"]
                 if "reduction" in mol2["electrode_potentials"]:
-                    mol2["EA"] = mol2["electrode_potentials"]["reduction"]["lithium"]
+                    mol2["EA"] = mol2["electrode_potentials"]["reduction"][
+                        "lithium"]
 
     mol2["svg"] = mol1["svg"]
     return mol2
+
 
 def copy_collections():
     source_cred_dir = os.environ['DB_LOC_SRC']
@@ -95,8 +107,9 @@ def copy_collections():
             molname = mol_web["user_tags"]["molname"]
         else:
             molname = mol_web["inchi"]
-        mol_doc = coll_dest.find_one(filter={"inchi_root": mol_web["inchi_root"],
-                                             "charge": mol_web["charge"]})
+        mol_doc = coll_dest.find_one(
+            filter={"inchi_root": mol_web["inchi_root"],
+                    "charge": mol_web["charge"]})
         if mol_doc:
             logging.info("Updating molecule \"{}\"".format(molname))
             coll_dest.update({"inchi_root": mol_web["inchi_root"]}, mol_web,
@@ -104,6 +117,7 @@ def copy_collections():
         else:
             logging.info("INSERT molecule \"{}\"".format(molname))
             coll_dest.insert(mol_web)
+
 
 def main():
     logging.basicConfig(level=logging.INFO)
@@ -113,6 +127,7 @@ def main():
     sh.setLevel(getattr(logging, 'INFO'))
     logger.addHandler(sh)
     copy_collections()
+
 
 if __name__ == '__main__':
     main()

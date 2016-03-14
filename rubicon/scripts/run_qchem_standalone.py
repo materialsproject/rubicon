@@ -35,17 +35,19 @@ def run_qchem(filename):
         qc_exe = shlex.split("qchem -np {}".format(min(24, len(mol))))
         half_cpus_cmd = shlex.split("qchem -np {}".format(min(12, len(mol))))
         openmp_cmd = shlex.split("qchem -seq -nt 24")
-    elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"]=="cori":
+    elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"] == "cori":
         num_numa_nodes = 2
-        low_nprocess = max(int(len(mol)/num_numa_nodes) * num_numa_nodes, 1)
+        low_nprocess = max(int(len(mol) / num_numa_nodes) * num_numa_nodes, 1)
         qc_exe = shlex.split("qchem -np {}".format(min(32, low_nprocess)))
-        half_cpus_cmd = shlex.split("qchem -np {}".format(min(16, low_nprocess)))
+        half_cpus_cmd = shlex.split(
+            "qchem -np {}".format(min(16, low_nprocess)))
         openmp_cmd = shlex.split("qchem -nt 32")
-    elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"]=="matgen":
+    elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"] == "matgen":
         num_numa_nodes = 2
-        low_nprocess = max(int(len(mol)/num_numa_nodes) * num_numa_nodes, 1)
+        low_nprocess = max(int(len(mol) / num_numa_nodes) * num_numa_nodes, 1)
         qc_exe = shlex.split("qchem -np {}".format(min(16, low_nprocess)))
-        half_cpus_cmd = shlex.split("qchem -np {}".format(min(8, low_nprocess)))
+        half_cpus_cmd = shlex.split(
+            "qchem -np {}".format(min(8, low_nprocess)))
         openmp_cmd = shlex.split("qchem -nt 8")
     elif carver_name_pattern.match(socket.gethostname()):
         # mendel compute nodes
@@ -82,6 +84,7 @@ def run_qchem(filename):
     c = Custodian(handlers=[handler], jobs=[job], max_errors=50)
     c.run()
 
+
 def write_smx_solvent_data(solvent):
     smx_data_file = os.path.join(os.path.dirname(__file__),
                                  "../utils/data", "smx_data.json")
@@ -99,7 +102,9 @@ def write_smx_solvent_data(solvent):
     with open('solvent_data', 'w') as f:
         f.write(solvent_text)
 
-def perturb_molecule(old_mol, vib_mode, reversed_direction=False, perturb_scale=0.3):
+
+def perturb_molecule(old_mol, vib_mode, reversed_direction=False,
+                     perturb_scale=0.3):
     max_dis = max([math.sqrt(sum([x ** 2 for x in mode]))
                    for mode in vib_mode])
     scale = perturb_scale / max_dis
@@ -108,7 +113,7 @@ def perturb_molecule(old_mol, vib_mode, reversed_direction=False, perturb_scale=
     direction = 1.0
     if reversed_direction:
         direction = -1.0
-    new_coords = [[c+v*direction for c, v in zip(site.coords, mode)]
+    new_coords = [[c + v * direction for c, v in zip(site.coords, mode)]
                   for site, mode in zip(old_mol.sites, normalized_mode)]
     species = [site.specie.symbol
                for site in old_mol.sites]
@@ -118,6 +123,7 @@ def perturb_molecule(old_mol, vib_mode, reversed_direction=False, perturb_scale=
                        spin_multiplicity=spin_multiplicity)
     return new_mol
 
+
 def main():
     import argparse
     parser = argparse.ArgumentParser(
@@ -125,7 +131,8 @@ def main():
     parser.add_argument("-f", "--filename", dest="filename", type=str,
                         required=True,
                         help="the QChem input filename")
-    parser.add_argument("-e", "--eliminate", dest="eli_img", action="store_true",
+    parser.add_argument("-e", "--eliminate", dest="eli_img",
+                        action="store_true",
                         help="whether to eliminate imaginary frequency")
     parser.add_argument("-s", "--solvent", dest="solvent", type=str,
                         required=False,
@@ -216,6 +223,6 @@ def main():
                     qcinp.write_file(eli_file_3)
                     run_qchem(eli_file_3)
 
+
 if __name__ == '__main__':
     main()
-

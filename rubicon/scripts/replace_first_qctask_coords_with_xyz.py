@@ -1,5 +1,5 @@
 import argparse
-import os
+
 from pymatgen.core.structure import Molecule
 from pymatgen.io.qchem import QcInput
 
@@ -27,8 +27,11 @@ def main():
         new_mol.set_charge_and_spin(charge, spin)
     qcinp.jobs[0].mol = new_mol
     qcinp.write_file(options.output)
-    print("created new QChem input file {new_file} using {old_inp} as an template and filled with coordinates " \
-          "from {coord_file}".format(old_inp=options.input, coord_file=options.coords, new_file=options.output))
+    print(
+    "created new QChem input file {new_file} using {old_inp} as an template and filled with coordinates " \
+    "from {coord_file}".format(old_inp=options.input,
+                               coord_file=options.coords,
+                               new_file=options.output))
 
 
 if __name__ == "__main__":

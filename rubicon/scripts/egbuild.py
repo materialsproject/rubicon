@@ -8,6 +8,7 @@ Can run in two modes, 'merge' for building sandbox+core task collections,
 and 'eg' for building the derived collections.
 """
 from pymongo import MongoClient
+
 from rubicon.builders import eg_builders_run, eg_shared
 
 __author__ = 'Dan Gunter <dkgunter@lbl.gov>'
@@ -48,12 +49,14 @@ def get_settings(config_file):
     except Exception, err:
         raise ConfigurationError(config_file, err)
 
+
 def get_db(**db_creds):
     conn = MongoClient(db_creds['host'], db_creds['port'], connect=False)
     db = conn[db_creds['database']]
     if db_creds['admin_user']:
         db.authenticate(db_creds['admin_user'], db_creds['admin_password'])
     return db
+
 
 def main():
     # Setup args
@@ -65,7 +68,8 @@ def main():
     common.add_argument("-p", "--prefix", dest="coll_prefix", type=str,
                         metavar='PREFIX', default=None,
                         help="Collection name prefix, ie namespace")
-    common.add_argument('--verbose', '-v', dest='vb', action="count", default=0,
+    common.add_argument('--verbose', '-v', dest='vb', action="count",
+                        default=0,
                         help="Print more verbose messages to standard error. "
                              "Repeatable. (default=ERROR)")
     common.add_argument('-P', '--ncores', dest="num_cores", type=int,
@@ -130,6 +134,7 @@ def main():
             status = -1
     _log.info("run.end status={}".format(status))
     return status
+
 
 if __name__ == '__main__':
     sys.exit(main())

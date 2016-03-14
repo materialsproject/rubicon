@@ -1,0 +1,12 @@
+HETATM    1  c3d DOL A   1      -1.157   0.417   0.038  0.00  0.00           C
+HETATM    2  c3d DOL A   1       0.379   0.459  -0.012  0.00  0.00           C
+HETATM    3  c3d DOL A   1      -0.355   2.575  -0.111  0.00  0.00           C
+HETATM    4  h1d DOL A   1      -1.594  -0.144  -0.800  0.00  0.00           H
+HETATM    5  h1d DOL A   1      -1.533   0.008   0.987  0.00  0.00           H
+HETATM    6  h1d DOL A   1       0.754   0.305  -1.039  0.00  0.00           H
+HETATM    7  h1d DOL A   1       0.867  -0.248   0.667  0.00  0.00           H
+HETATM    8  h2d DOL A   1      -0.470   3.479   0.500  0.00  0.00           H
+HETATM    9  h2d DOL A   1      -0.135   2.836  -1.165  0.00  0.00           H
+HETATM   10  osd DOL A   1      -1.546   1.799  -0.048  0.00  0.00           O
+HETATM   11  osd DOL A   1       0.680   1.785   0.430  0.00  0.00           O
+END

@@ -15,7 +15,6 @@ class EnergyEvaluator(object):
     def __init__(self, mol_coords):
         self.mol_coords = mol_coords
 
-
     @abstractmethod
     def calc_energy(self, fragments_coords):
         pass

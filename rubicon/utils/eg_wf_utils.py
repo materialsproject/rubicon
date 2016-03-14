@@ -8,7 +8,6 @@ from monty.os.path import zpath
 
 from rubicon.workflows.wf_settings import EG_RUN_LOCS
 
-
 __author__ = 'xiaohuiqu'
 
 

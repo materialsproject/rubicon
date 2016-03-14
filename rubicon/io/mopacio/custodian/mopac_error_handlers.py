@@ -2,7 +2,9 @@ import glob
 import logging
 import os
 import tarfile
+
 from custodian.custodian import ErrorHandler
+
 from rubicon.io.mopacio.mopacio import MopOutput, MopTask
 
 __author__ = 'xiaohuiqu'
@@ -12,6 +14,7 @@ class MopacErrorHandler(ErrorHandler):
     """
     Erro hander for MOPAC Jobs.
     """
+
     def __init__(self, input_file="mol.mop"):
         self.input_file = input_file
         basename = os.path.splitext(self.input_file)[0]
@@ -45,7 +48,6 @@ class MopacErrorHandler(ErrorHandler):
         self.mopinp.write_file(self.input_file)
         return {"errors": self.errors, "actions": actions}
 
-
     def backup(self):
         error_num = max([0] + [int(f.split(".")[1])
                                for f in glob.glob("error.*.tar.gz")])
@@ -57,4 +59,3 @@ class MopacErrorHandler(ErrorHandler):
             if os.path.exists(f):
                 tar.add(f)
         tar.close()
-

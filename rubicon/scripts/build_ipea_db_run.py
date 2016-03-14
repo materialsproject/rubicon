@@ -1,6 +1,8 @@
 import json
 import os
+
 from pymongo import MongoClient
+
 from rubicon.submission.submission_mongo_eg import SubmissionMongoAdapterEG
 
 __author__ = 'xiaohuiqu'
@@ -54,9 +56,9 @@ def build_ipea_db():
             neutral_energy_dict = tasks_coll.find(
                 filter={'task_id': neutral_tid},
                 projection={"_id": False,
-                        "state": True,
-                        "calculations.scf.energies": True,
-                        "calculations.scf_pcm.energies": True})[0]
+                            "state": True,
+                            "calculations.scf.energies": True,
+                            "calculations.scf_pcm.energies": True})[0]
             if neutral_energy_dict["state"] == "successful":
                 neutral_vaccum_energy = neutral_energy_dict['calculations'][
                     'scf']['energies'][-1][-1]
@@ -69,13 +71,15 @@ def build_ipea_db():
             cation_energy_dict = tasks_coll.find(
                 filter={'task_id': cation_tid},
                 projection={"_id": False,
-                        "state": True,
-                        "calculations.scf.energies": True,
-                        "calculations.scf_pcm.energies": True})[0]
+                            "state": True,
+                            "calculations.scf.energies": True,
+                            "calculations.scf_pcm.energies": True})[0]
             if cation_energy_dict["state"] == "successful":
-                cation_vaccum_energy = cation_energy_dict['calculations']['scf'][
+                cation_vaccum_energy = \
+                cation_energy_dict['calculations']['scf'][
                     'energies'][-1][-1]
-                cation_sol_energy = cation_energy_dict['calculations']['scf_pcm'][
+                cation_sol_energy = \
+                cation_energy_dict['calculations']['scf_pcm'][
                     'energies'][-1][-1]
             else:
                 cation_tid = None
@@ -84,13 +88,14 @@ def build_ipea_db():
             anion_energy_dict = tasks_coll.find(
                 filter={'task_id': anion_tid},
                 projection={"_id": False,
-                        "state": True,
-                        "calculations.scf.energies": True,
-                        "calculations.scf_pcm.energies": True})[0]
+                            "state": True,
+                            "calculations.scf.energies": True,
+                            "calculations.scf_pcm.energies": True})[0]
             if anion_energy_dict["state"] == "successful":
                 anion_vaccum_energy = anion_energy_dict['calculations']['scf'][
                     'energies'][-1][-1]
-                anion_sol_energy = anion_energy_dict['calculations']['scf_pcm'][
+                anion_sol_energy = \
+                anion_energy_dict['calculations']['scf_pcm'][
                     'energies'][-1][-1]
             else:
                 anion_tid = None

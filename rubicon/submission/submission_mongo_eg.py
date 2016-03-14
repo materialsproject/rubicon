@@ -1,12 +1,14 @@
-from collections import defaultdict
 import datetime
 import json
 import os
+from collections import defaultdict
+
 import dateutil.parser
+import yaml
+from pymongo import MongoClient
+
 from pymatgen.io.babel import BabelMolAdaptor
 from pymatgen.matproj.snl import StructureNL
-from pymongo import MongoClient
-import yaml
 from rubicon.utils.snl.egsnl import get_meta_from_structure
 
 DATETIME_HANDLER = lambda obj: obj.isoformat() \
@@ -68,7 +70,7 @@ class SubmissionMongoAdapterEG(object):
     def _get_next_submission_id(self):
         return self.id_assigner.find_and_modify(
             query={}, update={'$inc': {'next_submission_id': 1}})[
-                'next_submission_id']
+            'next_submission_id']
 
     def _get_next_reaction_id(self):
         return self.reaction_id_assigner.find_and_modify(
@@ -81,7 +83,8 @@ class SubmissionMongoAdapterEG(object):
 
     def _restart_reaction_id_assigner_at(self, next_reaction_id):
         self.reaction_id_assigner.remove()
-        self.reaction_id_assigner.insert({"next_reaction_id": next_reaction_id})
+        self.reaction_id_assigner.insert(
+            {"next_reaction_id": next_reaction_id})
 
     def submit_snl(self, snl, submitter_email, parameters=None):
         parameters = parameters if parameters else {}
@@ -102,7 +105,8 @@ class SubmissionMongoAdapterEG(object):
         self.jobs.insert(d)
         return d['submission_id']
 
-    def submit_reaction(self, reactant_snls, product_snls, reactant_fragments, product_fragments, submitter_email, parameters=None):
+    def submit_reaction(self, reactant_snls, product_snls, reactant_fragments,
+                        product_fragments, submitter_email, parameters=None):
         """
             Submit a reaction. This task will be separated to several single point energy calculations, and submitted
             as individual molecule.
@@ -129,7 +133,8 @@ class SubmissionMongoAdapterEG(object):
                 element = site.specie.symbol
                 product_element_count[element] += n
         if reaction_element_count != product_element_count:
-            raise Exception("Number of atoms is inconsistant in reactant and product")
+            raise Exception(
+                "Number of atoms is inconsistant in reactant and product")
         reactant_inchis = []
         product_inchis = []
         num_reactants = []
@@ -180,8 +185,10 @@ class SubmissionMongoAdapterEG(object):
         d['product_charges'] = product_charges
         d['reactant_spin_multiplicities'] = reactant_spin_multiplicities
         d['product_spin_multiplicities'] = product_spin_multiplicities
-        d['reactant_fragments'] = [[frag.to_dict() for frag in specie] for specie in reactant_fragments]
-        d['product_fragments'] = [[frag.to_dict() for frag in specie] for specie in product_fragments]
+        d['reactant_fragments'] = [[frag.to_dict() for frag in specie] for
+                                   specie in reactant_fragments]
+        d['product_fragments'] = [[frag.to_dict() for frag in specie] for
+                                  specie in product_fragments]
         self.reactions.insert(d)
         dummy_snl = StructureNL.from_dict(d["reactant_snls"][0])
         parameters['reaction_id'] = d['reaction_id']
@@ -212,8 +219,8 @@ class SubmissionMongoAdapterEG(object):
         :return: a list of IDs
         '''
         job_docs = self.jobs.find(filter={}, projection=["submission_id",
-                                              "submitted_at",
-                                              "parameters.nick_name"])
+                                                         "submitted_at",
+                                                         "parameters.nick_name"])
         ids = []
         for j in job_docs:
             submission_dt = dateutil.parser.parse(j['submitted_at'])
@@ -225,7 +232,8 @@ class SubmissionMongoAdapterEG(object):
         props = ['state', 'state_details', 'task_dict', 'submission_id',
                  'formula']
         infos = []
-        for j in self.jobs.find(filter=crit, projection=dict([(p, 1) for p in props])):
+        for j in self.jobs.find(filter=crit,
+                                projection=dict([(p, 1) for p in props])):
             infos.append(dict([(p, j[p]) for p in props]))
         return infos
 
@@ -327,4 +335,3 @@ def _reconstitute_dates(obj_dict):
             pass
 
     return obj_dict
-

@@ -3,17 +3,16 @@ Build molecules collection
 Adapted from Dan Gunter and Wei Chen's vasp materials builder
 """
 import copy
-import logging
 import datetime
-import sys
+import logging
 import re
+import sys
 
 import pymongo
 from pymongo import ASCENDING
 
 from rubicon.builders import eg_shared
 from rubicon.utils.qchem_firework_creator import QChemFireWorkCreator
-
 
 __author__ = "Xiaohui Qu"
 __copyright__ = "Copyright 2012-2013, The Electrolyte Genome Project"
@@ -22,7 +21,6 @@ __maintainer__ = "Xiaohui Qu"
 __email__ = "xqu@lbl.gov"
 __status__ = "Development"
 __date__ = "1/1/14"
-
 
 _log = logging.getLogger('eg.' + __name__)
 
@@ -50,18 +48,35 @@ class TaskKeys:
                                      '(?P<group_name>\w+)')
     lei_2_group_pattern = re.compile('(?P<base_mol>\w+)_(?P<pos1>\d+)_'
                                      '(?P<group1>\w+)_(?P<pos2>\d+)(?P<group2>\w+)')
-    literal_to_formula_group_name = {"nitro": "-NO2", "cyano": "-CN", "trichloromethyl": "-CCl3", "carboxyl": "-COOH",
-                                     "fluoro": "-F", "ethynyl": "-CCH", "methyl": "-CH3", "ethyl": "-CH2CH3",
-                                     "hydroxyl": "-OH", "vinyl": "-C=CH2", "methoxyl": "-OCH3",
-                                     "ethanamide": "-NHC(O)CH3", "benzene": "-C5H6", "amine": "-NH2",
-                                     "methylamine": "-NHCH3", "dimethylamine": "-N(CH3)2",
-                                     "Aceto": "-C(O)CH3", "Amine": "-NH2", "Benzene": "-C5H6", "Butyl": "-C4H9",
-                                     "Carboxyl": "-COOH", "Chloro": "-Cl", "Cyano": "-CN", "Dimethylamine": "-N(CH3)2",
-                                     "Ethanamide": "-NHC(O)CH3", "Ethyl": "-CH2CH3", "Ethynyl": "-CCH", "Fluoro": "-F",
-                                     "G0": "-OCH3", "G1": "-OCH2CH2OCH3", "G2": "-O(CH2CH2O)2CH3",
-                                     "G3": "-O(CH2CH2O)3CH3", "Hydroxyl": "-OH", "Methoxyl": "-OCH3", "Methyl": "-CH3",
-                                     "Methylamine": "-NHCH3", "Nitro": "-NO2", "S2": "-OCH2OCH3", "S3": "-O(CH2O)2CH3",
-                                     "Tribromomethyl": "-CBr3", "Tricholoromethyl": "-CCl3", "Triflouromethyl": "-CF3",
+    literal_to_formula_group_name = {"nitro": "-NO2", "cyano": "-CN",
+                                     "trichloromethyl": "-CCl3",
+                                     "carboxyl": "-COOH",
+                                     "fluoro": "-F", "ethynyl": "-CCH",
+                                     "methyl": "-CH3", "ethyl": "-CH2CH3",
+                                     "hydroxyl": "-OH", "vinyl": "-C=CH2",
+                                     "methoxyl": "-OCH3",
+                                     "ethanamide": "-NHC(O)CH3",
+                                     "benzene": "-C5H6", "amine": "-NH2",
+                                     "methylamine": "-NHCH3",
+                                     "dimethylamine": "-N(CH3)2",
+                                     "Aceto": "-C(O)CH3", "Amine": "-NH2",
+                                     "Benzene": "-C5H6", "Butyl": "-C4H9",
+                                     "Carboxyl": "-COOH", "Chloro": "-Cl",
+                                     "Cyano": "-CN",
+                                     "Dimethylamine": "-N(CH3)2",
+                                     "Ethanamide": "-NHC(O)CH3",
+                                     "Ethyl": "-CH2CH3", "Ethynyl": "-CCH",
+                                     "Fluoro": "-F",
+                                     "G0": "-OCH3", "G1": "-OCH2CH2OCH3",
+                                     "G2": "-O(CH2CH2O)2CH3",
+                                     "G3": "-O(CH2CH2O)3CH3",
+                                     "Hydroxyl": "-OH", "Methoxyl": "-OCH3",
+                                     "Methyl": "-CH3",
+                                     "Methylamine": "-NHCH3", "Nitro": "-NO2",
+                                     "S2": "-OCH2OCH3", "S3": "-O(CH2O)2CH3",
+                                     "Tribromomethyl": "-CBr3",
+                                     "Tricholoromethyl": "-CCl3",
+                                     "Triflouromethyl": "-CF3",
                                      "Vinyl": "-C=CH2", "butyl": "-C4H9"}
 
 
@@ -99,17 +114,21 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         sss = []
         for ch in self.ref_charge_range:
             self.ref_charge = ch
-            charge_state = QChemFireWorkCreator.get_state_name(ch, 1).split()[1]
-            _log.info("Getting distinct root INCHIs for {}s".format(charge_state))
+            charge_state = QChemFireWorkCreator.get_state_name(ch, 1).split()[
+                1]
+            _log.info(
+                "Getting distinct root INCHIs for {}s".format(charge_state))
             if ch == 0:
                 spec = {"$or": [{"user_tags.initial_charge": 0},
-                                {"user_tags.initial_charge": {"$exists": False}}]}
+                                {"user_tags.initial_charge": {
+                                    "$exists": False}}]}
             else:
                 spec = {"user_tags.initial_charge": ch}
             inchi_root = list(self._c.tasks.find(filter=spec,
                                                  projection='inchi_root')
                               .distinct('inchi_root'))
-            _log.info("There are total {} unique INCHIs".format(len(inchi_root)))
+            _log.info(
+                "There are total {} unique INCHIs".format(len(inchi_root)))
             map(self.add_item, inchi_root)
             _log.info("Beginning analysis")
             states = self.run_parallel()
@@ -122,11 +141,14 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         """
         query = {'state': 'successful', 'inchi_root': inchi_root,
                  'task_type': "single point energy"}
-        solvents = self._c.tasks.find(filter=query, projection=TaskKeys.fields).distinct(
+        solvents = self._c.tasks.find(filter=query,
+                                      projection=TaskKeys.fields).distinct(
             "implicit_solvent.solvent_name"
         )
-        #solvent_model = "ief-pcm"
-        solvent_models = self._c.tasks.find(filter=query, projection=TaskKeys.fields).distinct("implicit_solvent.model")
+        # solvent_model = "ief-pcm"
+        solvent_models = self._c.tasks.find(filter=query,
+                                            projection=TaskKeys.fields).distinct(
+            "implicit_solvent.model")
         molecule = dict()
         molecule['charge'] = self.ref_charge
         docs_available = False
@@ -135,12 +157,15 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
             for solvent in solvents:
                 query['implicit_solvent.solvent_name'] = solvent
                 query['implicit_solvent.model'] = solvent_model
-                docs = list(self._c.tasks.find(filter=query, projection=TaskKeys.fields))
+                docs = list(self._c.tasks.find(filter=query,
+                                               projection=TaskKeys.fields))
                 if docs:
                     docs_available = True
                 d = self.build_molecule_solvated_properties(docs)
                 if d and len(d) > 0:
-                    solvent_key = "{}_{}".format(solvent, solvent_model).replace(".", "_")
+                    solvent_key = "{}_{}".format(solvent,
+                                                 solvent_model).replace(".",
+                                                                        "_")
                     molecule['solvated_properties'][solvent_key] = d
         if not docs_available:
             return 1
@@ -211,7 +236,8 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
                 - \
                 docs["anion"]["calculations"][scf_name]["energies"][-1][-1]
         if "IP" in molecule and "EA" in molecule:
-            molecule["electrochemical_window_width"] = molecule["IP"] - molecule["EA"]
+            molecule["electrochemical_window_width"] = molecule["IP"] - \
+                                                       molecule["EA"]
         molecule['electrode_potentials'] = dict()
         if solution_phase:
             if 'IP' in molecule:
@@ -258,10 +284,11 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         molecule = dict()
         scf = self.build_molecule_ipea(docs, molecule, solution_phase=True)
         molecule['solvation_energy'] = docs["neutral"]["calculations"]["scf"][
-            "energies"][-1][-1] - \
-            docs["neutral"]["calculations"][scf]["energies"][-1][-1]
+                                           "energies"][-1][-1] - \
+                                       docs["neutral"]["calculations"][scf][
+                                           "energies"][-1][-1]
         molecule["implicit_solvent"] = copy.deepcopy(docs['neutral'][
-            "implicit_solvent"])
+                                                         "implicit_solvent"])
         return molecule
 
     def build_molecule_vacuum_properties(self, query):
@@ -306,13 +333,16 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
         if base_mol_name != 'dbbb':
             for g in group_name_texts.split(','):
                 position, gn = g.split('-')
-                functional_groups.append(TaskKeys.literal_to_formula_group_name[gn])
+                functional_groups.append(
+                    TaskKeys.literal_to_formula_group_name[gn])
         else:
             pos_text, group1_text, group2_text = group_name_texts.split(',')
             group1_name = group1_text.split('-')[1]
             group2_name = group2_text.split('-')[1]
-            functional_groups.append(TaskKeys.literal_to_formula_group_name[group1_name])
-            functional_groups.append(TaskKeys.literal_to_formula_group_name[group2_name])
+            functional_groups.append(
+                TaskKeys.literal_to_formula_group_name[group1_name])
+            functional_groups.append(
+                TaskKeys.literal_to_formula_group_name[group2_name])
         return functional_groups, base_mol_name
 
     @staticmethod
@@ -322,7 +352,8 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
             if "derivation_name" in docs["user_tags"] and \
                             ";" in docs["user_tags"]["derivation_name"]:
                 functional_groups, base_mol_name = MoleculesBuilder.parse_derivation_name(
-                    docs["user_tags"]["derivation_name"], docs["user_tags"]['molname'])
+                    docs["user_tags"]["derivation_name"],
+                    docs["user_tags"]['molname'])
                 molecule["base_molecule"] = base_mol_name
                 molecule["functional_groups"] = sorted(functional_groups)
             else:
@@ -332,7 +363,9 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
                     base_mol = m.group("base_mol")
                     literal_group_name = m.group("group_name")
                     if literal_group_name in TaskKeys.literal_to_formula_group_name:
-                        formula_group_name = TaskKeys.literal_to_formula_group_name[literal_group_name]
+                        formula_group_name = \
+                        TaskKeys.literal_to_formula_group_name[
+                            literal_group_name]
                         molecule["base_molecule"] = base_mol
                         molecule["functional_groups"] = [formula_group_name]
                 m = TaskKeys.lei_2_group_pattern.search(molname)
@@ -342,10 +375,13 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
                     literal_group2 = m.group("group2")
                     if literal_group1 in TaskKeys.literal_to_formula_group_name \
                             and literal_group2 in TaskKeys.literal_to_formula_group_name:
-                        formula_group1 = TaskKeys.literal_to_formula_group_name[literal_group1]
-                        formula_group2 = TaskKeys.literal_to_formula_group_name[literal_group2]
+                        formula_group1 = \
+                        TaskKeys.literal_to_formula_group_name[literal_group1]
+                        formula_group2 = \
+                        TaskKeys.literal_to_formula_group_name[literal_group2]
                         molecule["base_molecule"] = base_mol
-                        molecule["functional_groups"] = sorted([formula_group1, formula_group2])
+                        molecule["functional_groups"] = sorted(
+                            [formula_group1, formula_group2])
         return molecule
 
     def _build_indexes(self):
