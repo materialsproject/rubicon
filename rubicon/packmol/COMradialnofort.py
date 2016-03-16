@@ -77,8 +77,9 @@ class COMradialdistribution:
     def append_dict(self, radiuslist, g, output, moltypel):
         for i in range(0, len(moltypel)):
             for j in range(i, len(moltypel)):
-                output['RDF']['{0}-{1}'.format(moltypel[i],
-                                               moltypel[j])] = copy.deepcopy(
-                    g[i][j].tolist())
+                if not all([v == 0 for v in g[i][j]]):
+                    output['RDF']['{0}-{1}'.format(moltypel[i],
+                                                   moltypel[j])] = copy.deepcopy(
+                                                   g[i][j].tolist())
         if 'distance' not in output['RDF'].keys():
             output['RDF']['distance'] = copy.deepcopy(radiuslist.tolist())
