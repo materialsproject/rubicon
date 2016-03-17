@@ -33,7 +33,8 @@ if __name__ == '__main__':
     from COMradialnofort import COMradialdistribution
     from getatomcharges import getatomcharges
     from calcNEconductivity import calcNEconductivity
-
+    from getcoordinationnumber import getcoordinationnumber
+    
     c = calcCOM()
     m = MSD()
     gt = gettimedata()
@@ -41,6 +42,7 @@ if __name__ == '__main__':
     crd = COMradialdistribution()
     gc = getatomcharges()
     ne = calcNEconductivity()
+    cn = getcoordinationnumber()
 
     trjfile = 'sample_files/NaSCN.lammpstrj'
     datfile = 'sample_files/data.water_1NaSCN'
@@ -67,11 +69,13 @@ if __name__ == '__main__':
     output = ne.calcNEconductivity(output, molcharge, Lx, Ly, Lz, nummoltype,
                                    moltypel, T)
     # print(output)
-    print('Conductivity Finshed')
+    # print('Conductivity Finshed')
     output = crd.runradial(datfile, comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2,
                            Lz2, output, nummoltype, moltypel, moltype,
                            firststep=1)
 
+
+    # output = cn.calccoordinationnumber(output,nummoltype,moltypel,Lx*Ly*Lz)
     # outputfile=open('test.json', 'w')
     # json.dump(output,outputfile,indent=4)
     # outputfile.close()
