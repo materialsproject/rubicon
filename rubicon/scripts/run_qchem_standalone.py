@@ -37,11 +37,14 @@ def run_qchem(filename):
         openmp_cmd = shlex.split("qchem -seq -nt 24")
     elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"] == "cori":
         num_numa_nodes = 2
-        low_nprocess = max(int(len(mol) / num_numa_nodes) * num_numa_nodes, 1)
-        qc_exe = shlex.split("qchem -np {}".format(min(32, low_nprocess)))
+        low_nprocess = max(
+            int(len(mol) / num_numa_nodes) * num_numa_nodes, 1)
+        nodelist = os.environ["QCNODE"].split(',')
+        num_cores = 32 * len(nodelist)
+        qc_exe = shlex.split(
+            "qchem -np {}".format(min(num_cores, low_nprocess)))
         half_cpus_cmd = shlex.split(
-            "qchem -np {}".format(min(16, low_nprocess)))
-        openmp_cmd = shlex.split("qchem -nt 32")
+            "qchem -np {}".format(min(num_cores, low_nprocess)))
     elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"] == "matgen":
         num_numa_nodes = 2
         low_nprocess = max(int(len(mol) / num_numa_nodes) * num_numa_nodes, 1)
