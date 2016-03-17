@@ -45,7 +45,8 @@ def main():
                 direction_text = "User forward direction"
             else:
                 direction_text = "User reversed direction"
-            print("{} with scale factor {}".format(direction_text, options.scale))
+            print(
+            "{} with scale factor {}".format(direction_text, options.scale))
         new_mol = perturb_molecule(old_mol, vib_mode,
                                    reversed_direction=options.reverse,
                                    perturb_scale=options.scale)
@@ -60,9 +61,9 @@ def main():
         qcinp = QcInput([qctask_opt, qctask_freq])
         qcinp.write_file(options.output)
     else:
-        raise ValueError("Must have an imaginary frequency to perturb the molecule")
+        raise ValueError(
+            "Must have an imaginary frequency to perturb the molecule")
 
 
 if __name__ == '__main__':
     main()
-

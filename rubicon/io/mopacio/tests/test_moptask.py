@@ -2,11 +2,11 @@ from __future__ import unicode_literals
 
 import os
 from unittest import TestCase, skipIf
+
 from pymatgen import Molecule
 from rubicon.io.mopacio.mopacio import MopTask, MopOutput
 
 __author__ = 'xiaohuiqu'
-
 
 test_dir = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "..", "..", "..", "..",
@@ -21,7 +21,6 @@ mol = Molecule(["C", "H", "H", "H", "Cl"], coords)
 
 
 class TestMopTask(TestCase):
-
     def elementary_io_verify(self, moptask):
         self.to_and_from_dict_verify(moptask)
         self.from_string_verify(str(moptask), moptask.as_dict())
@@ -91,7 +90,6 @@ Doest it work with three line long text? I don't know, just try make up more
 
 
 class TestMopOutput(TestCase):
-
     def test_successful_message(self):
         moo = MopOutput(os.path.join(test_dir, "ch3cl_ef.out"))
         self.assertFalse(moo.data["has_error"])
@@ -165,4 +163,3 @@ Sites (17)
         moo = MopOutput(os.path.join(test_dir, "not_accurate_enough.out"))
         self.assertTrue(moo.data["has_error"])
         self.assertEqual(moo.data["errors"], ['Not Accurate Enough'])
-

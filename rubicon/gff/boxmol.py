@@ -1,6 +1,8 @@
 from pymatgen import Molecule
 
 __author__ = 'navnidhirajput'
+
+
 class BoxMol:
     def __init__(self, mols, num_mols, box_dims, mol_coords):
         self.mols = mols
@@ -27,5 +29,5 @@ class BoxMol:
     @classmethod
     def from_coords(cls, species, coords):
         bm = cls()
-        mols = [Molecule(s,c) for s, c in species, coords]
+        mols = [Molecule(s, c) for s, c in species, coords]
         bm.mols = mols

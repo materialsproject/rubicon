@@ -1,12 +1,12 @@
-from collections import defaultdict
 import copy
-import os
-import json
 import csv
-from pymatgen.core.units import Energy
+import json
+import os
+from collections import defaultdict
 
 from pymongo.mongo_client import MongoClient
 
+from pymatgen.core.units import Energy
 
 __author__ = 'xiaohuiqu'
 
@@ -33,11 +33,13 @@ def get_g3_bench_collection():
     return collection
 
 
-def get_1st_round_calcualtion_result(mission_tag, bench_key_name, bench_dict, no_expt_bench_dict,
+def get_1st_round_calcualtion_result(mission_tag, bench_key_name, bench_dict,
+                                     no_expt_bench_dict,
                                      db_collection):
-    result_cursor = db_collection.find(filter={"user_tags.mission": mission_tag},
-                                       projection=['pretty_formula', 'IE', 'EA', 'charge',
-                                               'user_tags.fw_name'])
+    result_cursor = db_collection.find(
+        filter={"user_tags.mission": mission_tag},
+        projection=['pretty_formula', 'IE', 'EA', 'charge',
+                    'user_tags.fw_name'])
     calc_result = list(result_cursor)
 
     with open("gauname2refname.json") as f:
@@ -65,11 +67,13 @@ def get_1st_round_calcualtion_result(mission_tag, bench_key_name, bench_dict, no
                 d['EA'] = {bench_key_name: m['EA']}
 
 
-def get_2nd_round_calcualtion_result(mission_tag, bench_key_name, bench_dict, no_expt_bench_dict,
+def get_2nd_round_calcualtion_result(mission_tag, bench_key_name, bench_dict,
+                                     no_expt_bench_dict,
                                      db_collection):
-    result_cursor = db_collection.find(filter={"user_tags.mission": mission_tag},
-                                       projection=['user_tags', 'IE', 'EA', 'calculations',
-                                               'inchi'])
+    result_cursor = db_collection.find(
+        filter={"user_tags.mission": mission_tag},
+        projection=['user_tags', 'IE', 'EA', 'calculations',
+                    'inchi'])
     calc_result = list(result_cursor)
     for m in calc_result:
         ref_name = m['user_tags']['fw_name']
@@ -93,27 +97,36 @@ def get_2nd_round_calcualtion_result(mission_tag, bench_key_name, bench_dict, no
         if 'scf' in m['calculations']:
             if 'neutral_energy' in d:
                 d['neutral_energy'][bench_key_name] = float(
-                    Energy(m['calculations']['scf']['energies'][-1], 'eV').to('Ha'))
+                    Energy(m['calculations']['scf']['energies'][-1], 'eV').to(
+                        'Ha'))
             else:
                 d['neutral_energy'] = {bench_key_name:
-                                       float(Energy(m['calculations']['scf']['energies'][-1],
-                                                    'eV').to('Ha'))}
+                                           float(Energy(
+                                               m['calculations']['scf'][
+                                                   'energies'][-1],
+                                               'eV').to('Ha'))}
         if 'scf_IE' in m['calculations']:
             if 'cation_energy' in d:
                 d['cation_energy'][bench_key_name] = float(
-                    Energy(m['calculations']['scf_IE']['energies'][-1], 'eV').to('Ha'))
+                    Energy(m['calculations']['scf_IE']['energies'][-1],
+                           'eV').to('Ha'))
             else:
                 d['cation_energy'] = {bench_key_name:
-                                      float(Energy(m['calculations']['scf_IE']['energies'][-1],
-                                                   'eV').to('Ha'))}
+                                          float(Energy(
+                                              m['calculations']['scf_IE'][
+                                                  'energies'][-1],
+                                              'eV').to('Ha'))}
         if 'scf_EA' in m['calculations']:
             if 'anion_energy' in d:
                 d['anion_energy'][bench_key_name] = float(
-                    Energy(m['calculations']['scf_EA']['energies'][-1], 'eV').to('Ha'))
+                    Energy(m['calculations']['scf_EA']['energies'][-1],
+                           'eV').to('Ha'))
             else:
                 d['anion_energy'] = {bench_key_name:
-                                     float(Energy(m['calculations']['scf_EA']['energies'][-1],
-                                                  'eV').to('Ha'))}
+                                         float(Energy(
+                                             m['calculations']['scf_EA'][
+                                                 'energies'][-1],
+                                             'eV').to('Ha'))}
 
 
 def write_dict(bench_dict, writer):
@@ -157,10 +170,12 @@ def get_1st_round_benchmark():
                 v['G3'] *= KCAL_TO_EV
     no_expt_bench = {}
     collection = get_g3_bench_collection()
-    get_1st_round_calcualtion_result("G2-97 Test Set Benchmark (Shyue Scheme)", "Shyue", bench,
+    get_1st_round_calcualtion_result("G2-97 Test Set Benchmark (Shyue Scheme)",
+                                     "Shyue", bench,
                                      no_expt_bench,
                                      collection)
-    get_1st_round_calcualtion_result("G2-97 Test Set Benchmark (Larry Scheme)", "Larry", bench,
+    get_1st_round_calcualtion_result("G2-97 Test Set Benchmark (Larry Scheme)",
+                                     "Larry", bench,
                                      no_expt_bench,
                                      collection)
     all_bench = {}
@@ -184,10 +199,12 @@ def get_2nd_round_mp2_geom_benchmark():
                 v['G3'] *= KCAL_TO_EV
     no_expt_bench = {}
     collection = get_g3_bench_collection()
-    get_2nd_round_calcualtion_result("G2-97 MP2 Geom Benchmark (Larry Scheme)", "Larry", bench,
+    get_2nd_round_calcualtion_result("G2-97 MP2 Geom Benchmark (Larry Scheme)",
+                                     "Larry", bench,
                                      no_expt_bench,
                                      collection)
-    get_2nd_round_calcualtion_result("G2-97 MP2 Geom Benchmark (Shyue Scheme)", "Shyue", bench,
+    get_2nd_round_calcualtion_result("G2-97 MP2 Geom Benchmark (Shyue Scheme)",
+                                     "Shyue", bench,
                                      no_expt_bench,
                                      collection)
 
@@ -197,6 +214,7 @@ def get_2nd_round_mp2_geom_benchmark():
     with open("G3_bench.json", 'w') as f:
         json.dump(all_bench, f, indent=4, sort_keys=True)
     write_csv(bench, no_expt_bench)
+
 
 def get_3th_round_dft_methods_benchmark():
     with open('G3_ref_with_inchi.json') as f:
@@ -212,9 +230,11 @@ def get_3th_round_dft_methods_benchmark():
     no_expt_bench = {}
     collection = get_g3_bench_collection()
 
-    for xc in ['xctpssh', 'pbe0', 'm06', 'm06-2x', 'pw6b95', 'becke97-d', 'b3lyp']:
+    for xc in ['xctpssh', 'pbe0', 'm06', 'm06-2x', 'pw6b95', 'becke97-d',
+               'b3lyp']:
         mission = "DFT Test (" + xc + ")"
-        get_2nd_round_calcualtion_result(mission, xc, bench, no_expt_bench, collection)
+        get_2nd_round_calcualtion_result(mission, xc, bench, no_expt_bench,
+                                         collection)
 
     all_bench = {}
     all_bench.update(bench)

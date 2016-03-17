@@ -2,12 +2,14 @@ import glob
 import json
 import logging
 import os
+import shutil
+import sys
+
 from fireworks import FireTaskBase, FWAction
 from fireworks.utilities.fw_serializers import FWSerializable
-import sys
 from monty.io import zopen
 from monty.os.path import zpath
-import shutil
+
 from rubicon.utils.eg_wf_utils import move_to_eg_garden
 from rubicon.workflows.wf_settings import MOVE_TO_EG_GARDEN
 
@@ -26,7 +28,7 @@ class FakeRunQChemTask(FireTaskBase, FWSerializable):
         qchem_logger = logging.getLogger('QChemDrone')
         qchem_logger.setLevel(logging.INFO)
         sh = logging.StreamHandler(stream=sys.stdout)
-        #sh.setLevel(getattr(logging, 'INFO'))
+        # sh.setLevel(getattr(logging, 'INFO'))
         qchem_logger.addHandler(sh)
 
         cur_dir = os.getcwd()
@@ -35,7 +37,8 @@ class FakeRunQChemTask(FireTaskBase, FWSerializable):
             if os.path.isfile(filename):
                 shutil.copy(filename, cur_dir)
 
-        if os.path.exists("custodian.json") or os.path.exists("custodian.json"+".gz"):
+        if os.path.exists("custodian.json") or os.path.exists(
+                        "custodian.json" + ".gz"):
             with zopen(zpath("custodian.json")) as f:
                 custodian_out = json.load(f)
         else:

@@ -4,14 +4,17 @@
 This module implements input and output processing from MOPAC
 """
 from __future__ import unicode_literals
+
 import copy
+import re
 from textwrap import TextWrapper
+
+import numpy as np
 from monty.io import zopen
 from monty.json import MSONable
+
 from pymatgen import SymmOp
 from pymatgen.core.structure import Molecule
-import re
-import numpy as np
 from pymatgen.util.coord_utils import get_angle
 
 __author__ = "Xiaohui Qu"
@@ -42,7 +45,8 @@ class MopTask(MSONable):
 
     available_sqm_methods = {"PM7", "PM7-TS", "PM6", "PM3", "AM1", "PM6-D3",
                              "PM6-DH+", "PM6-DH2", "PM6-DH2X"}
-    jobtype2text = {"SP": "1SCF", "OPT": "EF", "OPT_BFGS": "BFGS", "FREQ": "THERMO"}
+    jobtype2text = {"SP": "1SCF", "OPT": "EF", "OPT_BFGS": "BFGS",
+                    "FREQ": "THERMO"}
     jobtext2type = {v: k for k, v in jobtype2text.items()}
     available_sqm_tasktext = set(jobtype2text.values())
     zmat_patt = re.compile("^(\w+)*([\s,]+(\w+)[\s,]+(\w+))*[\-\.\s,\w]*$")
@@ -58,24 +62,32 @@ class MopTask(MSONable):
             raise Exception("charge must an integer")
         self.keywords = dict()
 
-        explicit_keywords = {"CHARGE"} | self.available_sqm_tasktext | self.available_sqm_methods
-        optional_keywords = set([k.upper() for k in optional_params.keys()]) if optional_params else set()
+        explicit_keywords = {
+                            "CHARGE"} | self.available_sqm_tasktext | self.available_sqm_methods
+        optional_keywords = set([k.upper() for k in
+                                 optional_params.keys()]) if optional_params else set()
         overlap_keywords = explicit_keywords & optional_keywords
         if len(overlap_keywords) > 0:
             raise Exception(" ".join(overlap_keywords) + " are duplicated"
-                            "in optional_params")
+                                                         "in optional_params")
         self.keywords["CHARGE"] = charge
         if jobtype.upper() not in ["SP", "OPT", "OPT_BFGS", "FREQ"]:
-            raise Exception('Job type "{}" is not supported currently'.format(jobtype))
+            raise Exception(
+                'Job type "{}" is not supported currently'.format(jobtype))
         self.keywords[self.jobtype2text[jobtype.upper()]] = None
 
-        title_wrapper = TextWrapper(width=80, expand_tabs=True, replace_whitespace=True, break_long_words=True,
+        title_wrapper = TextWrapper(width=80, expand_tabs=True,
+                                    replace_whitespace=True,
+                                    break_long_words=True,
                                     drop_whitespace=True)
         raw_title_lines = title_wrapper.wrap(title)[:2]
-        title_lines = raw_title_lines + [""] * max([0, 2 - len(raw_title_lines)])
+        title_lines = raw_title_lines + [""] * max(
+            [0, 2 - len(raw_title_lines)])
         self.title = title_lines
         if sqm_method.upper() not in self.available_sqm_methods:
-            raise Exception('Semi-empirical methods "{}" is not supported currently'.format(sqm_method))
+            raise Exception(
+                'Semi-empirical methods "{}" is not supported currently'.format(
+                    sqm_method))
         self.keywords[sqm_method.upper()] = None
         if optional_params:
             for k, v in optional_params.iteritems():
@@ -120,7 +132,8 @@ class MopTask(MSONable):
         sqm_method = (all_keys & self.available_sqm_methods).pop()
         task = (all_keys & self.available_sqm_tasktext).pop()
         priority_key_list = [sqm_method, task, "CHARGE"]
-        full_key_list = priority_key_list + list(all_keys - set(priority_key_list))
+        full_key_list = priority_key_list + list(
+            all_keys - set(priority_key_list))
         tokens = []
         for k in full_key_list:
             v = self.keywords[k]
@@ -159,7 +172,8 @@ class MopTask(MSONable):
         sqm_method = (all_keys & cls.available_sqm_methods).pop()
         jobtext = (all_keys & cls.available_sqm_tasktext).pop()
         jobtype = cls.jobtext2type[jobtext]
-        title = ' '.join(d["title"]) if len(d["title"][1]) > 0 else d["title"][0]
+        title = ' '.join(d["title"]) if len(d["title"][1]) > 0 else d["title"][
+            0]
         used_key = ["CHARGE", sqm_method, jobtext]
         optional_key = list(all_keys - set(used_key))
         optional_params = {k: d["keywords"][k] for k in optional_key}
@@ -336,7 +350,6 @@ class MopTask(MSONable):
 
 
 class MopOutput(object):
-
     kcal_per_mol_2_eV = 4.3363E-2
 
     def __init__(self, filename):
@@ -356,16 +369,21 @@ class MopOutput(object):
 
     @classmethod
     def _parse_job(cls, output):
-        heat_pattern = re.compile("FINAL HEAT OF FORMATION =\s+(?P<energy>-?\d+\.\d+)\s+KCAL/MOL")
-        total_energy_pattern = re.compile("TOTAL ENERGY\s+=\s+(?P<energy>-\d+\.\d+)\s+EV")
+        heat_pattern = re.compile(
+            "FINAL HEAT OF FORMATION =\s+(?P<energy>-?\d+\.\d+)\s+KCAL/MOL")
+        total_energy_pattern = re.compile(
+            "TOTAL ENERGY\s+=\s+(?P<energy>-\d+\.\d+)\s+EV")
         coord_pattern = re.compile("\s*\d+\s+(?P<element>[A-Z][a-z]*)\s+"
                                    "(?P<x>\-?\d+\.\d+)\s+"
                                    "(?P<y>\-?\d+\.\d+)\s+"
                                    "(?P<z>\-?\d+\.\d+)")
         error_defs = (
-            (re.compile("EXCESS NUMBER OF OPTIMIZATION CYCLES"), "Geometry optimization failed"),
-            (re.compile("UNABLE TO ACHIEVE SELF-CONSISTENCE"), "Bad SCF convergence"),
-            (re.compile("TO CONTINUE, START AGAIN WITH THE WORD \"PRECISE\""), "Not Accurate Enough")
+            (re.compile("EXCESS NUMBER OF OPTIMIZATION CYCLES"),
+             "Geometry optimization failed"),
+            (re.compile("UNABLE TO ACHIEVE SELF-CONSISTENCE"),
+             "Bad SCF convergence"),
+            (re.compile("TO CONTINUE, START AGAIN WITH THE WORD \"PRECISE\""),
+             "Not Accurate Enough")
         )
         energies = []
         parse_keywords = None
@@ -385,7 +403,8 @@ class MopOutput(object):
                     errors.add(message)
             if parse_keywords and input_keywords is None:
                 input_keywords = MopTask._parse_keywords([line])
-                jobtext = (set(input_keywords.keys()) & MopTask.available_sqm_tasktext).pop()
+                jobtext = (set(
+                    input_keywords.keys()) & MopTask.available_sqm_tasktext).pop()
                 jobtype = MopTask.jobtext2type[jobtext]
                 parse_keywords = False
             if result_section and "*" * 50 in line:
@@ -416,8 +435,10 @@ class MopOutput(object):
                 species = []
             m = heat_pattern.search(line)
             if m:
-                heat_of_formation = float(m.group("energy")) * cls.kcal_per_mol_2_eV
-                energies.append(tuple(["Heat of Formation", heat_of_formation]))
+                heat_of_formation = float(
+                    m.group("energy")) * cls.kcal_per_mol_2_eV
+                energies.append(
+                    tuple(["Heat of Formation", heat_of_formation]))
             m = total_energy_pattern.search(line)
             if m:
                 total_energy = float(m.group("energy"))
@@ -441,4 +462,3 @@ class MopOutput(object):
             "gracefully_terminated": gracefully_terminated
         }
         return data
-

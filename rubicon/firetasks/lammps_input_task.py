@@ -1,7 +1,7 @@
 import os
 import shlex
 import subprocess
-from pymatgen import Molecule
+
 try:
     # just a walkaround before the packmol is merged to master branch
     # after packmol is merged to master branch, the try...catch block
@@ -10,13 +10,11 @@ try:
 except:
     pass
 from rubicon.gff.boxmol import BoxMol
-from rubicon.gff.lammps_control import DictLammpsInputSet
 from rubicon.gff.lammps_data import LmpInput
 from rubicon.gff.antechamberio import AntechamberRunner
-
+from rubicon.gff.lamms_control_nvt import DictLammpsInputSet
 
 __author__ = 'navnidhirajput'
-
 
 from fireworks import FireTaskBase, explicit_serialize, FWAction
 
@@ -39,32 +37,29 @@ class WritelammpsInputTask(FireTaskBase):
 
     _fw_name = "Lammps Input Writer"
 
-
     def run_task(self, fw_spec):
-        mols_dict = fw_spec["molecules"]
-        mols = mols_dict
+        filename = fw_spec['prev_gaussian_freq']
+        mols_dict = fw_spec["molecule"]
+        mol = mols_dict
         ffmol_list = []
-        for mol in mols:
-            acr = AntechamberRunner(mol)
-            ffmol_list.append(acr.get_ff_top_mol(mol,'mol.pdb'))
-        #pmr = PackmolRunner(mols, [{"number":6,"inside box":[0.,0.,0.,70.,70.,70.]},{"number":12},{"number":48},{"number":2538}])
-        #pmr = PackmolRunner(mols, [{"number":15,"inside box":[0.,0.,0.,50.,50.,50.]},{"number":30},{"number":232}])
-        #pmr = PackmolRunner(mols, [{"number":15},{"number":30},{"number":232}])
-        #pmr = PackmolRunner(mols, [{"number":15}])
-        pmr = PackmolRunner(mols, [{"number":100,"inside box":[0.,0.,0.,50.,50.,50.]}])
-        #pmr = PackmolRunner(mols, [{"number":15,"inside box":[0.,0.,0.,100.,100.,100.]},{"number":30,"inside box":[0.,0.,0.,100.,100.,100.]},{"number":232,"inside box":[0.,0.,0.,100.,100.,100.]}])
-
+        acr = AntechamberRunner(mol)
+        ffmol_list.append(acr.get_ff_top_mol(mol, filename))
+        pmr = PackmolRunner([mol], [{"number": 100,
+                                     "inside box": [-14.82, -14.82, -14.82,
+                                                    14.82, 14.82, 14.82]}])
         mols_coord = pmr.run()
-        boxmol= BoxMol.from_packmol(pmr, mols_coord)
+        boxmol = BoxMol.from_packmol(pmr, mols_coord)
 
-        data_lammps=LmpInput(ffmol_list, boxmol)
+        data_lammps = LmpInput(ffmol_list, boxmol)
         data_lammps.write_lammps_data('mol_data.lammps')
         control_lammps = DictLammpsInputSet()
-        control_lammps.get_lammps_control('Lammps.json',ensemble='npt',temp=300)
+        # control_lammps.get_lammps_control('Lammps.json',ensemble='npt',temp=300)
+        control_lammps.get_lammps_control('Lammps.json', ensemble1='npt',
+                                          ensemble2='nvt', temp=298)
         control_lammps.write_lampps_control('mol_control.lammps')
 
         with open("mol_control.lammps") as f:
-            subprocess.check_call(shlex.split("srun -n 48 lmp_edison"), stdin=f)
+            subprocess.call(shlex.split("srun -n 48 lmp_edison"), stdin=f)
 
         prev_lammps_log = os.path.join(os.getcwd(), 'mol.log')
         prev_lammps_trj = os.path.join(os.getcwd(), "mol.lammpstrj")
@@ -75,7 +70,3 @@ class WritelammpsInputTask(FireTaskBase):
                        'prev_lammps_log': prev_lammps_log}
 
         return FWAction(update_spec=update_spec)
-
-
-
-

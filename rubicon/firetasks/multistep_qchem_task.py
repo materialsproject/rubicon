@@ -1,28 +1,28 @@
 import copy
+import datetime
 import json
 import logging
+import math
 import os
 import sys
-import math
-import datetime
 
 from fireworks.core.firework import FireTaskBase, FWAction, Workflow
 from fireworks.utilities.fw_serializers import FWSerializable
+from pymongo import MongoClient
+
 from pymatgen import Molecule
 from pymatgen.analysis.molecule_structure_comparator import \
     MoleculeStructureComparator
 from pymatgen.io.qchem import QcInput
-from pymongo import MongoClient
-
 from rubicon.borg.hive import DeltaSCFQChemToDbTaskDrone
 from rubicon.dupefinders.dupefinder_eg import DupeFinderEG
-from rubicon.utils.atomic_charge_mixed_basis_set_generator import AtomicChargeMixedBasisSetGenerator
+from rubicon.utils.atomic_charge_mixed_basis_set_generator import \
+    AtomicChargeMixedBasisSetGenerator
 from rubicon.utils.eg_wf_utils import get_eg_file_loc, \
     get_defuse_causing_qchem_fwid
+from rubicon.utils.qchem_firework_creator import QChemFireWorkCreator
 from rubicon.utils.snl.egsnl import EGStructureNL
 from rubicon.utils.snl.egsnl_mongo import EGSNLMongoAdapter
-from rubicon.utils.qchem_firework_creator import QChemFireWorkCreator
-
 
 __author__ = 'xiaohuiqu'
 
@@ -51,10 +51,12 @@ def get_basic_update_specs(fw_spec, d):
             elif "hirshfeld" in d["calculations"]["scf"]["charges"]:
                 pop_method = "hirshfeld"
         if pop_method is None:
-            raise ValueError("An vacuum single point caculation is require to use mixed basis set generator")
+            raise ValueError(
+                "An vacuum single point caculation is require to use mixed basis set generator")
         charges = d["calculations"]["scf"]["charges"][pop_method]
         if isinstance(bs_generator_dict, dict):
-            bs_generator = AtomicChargeMixedBasisSetGenerator.from_dict(bs_generator_dict)
+            bs_generator = AtomicChargeMixedBasisSetGenerator.from_dict(
+                bs_generator_dict)
         else:
             bs_generator = bs_generator_dict
         mixed_basis = bs_generator.get_basis(mol, charges)
@@ -67,9 +69,11 @@ def get_basic_update_specs(fw_spec, d):
             elif "hirshfeld" in d["calculations"]["scf"]["charges"]:
                 pop_method = "hirshfeld"
         if pop_method is None:
-            raise ValueError("An vacuum single point caculation is require to use mixed auxiliary basis set generator")
+            raise ValueError(
+                "An vacuum single point caculation is require to use mixed auxiliary basis set generator")
         charges = d["calculations"]["scf"]["charges"][pop_method]
-        aux_bs_generator = AtomicChargeMixedBasisSetGenerator(aux_bs_generator_dict)
+        aux_bs_generator = AtomicChargeMixedBasisSetGenerator(
+            aux_bs_generator_dict)
         mixed_aux_basis = aux_bs_generator.get_basis(mol, charges)
     if mixed_basis or mixed_aux_basis:
         update_specs["mixed_basis"] = mixed_basis
@@ -102,7 +106,7 @@ def standard_parsing_db_insertion(fw_spec):
     qcout_path = get_eg_file_loc(os.path.abspath(os.path.join(
         prev_dir, "mol.qcout")))
     t_id, d = drone.assimilate(qcout_path, fw_spec=fw_spec)
-    return d, qcout_path,  t_id
+    return d, qcout_path, t_id
 
 
 class QChemGeomOptDBInsertionTask(FireTaskBase, FWSerializable):
@@ -118,7 +122,7 @@ class QChemGeomOptDBInsertionTask(FireTaskBase, FWSerializable):
                 update_spec=update_specs)
         else:
             if d['state'] == 'rejected' and \
-                    d['reject_reason'] == 'structural change':
+                            d['reject_reason'] == 'structural change':
                 defuse_reason = 'structural change'
             else:
                 defuse_reason = d.get("errors", "unknown")
@@ -167,13 +171,15 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
         geom_fwid_cal, geom_fwid_db = -1, -2
         freq_fwid_cal, freq_fwid_db = -3, -4
         geom_fw_cal, geom_fw_db = fw_creator.geom_fw(
-            charge, spin_multiplicity, geom_fwid_cal, geom_fwid_db, method=qm_method)
+            charge, spin_multiplicity, geom_fwid_cal, geom_fwid_db,
+            method=qm_method)
         geom_fw_cal.spec["run_tags"]["task_type_amend"] = "imaginary " \
-            "frequency elimination"
+                                                          "frequency elimination"
         freq_fw_cal, freq_fw_db = fw_creator.freq_fw(
-            charge, spin_multiplicity, freq_fwid_cal, freq_fwid_db, method=qm_method)
+            charge, spin_multiplicity, freq_fwid_cal, freq_fwid_db,
+            method=qm_method)
         freq_fw_cal.spec["run_tags"]["task_type_amend"] = "imaginary " \
-            "frequency elimination"
+                                                          "frequency elimination"
         if grid:
             for fw in [geom_fw_cal, geom_fw_db, freq_fw_cal, freq_fw_db]:
                 if isinstance(fw.spec["qcinp"], dict):
@@ -226,7 +232,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
         direction = 1.0
         if reversed_direction:
             direction = -1.0
-        new_coords = [[c+v*direction for c, v in zip(site.coords, mode)]
+        new_coords = [[c + v * direction for c, v in zip(site.coords, mode)]
                       for site, mode in zip(old_mol.sites, normalized_mode)]
         species = [site.specie.symbol
                    for site in old_mol.sites]
@@ -278,7 +284,8 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
         mission = d['user_tags']['mission']
         additional_user_tags = {"img_freq_eli": img_freq_eli}
         if "initial_charge" in fw_spec["user_tags"]:
-            additional_user_tags["initial_charge"] = fw_spec["user_tags"]["initial_charge"]
+            additional_user_tags["initial_charge"] = fw_spec["user_tags"][
+                "initial_charge"]
         priority = fw_spec['_priority']
         old_snl = EGStructureNL.from_dict(d['snl_initial'])
         history = old_snl.history
@@ -304,7 +311,8 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
                         'snlgroup_id': fw_spec['snlgroup_id'],
                         'inchi_root': fw_spec['inchi_root']}
 
-        eli_strategy = img_freq_eli["methods"][img_freq_eli["current_method_id"]]
+        eli_strategy = img_freq_eli["methods"][
+            img_freq_eli["current_method_id"]]
         charge = new_mol.charge
         spin_multiplicity = new_mol.spin_multiplicity
         qm_method = fw_spec["qm_method"]
@@ -340,21 +348,26 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
         return FWAction(stored_data={'task_id': t_id}, detours=wf,
                         update_spec=update_specs)
 
+
 def get_bsse_update_specs(fw_spec, d):
     if "super_mol_snlgroup_id" in fw_spec["run_tags"]:
         ghost_atoms = fw_spec["run_tags"].get("ghost_atoms", list())
         from rubicon.workflows.bsse_wf import BSSEFragment
-        fragment_type = fw_spec["run_tags"].get("bsse_fragment_type", BSSEFragment.ISOLATED)
-        fragment_key = BasisSetSuperpositionErrorCalculationTask.get_fragment_key(ghost_atoms, fragment_type)
+        fragment_type = fw_spec["run_tags"].get("bsse_fragment_type",
+                                                BSSEFragment.ISOLATED)
+        fragment_key = BasisSetSuperpositionErrorCalculationTask.get_fragment_key(
+            ghost_atoms, fragment_type)
         fragment_dict = dict()
         fragment_dict["task_id"] = [d["task_id"]]
         fragment_dict["energy"] = d["calculations"]["scf"]["energies"][-1][-1]
         fragment_dict["ghost_atoms"] = ghost_atoms
         fragment_dict["fragment_type"] = fragment_type
-        fragment_dict["super_mol_snlgroup_id"] = fw_spec["run_tags"]["super_mol_snlgroup_id"]
+        fragment_dict["super_mol_snlgroup_id"] = fw_spec["run_tags"][
+            "super_mol_snlgroup_id"]
         return {fragment_key: fragment_dict}
     else:
         return {}
+
 
 class QChemSinglePointEnergyDBInsertionTask(FireTaskBase, FWSerializable):
     _fw_name = "NWChem Single Point Energy DB Insertion Task"
@@ -392,7 +405,7 @@ class QChemAIMDDBInsertionTask(FireTaskBase, FWSerializable):
                 update_spec=update_specs)
         else:
             if d['state'] == 'rejected' and \
-                    d['reject_reason'] == 'structural change':
+                            d['reject_reason'] == 'structural change':
                 defuse_reason = 'structural change'
             else:
                 defuse_reason = d.get("errors", "unknown")
@@ -423,15 +436,23 @@ class BasisSetSuperpositionErrorCalculationTask(FireTaskBase, FWSerializable):
                 continue
             fragment_name = self.get_fragment_name(frag.ghost_atoms)
             fragments_dict[fragment_name] = dict()
-            ov_fragment_key = self.get_fragment_key(frag.ghost_atoms, BSSEFragment.OVERLAPPED)
-            fragments_dict[fragment_name][BSSEFragment.OVERLAPPED] = fw_spec[ov_fragment_key]
-            ov_energy = fragments_dict[fragment_name][BSSEFragment.OVERLAPPED]["energy"]
-            iso_fragment_key = self.get_fragment_key(frag.ghost_atoms, BSSEFragment.ISOLATED)
-            fragments_dict[fragment_name][BSSEFragment.ISOLATED] = fw_spec[iso_fragment_key]
+            ov_fragment_key = self.get_fragment_key(frag.ghost_atoms,
+                                                    BSSEFragment.OVERLAPPED)
+            fragments_dict[fragment_name][BSSEFragment.OVERLAPPED] = fw_spec[
+                ov_fragment_key]
+            ov_energy = fragments_dict[fragment_name][BSSEFragment.OVERLAPPED][
+                "energy"]
+            iso_fragment_key = self.get_fragment_key(frag.ghost_atoms,
+                                                     BSSEFragment.ISOLATED)
+            fragments_dict[fragment_name][BSSEFragment.ISOLATED] = fw_spec[
+                iso_fragment_key]
             fragments_dict[fragment_name]["charge"] = frag.charge
-            fragments_dict[fragment_name]["spin_multiplicity"] = frag.spin_multiplicity
-            iso_energy = fragments_dict[fragment_name][BSSEFragment.ISOLATED]["energy"]
-            fragments_dict[fragment_name]["fragment_bsse"] = ov_energy - iso_energy
+            fragments_dict[fragment_name][
+                "spin_multiplicity"] = frag.spin_multiplicity
+            iso_energy = fragments_dict[fragment_name][BSSEFragment.ISOLATED][
+                "energy"]
+            fragments_dict[fragment_name][
+                "fragment_bsse"] = ov_energy - iso_energy
             bsse += fragments_dict[fragment_name]["fragment_bsse"]
         result_dict = dict()
         result_dict["fragments_result"] = fragments_dict
@@ -481,9 +502,10 @@ class BasisSetSuperpositionErrorCalculationTask(FireTaskBase, FWSerializable):
             db.authenticate(db_creds['admin_user'], db_creds['admin_password'])
         coll = db[db_creds['collection']]
 
-        result = coll.find_one(filter={"super_mol_snlgroup_id": d["super_mol_snlgroup_id"],
-                                       "fragments_def": d["fragments_def"]},
-                               projection=["task_id", "super_mol_snlgroup_id", "fragments_def"])
+        result = coll.find_one(
+            filter={"super_mol_snlgroup_id": d["super_mol_snlgroup_id"],
+                    "fragments_def": d["fragments_def"]},
+            projection=["task_id", "super_mol_snlgroup_id", "fragments_def"])
         if result is None or update_duplicates:
             d["last_updated"] = datetime.datetime.today()
             if result is None:
@@ -506,7 +528,8 @@ class BasisSetSuperpositionErrorCalculationTask(FireTaskBase, FWSerializable):
                         upsert=True)
             return d["task_id"]
         else:
-            logger.info("Skipping duplicate snlgrup {}".format(d["super_mol_snlgroup_id"]))
+            logger.info("Skipping duplicate snlgrup {}".format(
+                d["super_mol_snlgroup_id"]))
         conn.close()
         if "task_id" in d:
             return d["task_id"]
@@ -517,11 +540,14 @@ class BasisSetSuperpositionErrorCalculationTask(FireTaskBase, FWSerializable):
 
     @classmethod
     def get_fragment_name(cls, ghost_atoms):
-        return "ga_" + "-".join([str(i) for i in sorted(set(ghost_atoms))]) if len(ghost_atoms) > 0 else "ga_none"
+        return "ga_" + "-".join(
+            [str(i) for i in sorted(set(ghost_atoms))]) if len(
+            ghost_atoms) > 0 else "ga_none"
 
     @classmethod
     def get_fragment_key(cls, ghost_atoms, fragment_type):
-        return "{}_fragment_{}".format(fragment_type, cls.get_fragment_name(ghost_atoms))
+        return "{}_fragment_{}".format(fragment_type,
+                                       cls.get_fragment_name(ghost_atoms))
 
 
 class CounterpoiseCorrectionGenerationTask(FireTaskBase, FWSerializable):
@@ -548,9 +574,13 @@ class CounterpoiseCorrectionGenerationTask(FireTaskBase, FWSerializable):
             fragments = fragment_dicts
         priority = fw_spec.get('_priority', 1)
         dupefinder = fw_spec.get('_dupefinder', DupeFinderEG())
-        cc_wf = bsse_wf(super_mol=egsnl, name=molname, super_mol_snlgroup_id=super_mol_snlgroup_id,
-                        super_mol_charge=charge, super_mol_spin_multiplicity=spin_multiplicity,
-                        super_mol_inchi_root=inchi_root, qm_method=qm_method, fragments=fragments, mission=mission,
-                        dupefinder=dupefinder, priority=priority, is_spawnned=True, large=large)
+        cc_wf = bsse_wf(super_mol=egsnl, name=molname,
+                        super_mol_snlgroup_id=super_mol_snlgroup_id,
+                        super_mol_charge=charge,
+                        super_mol_spin_multiplicity=spin_multiplicity,
+                        super_mol_inchi_root=inchi_root, qm_method=qm_method,
+                        fragments=fragments, mission=mission,
+                        dupefinder=dupefinder, priority=priority,
+                        is_spawnned=True, large=large)
 
         return FWAction(detours=cc_wf)

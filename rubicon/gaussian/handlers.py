@@ -5,6 +5,7 @@ TODO: Change the module doc.
 """
 
 from __future__ import division
+
 from monty.json import MSONable
 
 __author__ = "Shyue Ping Ong"
@@ -13,7 +14,6 @@ __maintainer__ = "Shyue Ping Ong"
 __email__ = "shyuep@gmail.com"
 __status__ = "Beta"
 __date__ = "5/20/13"
-
 
 from custodian.custodian import ErrorHandler
 
@@ -27,12 +27,12 @@ class GaussianErrorHandler(ErrorHandler, MSONable):
         self.output_filename = output_filename
 
     def check(self):
-        #TODO: Implement actual checks.
+        # TODO: Implement actual checks.
         return False
 
     def correct(self):
-        #TODO: Implement corrections. Right now, this should never be reached
-        #since check always return False.
+        # TODO: Implement corrections. Right now, this should never be reached
+        # since check always return False.
         raise NotImplementedError("Not yet implemented corrections.")
         return {"errors": [], "actions": []}
 

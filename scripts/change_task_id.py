@@ -1,8 +1,9 @@
 import json
 import os
-import bson
-from pymatgen import Composition
+
 from pymongo import MongoClient
+
+from pymatgen import Composition
 
 __author__ = 'xiaohuiqu'
 
@@ -25,20 +26,24 @@ def get_db_collection():
     collection = db[collection_name]
     return collection, db
 
+
 def rename_task_id(collection):
     collection.update({}, {'$rename': {'task_id': 'task_id_deprecated'}},
                       multi=True)
+
 
 def add_new_task_id(db):
     for doc in db.molecules.find():
         doc["task_id"] = "mol-" + str(doc["task_id_deprecated"])
         db.molecules.save(doc)
 
+
 def add_field_reduced_cell_formula_abc(db):
     for doc in db.molecules.find():
-        doc["reduced_cell_formula_abc"] = Composition(doc["pretty_formula"])\
+        doc["reduced_cell_formula_abc"] = Composition(doc["pretty_formula"]) \
             .alphabetical_formula
         db.molecules.save(doc)
+
 
 def mark_g3_success(collection):
     g3_missions = ['G2-97 Test Set Benchmark (Shyue Scheme)',
@@ -47,6 +52,7 @@ def mark_g3_success(collection):
         collection.update({"user_tags.mission": mission},
                           {"$set": {"state": "successful"}},
                           multi=True)
+
 
 def mark_imaginary_freq_error(collection):
     mol_names = '''anthrachinon_wfs_16_trichloromethyl
@@ -87,6 +93,7 @@ viologen_wfs_7_fluoro'''
     for mol in mol_names.split('\n'):
         collection.update({"user_tags.fw_name": mol},
                           {"$set": {"state": "error"}})
+
 
 def mark_geom_failed_error(collection):
     mol_names = '''anthrachinon_wfs_15_benzene
@@ -188,14 +195,15 @@ viologen_wfs_7_trichloromethyl'''
         collection.update({"user_tags.fw_name": mol},
                           {"$set": {"state": "error"}})
 
+
 if __name__ == '__main__':
     collection, db = get_db_collection()
-    #rename_task_id(collection)
-    #add_new_task_id(db)
-    #mark_g3_success(collection)
-    #mark_imaginary_freq_error(collection)
-    #mark_geom_failed_error(collection)
-    #add_field_reduced_cell_formula_abc(db)
+    # rename_task_id(collection)
+    # add_new_task_id(db)
+    # mark_g3_success(collection)
+    # mark_imaginary_freq_error(collection)
+    # mark_geom_failed_error(collection)
+    # add_field_reduced_cell_formula_abc(db)
     missions = collection.find().distinct("user_tags.mission")
     for mi in missions:
         print mi

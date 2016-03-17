@@ -1,11 +1,12 @@
 import datetime
+
 from monty.json import MontyDecoder
+
 from pymatgen import Composition, Structure, Molecule
 from pymatgen.analysis.molecule_matcher import \
     MoleculeMatcher, InchiMolAtomMapper
 from pymatgen.io.babel import BabelMolAdaptor
 from pymatgen.matproj.snl import StructureNL
-
 
 __author__ = 'xiaohuiqu'
 
@@ -20,6 +21,7 @@ def get_bonds_from_obmol(obmol):
         bonds.append(sorted([a1, a2]))
     bonds.sort()
     return bonds
+
 
 def get_meta_from_structure(mol):
     '''
@@ -43,7 +45,7 @@ def get_meta_from_structure(mol):
             'formula': comp.formula,
             'reduced_cell_formula': comp.reduced_formula,
             'reduced_cell_formula_abc': Composition(comp.reduced_formula)
-            .alphabetical_formula,
+                .alphabetical_formula,
             'anonymized_formula': comp.anonymized_formula,
             'chemsystem': '-'.join(elsyms),
             'is_valid': mol.is_valid(),
@@ -95,11 +97,11 @@ class EGStructureNL(StructureNL):
         structure = Structure.from_dict(d) if "lattice" in d \
             else Molecule.from_dict(d)
         return EGStructureNL(structure, a["authors"],
-                           projects=a.get("projects", None),
-                           references=a.get("references", ""),
-                           remarks=a.get("remarks", None), data=data,
-                           history=a.get("history", None),
-                           created_at=created_at)
+                             projects=a.get("projects", None),
+                             references=a.get("references", ""),
+                             remarks=a.get("remarks", None), data=data,
+                             history=a.get("history", None),
+                             created_at=created_at)
 
     @staticmethod
     def from_snl(snl, snl_id, pointgroup):
@@ -164,7 +166,8 @@ class SNLGroup():
 
         if exact_match:
             mm = MoleculeMatcher(tolerance=0.01,
-                                 mapper=InchiMolAtomMapper(angle_tolerance=5.0))
+                                 mapper=InchiMolAtomMapper(
+                                     angle_tolerance=5.0))
 
             if not mm.fit(cand_snl.structure, self.canonical_structure):
                 return False

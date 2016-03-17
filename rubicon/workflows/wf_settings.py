@@ -1,5 +1,3 @@
-import os
-
 __author__ = 'xiaohuiqu'
 
 MOVE_TO_EG_GARDEN = True

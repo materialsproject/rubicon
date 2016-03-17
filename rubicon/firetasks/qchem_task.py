@@ -1,20 +1,21 @@
 import copy
+import datetime
 import json
 import logging
+import os
 import re
 import shlex
-import os
 import shutil
 import socket
-import datetime
 import sys
+
+from custodian.custodian import Custodian
 from custodian.qchem.handlers import QChemErrorHandler
 from custodian.qchem.jobs import QchemJob
 from fireworks.core.firework import FireTaskBase, FWAction
 from fireworks.fw_config import FWData
 from fireworks.utilities.fw_serializers import FWSerializable
 
-from custodian.custodian import Custodian
 from pymatgen.core.structure import Molecule
 from pymatgen.io.qchem import QcInput
 from rubicon.utils.eg_wf_utils import move_to_eg_garden
@@ -39,7 +40,8 @@ class QChemTask(FireTaskBase, FWSerializable):
     _fw_name = "QChem Task"
 
     @staticmethod
-    def _calibrate_alcf_cmd(input_file="mol.qcinp", max_minutes=60, num_nodes=8, ranks_per_node=1,
+    def _calibrate_alcf_cmd(input_file="mol.qcinp", max_minutes=60,
+                            num_nodes=8, ranks_per_node=1,
                             num_threads=64, scr_size_GB=2.0, use_runjob=False):
         qc_package_path = "/projects/JCESR/pkcoff/qchem43.mod1"
         qcaux_path = "/projects/JCESR/qcaux"
@@ -69,21 +71,27 @@ class QChemTask(FireTaskBase, FWSerializable):
             lenstep_config_set = json.load(f)
         lenstep_setting = lenstep_config_set["small size"]
         qc_envs.update(lenstep_setting)
-        qsub_env_text = ":".join(["{}={}".format(k, v) for k, v in qc_envs.items()])
-        runjob_env_text = " ".join(["--envs {}={}".format(k, v) for k, v in qc_envs.items()])
+        qsub_env_text = ":".join(
+            ["{}={}".format(k, v) for k, v in qc_envs.items()])
+        runjob_env_text = " ".join(
+            ["--envs {}={}".format(k, v) for k, v in qc_envs.items()])
         block_name = os.environ["COBALT_PARTNAME"]
         cur_dir = os.getcwd()
         qc_runjob_cmd = "runjob --block {block_name} -n {num_processes} --ranks-per-node " \
                         "{ranks_per_node} --verbose 2 {envs} --cwd={cur_dir} : {qc_exe_path} {qc_input_file} " \
                         "{scr_dir}".format(
-                            block_name=block_name, num_processes=num_nodes * ranks_per_node,
-                            ranks_per_node=ranks_per_node, envs=runjob_env_text, cur_dir=cur_dir,
-                            qc_exe_path=qc_exe_path, qc_input_file=input_file, scr_dir=qc_scr_dir)
+            block_name=block_name, num_processes=num_nodes * ranks_per_node,
+            ranks_per_node=ranks_per_node, envs=runjob_env_text,
+            cur_dir=cur_dir,
+            qc_exe_path=qc_exe_path, qc_input_file=input_file,
+            scr_dir=qc_scr_dir)
         qc_qsub_cmd = "qsub -A JCESR -t {max_minutes} -n {num_nodes} --mode c{ranks_per_node} --env {envs} " \
                       "--cwd={cur_dir} {qc_exe_path} {qc_input_file} {scr_dir}".format(
-                          max_minutes=max_minutes, num_nodes=num_nodes, ranks_per_node=ranks_per_node,
-                          envs=qsub_env_text, cur_dir=cur_dir, qc_exe_path=qc_exe_path, qc_input_file=input_file,
-                          scr_dir=qc_scr_dir)
+            max_minutes=max_minutes, num_nodes=num_nodes,
+            ranks_per_node=ranks_per_node,
+            envs=qsub_env_text, cur_dir=cur_dir, qc_exe_path=qc_exe_path,
+            qc_input_file=input_file,
+            scr_dir=qc_scr_dir)
         if use_runjob:
             qc_cmd = qc_runjob_cmd
         else:
@@ -134,18 +142,22 @@ class QChemTask(FireTaskBase, FWSerializable):
             # edison compute nodes
             if (not fw_data.MULTIPROCESSING) or (fw_data.SUB_NPROCS is None):
                 num_numa_nodes = 2
-                low_nprocess = max(int(len(mol)/num_numa_nodes) * num_numa_nodes, 1)
-                qc_exe = shlex.split("qchem -np {}".format(min(24, low_nprocess)))
-                half_cpus_cmd = shlex.split("qchem -np {}".format(min(12, low_nprocess)))
+                low_nprocess = max(
+                    int(len(mol) / num_numa_nodes) * num_numa_nodes, 1)
+                qc_exe = shlex.split(
+                    "qchem -np {}".format(min(24, low_nprocess)))
+                half_cpus_cmd = shlex.split(
+                    "qchem -np {}".format(min(12, low_nprocess)))
             else:
                 nodelist = ",".join(fw_data.NODE_LIST)
                 os.environ["QCNODE"] = nodelist
                 num_numa_nodes = 2 * len(fw_data.NODE_LIST)
-                low_nprocess = max(int(len(mol)/num_numa_nodes) * num_numa_nodes, 1)
+                low_nprocess = max(
+                    int(len(mol) / num_numa_nodes) * num_numa_nodes, 1)
                 qc_exe = shlex.split("qchem -np {}".format(
-                        min(fw_data.SUB_NPROCS, low_nprocess)))
+                    min(fw_data.SUB_NPROCS, low_nprocess)))
                 half_cpus_cmd = shlex.split("qchem -np {}".format(
-                        min(fw_data.SUB_NPROCS / 2, low_nprocess)))
+                    min(fw_data.SUB_NPROCS / 2, low_nprocess)))
             openmp_cmd = shlex.split("qchem -nt 24")
         elif "PBS_JOBID" in os.environ and "hopque" in os.environ["PBS_JOBID"]:
             if (not fw_data.MULTIPROCESSING) or (fw_data.SUB_NPROCS is None):
@@ -160,9 +172,15 @@ class QChemTask(FireTaskBase, FWSerializable):
                 half_cpus_cmd = shlex.split("qchem -np {}".format(
                     min(fw_data.SUB_NPROCS / 2, len(mol))))
             openmp_cmd = shlex.split("qchem -seq -nt 24")
-        elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"]=="cori":
+        elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"] == "cori":
             if (not fw_data.MULTIPROCESSING) or (fw_data.SUB_NPROCS is None):
                 num_numa_nodes = 2
+                low_nprocess = max(
+                    int(len(mol) / num_numa_nodes) * num_numa_nodes, 1)
+                qc_exe = shlex.split(
+                    "qchem -np {}".format(min(32, low_nprocess)))
+                half_cpus_cmd = shlex.split(
+                    "qchem -np {}".format(min(16, low_nprocess)))
                 low_nprocess = max(int(len(mol)/num_numa_nodes) * num_numa_nodes, 1)
                 nodelist = os.environ["QCNODE"].split(',')
                 num_cores = 32 * len(nodelist)
@@ -172,23 +190,29 @@ class QChemTask(FireTaskBase, FWSerializable):
                 nodelist = ",".join(fw_data.NODE_LIST)
                 os.environ["QCNODE"] = nodelist
                 num_numa_nodes = 2 * len(fw_data.NODE_LIST)
-                low_nprocess = max(int(len(mol)/num_numa_nodes) * num_numa_nodes, 1)
+                low_nprocess = max(
+                    int(len(mol) / num_numa_nodes) * num_numa_nodes, 1)
                 qc_exe = shlex.split("qchem -np {}".format(
                     min(fw_data.SUB_NPROCS, low_nprocess)))
                 half_cpus_cmd = shlex.split("qchem -np {}".format(
                     min(fw_data.SUB_NPROCS / 2, low_nprocess)))
             openmp_cmd = shlex.split("qchem -nt 32")
-        elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"]=="matgen":
+        elif "NERSC_HOST" in os.environ and os.environ[
+            "NERSC_HOST"] == "matgen":
             if (not fw_data.MULTIPROCESSING) or (fw_data.SUB_NPROCS is None):
                 num_numa_nodes = 2
-                low_nprocess = max(int(len(mol)/num_numa_nodes) * num_numa_nodes, 1)
-                qc_exe = shlex.split("qchem -np {}".format(min(16, low_nprocess)))
-                half_cpus_cmd = shlex.split("qchem -np {}".format(min(8, low_nprocess)))
+                low_nprocess = max(
+                    int(len(mol) / num_numa_nodes) * num_numa_nodes, 1)
+                qc_exe = shlex.split(
+                    "qchem -np {}".format(min(16, low_nprocess)))
+                half_cpus_cmd = shlex.split(
+                    "qchem -np {}".format(min(8, low_nprocess)))
             else:
                 nodelist = ",".join(fw_data.NODE_LIST)
                 os.environ["QCNODE"] = nodelist
                 num_numa_nodes = 2 * len(fw_data.NODE_LIST)
-                low_nprocess = max(int(len(mol)/num_numa_nodes) * num_numa_nodes, 1)
+                low_nprocess = max(
+                    int(len(mol) / num_numa_nodes) * num_numa_nodes, 1)
                 qc_exe = shlex.split("qchem -np {}".format(
                     min(fw_data.SUB_NPROCS, low_nprocess)))
                 half_cpus_cmd = shlex.split("qchem -np {}".format(
@@ -205,10 +229,12 @@ class QChemTask(FireTaskBase, FWSerializable):
             scr_size_GB = 0.9313
             max_minutes = 8 * 60
             qc_exe = shlex.split(self._calibrate_alcf_cmd(
-                num_nodes=num_nodes, max_minutes=max_minutes, num_threads=num_threads,
+                num_nodes=num_nodes, max_minutes=max_minutes,
+                num_threads=num_threads,
                 scr_size_GB=scr_size_GB))
             half_cpus_cmd = shlex.split(self._calibrate_alcf_cmd(
-                num_nodes=num_nodes, max_minutes=max_minutes, num_threads=num_threads/2,
+                num_nodes=num_nodes, max_minutes=max_minutes,
+                num_threads=num_threads / 2,
                 scr_size_GB=scr_size_GB))
             self._customize_alcf_qcinp(qcinp, num_nodes=num_nodes)
             openmp_cmd = None

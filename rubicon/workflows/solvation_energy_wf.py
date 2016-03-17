@@ -4,18 +4,22 @@ from fireworks.core.firework import Workflow
 
 from rubicon.utils.qchem_firework_creator import QChemFireWorkCreator
 
-
 __author__ = 'xiaohuiqu'
 
 
-def solvation_energy_fws(mol, name, mission, solvents, solvent_method, use_vdW_surface, dupefinder=None, priority=1, parent_fwid=None,
+def solvation_energy_fws(mol, name, mission, solvents, solvent_method,
+                         use_vdW_surface, dupefinder=None, priority=1,
+                         parent_fwid=None,
                          additional_user_tags=None, qm_method=None):
     large = False
     if len(mol) > 50:
         large = True
-    energy_method, geom_method = qm_method.split("//") if qm_method else (None, None)
-    fw_creator = QChemFireWorkCreator(mol=mol, molname=name, mission=mission, dupefinder=dupefinder,
-                                      priority=priority, large=large, additional_user_tags=additional_user_tags)
+    energy_method, geom_method = qm_method.split("//") if qm_method else (
+    None, None)
+    fw_creator = QChemFireWorkCreator(mol=mol, molname=name, mission=mission,
+                                      dupefinder=dupefinder,
+                                      priority=priority, large=large,
+                                      additional_user_tags=additional_user_tags)
     fwid_base = 1
     if parent_fwid:
         if not (isinstance(parent_fwid, int) or isinstance(parent_fwid, list)):
@@ -51,12 +55,13 @@ def solvation_energy_fws(mol, name, mission, solvents, solvent_method, use_vdW_s
     if num_solvents < 1:
         raise ValueError("You must provide at least one solvent")
 
-    sp_fw_ids = zip(* [iter(range(fwid_base + 4,
-                                  fwid_base + 4 + num_solvents*2))] * 2)
+    sp_fw_ids = zip(*[iter(range(fwid_base + 4,
+                                 fwid_base + 4 + num_solvents * 2))] * 2)
     sp_fws = (fw_creator.sp_fw(
-              charge=0, spin_multiplicity=1, fw_id_cal=fwid_cal,
-              fw_id_db=fwid_db, solvent_method=solvent_method, use_vdw_surface=use_vdW_surface, solvent=solvent,
-              qm_method=energy_method)
+        charge=0, spin_multiplicity=1, fw_id_cal=fwid_cal,
+        fw_id_db=fwid_db, solvent_method=solvent_method,
+        use_vdw_surface=use_vdW_surface, solvent=solvent,
+        qm_method=energy_method)
               for (fwid_cal, fwid_db), solvent in zip(sp_fw_ids, solvents))
     sp_cal_ids, sp_db_ids = zip(*sp_fw_ids)
     links_dict.update((dict(sp_fw_ids)))

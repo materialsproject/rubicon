@@ -9,12 +9,12 @@ coords = [[0.000000, 0.000000, 0.000000],
 mol = Molecule(["C", "H", "H", "H", "H"], coords)
 
 tasks = [
-            NwTask.dft_task(mol, operation="optimize", xc="b3lyp",
-                            basis_set="6-31++G*"),
-            NwTask.dft_task(mol, operation="freq", xc="b3lyp",
-                            basis_set="6-31++G*")
+    NwTask.dft_task(mol, operation="optimize", xc="b3lyp",
+                    basis_set="6-31++G*"),
+    NwTask.dft_task(mol, operation="freq", xc="b3lyp",
+                    basis_set="6-31++G*")
 
-        ]
+]
 nwi = NwInput(mol, tasks)
 
 print str(nwi)

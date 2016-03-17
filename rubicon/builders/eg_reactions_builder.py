@@ -3,14 +3,13 @@ Build molecules collection
 Adapted from Dan Gunter and Wei Chen's vasp materials builder
 """
 import copy
-import logging
 import datetime
+import logging
 import math
 import sys
 
 from rubicon.builders import eg_shared
 from rubicon.submission.submission_mongo_eg import SubmissionMongoAdapterEG
-
 
 __author__ = "Xiaohui Qu"
 __copyright__ = "Copyright 2012-2013, The Electrolyte Genome Project"
@@ -19,7 +18,6 @@ __maintainer__ = "Xiaohui Qu"
 __email__ = "xqu@lbl.gov"
 __status__ = "Development"
 __date__ = "1/1/14"
-
 
 _log = logging.getLogger('eg.' + __name__)
 
@@ -40,20 +38,19 @@ class TaskKeys:
         'pointgroup', 'inchi_root',
         'calculations',
         'formula', 'task_id_deprecated', 'svg', 'xyz')
-    reactions_fields = ('reaction_id', 'num_reactants', 'num_products',  'reactant_nicknames',
-                        'product_nicknames', 'reactant_inchis', 'product_inchis',
-                        'reactant_submission_ids', 'product_submission_ids', 'all_inchis',
-                        'reactant_spin_multiplicities', 'product_spin_multiplicities',
-                        'reactant_charges', 'product_charges', "submitter_email")
-
-
+    reactions_fields = (
+    'reaction_id', 'num_reactants', 'num_products', 'reactant_nicknames',
+    'product_nicknames', 'reactant_inchis', 'product_inchis',
+    'reactant_submission_ids', 'product_submission_ids', 'all_inchis',
+    'reactant_spin_multiplicities', 'product_spin_multiplicities',
+    'reactant_charges', 'product_charges', "submitter_email")
 
 
 class ReactionsBuilder(eg_shared.ParallelBuilder):
     """Build derived 'reactions' collection.
     """
     GAS_CONSTANT = 8.3144621 * (0.01036410 * 1.0E-3)  # eV K^-1 mol^-1
-    TEMPERATURE = 298.15 # K
+    TEMPERATURE = 298.15  # K
 
     def __init__(self, collections, **kwargs):
         """Create new molecules builder.
@@ -77,7 +74,8 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
         """Run the builder.
         """
         _log.info("Getting Reaction Indices")
-        reactions = list(self.source_reactions.find(filter={}, projection=TaskKeys.reactions_fields))
+        reactions = list(self.source_reactions.find(filter={},
+                                                    projection=TaskKeys.reactions_fields))
         map(self.add_item, reactions)
         _log.info("Beginning analysis")
         states = self.run_parallel()
@@ -101,12 +99,14 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
                              "task_type": "vacuum only single point energy"}
         for inchi, charge, spin in zip(reaction["reactant_inchis"],
                                        reaction["reactant_charges"],
-                                       reaction["reactant_spin_multiplicities"]):
+                                       reaction[
+                                           "reactant_spin_multiplicities"]):
             freq_query = copy.deepcopy(freq_query_template)
             freq_query["inchi_root"] = inchi
             freq_query["charge"] = charge
             freq_query["spin_multiplicity"] = spin
-            freq_doc = self._c.tasks.find_one(filter=freq_query, projection=TaskKeys.tasks_fields)
+            freq_doc = self._c.tasks.find_one(filter=freq_query,
+                                              projection=TaskKeys.tasks_fields)
             if not freq_doc:
                 return None
             reactant_freq_docs.append(freq_doc)
@@ -114,7 +114,8 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
             sp_query["inchi_root"] = inchi
             sp_query["charge"] = charge
             sp_query["spin_multiplicity"] = spin
-            sp_doc = self._c.tasks.find_one(filter=sp_query, projection=TaskKeys.tasks_fields)
+            sp_doc = self._c.tasks.find_one(filter=sp_query,
+                                            projection=TaskKeys.tasks_fields)
             if not sp_doc:
                 return None
             reactant_sp_docs.append(sp_doc)
@@ -122,19 +123,22 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
             sol_query["inchi_root"] = inchi
             sol_query["charge"] = charge
             sol_query["spin_multiplicity"] = spin
-            sol_doc = self._c.tasks.find_one(filter=sol_query, projection=TaskKeys.tasks_fields)
+            sol_doc = self._c.tasks.find_one(filter=sol_query,
+                                             projection=TaskKeys.tasks_fields)
             if not sol_doc:
                 return None
             reactant_sol_docs.append(sol_doc)
 
         for inchi, charge, spin in zip(reaction["product_inchis"],
                                        reaction["product_charges"],
-                                       reaction["product_spin_multiplicities"]):
+                                       reaction[
+                                           "product_spin_multiplicities"]):
             freq_query = copy.deepcopy(freq_query_template)
             freq_query["inchi_root"] = inchi
             freq_query["charge"] = charge
             freq_query["spin_multiplicity"] = spin
-            freq_doc = self._c.tasks.find_one(filter=freq_query, projection=TaskKeys.tasks_fields)
+            freq_doc = self._c.tasks.find_one(filter=freq_query,
+                                              projection=TaskKeys.tasks_fields)
             if not freq_doc:
                 return None
             product_freq_docs.append(freq_doc)
@@ -142,7 +146,8 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
             sp_query["inchi_root"] = inchi
             sp_query["charge"] = charge
             sp_query["spin_multiplicity"] = spin
-            sp_doc = self._c.tasks.find_one(filter=sp_query, projection=TaskKeys.tasks_fields)
+            sp_doc = self._c.tasks.find_one(filter=sp_query,
+                                            projection=TaskKeys.tasks_fields)
             if not sp_doc:
                 return None
             product_sp_docs.append(sp_doc)
@@ -150,7 +155,8 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
             sol_query["inchi_root"] = inchi
             sol_query["charge"] = charge
             sol_query["spin_multiplicity"] = spin
-            sol_doc = self._c.tasks.find_one(filter=sol_query, projection=TaskKeys.tasks_fields)
+            sol_doc = self._c.tasks.find_one(filter=sol_query,
+                                             projection=TaskKeys.tasks_fields)
             if not sol_doc:
                 return None
             product_sol_docs.append(sol_doc)
@@ -162,16 +168,19 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
         data = dict()
         for side, freq_sol_sps, counts in zip(["reactant", "product"],
                                               docs,
-                                              [reaction["num_reactants"], reaction["num_products"]]):
+                                              [reaction["num_reactants"],
+                                               reaction["num_products"]]):
             data[side] = []
             for n, freq_sol_sp in zip(counts, freq_sol_sps):
                 specie = dict()
                 specie["number"] = n
                 specie["task_id"] = dict()
                 specie["task_id_deprecated"] = dict()
-                specie["snlgroup_id_final"] = freq_sol_sp[0]["snlgroup_id_final"]
+                specie["snlgroup_id_final"] = freq_sol_sp[0][
+                    "snlgroup_id_final"]
                 specie["charge"] = freq_sol_sp[0]["charge"]
-                specie["spin_multiplicity"] = freq_sol_sp[0]["spin_multiplicity"]
+                specie["spin_multiplicity"] = freq_sol_sp[0][
+                    "spin_multiplicity"]
                 specie["snl_final"] = freq_sol_sp[0]["snl_final"]
                 specie["molecule"] = freq_sol_sp[0]["molecule_final"]
                 specie["xyz"] = freq_sol_sp[0]["xyz"]
@@ -183,53 +192,65 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
                 specie["nelements"] = freq_sol_sp[0]["nelements"]
                 specie["user_tags"] = freq_sol_sp[0]["user_tags"]
                 specie["run_tags"] = freq_sol_sp[0]["run_tags"]
-                specie["reduced_cell_formula_abc"] = freq_sol_sp[0]["reduced_cell_formula_abc"]
+                specie["reduced_cell_formula_abc"] = freq_sol_sp[0][
+                    "reduced_cell_formula_abc"]
                 specie["pretty_formula"] = freq_sol_sp[0]["pretty_formula"]
                 specie["formula"] = freq_sol_sp[0]["formula"]
                 specie["pointgroup"] = freq_sol_sp[0]["pointgroup"]
                 specie["svg"] = freq_sol_sp[0]["svg"]
                 freq_cal_doc = freq_sol_sp[0]["calculations"]
                 sp_cal_doc = freq_sol_sp[2]["calculations"]
-                specie["thermo_corrections"] = freq_cal_doc["freq"]["corrections"]
+                specie["thermo_corrections"] = freq_cal_doc["freq"][
+                    "corrections"]
                 if solution_phase:
                     # get the solution phase scf key name, scf_pcm, scf_sm12mk, etc.
                     sol_doc = freq_sol_sp[1]["calculations"]
                     scf_all = set(sol_doc.keys())
                     scf_all.remove('scf')
                     scf_name = scf_all.pop()
-                    specie["solvation_energy"] = sol_doc[scf_name]["energies"][-1][-1] - \
-                        sol_doc["scf"]["energies"][-1][-1]
+                    specie["solvation_energy"] = \
+                    sol_doc[scf_name]["energies"][-1][-1] - \
+                    sol_doc["scf"]["energies"][-1][-1]
                 specie["scf_energy"] = sp_cal_doc["scf"]["energies"][-1][-1]
                 for task_type, d in zip(["freq", "sol", "sp"], freq_sol_sp):
                     specie["task_id"][task_type] = d["task_id"]
-                    specie["task_id_deprecated"][task_type] = d["task_id_deprecated"]
+                    specie["task_id_deprecated"][task_type] = d[
+                        "task_id_deprecated"]
                 data[side].append(specie)
         gibbs_energy = {"reactant": [], "product": []}
         for side in ["reactant", "product"]:
             for specie in data[side]:
                 elec_energy = specie["scf_energy"]
-                solvation_energy = specie['solvation_energy'] if 'solvation_energy' in specie else 0.0
+                solvation_energy = specie[
+                    'solvation_energy'] if 'solvation_energy' in specie else 0.0
                 h = specie["thermo_corrections"]["Total Enthalpy"]
                 s = specie["thermo_corrections"]["Total Entropy"]
                 g = elec_energy + solvation_energy + (h - self.TEMPERATURE * s)
                 gibbs_energy[side].append(g)
         data["total_gibbs_free_energies"] = gibbs_energy
-        reactant_energy = sum([energy*n for energy, n in zip(gibbs_energy["reactant"], reaction["num_reactants"])])
-        product_energy = sum([energy*n for energy, n in zip(gibbs_energy["product"], reaction["num_products"])])
+        reactant_energy = sum([energy * n for energy, n in
+                               zip(gibbs_energy["reactant"],
+                                   reaction["num_reactants"])])
+        product_energy = sum([energy * n for energy, n in
+                              zip(gibbs_energy["product"],
+                                  reaction["num_products"])])
         data["delta_g"] = product_energy - reactant_energy
-        data["equilibrium_constants"] = math.exp(-data["delta_g"]/(self.GAS_CONSTANT*self.TEMPERATURE))
+        data["equilibrium_constants"] = math.exp(
+            -data["delta_g"] / (self.GAS_CONSTANT * self.TEMPERATURE))
         return data
-
 
     def process_item(self, reaction):
         """Create and add material for a given grouping identifer.
         """
-        query = {'state': 'successful', 'inchi_root': {"$in": reaction["all_inchis"]},
+        query = {'state': 'successful',
+                 'inchi_root': {"$in": reaction["all_inchis"]},
                  'task_type': "solvation energy"}
-        solvents = self._c.tasks.find(filter=query, projection=TaskKeys.tasks_fields).distinct(
+        solvents = self._c.tasks.find(filter=query,
+                                      projection=TaskKeys.tasks_fields).distinct(
             "implicit_solvent.solvent_name"
         )
-        solvent_models = self._c.tasks.find(filter=query, projection=TaskKeys.tasks_fields)\
+        solvent_models = self._c.tasks.find(filter=query,
+                                            projection=TaskKeys.tasks_fields) \
             .distinct("implicit_solvent.model")
         fe_docs = dict()
         fe_docs["reaction_id"] = reaction["reaction_id"]
@@ -245,16 +266,23 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
             for solvent in solvents:
                 query['implicit_solvent.solvent_name'] = solvent
                 query['implicit_solvent.model'] = solvent_model
-                docs = self.find_reaction_tasks_docs(solvent, solvent_model, reaction)
+                docs = self.find_reaction_tasks_docs(solvent, solvent_model,
+                                                     reaction)
                 if docs:
                     docs_available = True
-                d = self.build_reaction_data(docs, reaction, solution_phase=True) if docs else None
+                d = self.build_reaction_data(docs, reaction,
+                                             solution_phase=True) if docs else None
                 if d and len(d) > 0:
-                    solvent_key = "{}_{}".format(solvent, solvent_model).replace(".", "_")
+                    solvent_key = "{}_{}".format(solvent,
+                                                 solvent_model).replace(".",
+                                                                        "_")
                     fe_docs['solvated_properties'][solvent_key] = d
                     if "vacuum_properties" not in fe_docs:
-                        fe_docs["vacuum_properties"] = self.build_reaction_data(docs, reaction, solution_phase=False)
-        if not docs_available or "vacuum_properties" not in fe_docs or fe_docs["vacuum_properties"] is None:
+                        fe_docs[
+                            "vacuum_properties"] = self.build_reaction_data(
+                            docs, reaction, solution_phase=False)
+        if not docs_available or "vacuum_properties" not in fe_docs or fe_docs[
+            "vacuum_properties"] is None:
             return 1
         if len(fe_docs['solvated_properties']) == 0:
             return 2

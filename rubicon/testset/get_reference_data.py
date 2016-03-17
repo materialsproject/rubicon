@@ -1,8 +1,6 @@
-import copy
 from rubicon.testset.get_g3_benchmark import get_g3_bench_collection
 
 __author__ = 'Xiaohui Qu'
-
 
 import urllib2
 from BeautifulSoup import BeautifulSoup
@@ -16,6 +14,7 @@ bench_dict = defaultdict(dict)
 
 bench_dict['unit'] = 'kcal/mol'
 
+
 def get_table(url, title, keyname, result):
     global soup, row, tds
     soup = BeautifulSoup(urllib2.urlopen(url).read())
@@ -25,24 +24,29 @@ def get_table(url, title, keyname, result):
         tds = row.findAll('td')
         formula = str(tds[0].p.text).strip()
         d = result[formula]
-        d[keyname] = dict(G3=float(tds[1].p.string), Expt=float(tds[2].p.string))
+        d[keyname] = dict(G3=float(tds[1].p.string),
+                          Expt=float(tds[2].p.string))
+
 
 def refname2inchi(mission_tag):
     collection = get_g3_bench_collection()
     result_cursor = collection.find(filter={"user_tags.mission": mission_tag},
                                     projection=['inchi', 'user_tags.fw_name'])
     calc_result = list(result_cursor)
-    fw_name_2_inchi = {m['user_tags']['fw_name'].strip(): m['inchi'] for m in calc_result}
+    fw_name_2_inchi = {m['user_tags']['fw_name'].strip(): m['inchi'] for m in
+                       calc_result}
 
     with open("gauname2refname.json") as f:
         gau2ref = json.load(f)
     gau2ref.pop('NA')
     ref2gau = {v: k for k, v in gau2ref.items()}
 
-    ref2inchi = {ref_name: fw_name_2_inchi[fw_name] for ref_name, fw_name in ref2gau.items()
+    ref2inchi = {ref_name: fw_name_2_inchi[fw_name] for ref_name, fw_name in
+                 ref2gau.items()
                  if fw_name in fw_name_2_inchi}
 
     return ref2inchi
+
 
 if __name__ == '__main__':
     get_table(ip_url, "G3 Ionization Potentials", "IP", bench_dict)

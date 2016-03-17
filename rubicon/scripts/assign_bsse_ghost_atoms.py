@@ -1,6 +1,7 @@
 import argparse
 import copy
 import itertools
+
 from pymatgen.core.structure import Molecule
 from pymatgen.io.qchem import QcInput
 from rubicon.workflows.bsse_wf import BSSEFragment, get_sub_mol
@@ -31,7 +32,8 @@ def get_bsse_fragment_files(qcinp_file_name, bsse_fragments):
                 j.spin_multiplicity = bsse_frag.spin_multiplicity
             if 'basis' in j.params:
                 parent_basis_def = j.params['basis']
-                frag_basis_def = [bs for i, bs in enumerate(parent_basis_def) if i not in bsse_frag.ghost_atoms]
+                frag_basis_def = [bs for i, bs in enumerate(parent_basis_def)
+                                  if i not in bsse_frag.ghost_atoms]
                 j.set_basis_set(frag_basis_def)
         isolated_qcinps.append(frag_qcinp)
     return overlapped_qcinps, isolated_qcinps
@@ -53,10 +55,10 @@ def parse_fragments_definition(frag_def_file_name, qcinp_file_name):
                     print "current line is \'{}\'".format(frag_def_text[i])
                     raise ValueError("can't understand range \'{}\'".format(t))
                 start_index, end_index = [int(x) for x in t.split('-')]
-                frag_atoms.extend(range(start_index, end_index+1))
+                frag_atoms.extend(range(start_index, end_index + 1))
             else:
                 frag_atoms.append(int(t))
-        frag_atoms = [x-1 for x in frag_atoms]
+        frag_atoms = [x - 1 for x in frag_atoms]
         fragment_atoms.append(frag_atoms)
         ghost_atoms = BSSEFragment.get_host_atoms(frag_atoms, parent_mol)
         charge = int(token[1])
@@ -67,7 +69,7 @@ def parse_fragments_definition(frag_def_file_name, qcinp_file_name):
     if set(all_atom_from_fragments) != set(range(len(parent_mol))):
         print "The current fragments is:"
         for i, frag in enumerate(fragment_atoms):
-            print "Fragment {}:".format(i),  ', '.join([str(x) for x in frag])
+            print "Fragment {}:".format(i), ', '.join([str(x) for x in frag])
         raise ValueError("all the fragment should form the complete molecule")
     return bsse_fragments
 
@@ -91,15 +93,19 @@ def main():
                         help="the list of QChem input files to write isolated fragments")
     options = parser.parse_args()
 
-    bsse_fragments = parse_fragments_definition(options.fragments, options.input)
-    overlapped_qcinps, isolated_qcinps = get_bsse_fragment_files(options.input, bsse_fragments)
+    bsse_fragments = parse_fragments_definition(options.fragments,
+                                                options.input)
+    overlapped_qcinps, isolated_qcinps = get_bsse_fragment_files(options.input,
+                                                                 bsse_fragments)
     if len(bsse_fragments) != len(options.overlapped):
-        raise ValueError("Please specify {} names of QChem input file for overlapped "
-                         "fragments".format(len(bsse_fragments)))
+        raise ValueError(
+            "Please specify {} names of QChem input file for overlapped "
+            "fragments".format(len(bsse_fragments)))
     if len(bsse_fragments) != len(options.isolated):
-        raise ValueError("Please specify {} names of QChem input file for isolated "
-                         "fragments".format(len(bsse_fragments)))
-    for qcinp, filename in zip(overlapped_qcinps, options.overlapped) +\
+        raise ValueError(
+            "Please specify {} names of QChem input file for isolated "
+            "fragments".format(len(bsse_fragments)))
+    for qcinp, filename in zip(overlapped_qcinps, options.overlapped) + \
             zip(isolated_qcinps, options.isolated):
         qcinp.write_file(filename)
 

@@ -2,9 +2,11 @@ from __future__ import unicode_literals
 
 import argparse
 import copy
+
 from pymatgen.io.qchem import QcInput
 
 __author__ = 'xiaohuiqu'
+
 
 def assign_basis_set_by_range(qcinp, basis_def_file):
     with open(basis_def_file) as f:
@@ -16,18 +18,21 @@ def assign_basis_set_by_range(qcinp, basis_def_file):
         if t[1] < t[0]:
             print "The current line is:"
             print basis_def_texts[i]
-            raise ValueError("The atom order specifications must be in ascending order inside a line")
+            raise ValueError(
+                "The atom order specifications must be in ascending order inside a line")
         if i > 0:
-            prev_t = basis_def_token_values[i-1]
+            prev_t = basis_def_token_values[i - 1]
             if t[0] - prev_t[1] != 1:
                 print "The previous line is:"
-                print basis_def_texts[i-1]
+                print basis_def_texts[i - 1]
                 print "The current line is:"
                 print basis_def_texts[i]
-                raise ValueError("The index of first atom must be exactly 1 larger than the previous line")
+                raise ValueError(
+                    "The index of first atom must be exactly 1 larger than the previous line")
     mol = qcinp.jobs[0].mol
     if basis_def_token_values[-1][1] != len(mol):
-        raise ValueError("The provided numbers atom in the basis and QChem input file must be consistent")
+        raise ValueError(
+            "The provided numbers atom in the basis and QChem input file must be consistent")
     elements = [site.species_string for site in mol.sites]
     basis = []
     for t in basis_def_token_values:
@@ -38,7 +43,6 @@ def assign_basis_set_by_range(qcinp, basis_def_file):
     for j in qcinp_with_basis.jobs:
         j.set_basis_set(elements_and_basis)
     return qcinp_with_basis
-
 
 
 def main():
@@ -57,7 +61,8 @@ def main():
     options = parser.parse_args()
 
     qcinp_no_basis = QcInput.from_file(options.input)
-    mol_with_basis = assign_basis_set_by_range(qcinp=qcinp_no_basis, basis_def_file=options.basis)
+    mol_with_basis = assign_basis_set_by_range(qcinp=qcinp_no_basis,
+                                               basis_def_file=options.basis)
     mol_with_basis.write_file(options.output)
 
 

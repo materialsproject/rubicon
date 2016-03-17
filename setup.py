@@ -7,10 +7,11 @@ __maintainer__ = "Anubhav Jain"
 __email__ = "ajain@lbl.gov"
 __date__ = "Apr 10, 2013"
 
-from setuptools import setup, find_packages
-from rubicon import __version__
 import os
-import multiprocessing, logging  # AJ: for some reason this is needed to not have "python setup.py test" freak out
+
+from setuptools import setup, find_packages
+
+from rubicon import __version__
 
 module_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -25,8 +26,8 @@ if __name__ == "__main__":
           license='modified BSD',
           packages=find_packages(),
           zip_safe=False,
-          install_requires=['pymatgen>=2.6', 'fireworks>=0.1dev1.7',
-                            'custodian>=0.3', 'monty>=0.2.1'],
+          install_requires=['pymatgen>=3.0', 'fireworks>=0.9',
+                            'custodian>=0.7', 'monty>=0.2.1'],
           classifiers=["Programming Language :: Python :: 2.7",
                        "Development Status :: 2 - Pre-Alpha",
                        "Intended Audience :: Science/Research",
