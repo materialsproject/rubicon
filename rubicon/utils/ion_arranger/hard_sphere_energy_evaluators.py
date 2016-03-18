@@ -3,10 +3,15 @@ import itertools
 import math
 
 import numpy as np
-import openbabel as ob
+
+try:
+    import openbabel as ob
+except ImportError:
+    ob = None
 
 from pymatgen.analysis.molecule_structure_comparator import CovalentRadius
 from pymatgen.io.babel import BabelMolAdaptor
+
 from rubicon.utils.ion_arranger.energy_evaluator import EnergyEvaluator
 
 __author__ = 'xiaohuiqu'

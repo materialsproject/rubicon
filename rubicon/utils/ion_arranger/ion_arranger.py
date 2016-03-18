@@ -6,13 +6,20 @@ from random import Random
 from time import time
 
 import inspyred
+
 import numpy as np
-import openbabel as ob
+
+try:
+    import openbabel as ob
+except ImportError:
+    ob = None
+
 import simplerandom.random as srr
 
 from pymatgen.core.structure import Molecule
 from pymatgen.io.babel import BabelMolAdaptor
 from pymatgen.io.qchem import QcOutput
+
 from rubicon.utils.ion_arranger.hard_sphere_energy_evaluators import \
     HardSphereElectrostaticEnergyEvaluator, \
     AtomicRadiusUtils
