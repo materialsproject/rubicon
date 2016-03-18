@@ -27,7 +27,7 @@ if __name__ == "__main__":
           packages=find_packages(),
           zip_safe=False,
           install_requires=['pymatgen>=3.0', 'fireworks>=0.9',
-                            'custodian>=0.7', 'monty>=0.2.1'],
+                            'custodian>=0.7', 'monty>=0.7.0'],
           classifiers=["Programming Language :: Python :: 2.7",
                        "Development Status :: 2 - Pre-Alpha",
                        "Intended Audience :: Science/Research",
