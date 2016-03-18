@@ -23,11 +23,11 @@ class PackmolRunner(object):
     Create MD simulation box using packmol.
     """
     @requires(which('packmol'),
-              "PackmolRunner requires the executables 'packmol' to be in "
-              "the path. Please download the packmol fom"
-              "https://github.com/leandromartinez98/packmol"
-              "and follow the instructions in the README to compile."
-              ".Don't forget to add packmol to your path")
+              "PackmolRunner requires the executable 'packmol' to be in "
+              "the path. Please download packmol from "
+              "https://github.com/leandromartinez98/packmol "
+              "and follow the instructions in the README to compile. "
+              "Don't forget to add the packmol binary to your path")
     def __init__(self, mols, param_list):
         """
         Create PackMolRunner
