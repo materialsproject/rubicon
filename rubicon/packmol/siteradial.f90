@@ -1,5 +1,4 @@
-subroutine siteradial(x, y, z, aindex1, aindex2, mol, Lx, Ly, Lz,
-                      binsize, numbins, g1, maxr)
+subroutine siteradial(x, y, z, aindex1, aindex2, mol, Lx, Ly, Lz,binsize, numbins, g1, maxr)
 
 integer, dimension(:), intent(in)	:: aindex1
 integer, dimension(:), intent(in)	:: aindex2

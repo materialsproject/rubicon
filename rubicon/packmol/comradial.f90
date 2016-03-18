@@ -1,5 +1,4 @@
-subroutine comradial(mol1, mol2, nummol, moltype, comx, comy, comz, Lx, Ly, Lz,
-                     binsize, numbins, g1, maxr)
+subroutine comradial(mol1, mol2, nummol, moltype, comx, comy, comz, Lx, Ly, Lz,binsize, numbins, g1, maxr)
 
 integer, intent(in)	:: mol1
 integer, intent(in)	:: mol2
