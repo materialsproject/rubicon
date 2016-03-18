@@ -2,13 +2,14 @@ import datetime
 import json
 import os
 from collections import defaultdict
-
 import dateutil.parser
 import yaml
+
 from pymongo import MongoClient
 
 from pymatgen.io.babel import BabelMolAdaptor
 from pymatgen.matproj.snl import StructureNL
+
 from rubicon.utils.snl.egsnl import get_meta_from_structure
 
 DATETIME_HANDLER = lambda obj: obj.isoformat() \

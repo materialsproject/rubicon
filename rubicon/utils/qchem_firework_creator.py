@@ -10,6 +10,7 @@ from fireworks.core.firework import Tracker
 from pymatgen.core.periodic_table import Element
 from pymatgen.io.babel import BabelMolAdaptor
 from pymatgen.io.qchem import QcTask, QcInput
+
 from rubicon.dupefinders.dupefinder_eg import DupeFinderEG
 from rubicon.firetasks.qchem_task import QChemTask
 
