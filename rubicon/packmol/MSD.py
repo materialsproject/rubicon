@@ -6,7 +6,6 @@ Created on Thu Mar 12 14:08:27 2015
 """
 
 import copy
-import os
 
 import numpy as np
 from scipy import stats
@@ -86,7 +85,6 @@ class MSD:
         r2 = (comx[j] - comx[i]) ** 2 + (comy[j] - comy[i]) ** 2 + (comz[j] -
                                                                     comz[
                                                                         i]) ** 2
-
         return r2
 
     def MSDadd(self, r2, MSD, molcheck, i, j):
@@ -101,14 +99,13 @@ class MSD:
         return MSD
 
     def createtime(self, dt, tsjump, MSDt):
-        Time = np.arange(0, MSDt)
+        Time = np.arange(0, MSDt, dtype=np.float64)
         Time *= dt * tsjump
         return Time
 
     def takelnMSD(self, MSD, Time):
         lnMSD = np.log(MSD[:, 1:])
         lntime = np.log(Time[1:])
-
         return (lnMSD, lntime)
 
     def findlinearregion(self, lnMSD, lntime, dt, molecule):
@@ -155,5 +152,4 @@ class MSD:
         for i in range(0, len(moltypel)):
             output['MSD'][moltypel[i]] = copy.deepcopy(MSD[i].tolist())
             output['Diffusivity'][moltypel[i]] = copy.deepcopy(diffusivity[i])
-
         output['MSD']['time'] = Time.tolist()

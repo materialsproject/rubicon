@@ -8,12 +8,24 @@ __email__ = "ajain@lbl.gov"
 __date__ = "Apr 10, 2013"
 
 import os
+import sys
+import glob
 
-from setuptools import setup, find_packages
+from setuptools import find_packages
+
+try:
+    from numpy.distutils.core import setup, Extension
+except ImportError:
+    print "numpy.distutils.core cannot be imported. Install numpy"
+    sys.exit(-1)
 
 from rubicon import __version__
 
 module_dir = os.path.dirname(os.path.abspath(__file__))
+f90_sources = glob.glob(os.path.join(module_dir, "rubicon", "packmol",
+                                     "*.f90"))
+packmol_f90ext = Extension(name = 'rubicon._packmol_f90ext',
+                           sources = f90_sources)
 
 if __name__ == "__main__":
     setup(name='rubicon',
@@ -28,6 +40,7 @@ if __name__ == "__main__":
           zip_safe=False,
           install_requires=['pymatgen>=3.0', 'fireworks>=0.9',
                             'custodian>=0.7', 'monty>=0.7.0'],
+          extras_require={"plotting": ["matplotlib>=1.1"]},
           classifiers=["Programming Language :: Python :: 2.7",
                        "Development Status :: 2 - Pre-Alpha",
                        "Intended Audience :: Science/Research",
@@ -38,5 +51,6 @@ if __name__ == "__main__":
                        "Topic :: Scientific/Engineering"],
           test_suite='nose.collector',
           tests_require=['nose'],
+          ext_modules=[packmol_f90ext],
           scripts=[os.path.join(os.path.join(module_dir, "scripts", f))
                    for f in os.listdir(os.path.join(module_dir, "scripts"))])

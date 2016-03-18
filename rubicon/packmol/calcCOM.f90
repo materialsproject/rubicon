@@ -1,4 +1,5 @@
-subroutine calccom(n, nummol, x, y, z,  mol, amass, molmass, Lx, Ly, Lz, Lx2, Ly2, Lz2, comxt, comyt, comzt)
+subroutine calccom(n, nummol, x, y, z,  mol, amass, molmass, Lx, Ly, Lz,
+                   Lx2, Ly2, Lz2, comxt, comyt, comzt)
 
 integer, intent(in)	:: n, nummol
 real, dimension(:), intent(in)	:: x,y,z

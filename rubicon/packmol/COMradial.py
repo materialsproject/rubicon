@@ -7,21 +7,16 @@ Created on Tue Mar 10 10:07:34 2015
 
 import numpy as np
 
-try:
-    import comradial
-except:
-    import comradial2 as comradial
+from rubicon._packmol_f90ext import comradial
 
 
 class COMradialdistribution:
-    '''
-            Calculates the center of mass radial distribution function for a
-            given pair of molecules in a system
-            
-            Outputs are stored in a dictionary called output to later be stored
-           in JSON format
-           
-   '''
+    """
+    Calculates the center of mass radial distribution function for a
+    given pair of molecules in a system
+    Outputs are stored in a dictionary called output to later be stored
+    in JSON format
+    """
 
     def runradial(self, datfilename, mol1, mol2, comx, comy, comz, Lx, Ly, Lz,
                   Lx2, Ly2, Lz2, output, nummoltype, moltypel, moltype,
@@ -61,13 +56,12 @@ class COMradialdistribution:
 
     def radialdistribution(self, g, mol1, mol2, nummol, moltype, comx, comy,
                            comz, Lx, Ly, Lz, binsize, numbins, maxr, count):
-        # implements a FORTRAN code to calculate the number of molecules within each shell
-
+        # uses FORTRAN code to calculate the number of molecules within each
+        # shell
         g1 = comradial.comradial(mol1, mol2, nummol, moltype, comx[count],
                                  comy[count], comz[count], Lx, Ly, Lz, binsize,
                                  numbins, maxr)
         g += g1
-
         count += 1
         return (count)
 

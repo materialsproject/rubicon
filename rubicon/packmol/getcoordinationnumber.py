@@ -8,7 +8,7 @@ import numpy
 from scipy.integrate import cumtrapz
 import copy
 
-class getcoordinationnumber:
+class getcoordinationnumber(object):
     def calccoordinationnumber(self, output, nummoltype, moltypel, V):
         output['Coordination_Number'] = {}
         output['Coordination_Number']['units'] = 'Minima in angstroms, Coordination numbers in Angstroms'
