@@ -6,7 +6,7 @@ Created on Fri May  8 10:17:55 2015
 """
 import copy
 
-from rubicon._packmol_f90ext import calccom as calccomf
+from rubicon.packmol._packmol_f90ext import calccom as calccomf
 
 import numpy as np
 

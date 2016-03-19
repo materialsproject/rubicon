@@ -16,7 +16,7 @@ except ImportError:
 
 import numpy as np
 
-from rubicon._packmol_f90ext import siteradial
+from rubicon.packmol._packmol_f90ext import siteradial
 
 
 class siteradialdistribution:

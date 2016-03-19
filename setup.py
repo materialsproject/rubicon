@@ -24,7 +24,7 @@ from rubicon import __version__
 module_dir = os.path.dirname(os.path.abspath(__file__))
 f90_sources = glob.glob(os.path.join(module_dir, "rubicon", "packmol",
                                      "*.f90"))
-packmol_f90ext = Extension(name = 'rubicon._packmol_f90ext',
+packmol_f90ext = Extension(name = 'rubicon.packmol._packmol_f90ext',
                            sources = f90_sources)
 
 if __name__ == "__main__":
