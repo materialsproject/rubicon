@@ -1,16 +1,20 @@
-from rubicon.gff.ffmol import FFmol
-
-__author__ = 'navnidhirajput'
-
 """ A wrapper for AntechamberRunner which generates force field files
     for a specified molecule using gaussian output file as input
 """
 
+__author__ = 'navnidhirajput'
+
 import subprocess
 import shlex
-from gff import Gff, FFCorruptionException, correct_corrupted_frcmod_files
-from monty.tempfile import ScratchDir
 import tempfile
+
+from monty.os.path import which
+from monty.dev import requires
+from monty.tempfile import ScratchDir
+
+from rubicon.gff.ffmol import FFmol
+from rubicon.gff import Gff, FFCorruptionException, \
+    correct_corrupted_frcmod_files
 from rubicon.gff.topology import TopMol, TopCorruptionException, \
     correct_corrupted_top_files
 
@@ -20,7 +24,8 @@ class AntechamberRunner():
     A wrapper for AntechamberRunner software
 
     """
-
+    @requires(which('parmchk'), "Requires the binary parmchk")
+    @requires(which('antechamber'), "Requires the binary antechamber")
     def __init__(self, mols):
         """
         Args:
@@ -28,14 +33,6 @@ class AntechamberRunner():
         """
 
         self.mols = mols
-
-    #
-    # def _convert_to_pdb(self, molecule, filename=None):
-    #     """
-    #     generate pdb file for a given molecule
-    #     """
-    #     write_mol(molecule, filename)
-
 
     def _run_parmchk(self, filename='ANTECHAMBER_AC.AC'):
         """

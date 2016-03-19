@@ -4,7 +4,7 @@ import numpy
 from monty import json
 from pymongo import MongoClient
 
-from rubicon.packmol.lammpsio import LammpsLog
+from rubicon.io.lammpsio import LammpsLog
 
 __author__ = 'navnidhirajput'
 

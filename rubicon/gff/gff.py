@@ -4,8 +4,6 @@ from collections import defaultdict
 
 from monty.json import MSONable
 
-from pymatgen import Molecule
-
 __author__ = 'navnidhirajput'
 
 
