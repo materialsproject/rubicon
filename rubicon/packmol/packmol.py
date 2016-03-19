@@ -28,7 +28,7 @@ class PackmolRunner(object):
               "https://github.com/leandromartinez98/packmol "
               "and follow the instructions in the README to compile. "
               "Don't forget to add the packmol binary to your path")
-    def __init__(self, mols, param_list):
+    def __init__(self, mols, param_list, boxit=True):
         """
         Create PackMolRunner
 
@@ -37,9 +37,12 @@ class PackmolRunner(object):
                    list of Molecules to pack
               param_list:
                     list of parameters containing dicts for each molecule
+              boxit:
+                    put the molecule assembly in a box
         """
         self.mols = mols
         self.param_list = param_list
+        self.boxit = boxit
 
     def _format_packmol_str(self, some_obj):
         """
@@ -93,7 +96,7 @@ class PackmolRunner(object):
                          overwrite=True)
             # TODO: also check if user specified outside box, etc.
             # Do not use auto mode if user specified any type of box
-            if 'inside box' not in self.param_list[idx]:
+            if 'inside box' not in self.param_list[idx] and self.boxit:
                 self._get_auto_boxsize()
             with open(os.path.join(d, 'pack.inp'), 'w') as inp:
                 # create packmol control file
