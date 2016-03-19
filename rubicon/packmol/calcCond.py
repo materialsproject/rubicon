@@ -6,9 +6,10 @@ Created on Fri May  8 10:17:55 2015
 """
 import copy
 
-import calccomf
+from rubicon._packmol_f90ext import calccom as calccomf
+
 import numpy as np
-from matplotlib import pyplot as plt
+
 from scipy.integrate import cumtrapz
 from scipy.optimize import curve_fit
 

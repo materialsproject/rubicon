@@ -7,10 +7,7 @@ Created on Tue Mar 10 10:07:34 2015
 
 import numpy as np
 
-try:
-    import calccomf
-except:
-    import calccomf2 as calccomf
+from rubicon._packmol_f90ext import calccom as calccomf
 
 
 class calcCOM:
@@ -194,7 +191,7 @@ class calcCOM:
         for i in range(0, n):
             amass[i] = atommass[atype[i]]
 
-        (comxt, comyt, comzt) = calccomf.calccom(n, nummol, x, y, z, mol,
+        (comxt, comyt, comzt) = calccomf(n, nummol, x, y, z, mol,
                                                  amass, molmass, Lx, Ly, Lz,
                                                  Lx2, Ly2, Lz2)
         comx[count] += comxt

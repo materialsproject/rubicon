@@ -8,7 +8,12 @@ Created on Mon Dec 23 01:16:09 2013
 import sys
 from multiprocessing import Pool
 
-import matplotlib.pyplot as plt
+try:
+    import matplotlib.pyplot as plt
+except ImportError:
+    plt = None
+    print "Install matplotlib"
+
 import numpy as np
 import scipy.integrate
 

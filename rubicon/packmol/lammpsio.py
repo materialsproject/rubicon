@@ -3,10 +3,8 @@
 import re
 
 import numpy as np
-# from json_coders import MSONable
 import scipy.integrate
 from multiprocessing import Pool
-import time
 
 
 def _list2float(seq):
