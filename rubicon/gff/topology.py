@@ -1,6 +1,3 @@
-import os
-
-from pymatgen import Molecule
 
 __author__ = 'navnidhirajput'
 
