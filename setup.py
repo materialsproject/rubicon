@@ -35,7 +35,7 @@ if __name__ == "__main__":
                             'custodian>=0.7', 'monty>=0.7.0'],
           extras_require={"plotting": ["matplotlib>=1.1"],
                           "molecules": ["openbabel"],
-                          "molecular dynamics": ["packmol"]},
+                          "molecular dynamics": ["Packmol", "AmberTools"]},
           keywords=["materials", "project", "electrolyte", "molecular dynamics",
                     "lammps", "qchem", "analysis"],
           classifiers=["Programming Language :: Python :: 2.7",

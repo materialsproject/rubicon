@@ -25,8 +25,13 @@ class AntechamberRunner():
     A wrapper for AntechamberRunner software
 
     """
-    @requires(which('parmchk'), "Requires the binary parmchk")
-    @requires(which('antechamber'), "Requires the binary antechamber")
+
+    @requires(which('parmchk'), "Requires the binary parmchk."
+              "Install AmberTools from http://ambermd.org/#AmberTools")
+
+    @requires(which('antechamber'), "Requires the binary antechamber."
+              "Install AmberTools from http://ambermd.org/#AmberTools")
+
     def __init__(self, mols):
         """
         Args:
