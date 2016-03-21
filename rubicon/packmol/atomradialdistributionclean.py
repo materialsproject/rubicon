@@ -8,9 +8,15 @@ Created on Wed Mar 11 15:48:23 2015
 import linecache
 import os
 
-import matplotlib.pyplot as plt
+try:
+    import matplotlib.pyplot as plt
+except ImportError:
+    plt = None
+    print "Install matplotlib"
+
 import numpy as np
-import siteradial
+
+from rubicon.packmol._packmol_f90ext import siteradial
 
 
 class siteradialdistribution:

@@ -8,11 +8,14 @@ Created on Mon Dec 23 01:16:09 2013
 import sys
 from multiprocessing import Pool
 
-import matplotlib.pyplot as plt
+try:
+    import matplotlib.pyplot as plt
+except ImportError:
+    plt = None
+    print "Install matplotlib"
+
 import numpy as np
 import scipy.integrate
-
-import lammpsio
 
 
 def autocorrelate(a):
@@ -29,10 +32,11 @@ if __name__ == '__main__':
     All the properties are evaluated based on the *properties input. Right now, pymatgen only supports viscosity (argument: viscosity) evaluation.
                 Example: 'md_properties log.lammps viscosity' will return the viscosity of the system.
     """
+    from rubicon.io.lammpsio import LammpsLog
 
     logfilename = sys.argv[1]
     properties = sys.argv[2:]
-    l = lammpsio.LammpsLog(logfilename, *properties)
+    l = LammpsLog(logfilename, *properties)
     l.parselog()
     wline = l.wline
     print 'Done reading the log file. Starting Calculations...'

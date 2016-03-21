@@ -6,8 +6,7 @@ Created on Tue Mar 10 10:07:34 2015
 """
 
 import numpy as np
-# import matplotlib.pyplot as plt
-# import os
+
 import copy
 
 

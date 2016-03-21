@@ -7,6 +7,7 @@ docs/_build/*/*/*
 
 # C extensions
 *.so
+*.so.*
 
 # Packages
 *.egg

@@ -9,7 +9,7 @@ import requests
 
 try:
     import pybel as pb
-except Exception as ex:
+except ImportError:
     print "WARNING: Error importing pybel, setting pb to None!"
     pb = None
 

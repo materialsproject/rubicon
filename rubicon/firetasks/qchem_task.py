@@ -177,10 +177,12 @@ class QChemTask(FireTaskBase, FWSerializable):
                 num_numa_nodes = 2
                 low_nprocess = max(
                     int(len(mol) / num_numa_nodes) * num_numa_nodes, 1)
+                nodelist = os.environ["QCNODE"].split(',')
+                num_cores = 32 * len(nodelist)
                 qc_exe = shlex.split(
-                    "qchem -np {}".format(min(32, low_nprocess)))
+                    "qchem -np {}".format(min(num_cores, low_nprocess)))
                 half_cpus_cmd = shlex.split(
-                    "qchem -np {}".format(min(16, low_nprocess)))
+                    "qchem -np {}".format(min(num_cores, low_nprocess)))
             else:
                 nodelist = ",".join(fw_data.NODE_LIST)
                 os.environ["QCNODE"] = nodelist
