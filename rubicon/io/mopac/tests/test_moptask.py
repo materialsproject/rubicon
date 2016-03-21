@@ -4,7 +4,8 @@ import os
 from unittest import TestCase, skipIf
 
 from pymatgen import Molecule
-from rubicon.io.mopacio import MopTask, MopOutput
+
+from rubicon.io.mopac.mopacio import MopTask, MopOutput
 
 __author__ = 'xiaohuiqu'
 

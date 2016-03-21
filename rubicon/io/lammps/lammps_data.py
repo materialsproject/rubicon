@@ -1,6 +1,7 @@
 """
 This module implements input and output processing from Lampps.
 """
+
 import math
 
 __author__ = 'navnidhirajput'

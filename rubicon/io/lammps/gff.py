@@ -1,10 +1,11 @@
+
+__author__ = 'navnidhirajput'
+
 import json
 import os
 from collections import defaultdict
 
 from monty.json import MSONable
-
-__author__ = 'navnidhirajput'
 
 
 class Gff(MSONable):

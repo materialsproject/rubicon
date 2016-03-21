@@ -1,10 +1,11 @@
+
 __author__ = 'navnidhirajput'
+
+
 import json
 import os
 
 MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-__author__ = 'navnidhirajput'
 
 
 class DictLammpsInputSet():
@@ -25,24 +26,21 @@ class DictLammpsInputSet():
 
     def __init__(self, name=None, parajson=None, config_dict=None,
                  user_lammps_settings=None):
+
         self.name = name
         self.lines = []
         self.parajson = parajson
         if user_lammps_settings:
             self.lammps_settings.update(user_lammps_settings)
 
-    def get_lammps_control(self, filename=None, ensemble1="npt",
-                           ensemble2="nvt", temp=None):
-        jsonfile = open(
-            os.path.join(os.path.dirname(__file__), "Lammps_min_npt_nvt.json"))
+    def get_lammps_control(self, filename=None, ensemble=None, temp=None):
+        jsonfile = open(os.path.join(os.path.dirname(__file__), "Lammps.json"))
         self.parajson = json.load(jsonfile, encoding="utf-8")
         self.parajson['LAMMPSINNPT']['temp'] = temp
-        self.parajson['LAMMPSINNPT']['fix1']['style'] = ensemble1
-        self.parajson['LAMMPSINNPT']['fix1']['ID'] = ensemble1
-        self.parajson['LAMMPSINNPT']['fix2']['style'] = ensemble2
-        self.parajson['LAMMPSINNPT']['fix2']['ID'] = ensemble2
-        self.parajson['LAMMPSINNPT']['fix1']['Tstart'] = temp
-        self.parajson['LAMMPSINNPT']['fix1']['Tstop'] = temp
+        self.parajson['LAMMPSINNPT']['fix']['style'] = ensemble
+        self.parajson['LAMMPSINNPT']['fix']['ID'] = ensemble
+        self.parajson['LAMMPSINNPT']['fix']['Tstart'] = temp
+        self.parajson['LAMMPSINNPT']['fix']['Tstop'] = temp
         return self.parajson
 
     def __str__(self):
@@ -198,139 +196,95 @@ class DictLammpsInputSet():
         lines.append('{} {}'.format('thermo ', (
             self.parajson['LAMMPSINNPT']['thermo']["N"])))
 
-        lines.append('{} {} {} {} {} {} {} {} {} {} {} {}'.format('fix ',
-                                                                  (
-                                                                      self.parajson[
-                                                                          'LAMMPSINNPT'][
-                                                                          'fix1'][
-                                                                          "ID"]),
-                                                                  (
-                                                                      self.parajson[
-                                                                          'LAMMPSINNPT'][
-                                                                          'fix1'][
-                                                                          "group-id"]),
-                                                                  (
-                                                                      self.parajson[
-                                                                          'LAMMPSINNPT'][
-                                                                          'fix1'][
-                                                                          "style"]),
-                                                                  "temp",
-                                                                  (
-                                                                      self.parajson[
-                                                                          'LAMMPSINNPT'][
-                                                                          'fix1'][
-                                                                          "Tstart"]),
-                                                                  (
-                                                                      self.parajson[
-                                                                          'LAMMPSINNPT'][
-                                                                          'fix1'][
-                                                                          "Tstop"]),
-                                                                  (
-                                                                      self.parajson[
-                                                                          'LAMMPSINNPT'][
-                                                                          'fix1'][
-                                                                          "Tdamp"]),
-                                                                  (
-                                                                      self.parajson[
-                                                                          'LAMMPSINNPT'][
-                                                                          'fix1'][
-                                                                          "iso"]),
-                                                                  (
-                                                                      self.parajson[
-                                                                          'LAMMPSINNPT'][
-                                                                          'fix1'][
-                                                                          "Pstart"]),
-                                                                  (
-                                                                      self.parajson[
-                                                                          'LAMMPSINNPT'][
-                                                                          'fix1'][
-                                                                          "Pstop"]),
-                                                                  (
-                                                                      self.parajson[
-                                                                          'LAMMPSINNPT'][
-                                                                          'fix1'][
-                                                                          "Pdamp"])))
-        lines.append(
-            '{} {}'.format('run ',
-                           (self.parajson['LAMMPSINNPT']['run1']["N"])))
+        if self.parajson['LAMMPSINNPT']['fix']["style"] == "npt":
 
+            lines.append('{} {} {} {} {} {} {} {} {} {} {} {}'.format('fix ',
+                                                                      (
+                                                                          self.parajson[
+                                                                              'LAMMPSINNPT'][
+                                                                              'fix'][
+                                                                              "ID"]),
+                                                                      (
+                                                                          self.parajson[
+                                                                              'LAMMPSINNPT'][
+                                                                              'fix'][
+                                                                              "group-id"]),
+                                                                      (
+                                                                          self.parajson[
+                                                                              'LAMMPSINNPT'][
+                                                                              'fix'][
+                                                                              "style"]),
+                                                                      "temp",
+                                                                      (
+                                                                          self.parajson[
+                                                                              'LAMMPSINNPT'][
+                                                                              'fix'][
+                                                                              "Tstart"]),
+                                                                      (
+                                                                          self.parajson[
+                                                                              'LAMMPSINNPT'][
+                                                                              'fix'][
+                                                                              "Tstop"]),
+                                                                      (
+                                                                          self.parajson[
+                                                                              'LAMMPSINNPT'][
+                                                                              'fix'][
+                                                                              "Tdamp"]),
+                                                                      (
+                                                                          self.parajson[
+                                                                              'LAMMPSINNPT'][
+                                                                              'fix'][
+                                                                              "iso"]),
+                                                                      (
+                                                                          self.parajson[
+                                                                              'LAMMPSINNPT'][
+                                                                              'fix'][
+                                                                              "Pstart"]),
+                                                                      (
+                                                                          self.parajson[
+                                                                              'LAMMPSINNPT'][
+                                                                              'fix'][
+                                                                              "Pstop"]),
+                                                                      (
+                                                                          self.parajson[
+                                                                              'LAMMPSINNPT'][
+                                                                              'fix'][
+                                                                              "Pdamp"])))
+        elif self.parajson['LAMMPSINNPT']['fix']["style"] == "nvt":
+            lines.append('{} {} {} {} {} {} {} {}'.format('fix ',
+                                                          (self.parajson[
+                                                               'LAMMPSINNPT'][
+                                                               'fix']["ID"]),
+                                                          (self.parajson[
+                                                               'LAMMPSINNPT'][
+                                                               'fix'][
+                                                               "group-id"]),
+                                                          (self.parajson[
+                                                               'LAMMPSINNPT'][
+                                                               'fix'][
+                                                               "style"]),
+                                                          "temp",
+                                                          (self.parajson[
+                                                               'LAMMPSINNPT'][
+                                                               'fix'][
+                                                               "Tstart"]),
+                                                          (self.parajson[
+                                                               'LAMMPSINNPT'][
+                                                               'fix'][
+                                                               "Tstop"]),
+                                                          (self.parajson[
+                                                               'LAMMPSINNPT'][
+                                                               'fix'][
+                                                               "Tdamp"])))
+        lines.append('{} {} {} {}'.format('restart ',
+                                          self.parajson['LAMMPSINNPT'][
+                                              "restart"]['N'],
+                                          self.parajson['LAMMPSINNPT'][
+                                              "restart"]['file1'],
+                                          self.parajson['LAMMPSINNPT'][
+                                              "restart"]['file2']))
         lines.append(
-            '{} {}'.format('unfix ',
-                           (self.parajson['LAMMPSINNPT']['unfix1']["N"])))
-
-        lines.append('{} {} {} {} {} {} {} {}'.format('fix ',
-                                                      (
-                                                          self.parajson[
-                                                              'LAMMPSINNPT'][
-                                                              'fix2'][
-                                                              "ID"]),
-                                                      (
-                                                          self.parajson[
-                                                              'LAMMPSINNPT'][
-                                                              'fix2'][
-                                                              "group-id"]),
-                                                      (
-                                                          self.parajson[
-                                                              'LAMMPSINNPT'][
-                                                              'fix2'][
-                                                              "style"]),
-                                                      "temp",
-                                                      (
-                                                          self.parajson[
-                                                              'LAMMPSINNPT'][
-                                                              'fix2'][
-                                                              "Tstart"]),
-                                                      (
-                                                          self.parajson[
-                                                              'LAMMPSINNPT'][
-                                                              'fix2'][
-                                                              "Tstop"]),
-                                                      (
-                                                          self.parajson[
-                                                              'LAMMPSINNPT'][
-                                                              'fix2'][
-                                                              "Tdamp"])))
-        lines.append(
-            '{} {}'.format('run ',
-                           (self.parajson['LAMMPSINNPT']['run2']["N"])))
-
-        lines.append(
-            '{} {}'.format('unfix ',
-                           (self.parajson['LAMMPSINNPT']['unfix2']["N"])))
-
-        # elif self.parajson['LAMMPSINNPT']['fix1']["style"] == "nvt":
-        #     lines.append('{} {} {} {} {} {} {} {}'.format('fix1 ',
-        #                                                   (self.parajson[
-        #                                                        'LAMMPSINNPT'][
-        #                                                        'fix1']["ID"]),
-        #                                                   (self.parajson[
-        #                                                        'LAMMPSINNPT'][
-        #                                                        'fix1'][
-        #                                                        "group-id"]),
-        #                                                   (self.parajson[
-        #                                                        'LAMMPSINNPT'][
-        #                                                        'fix1']["style"]),
-        #                                                   "temp",
-        #                                                   (self.parajson[
-        #                                                        'LAMMPSINNPT'][
-        #                                                        'fix1'][
-        #                                                        "Tstart"]),
-        #                                                   (self.parajson[
-        #                                                        'LAMMPSINNPT'][
-        #                                                        'fix1']["Tstop"]),
-        #                                                   (self.parajson[
-        #                                                        'LAMMPSINNPT'][
-        #                                                        'fix1'][
-        #                                                        "Tdamp"])))
-        # lines.append('{} {} {} {}'.format('restart ',
-        #                                   self.parajson['LAMMPSINNPT'][
-        #                                       "restart"]['N'],
-        #                                   self.parajson['LAMMPSINNPT'][
-        #                                       "restart"]['file1'],
-        #                                   self.parajson['LAMMPSINNPT'][
-        #                                       "restart"]['file2']))
-        # lines.append(
-        #     '{} {}'.format('run ', (self.parajson['LAMMPSINNPT']['run']["N"])))
+            '{} {}'.format('run ', (self.parajson['LAMMPSINNPT']['run']["N"])))
         lines.append('{} {}'.format('write_restart ',
                                     self.parajson['LAMMPSINNPT'][
                                         'write_restart']["file"]))

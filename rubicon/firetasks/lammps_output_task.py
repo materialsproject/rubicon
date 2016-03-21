@@ -4,7 +4,7 @@ import shlex
 import numpy
 from pymongo import MongoClient
 
-from rubicon.io.lammpsio import LammpsLog
+from rubicon.io.lammps.lammpsio import LammpsLog
 
 try:
     # just a walkaround before the packmol is merged to master branch

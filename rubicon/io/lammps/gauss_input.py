@@ -1,4 +1,6 @@
-from pymatgen import write_mol, Molecule
+__author__ = 'navnidhirajput'
+
+from pymatgen.core import Molecule
 
 coords_mg = [[-1.695, 0.443, 0.000]]
 coords_thf = [[-3.682, 1.377, -0.211],
@@ -21,7 +23,7 @@ thf = Molecule(
     ["C", "C", "C", "H", "H", "C", "H", "H", "O", "H", "H", "H", "H"],
     coords_thf, site_properties={"mol_name": ["THF"] * len(coords_thf)})
 
-__author__ = 'navnidhirajput'
+
 
 
 class GaussianInput():
