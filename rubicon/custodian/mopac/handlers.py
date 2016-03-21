@@ -5,7 +5,7 @@ import tarfile
 
 from custodian.custodian import ErrorHandler
 
-from rubicon.io.mopacio import MopOutput, MopTask
+from rubicon.io.mopac.mopacio import MopOutput, MopTask
 
 __author__ = 'xiaohuiqu'
 

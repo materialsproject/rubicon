@@ -29,10 +29,12 @@ def autocorrelate(a):
 if __name__ == '__main__':
 
     """
-    All the properties are evaluated based on the *properties input. Right now, pymatgen only supports viscosity (argument: viscosity) evaluation.
-                Example: 'md_properties log.lammps viscosity' will return the viscosity of the system.
+    All the properties are evaluated based on the *properties input.
+    Right now, pymatgen only supports viscosity (argument: viscosity) evaluation.
+    Example: 'md_properties log.lammps viscosity' will return the viscosity
+    of the system.
     """
-    from rubicon.io.lammpsio import LammpsLog
+    from rubicon.io.lammps.lammpsio import LammpsLog
 
     logfilename = sys.argv[1]
     properties = sys.argv[2:]

@@ -1,6 +1,6 @@
 import argparse
 
-from rubicon.io.mopacio.mopacio import MopOutput
+from rubicon.io.mopac.mopacio import MopOutput
 
 __author__ = 'xiaohuiqu'
 

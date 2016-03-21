@@ -1,12 +1,14 @@
+
+__author__ = 'navnidhirajput'
+
+
 import shlex
 
 import numpy
 from monty import json
 from pymongo import MongoClient
 
-from rubicon.io.lammpsio import LammpsLog
-
-__author__ = 'navnidhirajput'
+from rubicon.io.lammps.lammpsio import LammpsLog
 
 
 class LammpsProperties():

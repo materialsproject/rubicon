@@ -1,22 +1,23 @@
-""" A wrapper for AntechamberRunner which generates force field files
+"""
+    A wrapper for AntechamberRunner which generates force field files
     for a specified molecule using gaussian output file as input
 """
 
 __author__ = 'navnidhirajput'
 
-import subprocess
 import shlex
+import subprocess
 import tempfile
 
-from monty.os.path import which
 from monty.dev import requires
+from monty.os.path import which
 from monty.tempfile import ScratchDir
 
-from rubicon.gff.ffmol import FFmol
-from rubicon.gff import Gff, FFCorruptionException, \
-    correct_corrupted_frcmod_files
-from rubicon.gff.topology import TopMol, TopCorruptionException, \
-    correct_corrupted_top_files
+from rubicon.io.lammps.topology import TopMol, TopCorruptionException
+from rubicon.io.lammps.topology import correct_corrupted_top_files
+from rubicon.io.lammps.gff import Gff, FFCorruptionException
+from rubicon.io.lammps.gff import correct_corrupted_frcmod_files
+from rubicon.io.lammps.ffmol import FFmol
 
 
 class AntechamberRunner():
@@ -24,8 +25,13 @@ class AntechamberRunner():
     A wrapper for AntechamberRunner software
 
     """
-    @requires(which('parmchk'), "Requires the binary parmchk")
-    @requires(which('antechamber'), "Requires the binary antechamber")
+
+    @requires(which('parmchk'), "Requires the binary parmchk."
+              "Install AmberTools from http://ambermd.org/#AmberTools")
+
+    @requires(which('antechamber'), "Requires the binary antechamber."
+              "Install AmberTools from http://ambermd.org/#AmberTools")
+
     def __init__(self, mols):
         """
         Args:

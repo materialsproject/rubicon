@@ -1,5 +1,4 @@
 import json
-import os
 import unittest
 from unittest import TestCase
 
@@ -9,8 +8,8 @@ try:
     from pymatgen.packmol.packmol import PackmolRunner
 except:
     pass
-from rubicon.gff.antechamberio import AntechamberRunner
-from rubicon.gff.lammps_data import LmpInput
+from rubicon.io.lammps.antechamberio import AntechamberRunner
+from rubicon.io.lammps.lammps_data import LmpInput
 
 __author__ = 'navnidhirajput'
 

@@ -8,7 +8,7 @@ Created on Tue Mar 10 10:07:34 2015
 import math
 import time
 
-from atomradialdistributionclean import siteradialdistribution
+from rubicon.analysis.lammps.atomradialdistributionclean import siteradialdistribution
 
 tic = time.time()
 ard = siteradialdistribution()
