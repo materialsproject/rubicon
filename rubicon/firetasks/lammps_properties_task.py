@@ -8,13 +8,13 @@ from pymongo import MongoClient
 try:
     # these packages are not necessarily installed by all the users
     # TODO: Refactor PackMol module to python code and merge the ff_dev branch in pymatgen to master
-    from rubicon.packmol.MSD import MSD
-    from rubicon.packmol.calcCOM import calcCOM
-    from rubicon.packmol.gettimedata import gettimedata
-    from rubicon.packmol.getmoldata import getmoldata
-    from rubicon.packmol.COMradialnofort import COMradialdistribution
-    from rubicon.packmol.getatomcharges import getatomcharges
-    from rubicon.packmol.calcNEconductivity import calcNEconductivity
+    from rubicon.analysis.lammps.MSD import MSD
+    from rubicon.analysis.lammps.calcCOM import calcCOM
+    from rubicon.analysis.lammps.gettimedata import gettimedata
+    from rubicon.analysis.lammps.getmoldata import getmoldata
+    from rubicon.analysis.lammps.COMradialnofort import COMradialdistribution
+    from rubicon.analysis.lammps.getatomcharges import getatomcharges
+    from rubicon.analysis.lammps.calcNEconductivity import calcNEconductivity
 except:
     pass
 from fireworks import FireTaskBase, explicit_serialize

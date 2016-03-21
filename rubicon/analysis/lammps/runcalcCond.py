@@ -5,9 +5,9 @@ Created on Thu May  7 14:25:47 2015
 @author: mhumbert
 """
 if __name__ == '__main__':
-    from getatomcharges import getatomcharges
-    from getmoldata import getmoldata
-    from calcCond import calcCond
+    from rubicon.analysis.lammps.getatomcharges import getatomcharges
+    from rubicon.analysis.lammps.getmoldata import getmoldata
+    from rubicon.analysis.lammps.calcCond import calcCond
 
     g = getatomcharges()
     gm = getmoldata()

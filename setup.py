@@ -22,9 +22,9 @@ except ImportError:
 from rubicon import __version__
 
 module_dir = os.path.dirname(os.path.abspath(__file__))
-f90_sources = glob.glob(os.path.join(module_dir, "rubicon", "packmol",
-                                     "*.f90"))
-packmol_f90ext = Extension(name = 'rubicon.packmol._packmol_f90ext',
+f90_sources = glob.glob(os.path.join(module_dir, "rubicon", "analysis",
+                                     "lammps", "*.f90"))
+md_analyzer = Extension(name = 'rubicon.analysis.lammps._md_analyzer',
                            sources = f90_sources)
 
 if __name__ == "__main__":
@@ -51,6 +51,6 @@ if __name__ == "__main__":
                        "Topic :: Scientific/Engineering"],
           test_suite='nose.collector',
           tests_require=['nose'],
-          ext_modules=[packmol_f90ext],
+          ext_modules=[md_analyzer],
           scripts=[os.path.join(os.path.join(module_dir, "scripts", f))
                    for f in os.listdir(os.path.join(module_dir, "scripts"))])

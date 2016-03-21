@@ -6,14 +6,12 @@ Created on Fri May  8 10:17:55 2015
 """
 import copy
 
-from rubicon.packmol._packmol_f90ext import calccom as calccomf
-
 import numpy as np
-
+from rubicon.analysis.lammps._md_analyzer import calccom as calccomf
 from scipy.integrate import cumtrapz
 from scipy.optimize import curve_fit
 
-from gettimedata import gettimedata
+from rubicon.analysis.lammps.gettimedata import gettimedata
 
 
 class calcCond:

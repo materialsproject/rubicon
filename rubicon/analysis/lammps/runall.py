@@ -26,14 +26,14 @@ Created on Thu Mar 12 14:14:34 2015
 '''
 
 if __name__ == '__main__':
-    from MSD import MSD
-    from calcCOM import calcCOM
-    from gettimedata import gettimedata
-    from getmoldata import getmoldata
-    from COMradialnofort import COMradialdistribution
-    from getatomcharges import getatomcharges
-    from calcNEconductivity import calcNEconductivity
-    from getcoordinationnumber import getcoordinationnumber
+    from rubicon.analysis.lammps.MSD import MSD
+    from rubicon.analysis.lammps.calcCOM import calcCOM
+    from rubicon.analysis.lammps.gettimedata import gettimedata
+    from rubicon.analysis.lammps.getmoldata import getmoldata
+    from rubicon.analysis.lammps.COMradialnofort import COMradialdistribution
+    from rubicon.analysis.lammps.getatomcharges import getatomcharges
+    from rubicon.analysis.lammps.calcNEconductivity import calcNEconductivity
+    from rubicon.analysis.lammps.getcoordinationnumber import getcoordinationnumber
     
     c = calcCOM()
     m = MSD()

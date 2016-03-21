@@ -7,7 +7,7 @@ Created on Tue Mar 10 10:07:34 2015
 
 import numpy as np
 
-from rubicon.packmol._packmol_f90ext import comradial
+from rubicon.analysis.lammps._md_analyzer import comradial
 
 
 class COMradialdistribution:
