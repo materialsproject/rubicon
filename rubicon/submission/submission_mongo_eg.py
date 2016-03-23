@@ -1,15 +1,20 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 import datetime
 import json
 import os
 from collections import defaultdict
-import dateutil.parser
-import yaml
 
+import dateutil.parser
+import six
+import yaml
 from pymongo import MongoClient
 
 from pymatgen.io.babel import BabelMolAdaptor
 from pymatgen.matproj.snl import StructureNL
-
 from rubicon.utils.snl.egsnl import get_meta_from_structure
 
 DATETIME_HANDLER = lambda obj: obj.isoformat() \
@@ -43,14 +48,16 @@ class SubmissionMongoAdapterEG(object):
 
     def _reset(self):
         if "prod" in self.database.name:
-            print "PROD database is not supposed to reset, please changed the code to reset"
+            print("PROD database is not supposed to reset, please changed "
+                  "the code to reset")
             exit()
         self._restart_id_assigner_at(1)
         self.jobs.remove()
 
     def _reset_reactions_collection(self):
         if "prod" in self.database.name:
-            print "PROD database is not supposed to reset, please changed the code to reset"
+            print("PROD database is not supposed to reset, please changed "
+                  "the code to reset")
             exit()
         self._restart_reaction_id_assigner_at(1)
         self.reactions.remove()
@@ -214,11 +221,11 @@ class SubmissionMongoAdapterEG(object):
                          {'$set': {'state': 'CANCELLED'}})
 
     def get_submission_ids_after(self, dt):
-        '''
+        """
         Return the submission id after a time point
         :param dt: a datetime object after which point you want to get
         :return: a list of IDs
-        '''
+        """
         job_docs = self.jobs.find(filter={}, projection=["submission_id",
                                                          "submitted_at",
                                                          "parameters.nick_name"])
@@ -329,7 +336,7 @@ def _reconstitute_dates(obj_dict):
     if isinstance(obj_dict, list):
         return [_reconstitute_dates(v) for v in obj_dict]
 
-    if isinstance(obj_dict, basestring):
+    if isinstance(obj_dict, six.string_types):
         try:
             return datetime.datetime.strptime(obj_dict, "%Y-%m-%dT%H:%M:%S.%f")
         except ValueError:

@@ -1,3 +1,8 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 from fireworks.features.dupefinder import DupeFinderBase
 
 __author__ = 'xiaohuiqu'

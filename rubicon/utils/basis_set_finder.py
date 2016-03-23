@@ -1,3 +1,8 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 __author__ = 'xiaohuiqu'
 
 import json
@@ -16,7 +21,7 @@ def singleton(class_):
 
 
 @singleton
-class NWChemBasisSetFinder():
+class NWChemBasisSetFinder:
     def __init__(self):
         data_file = os.path.join(os.path.dirname(__file__), 'data',
                                  'available_nwchem_basis_set.json')
@@ -24,7 +29,7 @@ class NWChemBasisSetFinder():
             self.basis_set = json.load(f)
 
     def basis_set_exist(self, element, b):
-        if b.lower() not in self.basis_set.keys():
+        if b.lower() not in list(self.basis_set.keys()):
             return False
         return element in self.basis_set[b.lower()]
 

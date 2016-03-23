@@ -1,3 +1,12 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
+import six
+from six.moves import range
+from six.moves import zip
+
 """
 This module implements input and output processing from Lampps.
 """
@@ -7,7 +16,7 @@ import math
 __author__ = 'navnidhirajput'
 
 
-class LmpInput():
+class LmpInput:
     """
     write lammps data input file
     """
@@ -44,23 +53,23 @@ class LmpInput():
 
         for ffmol in ffmol_list:
             gff = ffmol.gff
-            atom_type_list.extend(gff.masses.keys())
-            bond_type_list.extend(gff.bonds.keys())
-            angle_type_list.extend(gff.angles.keys())
-            dihedral_type_list.extend(gff.dihedrals.keys())
-            improper_type_list.extend(gff.imdihedrals.keys())
+            atom_type_list.extend(list(gff.masses.keys()))
+            bond_type_list.extend(list(gff.bonds.keys()))
+            angle_type_list.extend(list(gff.angles.keys()))
+            dihedral_type_list.extend(list(gff.dihedrals.keys()))
+            improper_type_list.extend(list(gff.imdihedrals.keys()))
             num_atoms_types = len(set(atom_type_list))
             num_bonds_types += len(gff.bonds)
             num_angles_types += len(gff.angles)
             num_impropers_types += (len(gff.imdihedrals))
-            for k, v in gff.dihedrals.iteritems():
+            for k, v in six.iteritems(gff.dihedrals):
                 num_dih += len(v)
         num_dihedrals_types += num_dih
         lines.append('\n')
         lines.append("{} {}".format(num_atoms_types, "atom types"))
         lines.append("{} {}".format(num_bonds_types, "bond types"))
         lines.append("{} {}".format(num_angles_types, "angle types"))
-        lines.append("{} {}".format((num_dihedrals_types), "dihedral types"))
+        lines.append("{} {}".format(num_dihedrals_types, "dihedral types"))
         lines.append(
             "{} {}{}".format(num_impropers_types, "improper types", '\n'))
         self.num_improper_dihedrals = num_impropers_types
@@ -83,11 +92,11 @@ class LmpInput():
             top = ffmol.top
             top._get_ff_dihedrals(gff.dihedrals, top.dihedrals, gff.atom_gaff)
             num_atoms += (len(top.atoms)) * num_mols
-            num_bonds += len((top.bonds) * num_mols)
+            num_bonds += len(top.bonds * num_mols)
             num_angles += (len(top.angles) * num_mols)
             num_impropers += (len(top.imdihedrals) * num_mols)
 
-            for k, n in top.topdihedralff.iteritems():
+            for k, n in six.iteritems(top.topdihedralff):
                 num_total_dih += len(n[1])
         num_dihedrals += (num_total_dih * num_mols)
         lines.append("{} {}".format(num_atoms, "atoms"))
@@ -133,12 +142,12 @@ class LmpInput():
             gff = ffmol.gff
             if gff.masses is not None:
                 for i, v in enumerate(gff.masses.values()):
-                    if gff.masses.keys()[i] in element_list:
+                    if list(gff.masses.keys())[i] in element_list:
                         continue
-                    element_list.append(gff.masses.keys()[i])
+                    element_list.append(list(gff.masses.keys())[i])
                     lines.append(
                         '{} {} {} {} {} {}'.format(num_atoms + 1, v, '#',
-                                                   gff.masses.keys()[i],
+                                                   list(gff.masses.keys())[i],
                                                    mol_index,
                                                    mol.site_properties[
                                                        "mol_name"][0]))
@@ -160,13 +169,13 @@ class LmpInput():
             top = ffmol.top
             if gff.vdws:
                 for i, v in enumerate(gff.vdws.values()):
-                    if gff.vdws.keys()[i] in element_list:
+                    if list(gff.vdws.keys())[i] in element_list:
                         continue
-                    element_list.append(gff.vdws.keys()[i])
+                    element_list.append(list(gff.vdws.keys())[i])
                     lines.append(
                         '{} {} {} {} {} {} {}'.format(num_atoms + 1, v[1],
                                                       v[0] * 1.7818, '#',
-                                                      gff.vdws.keys()[i],
+                                                      list(gff.vdws.keys())[i],
                                                       mol_index,
                                                       mol.site_properties[
                                                           "mol_name"][0]))
@@ -192,9 +201,13 @@ class LmpInput():
                     lines.append(
                         '{} {}  {} {} {} {} {} {}'.format(num_atoms + 1, v[0],
                                                           v[1], '#',
-                                                          gff.bonds.keys()[i][
+                                                          list(
+                                                              gff.bonds.keys())[
+                                                              i][
                                                               0],
-                                                          gff.bonds.keys()[i][
+                                                          list(
+                                                              gff.bonds.keys())[
+                                                              i][
                                                               1],
                                                           mol_index,
                                                           mol.site_properties[
@@ -223,13 +236,16 @@ class LmpInput():
                         '{} {} {} {} {} {} {} {} {}'.format(num_atoms + 1,
                                                             v[0],
                                                             v[1], '#',
-                                                            gff.angles.keys()[
+                                                            list(
+                                                                gff.angles.keys())[
                                                                 i][
                                                                 0],
-                                                            gff.angles.keys()[
+                                                            list(
+                                                                gff.angles.keys())[
                                                                 i][
                                                                 1],
-                                                            gff.angles.keys()[
+                                                            list(
+                                                                gff.angles.keys())[
                                                                 i][
                                                                 2], mol_index,
                                                             mol.site_properties[
@@ -256,7 +272,7 @@ class LmpInput():
             top = ffmol.top
             if gff.dihedrals is not None:
                 for i, v in enumerate(gff.dihedrals.values()):
-                    for func_form, d in v.iteritems():
+                    for func_form, d in six.iteritems(v):
                         j += 1
                         lines.append(
                             '{}  {}  {}  {} {} {} {} {} {} {} {} {}'.format(j,
@@ -268,17 +284,21 @@ class LmpInput():
                                                                                     1]),
                                                                             '0.0',
                                                                             '#',
-                                                                            gff.dihedrals.keys()[
+                                                                            list(
+                                                                                gff.dihedrals.keys())[
                                                                                 i][
                                                                                 0],
-                                                                            gff.dihedrals.keys()[
+                                                                            list(
+                                                                                gff.dihedrals.keys())[
                                                                                 i][
                                                                                 1],
-                                                                            gff.dihedrals.keys()[
+                                                                            list(
+                                                                                gff.dihedrals.keys())[
                                                                                 i]
                                                                             [
                                                                                 2],
-                                                                            gff.dihedrals.keys()[
+                                                                            list(
+                                                                                gff.dihedrals.keys())[
                                                                                 i][
                                                                                 3],
                                                                             mol_index,
@@ -307,10 +327,11 @@ class LmpInput():
                                  (num_atoms + 1, v[0],
                                   int(round(math.cos(math.degrees(v[1])), 0)),
                                   int(v[2]), '#',
-                                  gff.imdihedrals.keys()[i][0],
-                                  gff.imdihedrals.keys()[i][1],
-                                  gff.imdihedrals.keys()[i][2],
-                                  gff.imdihedrals.keys()[i][3], mol_index,
+                                  list(gff.imdihedrals.keys())[i][0],
+                                  list(gff.imdihedrals.keys())[i][1],
+                                  list(gff.imdihedrals.keys())[i][2],
+                                  list(gff.imdihedrals.keys())[i][3],
+                                  mol_index,
                                   mol.site_properties["mol_name"][0]))
                     num_atoms = num_atoms + 1
             mol_index += 1
@@ -339,11 +360,11 @@ class LmpInput():
             top = ffmol.top
             if gff.masses is not None:
                 for m, v in enumerate(gff.masses.values()):
-                    if gff.masses.keys()[m] in element_list:
+                    if list(gff.masses.keys())[m] in element_list:
                         continue
-                    element_list.append(gff.masses.keys()[m])
+                    element_list.append(list(gff.masses.keys())[m])
                     masses_index = masses_index + 1
-                    atom_type_index[gff.masses.keys()[m]] = masses_index
+                    atom_type_index[list(gff.masses.keys())[m]] = masses_index
             num_atoms = len(mol)
             num_this_mol = num_mols
 
@@ -396,7 +417,7 @@ class LmpInput():
             if gff.bonds:
                 for m, v in enumerate(gff.bonds.values()):
                     bond_index = bond_index + 1
-                    bond_type_index[gff.bonds.keys()[m]] = bond_index
+                    bond_type_index[list(gff.bonds.keys())[m]] = bond_index
 
             for imol in range(num_mols):
                 mol_bonds = top.bonds
@@ -448,7 +469,7 @@ class LmpInput():
             if gff.angles:
                 for m, v in enumerate(gff.angles.values()):
                     angle_index = angle_index + 1
-                    angle_type_index[gff.angles.keys()[m]] = angle_index
+                    angle_type_index[list(gff.angles.keys())[m]] = angle_index
             # iterate over first molecule
             for imol in range(num_mols):
                 mol_angles = top.angles
@@ -502,7 +523,7 @@ class LmpInput():
                 for m, v in enumerate(gff.dihedrals.values()):
                     dihedral_index = dihedral_index + 1
                     dihedral_type_index[
-                        gff.dihedrals.keys()[m]] = dihedral_index
+                        list(gff.dihedrals.keys())[m]] = dihedral_index
 
                 top._get_ff_dihedrals(gff.dihedrals, top.dihedrals,
                                       gff.atom_gaff)
@@ -511,7 +532,7 @@ class LmpInput():
                     mol_index += 1
                     l += 1
                     # iterate over bonds in first molecule
-                    for k, v in top.topdihedralff.iteritems():
+                    for k, v in six.iteritems(top.topdihedralff):
                         A = k.split()[0]
                         B = k.split()[1]
                         C = k.split()[2]
@@ -525,7 +546,7 @@ class LmpInput():
                         if dihedral_label[0] > dihedral_label[3]:
                             dihedral_label = tuple(
                                 reversed(list(dihedral_label)))
-                        for func_form, d in v[1].iteritems():
+                        for func_form, d in six.iteritems(v[1]):
                             j += 1
                             lines.append(
                                 '{}  {}  {}  {}  {}  {}  {}  {}  {}'
@@ -569,7 +590,7 @@ class LmpInput():
                 for m, v in enumerate(gff.imdihedrals.values()):
                     imdihedrals_index = imdihedrals_index + 1
                     imdihedral_type_index[
-                        gff.imdihedrals.keys()[m]] = imdihedrals_index
+                        list(gff.imdihedrals.keys())[m]] = imdihedrals_index
 
                 # iterate over types of mol
                 # iterate over first molecule

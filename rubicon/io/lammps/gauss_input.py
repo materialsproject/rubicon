@@ -1,3 +1,8 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 __author__ = 'navnidhirajput'
 
 from pymatgen.core import Molecule
@@ -24,9 +29,7 @@ thf = Molecule(
     coords_thf, site_properties={"mol_name": ["THF"] * len(coords_thf)})
 
 
-
-
-class GaussianInput():
+class GaussianInput:
     def gaus_input(self, mol, multiplicity=None, charge=None):
         mol_name = mol.site_properties['mol_name'][0]
         gaus_lines = []

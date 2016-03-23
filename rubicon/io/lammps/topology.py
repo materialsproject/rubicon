@@ -1,3 +1,10 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
+import six
+from six.moves import range
 
 __author__ = 'navnidhirajput'
 
@@ -76,7 +83,7 @@ class TopMol(object):
     def _get_ff_dihedrals(self, gff_dihedrals, top_dihedral, atom_gaff):
 
         self.gaff_info = []
-        for keys, values in gff_dihedrals.iteritems():
+        for keys, values in six.iteritems(gff_dihedrals):
             self.gaff_info = [keys, values]
 
         for item in top_dihedral:
@@ -94,7 +101,7 @@ class TopMol(object):
     def _get_ff_bonds(self, gff_bonds, top_bond, atom_gaff):
 
         self.gaff_info = []
-        for keys, values in gff_bonds.iteritems():
+        for keys, values in six.iteritems(gff_bonds):
             self.gaff_info = [keys, values]
         for item in top_bond:
             d1 = item[0] + ' ' + item[1]
@@ -110,25 +117,25 @@ class TopMol(object):
     def _get_ff_angles(self, gff_angles, top_angle, atom_gaff):
 
         self.gaff_info = []
-        for keys, values in gff_angles.iteritems():
+        for keys, values in six.iteritems(gff_angles):
             self.gaff_info = [keys, values]
         for item in top_angle:
             d1 = item[0] + ' ' + item[1] + ' ' + item[2]
             a1, a2, a3 = atom_gaff[item[0]], atom_gaff[item[1]], atom_gaff[
                 item[2]]
             if (str(a1), str(a2), str(a3)) in gff_angles:
-                self.topangleff[d1] = (((str(a1), str(a2), str(a3))),
+                self.topangleff[d1] = ((str(a1), str(a2), str(a3)),
                                        gff_angles[(str(a1), str(a2), str(a3))])
             elif (str(a3), str(a2), str(a1)) in gff_angles:
                 angle_type = tuple(sorted((str(a1), str(a2), str(a3))))
                 self.topangleff[d1] = (
-                    ((str(a1), str(a2), str(a3))), gff_angles[angle_type])
+                    (str(a1), str(a2), str(a3)), gff_angles[angle_type])
             self.num_ang_types = len(set(self.topangleff.keys()))
 
     def _get_ff_imdihedrals(self, gff_imdihedrals, top_imdihedral, atom_gaff):
 
         self.gaff_info = []
-        for keys, values in gff_imdihedrals.iteritems():
+        for keys, values in six.iteritems(gff_imdihedrals):
             self.gaff_info = [keys, values]
 
         for item in top_imdihedral:
@@ -201,8 +208,8 @@ def correct_corrupted_top_files(corrupted_file=None, gaff_file=None):
     top_gaff = TopMol.gaff_fromfile(gaff_file)
     atom_index = 1
 
-    for x in xrange(0, len(top.atoms)):
-        if top.atoms[x][1].lower() in top_gaff.atoms.keys():
+    for x in range(0, len(top.atoms)):
+        if top.atoms[x][1].lower() in list(top_gaff.atoms.keys()):
             rtf_lines.append('{}  {}  {}   {}'.format('MASS', atom_index,
                                                       top.atoms[x][1].lower(),
                                                       top_gaff.atoms[

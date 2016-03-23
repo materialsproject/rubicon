@@ -1,22 +1,24 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Mar 11 15:48:23 2015
+# coding: utf-8
 
-@author: mhumbert
-"""
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
 
 import linecache
 import os
+
+from six.moves import range
 
 try:
     import matplotlib.pyplot as plt
 except ImportError:
     plt = None
-    print "Install matplotlib"
+    print("Install matplotlib")
 
 import numpy as np
 
 from rubicon.analysis.lammps._md_analyzer import siteradial
+
+__author__ = "mhumbert"
 
 
 class siteradialdistribution:
@@ -59,7 +61,7 @@ class siteradialdistribution:
         n = int(linecache.getline(trjfilename, 4))
         num_timesteps = int(num_lines / (n + 9))
         count = 0
-        return (num_lines, n, num_timesteps, count)
+        return num_lines, n, num_timesteps, count
 
     def getdimensions(self, trjfilename):
         # uses trjectory file to get the length of box sides
@@ -75,7 +77,7 @@ class siteradialdistribution:
         Ly2 = Ly / 2
         Lz = float(zbounds[1]) - float(zbounds[0])
         Lz2 = Lz / 2
-        return (Lx, Lx2, Ly, Ly2, Lz, Lz2)
+        return Lx, Lx2, Ly, Ly2, Lz, Lz2
 
     def setgparam(self, Lx2, Ly2, Lz2, n, firststep):
         # uses side lengths to set the maximum radius for box and number of bins
@@ -84,7 +86,7 @@ class siteradialdistribution:
         binsize = 0.1
         numbins = int(np.ceil(maxr / binsize))
         line = 10 + int(firststep) * (n + 9)
-        return (maxr, binsize, numbins, line)
+        return maxr, binsize, numbins, line
 
     def createarrays(self, numbins, n):
         # creates numpy arrays for data reading
@@ -96,7 +98,7 @@ class siteradialdistribution:
         atype = np.zeros(n)
         aid = np.zeros(n)
         aid = aid.tolist()
-        return (g, x, y, z, mol, atype, aid)
+        return g, x, y, z, mol, atype, aid
 
     def getcolumns(self, trjfilename):
         # defines the columns each data type is in in the trjectory file
@@ -110,7 +112,7 @@ class siteradialdistribution:
         molcol = inline.index('mol')
         typecol = inline.index('type')
         idcol = inline.index('id')
-        return (xcol, ycol, zcol, molcol, typecol, idcol)
+        return xcol, ycol, zcol, molcol, typecol, idcol
 
     def getmoltype(self, datfilename):
         # determines molecule types and number of each molecule type
@@ -135,7 +137,7 @@ class siteradialdistribution:
             for j in range(0, nummoltype[i]):
                 moltype.append(int(i))
 
-        return (linenum, nummoltype, moltypel, moltype)
+        return linenum, nummoltype, moltypel, moltype
 
     def getnumatominmol(self, trjfilename, moltype1, atype1, anum1, moltype2,
                         atype2, anum2, n, line, idcol, molcol, typecol,
@@ -182,8 +184,9 @@ class siteradialdistribution:
         aindex2 = []
 
         return (
-        atomcount1, atomid1, atomcount2, atomid2, nummol1, nummol2, aindex1,
-        aindex2)
+            atomcount1, atomid1, atomcount2, atomid2, nummol1, nummol2,
+            aindex1,
+            aindex2)
 
     def readdata(self, trjfilename, n, line, idcol, xcol, ycol, zcol, molcol,
                  x, y, z, mol):
@@ -195,7 +198,7 @@ class siteradialdistribution:
             z[int(inline[idcol]) - 1] = float(inline[zcol])
             mol[int(inline[idcol]) - 1] = float(inline[molcol])
         line += 9 + n
-        return (x, y, z, mol, line)
+        return x, y, z, mol, line
 
     def getindeces(self, count, nummol1, nummol2, atomid1, atomid2, atomcount1,
                    atomcount2, aindex1, aindex2):
@@ -205,7 +208,7 @@ class siteradialdistribution:
             for mol2 in range(0, nummol2):
                 aindex2.append(int(atomid2 + mol2 * atomcount2))
 
-        return (aindex1, aindex2)
+        return aindex1, aindex2
 
     def radialdistribution(self, x, y, z, aindex1, aindex2, mol, Lx, Ly, Lz,
                            binsize, numbins, maxr, g, count):
@@ -214,16 +217,16 @@ class siteradialdistribution:
         g += g1
         count += 1
 
-        return (g, count)
+        return g, count
 
     def radialnormalization(self, numbins, binsize, Lx, Ly, Lz, nummol1,
                             nummol2, count, g):
         # normalizes g to box density
         radiuslist = (np.arange(numbins) + 1) * binsize
         g *= Lx * Ly * Lz / nummol1 / nummol2 / 4 / np.pi / (
-                                                            radiuslist) ** 2 / binsize / count
+                                                                radiuslist) ** 2 / binsize / count
 
-        return (radiuslist, g)
+        return radiuslist, g
 
     def plot(self, radiuslist, g):
         # plots radial distribution function

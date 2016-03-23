@@ -1,3 +1,8 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 """
 Run derived collection builder.
 
@@ -30,7 +35,7 @@ class ConfigurationError(Exception):
 
 
 def tell_user(message):
-    "Flexible way to control output for the user."
+    """Flexible way to control output for the user."""
     print(message)
 
 
@@ -46,7 +51,7 @@ def get_settings(config_file):
                 return json.load(f)
         else:
             raise ValueError("configuration file not found")
-    except Exception, err:
+    except Exception as err:
         raise ConfigurationError(config_file, err)
 
 
@@ -112,7 +117,7 @@ def main():
 
     try:
         settings = get_settings(args.config_file)
-    except ConfigurationError, err:
+    except ConfigurationError as err:
         p.error(str(err))
     core_db = get_db(**settings)
     suffix = None
@@ -122,15 +127,15 @@ def main():
 
     status = 0
     _log.info("run.start")
-    if args.func_name == 'sandbox':
+    if args.__name__ == 'sandbox':
         pass
     else:
         # Build derived collection
         try:
             status = args.func(collections, args)
-        except Exception, err:
+        except Exception as err:
             tb = traceback.format_exc()
-            _log.error("Failed to run '{}': {}".format(args.func_name, tb))
+            _log.error("Failed to run '{}': {}".format(args.__name__, tb))
             status = -1
     _log.info("run.end status={}".format(status))
     return status

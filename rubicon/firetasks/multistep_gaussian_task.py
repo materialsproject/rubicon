@@ -1,3 +1,8 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 import shlex
 
 from fireworks import explicit_serialize, FireTaskBase, FWAction
@@ -14,6 +19,7 @@ class GaussianGeomOptDBInsertionTask(FireTaskBase):
     _fw_name = "QChem Geometry Optimization DB Insertion Task"
 
     def _insert_doc(self, fw_spec=None, filename="mol_geo.out"):
+        coll = None
         db_dir = shlex.os.environ['DB_LOC']
         db_path = shlex.os.path.join(db_dir, 'tasks_db.json')
         with open(db_path) as f:

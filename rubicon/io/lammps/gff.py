@@ -1,3 +1,7 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
 
 __author__ = 'navnidhirajput'
 
@@ -86,7 +90,7 @@ class Gff(MSONable):
                         continue
                     atom_type = line[0:2].strip()
                     mass = float(line[3:9])
-                    masses[atom_type.lower()] = (mass)
+                    masses[atom_type.lower()] = mass
 
                 if line.startswith('BOND'):
                     bond_section = True
@@ -132,7 +136,7 @@ class Gff(MSONable):
                     dihedral_func_type = (line[49:50])
                     dihedral_constant = float(line[19:24])
                     dihedral_angle = float(line[31:38])
-                    dihedrals[(dihedral_type)][dihedral_func_type] = (
+                    dihedrals[dihedral_type][dihedral_func_type] = (
                         dihedral_constant, dihedral_angle)
 
                 if line.startswith('IMPROPER'):
@@ -250,9 +254,9 @@ class Gff(MSONable):
                         general_dihedral_func_type = (line[14:15])
                         general_dihedral_constant = float(line[18:24])
                         general_dihedral_angle = float(line[31:38])
-                        general_dihedrals[(general_dihedral_type)] = (
-                        general_dihedral_func_type,
-                        general_dihedral_constant, general_dihedral_angle)
+                        general_dihedrals[general_dihedral_type] = (
+                            general_dihedral_func_type,
+                            general_dihedral_constant, general_dihedral_angle)
 
 
                     else:
@@ -263,9 +267,10 @@ class Gff(MSONable):
                         specific_dihedral_func_type = (line[14:15])
                         specific_dihedral_constant = float(line[18:24])
                         specific_dihedral_angle = float(line[31:38])
-                        specific_dihedrals[(specific_dihedral_type)] = (
-                        specific_dihedral_func_type,
-                        specific_dihedral_constant, specific_dihedral_angle)
+                        specific_dihedrals[specific_dihedral_type] = (
+                            specific_dihedral_func_type,
+                            specific_dihedral_constant,
+                            specific_dihedral_angle)
 
                 if line.startswith('non_bonded'):
                     vdw_section = True
@@ -348,14 +353,14 @@ def correct_corrupted_frcmod_files(corrupted_file=None, gaff_file=None):
     # print atoms
     gff_para = Gff.from_gaff_para(gaff_file)
     for ant_atom_name in gff.masses.keys():
-        if ant_atom_name in gff_para[0].keys():
+        if ant_atom_name in list(gff_para[0].keys()):
             frc_lines.append(
                 '{}  {}'.format(ant_atom_name, gff_para[0][ant_atom_name]))
             frc_lines.append('\n')
 
     frc_lines.append('\nBOND\n')
     for bond in gff.bonds:
-        if bond in gff_para[1].keys():
+        if bond in list(gff_para[1].keys()):
             frc_lines.append(
                 '{}{}{}    {}     {}'.format(bond[0], '-', bond[1],
                                              gff_para[1][bond][0],
@@ -364,7 +369,7 @@ def correct_corrupted_frcmod_files(corrupted_file=None, gaff_file=None):
 
     frc_lines.append('\nANGLE\n')
     for angle in gff.angles:
-        if angle in gff_para[2].keys():
+        if angle in list(gff_para[2].keys()):
             frc_lines.append(
                 '{}{}{}{}{}   {}    {}'.format(angle[0], '-', angle[1], '-',
                                                angle[2], gff_para[2][angle][0],
@@ -373,19 +378,19 @@ def correct_corrupted_frcmod_files(corrupted_file=None, gaff_file=None):
 
     frc_lines.append('\nDIHE\n')
     for dihedral in gff.dihedrals:
-        if dihedral in gff_para[3].keys():
+        if dihedral in list(gff_para[3].keys()):
             frc_lines.append(
                 '{}{}{}{}{}{}{}'.format(dihedral[0], '-', dihedral[1], '-',
                                         dihedral[2], '-', dihedral[3]))
             frc_lines.append('\n')
-        elif dihedral[1:3] in gff_para[4].keys():
+        elif dihedral[1:3] in list(gff_para[4].keys()):
 
             frc_lines.append(
                 '{}{}{}{}{}{}{}'.format(dihedral[0], '-', dihedral[1], '-',
                                         dihedral[2], '-', dihedral[3]))
             frc_lines.append('\n')
 
-        elif dihedral[::-1][1:3] in gff_para[4].keys():
+        elif dihedral[::-1][1:3] in list(gff_para[4].keys()):
 
             frc_lines.append(
                 '{}{}{}{}{}{}{}   {}       {}      {}      {}'.format(
@@ -398,19 +403,19 @@ def correct_corrupted_frcmod_files(corrupted_file=None, gaff_file=None):
 
     frc_lines.append('\nIMPROPER\n')
     for improper in gff.imdihedrals:
-        if improper in gff_para[3].keys():
+        if improper in list(gff_para[3].keys()):
             frc_lines.append(
                 '{}{}{}{}{}{}{}'.format(improper[0], '-', improper[1], '-',
                                         improper[2], '-', improper[3]))
             frc_lines.append('\n')
-        elif improper[1:3] in gff_para[4].keys():
+        elif improper[1:3] in list(gff_para[4].keys()):
 
             frc_lines.append(
                 '{}{}{}{}{}{}{}'.format(improper[0], '-', improper[1], '-',
                                         improper[2], '-', improper[3]))
             frc_lines.append('\n')
 
-        elif improper[::-1][1:3] in gff_para[4].keys():
+        elif improper[::-1][1:3] in list(gff_para[4].keys()):
 
             frc_lines.append(
                 '{}{}{}{}{}{}{}   {}       {}      {}      {}'.format(
@@ -423,7 +428,7 @@ def correct_corrupted_frcmod_files(corrupted_file=None, gaff_file=None):
 
     frc_lines.append('\nNONBON\n')
     for vdw in gff.vdws:
-        if vdw in gff_para[5].keys():
+        if vdw in list(gff_para[5].keys()):
             frc_lines.append('{}  {}    {}'.format(vdw, gff_para[5][vdw][0],
                                                    gff_para[5][vdw][1]))
         frc_lines.append('\n')

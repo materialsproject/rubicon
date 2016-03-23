@@ -1,7 +1,14 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 import copy
 import itertools
 
 from fireworks import Workflow
+from six.moves import range
+from six.moves import zip
 
 from rubicon.utils.atomic_charge_mixed_basis_set_generator import \
     AtomicChargeMixedBasisSetGenerator
@@ -89,8 +96,9 @@ def md_relax_fws(mol, name, mission, qm_method, high_temperature=323,
 
     temperatures = list(itertools.chain(
         [int(high_temperature), int(low_temperature)] * md_runs))
-    md_fw_ids = zip(
-        *[iter(range(fwid_base + 6, fwid_base + 6 + md_runs * 2 * 2))] * 2)
+    md_fw_ids = list(zip(
+        *[iter(
+            list(range(fwid_base + 6, fwid_base + 6 + md_runs * 2 * 2)))] * 2))
     md_fws = []
     for (md_cal_fwid, md_db_fwid), temperature in zip(md_fw_ids, temperatures):
         fw_md = fw_creator.aimd_fw(charge, spin_multiplicity, md_cal_fwid,

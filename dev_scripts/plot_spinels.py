@@ -1,5 +1,15 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 import pymongo
-from pymatpro.safety_paper.views_plot import HeatMapPlot
+
+try:
+    from pymatpro.safety_paper.views_plot import HeatMapPlot
+except ImportError:
+    HeatMapPlot = None
+    print("Install pymatpro")
 
 from pymatgen import Structure, MPRester
 from pymatgen.apps.battery.insertion_battery import InsertionElectrode
@@ -133,13 +143,13 @@ for working_ion in working_ion_pool:
     charge_ehull.append(c_ehull_row)
 
 for vrow in voltage:
-    print vrow
+    print(vrow)
 
 for crow in capacity_grav:
-    print crow
+    print(crow)
 
 for drow in discharge_ehull:
-    print drow
+    print(drow)
 
 plot_params = {}
 hmp4 = HeatMapPlot([charge_ehull[0]], redox_ion_pool, [" "],

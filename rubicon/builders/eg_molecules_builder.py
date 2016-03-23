@@ -1,7 +1,13 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 """
 Build molecules collection
 Adapted from Dan Gunter and Wei Chen's vasp materials builder
 """
+
 import copy
 import datetime
 import logging
@@ -13,6 +19,8 @@ from pymongo import ASCENDING
 
 from rubicon.builders import eg_shared
 from rubicon.utils.qchem_firework_creator import QChemFireWorkCreator
+from six.moves import map
+from six.moves import zip
 
 __author__ = "Xiaohui Qu"
 __copyright__ = "Copyright 2012-2013, The Electrolyte Genome Project"
@@ -129,7 +137,7 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
                               .distinct('inchi_root'))
             _log.info(
                 "There are total {} unique INCHIs".format(len(inchi_root)))
-            map(self.add_item, inchi_root)
+            list(map(self.add_item, inchi_root))
             _log.info("Beginning analysis")
             states = self.run_parallel()
             sss.extend(states)
@@ -364,8 +372,8 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
                     literal_group_name = m.group("group_name")
                     if literal_group_name in TaskKeys.literal_to_formula_group_name:
                         formula_group_name = \
-                        TaskKeys.literal_to_formula_group_name[
-                            literal_group_name]
+                            TaskKeys.literal_to_formula_group_name[
+                                literal_group_name]
                         molecule["base_molecule"] = base_mol
                         molecule["functional_groups"] = [formula_group_name]
                 m = TaskKeys.lei_2_group_pattern.search(molname)
@@ -376,9 +384,11 @@ class MoleculesBuilder(eg_shared.ParallelBuilder):
                     if literal_group1 in TaskKeys.literal_to_formula_group_name \
                             and literal_group2 in TaskKeys.literal_to_formula_group_name:
                         formula_group1 = \
-                        TaskKeys.literal_to_formula_group_name[literal_group1]
+                            TaskKeys.literal_to_formula_group_name[
+                                literal_group1]
                         formula_group2 = \
-                        TaskKeys.literal_to_formula_group_name[literal_group2]
+                            TaskKeys.literal_to_formula_group_name[
+                                literal_group2]
                         molecule["base_molecule"] = base_mol
                         molecule["functional_groups"] = sorted(
                             [formula_group1, formula_group2])

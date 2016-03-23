@@ -1,28 +1,30 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Mar 13 10:36:25 2015
+# coding: utf-8
 
-@author: mhumbert
-"""
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
+from six.moves import range
+
+__author__ = "mhumbert"
 
 
 class getmoldata:
-    '''
-    
-             Determines molecule types and number of each molecule type and 
+    """
+
+             Determines molecule types and number of each molecule type and
              creates a list of molecule type of each molecule
-             
-             Requires the following comments in the lammps data file starting 
+
+             Requires the following comments in the lammps data file starting
             at the third line
-            
+
             # "number" "molecule" molecules
-            
+
             where "number" is the number of that molecule type and
             "molecule" is a name for that molecule
-            
+
             Do not include blank lines in between the molecule types
-            
-    '''
+
+    """
 
     def getmoltype(self, datfilename):
         # determines molecule types and number of each molecule type
@@ -49,4 +51,4 @@ class getmoldata:
                 moltype.append(int(i))
 
         datfile.close()
-        return (nummoltype, moltypel, moltype)
+        return nummoltype, moltypel, moltype

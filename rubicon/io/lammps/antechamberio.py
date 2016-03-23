@@ -1,3 +1,8 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 """
     A wrapper for AntechamberRunner which generates force field files
     for a specified molecule using gaussian output file as input
@@ -20,18 +25,16 @@ from rubicon.io.lammps.gff import correct_corrupted_frcmod_files
 from rubicon.io.lammps.ffmol import FFmol
 
 
-class AntechamberRunner():
+class AntechamberRunner:
     """
     A wrapper for AntechamberRunner software
 
     """
 
     @requires(which('parmchk'), "Requires the binary parmchk."
-              "Install AmberTools from http://ambermd.org/#AmberTools")
-
+                                "Install AmberTools from http://ambermd.org/#AmberTools")
     @requires(which('antechamber'), "Requires the binary antechamber."
-              "Install AmberTools from http://ambermd.org/#AmberTools")
-
+                                    "Install AmberTools from http://ambermd.org/#AmberTools")
     def __init__(self, mols):
         """
         Args:
@@ -94,6 +97,6 @@ class AntechamberRunner():
             gff.read_atom_index(mol, 'ANTECHAMBER_AC.AC')
             # gff.read_charges()
 
-            mol.add_site_property("atomname", (gff.atom_index.values()))
+            mol.add_site_property("atomname", (list(gff.atom_index.values())))
         ffmol = FFmol(gff, top)
         return ffmol

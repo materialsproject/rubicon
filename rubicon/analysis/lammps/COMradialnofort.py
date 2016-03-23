@@ -1,13 +1,14 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Mar 10 10:07:34 2015
+# coding: utf-8
 
-@author: mhumbert
-"""
-
-import numpy as np
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
 
 import copy
+
+import numpy as np
+from six.moves import range
+
+__author__ = "mhumbert"
 
 
 class COMradialdistribution:
@@ -34,7 +35,7 @@ class COMradialdistribution:
         numbins = int(np.ceil(maxr / binsize))
         count = firststep
         g = np.zeros((len(moltypel), len(moltypel), numbins))
-        return (maxr, binsize, numbins, count, g)
+        return maxr, binsize, numbins, count, g
 
     def radialdistribution(self, g, nummol, moltype, comx, comy, comz, Lx, Ly,
                            Lz, binsize, numbins, maxr, count):
@@ -55,12 +56,12 @@ class COMradialdistribution:
 
                 if r <= maxr:
                     g[moltype[molecule1]][moltype[molecule2]][
-                        int(round(r / (binsize)) - 1)] += 1
+                        int(round(r / binsize) - 1)] += 1
                     g[moltype[molecule2]][moltype[molecule1]][
-                        int(round(r / (binsize)) - 1)] += 1
+                        int(round(r / binsize) - 1)] += 1
 
         count += 1
-        return (count)
+        return count
 
     def radialnormalization(self, numbins, binsize, Lx, Ly, Lz, nummol, count,
                             g, firststep):
@@ -69,16 +70,17 @@ class COMradialdistribution:
         for i in range(0, len(g)):
             for j in range(0, len(g)):
                 g[i][j] *= Lx * Ly * Lz / nummol[i] / nummol[j] / 4 / np.pi / (
-                                                                              radiuslist) ** 2 / binsize / (
-                           count - firststep)
-        return (radiuslist)
+                                                                                  radiuslist) ** 2 / binsize / (
+                               count - firststep)
+        return radiuslist
 
     def append_dict(self, radiuslist, g, output, moltypel):
         for i in range(0, len(moltypel)):
             for j in range(i, len(moltypel)):
                 if not all([v == 0 for v in g[i][j]]):
                     output['RDF']['{0}-{1}'.format(moltypel[i],
-                                                   moltypel[j])] = copy.deepcopy(
-                                                   g[i][j].tolist())
-        if 'distance' not in output['RDF'].keys():
+                                                   moltypel[
+                                                       j])] = copy.deepcopy(
+                        g[i][j].tolist())
+        if 'distance' not in list(output['RDF'].keys()):
             output['RDF']['distance'] = copy.deepcopy(radiuslist.tolist())

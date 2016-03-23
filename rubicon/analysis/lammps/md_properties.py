@@ -1,28 +1,31 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Dec 23 01:16:09 2013
+# coding: utf-8
 
-@author: asharma6
-"""
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
 
 import sys
 from multiprocessing import Pool
+
+from six.moves import range
+from six.moves import zip
 
 try:
     import matplotlib.pyplot as plt
 except ImportError:
     plt = None
-    print "Install matplotlib"
+    print("Install matplotlib")
 
 import numpy as np
 import scipy.integrate
+
+__author__ = "asharma"
 
 
 def autocorrelate(a):
     b = np.concatenate((a, np.zeros(len(a))), axis=1)
     c = np.fft.ifft(np.fft.fft(b) * np.conjugate(np.fft.fft(b))).real
     d = c[:len(c) / 2]
-    d = d / (np.array(range(len(a))) + 1)[::-1]
+    d = d / (np.array(list(range(len(a)))) + 1)[::-1]
     return d[:wline]
 
 
@@ -41,7 +44,7 @@ if __name__ == '__main__':
     l = LammpsLog(logfilename, *properties)
     l.parselog()
     wline = l.wline
-    print 'Done reading the log file. Starting Calculations...'
+    print('Done reading the log file. Starting Calculations...')
     NCORES = 8
     p = Pool(NCORES)
 
@@ -72,4 +75,4 @@ if __name__ == '__main__':
                         visco):
             output.write(' '.join(str(x) for x in line) + '\n')
         output.close()
-        print 'Viscosity Calculation Comlete!'
+        print('Viscosity Calculation Comlete!')

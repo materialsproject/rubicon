@@ -1,4 +1,10 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 from fireworks.utilities.fw_serializers import FWSerializable
+from six.moves import zip
 
 from pymatgen.core.structure import Molecule
 
@@ -47,4 +53,4 @@ class AtomicChargeMixedBasisSetGenerator(FWSerializable):
         basis = [
             self.normal_basis_set if c >= self.charge_threshold else self.diffuse_basis_set
             for c in charges]
-        return zip(elements, basis)
+        return list(zip(elements, basis))

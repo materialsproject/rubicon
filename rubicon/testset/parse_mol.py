@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
 
 import glob
 import re
@@ -6,11 +9,12 @@ import sys
 import traceback
 
 import requests
+from six.moves import range
 
 try:
     import pybel as pb
 except ImportError:
-    print "WARNING: Error importing pybel, setting pb to None!"
+    print("WARNING: Error importing pybel, setting pb to None!")
     pb = None
 
 from pymatgen import Element, Molecule
@@ -30,7 +34,7 @@ def parse_file(filename):
             gau = GaussianInput.from_string("\n".join(lines))
             yield (gau.molecule, gau.charge, gau.spin_multiplicity)
         except:
-            print "error in {}".format(t)
+            print("error in {}".format(t))
 
 
 session = requests.Session()
@@ -47,7 +51,7 @@ def get_nih_names(smiles):
             names = response.text.split("\n")
             return [n.strip() for n in names if n.strip() != ""]
         else:
-            print "{} not found.\n".format(smiles)
+            print("{} not found.\n".format(smiles))
             return []
     except:
         return []
@@ -55,7 +59,7 @@ def get_nih_names(smiles):
 
 def insert_g3testset(coll):
     for f in glob.glob("g*.txt"):
-        print "Parsing " + f
+        print("Parsing " + f)
         for (m, charge, spin) in parse_file(f):
             try:
                 clean_sites = []
@@ -91,11 +95,11 @@ def insert_g3testset(coll):
                              "spin_multiplicity": spin}, {"$set": d},
                             upsert=True)
             except Exception as ex:
-                print "Error in {}".format(f)
+                print("Error in {}".format(f))
                 exc_type, exc_value, exc_traceback = sys.exc_info()
                 traceback.print_exception(exc_type, exc_value, exc_traceback,
                                           limit=2, file=sys.stdout)
-        print "{} parsed!".format(f)
+        print("{} parsed!".format(f))
 
 
 def insert_solvents(coll):
@@ -153,12 +157,12 @@ def insert_solvents(coll):
                          "spin_multiplicity": clean_mol.spin_multiplicity},
                         {"$set": d}, upsert=True)
         else:
-            print "{} not found.\n".format(n)
+            print("{} not found.\n".format(n))
 
 
 def insert_elements(coll):
-    print "adding missing elements."
-    for z in xrange(1, 19):
+    print("adding missing elements.")
+    for z in range(1, 19):
         el = Element.from_Z(z)
         r = coll.find(filter={"formula": "{}1".format(el.symbol)})
         if r.count() == 0:
@@ -189,18 +193,20 @@ def insert_elements(coll):
                 d["tags"] = ["G305 test set"]
                 coll.insert(d)
             except Exception as ex:
-                print "Error in {}".format(el)
+                print("Error in {}".format(el))
         elif r.count() > 1:
-            print "More than 1 {} found. Removing...".format(el)
+            print("More than 1 {} found. Removing...".format(el))
             results = list(r)
             for r in results[1:]:
-                print r["_id"]
+                print(r["_id"])
                 coll.remove({"_id": r["_id"]})
 
 
 if __name__ == "__main__":
-    from pymatpro.db.mongo.query_engine_mongo import MongoQueryEngine
-
+    try:
+        from pymatpro.db.mongo.query_engine_mongo import MongoQueryEngine
+    except ImportError:
+        print("Install pymatpro")
     qe = MongoQueryEngine()
     db = qe.db
     coll = db["molecules"]

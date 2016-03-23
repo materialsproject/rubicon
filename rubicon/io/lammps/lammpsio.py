@@ -1,10 +1,15 @@
-#!/usr/bin/env python
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
 
 import re
+from multiprocessing import Pool
 
 import numpy as np
 import scipy.integrate
-from multiprocessing import Pool
+from six.moves import range
+from six.moves import zip
 
 
 def _list2float(seq):
@@ -19,11 +24,11 @@ def autocorrelate(a):
     b = np.concatenate((a, np.zeros(len(a))), axis=1)
     c = np.fft.ifft(np.fft.fft(b) * np.conjugate(np.fft.fft(b))).real
     d = c[:len(c) / 2]
-    d = d / (np.array(range(len(a))) + 1)[::-1]
+    d = d / (np.array(list(range(len(a)))) + 1)[::-1]
     return d
 
 
-class LammpsLog():
+class LammpsLog:
     """
     Parser for LAMMPS log file (parse function).
     Saves the output properties (log file) in the form of a dictionary (LOG) with the key being
@@ -97,7 +102,7 @@ class LammpsLog():
             for line in logfile:
                 if line == '\n':
                     footer_blank_line += 1
-            print int(md_step / log_save_freq)
+            print(int(md_step / log_save_freq))
 
             if total_lines >= header + md_step / log_save_freq:
                 rawdata = np.genfromtxt(fname=filename, dtype=float,
@@ -117,7 +122,7 @@ class LammpsLog():
         """
         print the list of properties
         """
-        print log.llog.keys()
+        print(list(log.llog.keys()))
 
     # viscosity
     def viscosity(self, cutoff):

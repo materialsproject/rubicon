@@ -1,5 +1,11 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 from fireworks.core.firework import Firework, Workflow
 from fireworks.utilities.fw_serializers import FWSerializable
+from six.moves import range
 
 from pymatgen.core.structure import Molecule
 from rubicon.firetasks.multistep_qchem_task import \

@@ -1,9 +1,14 @@
-# coding=utf-8
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
+import six
+from six.moves import map
 
 """
 This module implements input and output processing from MOPAC
 """
-from __future__ import unicode_literals
 
 import copy
 import re
@@ -63,7 +68,7 @@ class MopTask(MSONable):
         self.keywords = dict()
 
         explicit_keywords = {
-                            "CHARGE"} | self.available_sqm_tasktext | self.available_sqm_methods
+                                "CHARGE"} | self.available_sqm_tasktext | self.available_sqm_methods
         optional_keywords = set([k.upper() for k in
                                  optional_params.keys()]) if optional_params else set()
         overlap_keywords = explicit_keywords & optional_keywords
@@ -90,12 +95,12 @@ class MopTask(MSONable):
                     sqm_method))
         self.keywords[sqm_method.upper()] = None
         if optional_params:
-            for k, v in optional_params.iteritems():
-                if isinstance(v, str) or isinstance(v, unicode):
+            for k, v in six.iteritems(optional_params):
+                if isinstance(v, str) or isinstance(v, six.text_type):
                     self.keywords[k.upper()] = v.upper()
                 else:
                     self.keywords[k.upper()] = v
-        if "INT" in self.keywords.keys():
+        if "INT" in list(self.keywords.keys()):
             raise Exception("Internal coordinates is not supported yet")
         self.keywords["XYZ"] = None
 
@@ -141,7 +146,7 @@ class MopTask(MSONable):
                 tokens.append(k)
             elif isinstance(v, int):
                 tokens.append("{k:s}={v:d}".format(k=k, v=v))
-            elif isinstance(v, str) or isinstance(v, unicode):
+            elif isinstance(v, str) or isinstance(v, six.text_type):
                 tokens.append("{k:s}={v:s}".format(k=k, v=v))
         lines = [' '.join(tokens)]
         return lines
@@ -253,9 +258,9 @@ class MopTask(MSONable):
                 species.append(m.group(1))
                 toks = re.split("[,\s]+", l.strip())
                 if len(toks) > 4:
-                    coords.append(map(float, toks[2:5]))
+                    coords.append(list(map(float, toks[2:5])))
                 else:
-                    coords.append(map(float, toks[1:4]))
+                    coords.append(list(map(float, toks[1:4])))
             elif cls.zmat_patt.match(l):
                 zmode = True
                 toks = re.split("[,\s]+", l.strip())
@@ -335,7 +340,7 @@ class MopTask(MSONable):
                 sp = re.sub("\d", "", sp_str)
                 return sp.capitalize()
 
-        species = map(parse_species, species)
+        species = list(map(parse_species, species))
 
         return Molecule(species, coords)
 
@@ -361,7 +366,7 @@ class MopOutput(object):
     @classmethod
     def _expected_successful_pattern(cls, input_keywords):
         text = ["SCF FIELD WAS ACHIEVED"]
-        all_keys = input_keywords.keys()
+        all_keys = list(input_keywords.keys())
         if "EF" in all_keys or "BFGS" in all_keys:
             text.append("GEOMETRY OPTIMISED USING .*\(\w+\)\.|"
                         "\w+ TEST WAS SATISFIED IN \w+ OPTIMIZATION")

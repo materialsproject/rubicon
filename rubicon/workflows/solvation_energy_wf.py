@@ -1,6 +1,13 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 import itertools
 
 from fireworks.core.firework import Workflow
+from six.moves import range
+from six.moves import zip
 
 from rubicon.utils.qchem_firework_creator import QChemFireWorkCreator
 
@@ -15,7 +22,7 @@ def solvation_energy_fws(mol, name, mission, solvents, solvent_method,
     if len(mol) > 50:
         large = True
     energy_method, geom_method = qm_method.split("//") if qm_method else (
-    None, None)
+        None, None)
     fw_creator = QChemFireWorkCreator(mol=mol, molname=name, mission=mission,
                                       dupefinder=dupefinder,
                                       priority=priority, large=large,
@@ -55,15 +62,15 @@ def solvation_energy_fws(mol, name, mission, solvents, solvent_method,
     if num_solvents < 1:
         raise ValueError("You must provide at least one solvent")
 
-    sp_fw_ids = zip(*[iter(range(fwid_base + 4,
-                                 fwid_base + 4 + num_solvents * 2))] * 2)
+    sp_fw_ids = list(zip(*[iter(list(range(fwid_base + 4,
+                                           fwid_base + 4 + num_solvents * 2)))] * 2))
     sp_fws = (fw_creator.sp_fw(
         charge=0, spin_multiplicity=1, fw_id_cal=fwid_cal,
         fw_id_db=fwid_db, solvent_method=solvent_method,
         use_vdw_surface=use_vdW_surface, solvent=solvent,
         qm_method=energy_method)
               for (fwid_cal, fwid_db), solvent in zip(sp_fw_ids, solvents))
-    sp_cal_ids, sp_db_ids = zip(*sp_fw_ids)
+    sp_cal_ids, sp_db_ids = list(zip(*sp_fw_ids))
     links_dict.update((dict(sp_fw_ids)))
     fireworks.extend(itertools.chain.from_iterable(sp_fws))
     if len(mol) > 1:

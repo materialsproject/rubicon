@@ -1,3 +1,8 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 from pymatgen import Molecule
 from pymatgen.io.nwchem import NwInput, NwTask
 
@@ -17,4 +22,4 @@ tasks = [
 ]
 nwi = NwInput(mol, tasks)
 
-print str(nwi)
+print(nwi)

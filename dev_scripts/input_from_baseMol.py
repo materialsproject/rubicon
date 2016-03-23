@@ -1,10 +1,12 @@
-#!/usr/bin/env python
+# coding: utf-8
 
-from __future__ import print_function
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
 
 import os
 
 from rubicon.workflows.mol_to_wf import mol_to_wf_nwchem
+from six.moves import range
 
 from pymatgen.analysis.molecule_matcher import InchiMolAtomMapper
 from pymatgen.core.structure import Molecule, FunctionalGroups
@@ -90,7 +92,7 @@ for index in substitute_sitelist:
         derivatives[name] = a.pymatgen_mol
 
 print("Total of ", end='')
-print(len(derivatives.keys()), end='')
+print(len(list(derivatives.keys())), end='')
 print(" derivatives are created")
 
 '''

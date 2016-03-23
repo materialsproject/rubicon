@@ -1,6 +1,12 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 import datetime
 
 from monty.json import MontyDecoder
+from six.moves import range
 
 from pymatgen import Composition, Structure, Molecule
 from pymatgen.analysis.molecule_matcher import \
@@ -24,7 +30,7 @@ def get_bonds_from_obmol(obmol):
 
 
 def get_meta_from_structure(mol):
-    '''
+    """
     set basis information for the molecule
 
     Args:
@@ -32,7 +38,7 @@ def get_meta_from_structure(mol):
 
     Returns:
         the meta information dict
-    '''
+    """
     comp = mol.composition
     elsyms = sorted(set([e.symbol for e in comp.elements]))
     bb = BabelMolAdaptor(mol)
@@ -116,7 +122,7 @@ class EGStructureNL(StructureNL):
         return EGStructureNL.from_dict(snl2.as_dict())
 
 
-class SNLGroup():
+class SNLGroup:
     def __init__(self, snlgroup_id, canonical_snl, all_snl_ids=None):
         # Auto fields
         self.created_at = datetime.datetime.utcnow()
