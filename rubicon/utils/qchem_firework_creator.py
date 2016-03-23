@@ -1,16 +1,21 @@
-# coding=utf-8
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 import copy
 import json
 import math
 import os
 
+import six
 from fireworks import Firework
 from fireworks.core.firework import Tracker
+from six.moves import zip
 
 from pymatgen.core.periodic_table import Element
 from pymatgen.io.babel import BabelMolAdaptor
 from pymatgen.io.qchem import QcTask, QcInput
-
 from rubicon.dupefinders.dupefinder_eg import DupeFinderEG
 from rubicon.firetasks.qchem_task import QChemTask
 
@@ -288,12 +293,12 @@ class QChemFireWorkCreator:
             pol_per_vol = total_polarization / 1.0
             a, b, c = 2, - (1 + 9 * pol_per_vol), -1
             dielectric_constant = (-b + math.sqrt(b ** 2 - 4 * a * c)) / (
-            2 * a)
+                2 * a)
             solvent_name = ', '.join(['{:.0%} {:s}'.format(vol, name)
                                       for vol, name in
                                       zip(vol_ratio, compounds)]) \
                            + ' in volume'
-        elif isinstance(solvent, str) or isinstance(solvent, unicode):
+        elif isinstance(solvent, str) or isinstance(solvent, six.text_type):
             solvent_pure = solvent.lower()
             if solvent_pure not in dielec_consts:
                 raise Exception("Don't know the dielectric constants for "
@@ -495,7 +500,7 @@ class QChemFireWorkCreator:
                             ecp=ecp, rem_params=rem_params,
                             ghost_atoms=ga)
         if (not self.large) and (
-                mixed_basis_generator is None and mixed_aux_basis_generator is None):
+                        mixed_basis_generator is None and mixed_aux_basis_generator is None):
             qctask_vac.set_dft_grid(128, 302)
             qctask_vac.set_integral_threshold(12)
             qctask_vac.set_scf_convergence_threshold(8)

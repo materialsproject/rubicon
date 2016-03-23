@@ -1,3 +1,8 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 import datetime
 import os
 
@@ -31,7 +36,8 @@ class EGSNLMongoAdapter(FWSerializable):
 
     def _reset(self):
         if "prod" in self.database.name:
-            print "PROD database is not supposed to reset, please changed the code to reset"
+            print("PROD database is not supposed to reset, please changed " \
+                  "the code to reset")
             exit()
         self.restart_id_assigner_at(1, 1)
         self.snl.remove()
@@ -86,8 +92,8 @@ class EGSNLMongoAdapter(FWSerializable):
 
     def _add_if_belongs(self, snlgroup, egsnl, testing_mode):
         if snlgroup.add_if_belongs(egsnl):
-            print 'MATCH FOUND, grouping (snl_id, snlgroup): {}'. \
-                format((egsnl.snl_id, snlgroup.snlgroup_id))
+            print('MATCH FOUND, grouping (snl_id, snlgroup): {}'. \
+                  format((egsnl.snl_id, snlgroup.snlgroup_id)))
             if not testing_mode:
                 self.snlgroups.update({'snlgroup_id': snlgroup.snlgroup_id},
                                       snlgroup.as_dict())

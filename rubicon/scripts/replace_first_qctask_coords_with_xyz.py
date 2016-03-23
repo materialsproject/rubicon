@@ -1,3 +1,8 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 import argparse
 
 from pymatgen.core.structure import Molecule
@@ -28,10 +33,10 @@ def main():
     qcinp.jobs[0].mol = new_mol
     qcinp.write_file(options.output)
     print(
-    "created new QChem input file {new_file} using {old_inp} as an template and filled with coordinates " \
-    "from {coord_file}".format(old_inp=options.input,
-                               coord_file=options.coords,
-                               new_file=options.output))
+        "created new QChem input file {new_file} using {old_inp} as an template and filled with coordinates " \
+        "from {coord_file}".format(old_inp=options.input,
+                                   coord_file=options.coords,
+                                   new_file=options.output))
 
 
 if __name__ == "__main__":

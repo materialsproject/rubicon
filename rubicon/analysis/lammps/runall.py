@@ -1,9 +1,10 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Mar 12 14:14:34 2015
+# coding: utf-8
 
-@author: mhumbert
-"""
+__author__ = "mhumbert"
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 '''
 
         Sample driver file to calculate the MSD and diffusivity for all 
@@ -25,6 +26,8 @@ Created on Thu Mar 12 14:14:34 2015
 
 '''
 
+from __future__ import absolute_import
+
 if __name__ == '__main__':
     from rubicon.analysis.lammps.MSD import MSD
     from rubicon.analysis.lammps.calcCOM import calcCOM
@@ -33,8 +36,9 @@ if __name__ == '__main__':
     from rubicon.analysis.lammps.COMradialnofort import COMradialdistribution
     from rubicon.analysis.lammps.getatomcharges import getatomcharges
     from rubicon.analysis.lammps.calcNEconductivity import calcNEconductivity
-    from rubicon.analysis.lammps.getcoordinationnumber import getcoordinationnumber
-    
+    from rubicon.analysis.lammps.getcoordinationnumber import \
+        getcoordinationnumber
+
     c = calcCOM()
     m = MSD()
     gt = gettimedata()

@@ -1,6 +1,9 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
 
 __author__ = 'navnidhirajput'
-
 
 import json
 import os
@@ -8,7 +11,7 @@ import os
 MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
-class DictLammpsInputSet():
+class DictLammpsInputSet:
     """
     Concrete implementation of LammpsInputSet that is initialized from a dict
     settings. This allows arbitrary settings to be input. In general,

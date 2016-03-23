@@ -1,15 +1,18 @@
 # coding: utf-8
 
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
+import glob
 import os
 import sys
-import glob
 
 from setuptools import find_packages
 
 try:
     from numpy.distutils.core import setup, Extension
 except ImportError:
-    print "numpy.distutils.core cannot be imported. Install numpy"
+    print("numpy.distutils.core cannot be imported. Install numpy")
     sys.exit(-9)
 
 from rubicon import __version__
@@ -17,8 +20,8 @@ from rubicon import __version__
 module_dir = os.path.dirname(os.path.abspath(__file__))
 f90_sources = glob.glob(os.path.join(module_dir, "rubicon", "analysis",
                                      "lammps", "*.f90"))
-md_analyzer = Extension(name = 'rubicon.analysis.lammps._md_analyzer',
-                           sources = f90_sources)
+md_analyzer = Extension(name='rubicon.analysis.lammps._md_analyzer',
+                        sources=f90_sources)
 
 if __name__ == "__main__":
     setup(name='rubicon',
@@ -32,11 +35,12 @@ if __name__ == "__main__":
           license='modified BSD',
           packages=find_packages(),
           install_requires=['pymatgen>=3.0', 'fireworks>=0.9',
-                            'custodian>=0.7', 'monty>=0.7.0'],
+                            'custodian>=0.7', 'monty>=0.7.0', 'simplerandom'],
           extras_require={"plotting": ["matplotlib>=1.1"],
                           "molecules": ["openbabel"],
                           "molecular dynamics": ["Packmol", "AmberTools"]},
-          keywords=["materials", "project", "electrolyte", "molecular dynamics",
+          keywords=["materials", "project", "electrolyte",
+                    "molecular dynamics",
                     "lammps", "qchem", "analysis"],
           classifiers=["Programming Language :: Python :: 2.7",
                        "Development Status :: 2 - Pre-Alpha",

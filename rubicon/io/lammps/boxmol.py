@@ -1,3 +1,8 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 from pymatgen import Molecule
 
 __author__ = 'navnidhirajput'
@@ -29,5 +34,5 @@ class BoxMol:
     @classmethod
     def from_coords(cls, species, coords):
         bm = cls()
-        mols = [Molecule(s, c) for s, c in species, coords]
+        mols = [Molecule(*sc) for sc in zip(species, coords)]
         bm.mols = mols

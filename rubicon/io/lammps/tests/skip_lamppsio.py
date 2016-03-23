@@ -1,15 +1,16 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 import json
 import unittest
 from unittest import TestCase
 
 from pymatgen import Molecule
-
-try:
-    from pymatgen.packmol.packmol import PackmolRunner
-except:
-    pass
 from rubicon.io.lammps.antechamberio import AntechamberRunner
 from rubicon.io.lammps.lammps_data import LmpInput
+from rubicon.packmol.packmol import PackmolRunner
 
 __author__ = 'navnidhirajput'
 

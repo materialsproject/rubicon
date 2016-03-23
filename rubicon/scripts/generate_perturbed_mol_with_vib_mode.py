@@ -1,9 +1,12 @@
-from rubicon.scripts.run_qchem_standalone import perturb_molecule
+# coding: utf-8
 
-__author__ = 'xiaohuiqu'
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
 
 import copy
+
 from pymatgen.io.qchem import QcInput, QcOutput
+from rubicon.scripts.run_qchem_standalone import perturb_molecule
 
 __author__ = 'xiaohuiqu'
 
@@ -46,7 +49,8 @@ def main():
             else:
                 direction_text = "User reversed direction"
             print(
-            "{} with scale factor {}".format(direction_text, options.scale))
+                "{} with scale factor {}".format(direction_text,
+                                                 options.scale))
         new_mol = perturb_molecule(old_mol, vib_mode,
                                    reversed_direction=options.reverse,
                                    perturb_scale=options.scale)

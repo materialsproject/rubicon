@@ -1,20 +1,23 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 import glob
 import os
-
-from pymatgen import write_mol, Molecule
-from pymatgen.io import gaussianio
 
 from fireworks import Workflow, LaunchPad
 from fireworks.core.firework import Firework
 
 import rubicon
+from pymatgen import Molecule
+from rubicon.firetasks.gaussian_input_task import WritegaussianGeoTask, \
+    WritegaussianFreqESPTask
 from rubicon.firetasks.lammps_input_task import WritelammpsInputTask
 from rubicon.firetasks.lammps_output_task import WritelammpsOutputTask
 from rubicon.firetasks.lammps_properties_task import ParselammpsProperties
 from rubicon.firetasks.multistep_gaussian_task import \
     GaussianGeomOptDBInsertionTask, GaussianFreqESPDBInsertionTask
-from rubicon.firetasks.gaussian_input_task import WritegaussianGeoTask, \
-    WritegaussianFreqESPTask
 
 __author__ = 'navnidhirajput'
 
@@ -30,9 +33,9 @@ if __name__ == '__main__':
 
     coords = []
     sp = []
-    solvent_molecules_path = os.path.join(rubicon.__path__[0], 
+    solvent_molecules_path = os.path.join(rubicon.__path__[0],
                                           'workflows/test_mols/solvent_molecules')
-    moleculelist = glob.glob(solvent_molecules_path+'/*.pdb')
+    moleculelist = glob.glob(solvent_molecules_path + '/*.pdb')
     for filename in moleculelist:
         mol = Molecule.from_file(filename)
         file_name = os.path.basename(filename)

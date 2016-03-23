@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Mar 10 10:07:34 2015
+# coding: utf-8
 
-@author: mhumbert
-"""
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
 
 import numpy as np
-
 from rubicon.analysis.lammps._md_analyzer import comradial
+
+__author__ = "mhumbert"
 
 
 class COMradialdistribution:
@@ -44,7 +43,7 @@ class COMradialdistribution:
         numbins = int(np.ceil(maxr / binsize))
         count = firststep
         g = np.zeros(numbins)
-        return (maxr, binsize, numbins, count, g)
+        return maxr, binsize, numbins, count, g
 
     def getnummol(self, moltypel, nummoltype, mol1, mol2):
         # returns number of each mpolecule type and converts the molecule type to an integer
@@ -52,7 +51,7 @@ class COMradialdistribution:
         nummol2 = nummoltype[moltypel.index(mol2)]
         mol1 = int(moltypel.index(mol1))
         mol2 = int(moltypel.index(mol2))
-        return (nummol1, nummol2, mol1, mol2)
+        return nummol1, nummol2, mol1, mol2
 
     def radialdistribution(self, g, mol1, mol2, nummol, moltype, comx, comy,
                            comz, Lx, Ly, Lz, binsize, numbins, maxr, count):
@@ -63,16 +62,16 @@ class COMradialdistribution:
                                  numbins, maxr)
         g += g1
         count += 1
-        return (count)
+        return count
 
     def radialnormalization(self, numbins, binsize, Lx, Ly, Lz, nummol1,
                             nummol2, count, g, firststep):
         # normalizes g to box density
         radiuslist = (np.arange(numbins) + 1) * binsize
         g *= Lx * Ly * Lz / nummol1 / nummol2 / 4 / np.pi / (
-                                                            radiuslist) ** 2 / binsize / (
-             count - firststep)
-        return (radiuslist)
+                                                                radiuslist) ** 2 / binsize / (
+                 count - firststep)
+        return radiuslist
 
     def append_dict(self, radiuslist, g, output, mol1, mol2, moltypel):
         output['RDF']['{0}-{1}'.format(moltypel[mol1], moltypel[mol2])] = g

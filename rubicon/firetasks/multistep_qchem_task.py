@@ -1,3 +1,8 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 import copy
 import datetime
 import json
@@ -9,6 +14,7 @@ import sys
 from fireworks.core.firework import FireTaskBase, FWAction, Workflow
 from fireworks.utilities.fw_serializers import FWSerializable
 from pymongo import MongoClient
+from six.moves import zip
 
 from pymatgen import Molecule
 from pymatgen.analysis.molecule_structure_comparator import \

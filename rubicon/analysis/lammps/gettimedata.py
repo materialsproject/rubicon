@@ -1,19 +1,22 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Mar 13 10:41:46 2015
+# coding: utf-8
 
-@author: mhumbert
-"""
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
+from six.moves import range
+
+__author__ = "mhumbert"
 
 
 class gettimedata:
-    '''
-            Uses a lammps trajectory file and log file to determine the 
+    """
+            Uses a lammps trajectory file and log file to determine the
             timestep size and the trajectory print frequency
-            
-    '''
+
+    """
 
     def getdt(self, logfilename):
+        dt = None
         logfile = open(logfilename)
         foundtimestep = False
         while foundtimestep == False:
@@ -24,7 +27,6 @@ class gettimedata:
                     dt = float(inline[1])
                     foundtimestep = True
         logfile.close()
-
         return dt
 
     def getjump(self, trjfilename):

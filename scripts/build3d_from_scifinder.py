@@ -1,3 +1,8 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 __author__ = 'Xiaohui Qu'
 __copyright__ = 'Copyright 2013, The Materials Project'
 __version__ = '0.1'
@@ -10,7 +15,11 @@ import json
 import os
 import re
 
-import openbabel as ob
+try:
+    import openbabel as ob
+except ImportError:
+    ob = None
+    print("Install openbabel")
 
 from pymatgen.io.babel import BabelMolAdaptor
 from pymatgen.matproj.snl import StructureNL
@@ -47,20 +56,20 @@ if __name__ == '__main__':
     for filename in filenames:
         dirname = filename[:-4]
         if os.path.exists(dirname):
-            print "directory " + dirname + " already exists"
-            print "please delete it before use this script"
+            print("directory " + dirname + " already exists")
+            print("please delete it before use this script")
             exit(0)
     for filename in filenames:
         dirname = filename[:-4]
         os.mkdir(dirname)
-        print "reading", filename
+        print("reading", filename)
         text = None
         with open(filename) as f:
             text = f.read()
         mol_tokens = str_to_obmols(text)
         for (i, (mol, cas)) in enumerate(mol_tokens):
-            print "processing molecule", i + 1, cas, "of", len(
-                mol_tokens), "molecules"
+            print("processing molecule", i + 1, cas, "of", len(
+                mol_tokens), "molecules")
             try:
                 build3d(mol)
             except:
@@ -72,4 +81,4 @@ if __name__ == '__main__':
         for snl in snl_texts:
             with open(dirname + "/" + snl.remarks[0] + ".snl", 'w') as f:
                 json.dump(snl.as_dict(), f, indent=4)
-    print "Done"
+    print("Done")

@@ -1,3 +1,8 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 import copy
 import itertools
 import math
@@ -6,8 +11,9 @@ from random import Random
 from time import time
 
 import inspyred
-
 import numpy as np
+from six.moves import range
+from six.moves import zip
 
 try:
     import openbabel as ob
@@ -27,7 +33,7 @@ from rubicon.utils.ion_arranger.semi_emprical_qm_energy_evaluator import \
     SemiEmpricalQuatumMechanicalEnergyEvaluator
 
 
-class IonPlacer():
+class IonPlacer:
     def __init__(self, molecule, fragments, nums_fragments, energy_evaluator,
                  prng="kiss", random_seed=None, taboo_tolerance_ang=1.0,
                  taboo_tolerance_particle_ratio=0.5,
@@ -42,7 +48,7 @@ class IonPlacer():
             raise Exception("Random number generator is not supported")
         self.seed = random_seed if random_seed else int(time())
         self.prng.seed(self.seed)
-        print "Random Seed:", self.seed
+        print("Random Seed:", self.seed)
         self.final_pop = None
         self.best = None
         self.ea = inspyred.swarm.PSO(self.prng)
@@ -89,12 +95,11 @@ class IonPlacer():
                          args):
         current_fitness = [p.fitness for p in population]
         short_current_fitness = [round(x, 2) for x in current_fitness]
-        print "BEST FITNESS", min(short_current_fitness)
-        print "CURRENT FITNESS", short_current_fitness
+        print("BEST FITNESS", min(short_current_fitness))
+        print("CURRENT FITNESS", short_current_fitness)
         archieved_fitness = [p.fitness for p in self.ea.archive]
         short_archieved_fitness = [round(x, 2) for x in archieved_fitness]
-        print "ARCHIEVED FITNESS", short_archieved_fitness
-        print
+        print("ARCHIEVED FITNESS", short_archieved_fitness)
 
     @classmethod
     def get_max_radius(cls, mol_coords, fragments, nums_fragments):
@@ -126,7 +131,7 @@ class IonPlacer():
             frag_volume = (4.0 / 3.0) * math.pi * (safe_radius ** 3)
             total_volume += frag_volume * num_frag
         equivalent_radius = (total_volume * (3.0 / 4.0) / math.pi) ** (
-        1.0 / 3.0)
+            1.0 / 3.0)
         return equivalent_radius
 
     @classmethod
@@ -325,7 +330,7 @@ class IonPlacer():
             self.reevaluate_fitness = False
             fitness = self.evaluate_conformers(candidates, args)
         else:
-            coords_fitness = zip(all_coords, fitness)
+            coords_fitness = list(zip(all_coords, fitness))
             if self.is_conformer_located(coords_fitness):
                 self.taboo_current_solution(coords_fitness)
         mopac_energy_threshold = -3.0
@@ -335,7 +340,7 @@ class IonPlacer():
         if self.conformer_staring_generation is not None and \
                         self.ea.num_evaluations > self.conformer_staring_generation + \
                         self.max_generations_each_conformer:
-            coords_fitness = zip(all_coords, fitness)
+            coords_fitness = list(zip(all_coords, fitness))
             self.taboo_current_solution(coords_fitness)
         if self.always_write_best:
             best_fitness, best_index = self._get_best_index_and_fitness(
@@ -515,8 +520,8 @@ def main():
     placer.place(max_evaluations=options.iterations,
                  pop_size=options.size,
                  neighborhood_size=options.num_neighbours)
-    print 'It took {:.1f} seconds to place the salt'.format(placer
-                                                            .playing_time)
+    print('It took {:.1f} seconds to place the salt'.format(placer
+                                                            .playing_time))
 
 
 if __name__ == '__main__':

@@ -1,4 +1,10 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 __author__ = 'xiaohuiqu'
+
 import rubicon.scripts.moo2xyz as moo2xyz
 
 if __name__ == '__main__':

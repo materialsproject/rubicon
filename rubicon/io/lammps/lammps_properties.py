@@ -1,6 +1,9 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
 
 __author__ = 'navnidhirajput'
-
 
 import shlex
 
@@ -11,7 +14,7 @@ from pymongo import MongoClient
 from rubicon.io.lammps.lammpsio import LammpsLog
 
 
-class LammpsProperties():
+class LammpsProperties:
     """
     Store lammps properties in output dictionary
 
@@ -23,6 +26,7 @@ class LammpsProperties():
     _fw_name = "Lammps Properties Writer"
 
     def _insert_doc(self, fw_spec=None):
+        coll = None
         db_dir = shlex.os.environ['DB_LOC']
         db_path = shlex.os.path.join(db_dir, 'tasks_db.json')
         with open(db_path) as f:

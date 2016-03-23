@@ -1,31 +1,31 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Mar 10 10:07:34 2015
+# coding: utf-8
 
-@author: mhumbert
-"""
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
 
 import numpy as np
-
 from rubicon.analysis.lammps._md_analyzer import calccom as calccomf
+from six.moves import range
+
+__author__ = "mhumbert"
 
 
 class calcCOM:
-    '''
+    """
             Calculates the center of mass for all molecules in a system from
             a lammps trajectory file and a lammps data file
-            
-            Requires the following comments in the lammps data file starting 
+
+            Requires the following comments in the lammps data file starting
             at the third line
-            
+
             # "number" "molecule" molecules
-            
+
             where "number" is the number of that molecule type and
             "molecule" is a name for that molecule
-            
+
             Do not include blank lines in between the molecule types
-            
-    '''
+
+    """
 
     def calcCOM(self, trjfilename, datfilename):
         (num_lines, n, num_timesteps, count, line) = self.getnum(trjfilename)
@@ -52,7 +52,7 @@ class calcCOM:
                                                          Ly, Lz, Lx2, Ly2, Lz2,
                                                          n, count, nummol)
             trjfile.close()
-        return (comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2)
+        return comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2
 
     def getnum(self, trjfilename):
         # uses the trjectory file and returns the number of lines and the number of atoms
@@ -70,7 +70,7 @@ class calcCOM:
         for j in range(1, len(trjfilename)):
             line[j] += n + 9
         count = 0
-        return (num_lines, n, num_timesteps, count, line)
+        return num_lines, n, num_timesteps, count, line
 
     def getdimensions(self, trjfilename):
         # uses trjectory file to get the length of box sides
@@ -90,7 +90,7 @@ class calcCOM:
         Lz = float(zbounds[1]) - float(zbounds[0])
         Lz2 = Lz / 2
         trjfile.close()
-        return (Lx, Lx2, Ly, Ly2, Lz, Lz2)
+        return Lx, Lx2, Ly, Ly2, Lz, Lz2
 
     def createarrays(self, n):
         # creates numpy arrays for data reading
@@ -99,7 +99,7 @@ class calcCOM:
         z = np.zeros(n)
         mol = np.zeros(n)
         atype = np.zeros(n)
-        return (x, y, z, mol, atype)
+        return x, y, z, mol, atype
 
     def getcolumns(self, trjfilename):
         # defines the columns each data type is in in the trjectory file
@@ -115,7 +115,7 @@ class calcCOM:
         zcol = inline.index('z')
         molcol = inline.index('mol')
         typecol = inline.index('type')
-        return (xcol, ycol, zcol, molcol, typecol)
+        return xcol, ycol, zcol, molcol, typecol
 
     def getmass(self, datfilename):
         # returns a dictionary of the mass of each atom type
@@ -169,7 +169,7 @@ class calcCOM:
             atype[a] = inline[typecol]
 
         line[i] += n + 9
-        return (x, y, z, mol, atype, line)
+        return x, y, z, mol, atype, line
 
     def comprep(self, mol, n, atype, atommass, num_timesteps):
         # creates arrays to prepare for center of mass calculations
@@ -182,7 +182,7 @@ class calcCOM:
         for atom in range(0, n):
             molmass[mol[atom] - 1] += atommass[atype[atom]]
 
-        return (nummol, comx, comy, comz, molmass)
+        return nummol, comx, comy, comz, molmass
 
     def calccom(self, comx, comy, comz, x, y, z, mol, atype, atommass, molmass,
                 Lx, Ly, Lz, Lx2, Ly2, Lz2, n, count, nummol):
@@ -192,11 +192,11 @@ class calcCOM:
             amass[i] = atommass[atype[i]]
 
         (comxt, comyt, comzt) = calccomf(n, nummol, x, y, z, mol,
-                                                 amass, molmass, Lx, Ly, Lz,
-                                                 Lx2, Ly2, Lz2)
+                                         amass, molmass, Lx, Ly, Lz,
+                                         Lx2, Ly2, Lz2)
         comx[count] += comxt
         comy[count] += comyt
         comz[count] += comzt
         count += 1
 
-        return (comx, comy, comz, count)
+        return comx, comy, comz, count

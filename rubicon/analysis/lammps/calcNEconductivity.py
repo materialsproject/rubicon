@@ -1,9 +1,11 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu May  7 15:06:47 2015
+# coding: utf-8
 
-@author: mhumbert
-"""
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
+from six.moves import range
+
+__author__ = "mhumbert"
 
 
 class calcNEconductivity:

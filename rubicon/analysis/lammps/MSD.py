@@ -1,25 +1,26 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Mar 12 14:08:27 2015
+# coding: utf-8
 
-@author: mhumbert
-"""
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
 
 import copy
 
 import numpy as np
 from scipy import stats
+from six.moves import range
+
+__author__ = "mhumbert"
 
 
 class MSD:
-    '''
-            Calculates the MSD and diffusivity for all molecules in the system 
+    """
+            Calculates the MSD and diffusivity for all molecules in the system
             given a list of center of mass coordinates.
-           
+
            Outputs are stored in a dictionary called output to later be stored
            in JSON format
-           
-    '''
+
+    """
 
     def runMSD(self, comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2, moltype,
                moltypel, dt, tsjump, output):
@@ -64,13 +65,13 @@ class MSD:
                 elif (comz[i][j] - comz[i - 1][j]) < (-Lz2):
                     while (comz[i][j] - comz[i - 1][j]) < (-Lz2):
                         comz[i][j] += Lz
-        return (comx, comy, comz)
+        return comx, comy, comz
 
     def gettimesteps(self, num_timesteps, moltypel):
         MSDt = int(np.floor(num_timesteps / 2))
         MSD = np.zeros((len(moltypel), MSDt))
         diffusivity = []
-        return (MSDt, MSD, diffusivity)
+        return MSDt, MSD, diffusivity
 
     def setmolarray(self, moltype, moltypel):
         molcheck = np.zeros((len(moltypel), len(moltype)))
@@ -79,7 +80,7 @@ class MSD:
         nummol = np.zeros(len(moltypel))
         for i in range(0, len(nummol)):
             nummol[i] = np.sum(molcheck[i])
-        return (molcheck, nummol)
+        return molcheck, nummol
 
     def calcr2(self, comx, comy, comz, i, j):
         r2 = (comx[j] - comx[i]) ** 2 + (comy[j] - comy[i]) ** 2 + (comz[j] -
@@ -106,7 +107,7 @@ class MSD:
     def takelnMSD(self, MSD, Time):
         lnMSD = np.log(MSD[:, 1:])
         lntime = np.log(Time[1:])
-        return (lnMSD, lntime)
+        return lnMSD, lntime
 
     def findlinearregion(self, lnMSD, lntime, dt, molecule):
         timestepskip = int(500 / dt)
@@ -123,7 +124,7 @@ class MSD:
                 t1 = maxtime - 1 - (numskip - 1) * timestepskip
                 t2 = maxtime - 1 - numskip * timestepskip
                 slope = (lnMSD[molecule][t1] - lnMSD[molecule][t2]) / (
-                lntime[t1] - lntime[t2])
+                    lntime[t1] - lntime[t2])
                 if abs(slope - 1.) < tolerance:
                     numskip += 1
                 else:

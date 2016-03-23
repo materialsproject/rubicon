@@ -1,17 +1,19 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri May  8 10:17:55 2015
+# coding: utf-8
 
-@author: mhumbert
-"""
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 import copy
 
 import numpy as np
 from rubicon.analysis.lammps._md_analyzer import calccom as calccomf
 from scipy.integrate import cumtrapz
 from scipy.optimize import curve_fit
+from six.moves import range
 
 from rubicon.analysis.lammps.gettimedata import gettimedata
+
+__author__ = "mhumbert"
 
 
 class calcCond:
@@ -95,7 +97,7 @@ class calcCond:
         for j in range(1, len(trjfilename)):
             line[j] += n + 9
         count = 0
-        return (num_lines, n, num_timesteps, count, line)
+        return num_lines, n, num_timesteps, count, line
 
     def createarrays(self, n, num_timesteps):
         vx = np.zeros(n)
@@ -105,7 +107,7 @@ class calcCond:
         atype = np.zeros(n)
         j = np.zeros((num_timesteps, 3))
         J = np.zeros(num_timesteps / 2)
-        return (vx, vy, vz, mol, atype, j, J)
+        return vx, vy, vz, mol, atype, j, J
 
     def getcolumns(self, trjfilename):
         # defines the columns each data type is in in the trjectory file
@@ -123,7 +125,7 @@ class calcCond:
         molcol = inline.index('mol')
         typecol = inline.index('type')
         trjfile.close()
-        return (vxcol, vycol, vzcol, idcol, molcol, typecol)
+        return vxcol, vycol, vzcol, idcol, molcol, typecol
 
     def readdata(self, trjfile, n, line, vx, vy, vz, vxcol, vycol, vzcol,
                  idcol, i, mol, molcol, atype, typecol):
@@ -140,14 +142,14 @@ class calcCond:
             atype[int(inline[idcol]) - 1] = int(inline[typecol])
 
         line[i] += n + 9
-        return (vx, vy, vz, line, mol, atype)
+        return vx, vy, vz, line, mol, atype
 
     def calcj(self, molcharges, comvx, comvy, comvz, j, count):
         j[count][0] = np.dot(comvx, molcharges)
         j[count][1] = np.dot(comvy, molcharges)
         j[count][2] = np.dot(comvz, molcharges)
         count += 1
-        return (j, count)
+        return j, count
 
     def clacJ(self, j, J):
         for i in range(0, len(j) / 2):
@@ -183,7 +185,7 @@ class calcCond:
         molmass = np.zeros(nummol)
         for atom in range(0, n):
             molmass[mol[atom] - 1] += atommass[atype[atom]]
-        return (comvx, comvy, comvz, nummol, molmass)
+        return comvx, comvy, comvz, nummol, molmass
 
     def getmass(self, datfilename):
         # returns a dictionary of the mass of each atom type
@@ -232,4 +234,4 @@ class calcCond:
         comvy = copy.deepcopy(comvyt)
         comvz = copy.deepcopy(comvzt)
 
-        return (comvx, comvy, comvz)
+        return comvx, comvy, comvz

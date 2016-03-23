@@ -1,3 +1,8 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 import json
 import os
 
@@ -206,4 +211,4 @@ if __name__ == '__main__':
     # add_field_reduced_cell_formula_abc(db)
     missions = collection.find().distinct("user_tags.mission")
     for mi in missions:
-        print mi
+        print(mi)

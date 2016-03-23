@@ -1,9 +1,11 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu May  7 14:25:47 2015
+# coding: utf-8
 
-@author: mhumbert
-"""
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
+__author__ = "mhumbert"
+
+
 if __name__ == '__main__':
     from rubicon.analysis.lammps.getatomcharges import getatomcharges
     from rubicon.analysis.lammps.getmoldata import getmoldata
@@ -27,4 +29,4 @@ if __name__ == '__main__':
     (molcharges, atomcharges, n) = g.getmolcharges(datfilename, n)
     output = cc.calcConductivity(molcharges, trjfilename, logfilename,
                                  datfilename, T, output)
-    print(output['Conductivity']['Green_Kubo'])
+    print((output['Conductivity']['Green_Kubo']))

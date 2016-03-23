@@ -1,10 +1,14 @@
 # coding: utf-8
 
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 import os
 import tempfile
 from subprocess import Popen, PIPE
 
 import numpy as np
+import six
 
 try:
     import pybel as pb
@@ -30,10 +34,9 @@ class PackmolRunner(object):
               "https://github.com/leandromartinez98/packmol "
               "and follow the instructions in the README to compile. "
               "Don't forget to add the packmol binary to your path")
-
     def __init__(self, mols, param_list, input_file="pack.inp",
                  tolerance=2.0, filetype="xyz",
-                 control_params={"maxit":20, "nloop":600},
+                 control_params={"maxit": 20, "nloop": 600},
                  boxit=True, output_file="packed.xyz"):
         """
         Create PackMolRunner
@@ -96,12 +99,13 @@ class PackmolRunner(object):
         """
         volume = 0.0
         for idx, mol in enumerate(self.mols):
-            lx, ly, lz = np.max(mol.cart_coords, 0) - np.min(mol.cart_coords,0)
+            lx, ly, lz = np.max(mol.cart_coords, 0) - np.min(mol.cart_coords,
+                                                             0)
             lx += 2.0
             ly += 2.0
             lz += 2.0
             length = max(lx, ly, lz)
-            volume += length ** (3.0) * float(self.param_list[idx]['number'])
+            volume += length ** 3.0 * float(self.param_list[idx]['number'])
         length = volume ** (1.0 / 3.0)
         for idx, mol in enumerate(self.mols):
             self.param_list[idx]['inside box'] = '0.0 0.0 0.0 {} {} {}'.format(
@@ -117,20 +121,22 @@ class PackmolRunner(object):
         scratch = tempfile.gettempdir()
         with ScratchDir(scratch, copy_to_current_on_exit=True) as d:
             with open(os.path.join(d, self.input_file), 'w') as inp:
-                for k, v in self.control_params.iteritems():
+                for k, v in six.iteritems(self.control_params):
                     inp.write('{} {}\n'.format(k, self._format_param_val(v)))
                 for idx, mol in enumerate(self.mols):
                     a = BabelMolAdaptor(mol)
                     pm = pb.Molecule(a.openbabel_mol)
                     pm.write(self.control_params["filetype"],
                              filename=os.path.join(d, '{}.{}'.format(idx,
-                                                                     self.control_params["filetype"])),
+                                                                     self.control_params[
+                                                                         "filetype"])),
                              overwrite=True)
                     inp.write('\n')
                     inp.write(
                         'structure {}.{}\n'.format(os.path.join(d, str(idx)),
-                                                   self.control_params["filetype"]))
-                    for k, v in self.param_list[idx].iteritems():
+                                                   self.control_params[
+                                                       "filetype"]))
+                    for k, v in six.iteritems(self.param_list[idx]):
                         inp.write(
                             '  {} {}\n'.format(k, self._format_param_val(v)))
                     inp.write('end structure\n')
@@ -141,11 +147,12 @@ class PackmolRunner(object):
             output_file = os.path.join(d, self.control_params["output"])
             if os.path.isfile(output_file):
                 packed_mol = BabelMolAdaptor.from_file(output_file)
-                print "packed molecule written to {}".format(self.control_params["output"])
+                print("packed molecule written to {}".format(
+                    self.control_params["output"]))
                 return packed_mol.pymatgen_mol
             else:
-                print "Packmol execution failed"
-                print stdout, stderr
+                print("Packmol execution failed")
+                print(stdout, stderr)
                 return None
 
 
@@ -161,15 +168,16 @@ if __name__ == '__main__':
                       [1.98570, -0.13650, -0.00000]]
     ethanol = Molecule(["C", "C", "O", "H", "H", "H", "H", "H", "H"],
                        ethanol_coords)
-    water_coords = [[9.626,6.787,12.673],
+    water_coords = [[9.626, 6.787, 12.673],
                     [9.626, 8.420, 12.673],
                     [10.203, 7.604, 12.673]]
     water = Molecule(["H", "H", "O"], water_coords)
     pmr = PackmolRunner([ethanol, water],
-                        [{"number": 1, "fixed":[0,0,0,0,0,0], "centerofmass":""},
-                         {"number": 15, "inside sphere": [0, 0, 0, 5]} ],
+                        [{"number": 1, "fixed": [0, 0, 0, 0, 0, 0],
+                          "centerofmass": ""},
+                         {"number": 15, "inside sphere": [0, 0, 0, 5]}],
                         input_file="packmol_input.inp", tolerance=2.0,
                         filetype="xyz",
-                        control_params = {"nloop": 1000},
+                        control_params={"nloop": 1000},
                         boxit=False, output_file="cocktail.xyz")
     s = pmr.run()
