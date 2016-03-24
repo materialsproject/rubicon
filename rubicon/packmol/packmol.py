@@ -1,8 +1,9 @@
 # coding: utf-8
 
-from __future__ import division, print_function, unicode_literals, \
-    absolute_import
+from __future__ import division, print_function, absolute_import, \
+    unicode_literals
 
+from io import open
 import os
 import tempfile
 from subprocess import Popen, PIPE
@@ -28,7 +29,7 @@ class PackmolRunner(object):
     Create MD simulation box using packmol.
     """
 
-    @requires(which('packmol'),
+    @requires(which(b'packmol'),
               "PackmolRunner requires the executable 'packmol' to be in "
               "the path. Please download packmol from "
               "https://github.com/leandromartinez98/packmol "
@@ -120,7 +121,8 @@ class PackmolRunner(object):
         """
         scratch = tempfile.gettempdir()
         with ScratchDir(scratch, copy_to_current_on_exit=True) as d:
-            with open(os.path.join(d, self.input_file), 'w') as inp:
+            with open(os.path.join(d, self.input_file), 'wt',
+                      encoding="utf-8") as inp:
                 for k, v in six.iteritems(self.control_params):
                     inp.write('{} {}\n'.format(k, self._format_param_val(v)))
                 for idx, mol in enumerate(self.mols):
@@ -129,11 +131,12 @@ class PackmolRunner(object):
                     pm.write(self.control_params["filetype"],
                              filename=os.path.join(d, '{}.{}'.format(idx,
                                                                      self.control_params[
-                                                                         "filetype"])),
+                                                                         "filetype"])).encode(
+                                 "ascii"),
                              overwrite=True)
-                    inp.write('\n')
+                    inp.write("\n")
                     inp.write(
-                        'structure {}.{}\n'.format(os.path.join(d, str(idx)),
+                        "structure {}.{}\n".format(os.path.join(d, str(idx)),
                                                    self.control_params[
                                                        "filetype"]))
                     for k, v in six.iteritems(self.param_list[idx]):
