@@ -1,4 +1,5 @@
 *.py[cod]
+*.bak
 
 # doc builds
 docs/_build/*
@@ -7,6 +8,7 @@ docs/_build/*/*/*
 
 # C extensions
 *.so
+*.so.*
 
 # Packages
 *.egg

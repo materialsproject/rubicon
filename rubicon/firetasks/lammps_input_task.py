@@ -1,3 +1,8 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 import os
 import shlex
 import subprocess
@@ -9,10 +14,10 @@ try:
     from pymatgen.packmol.packmol import PackmolRunner
 except:
     pass
-from rubicon.gff.boxmol import BoxMol
-from rubicon.gff.lammps_data import LmpInput
-from rubicon.gff.antechamberio import AntechamberRunner
-from rubicon.gff.lamms_control_nvt import DictLammpsInputSet
+from rubicon.io.lammps.boxmol import BoxMol
+from rubicon.io.lammps.lammps_data import LmpInput
+from rubicon.io.lammps.antechamberio import AntechamberRunner
+from rubicon.io.lammps.lamms_control_nvt import DictLammpsInputSet
 
 __author__ = 'navnidhirajput'
 

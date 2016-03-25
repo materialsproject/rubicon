@@ -1,3 +1,8 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 from rubicon.testset.get_g3_benchmark import get_g3_bench_collection
 
 __author__ = 'Xiaohui Qu'
@@ -19,7 +24,7 @@ def get_table(url, title, keyname, result):
     global soup, row, tds
     soup = BeautifulSoup(urllib2.urlopen(url).read())
     if soup.title.string != title:
-        print "Warning! webpage", url, "changed"
+        print("Warning! webpage", url, "changed")
     for row in soup.table.findAll('tr')[1:]:
         tds = row.findAll('td')
         formula = str(tds[0].p.text).strip()

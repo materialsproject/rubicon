@@ -1,3 +1,8 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 import glob
 import json
 import os
@@ -52,14 +57,15 @@ def main():
             continue
         with zopen(zpath(fw_json_filename)) as f:
             fw_dict = json.load(f)
-        print "{percent:4.2%} completed, processing directory {d:s}, molecule name {molname:s}," \
+        print("{percent:4.2%} completed, processing directory {d:s}, "
+              "molecule name {molname:s}," \
               " mission {mission:s}".format(percent=i / float(num_dirs), d=sd,
                                             molname=
                                             fw_dict['spec']['user_tags'][
                                                 'molname'],
                                             mission=
                                             fw_dict['spec']['user_tags'][
-                                                'mission'])
+                                                'mission']))
 
         molname = fw_dict['spec']['user_tags']['molname']
         egsnl_tasks = [AddEGSNLTask()]

@@ -1,19 +1,14 @@
-#!/usr/bin/env python
+# coding: utf-8
 
-"""
-TODO: Modify module doc.
-"""
-
-from __future__ import division
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
 
 import shlex
 import subprocess
 
-import fireworks
 from monty.io import zopen
 from monty.json import jsanitize
 from monty.os.path import zpath
-from pkg_resources import parse_version
 
 from pymatgen import Molecule
 from pymatgen.analysis.molecule_structure_comparator import \

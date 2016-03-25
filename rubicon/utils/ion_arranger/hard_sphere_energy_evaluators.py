@@ -1,12 +1,24 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 import copy
 import itertools
 import math
 
 import numpy as np
-import openbabel as ob
+from six.moves import range
+from six.moves import zip
+
+try:
+    import openbabel as ob
+except ImportError:
+    ob = None
 
 from pymatgen.analysis.molecule_structure_comparator import CovalentRadius
 from pymatgen.io.babel import BabelMolAdaptor
+
 from rubicon.utils.ion_arranger.energy_evaluator import EnergyEvaluator
 
 __author__ = 'xiaohuiqu'
@@ -206,7 +218,7 @@ class OrderredLayoutEnergyEvaluator(EnergyEvaluator):
         nfrags = len(frag_coords)
         center_with_original_rank = []
         for i, frag in enumerate(frag_coords):
-            xs, ys, zs = zip(*frag)
+            xs, ys, zs = list(zip(*frag))
             center = tuple([sum(xs) / float(natoms), sum(ys) / float(natoms),
                             sum(zs) / float(natoms)])
             center_with_original_rank.append(tuple([center, i + 1]))
@@ -234,7 +246,7 @@ class OrderredLayoutEnergyEvaluator(EnergyEvaluator):
                                                   key=lambda x: x[0][0])
         original_ranks = [i for center, i in sorted_center_with_original_rank]
         cur_orig_rank = [tuple([i + 1, j]) for i, j in
-                         zip(range(nfrags), original_ranks)]
+                         zip(list(range(nfrags)), original_ranks)]
         cur_orig_rank.sort(key=lambda x: x[1])
         ranks = [i for i, j in cur_orig_rank]
         return ranks
@@ -244,7 +256,7 @@ class OrderredLayoutEnergyEvaluator(EnergyEvaluator):
         n = len(rank_y)
         if n == 0 or n == 1:
             return 1.0
-        rank_x = range(1, n + 1)
+        rank_x = list(range(1, n + 1))
         d_2 = [(rx - ry) ** 2 for rx, ry in zip(rank_x, rank_y)]
         spearsman = 1.0 - (6.0 * sum(d_2)) / (n * (n ** 2 - 1))
         return spearsman
@@ -282,7 +294,8 @@ class ContactDetector(object):
 
     def _get_contact_matrix(self, fragments_coords):
         fragments = [(self.mol_coords, self.mol_radius)]
-        fragments.extend(zip(fragments_coords, self.fragments_atom_radius))
+        fragments.extend(
+            list(zip(fragments_coords, self.fragments_atom_radius)))
         num_frag = len(fragments)
         fragments = [(c, r, i) for i, (c, r) in enumerate(fragments)]
         contact_matrix = np.zeros((num_frag, num_frag), dtype=int)
@@ -290,8 +303,8 @@ class ContactDetector(object):
         for p in frag_pair:
             ((c1s, r1s, i1), (c2s, r2s, i2)) = p
             contact = 0
-            for (c1, r1), (c2, r2) in itertools.product(zip(c1s, r1s),
-                                                        zip(c2s, r2s)):
+            for (c1, r1), (c2, r2) in itertools.product(list(zip(c1s, r1s)),
+                                                        list(zip(c2s, r2s))):
                 distance = math.sqrt(sum([(x1 - x2) ** 2 for x1, x2
                                           in zip(c1, c2)]))
                 if distance <= r1 + r2 + self.cap:
@@ -337,7 +350,8 @@ class ContactGapRMSDEnergyEvaluator(EnergyEvaluator):
 
     def _get_mol_gaps(self, fragments_coords):
         fragments = [(self.mol_coords, self.mol_radius)]
-        fragments.extend(zip(fragments_coords, self.fragments_atom_radius))
+        fragments.extend(
+            list(zip(fragments_coords, self.fragments_atom_radius)))
         fragments = [(c, r, i) for i, (c, r) in enumerate(fragments)]
         mol_gaps = []
         for c1s, r1s, i1 in fragments:
@@ -347,8 +361,9 @@ class ContactGapRMSDEnergyEvaluator(EnergyEvaluator):
                 if i1 == i2:
                     continue
                 contact = False
-                for (c1, r1), (c2, r2) in itertools.product(zip(c1s, r1s),
-                                                            zip(c2s, r2s)):
+                for (c1, r1), (c2, r2) in itertools.product(
+                        list(zip(c1s, r1s)),
+                        list(zip(c2s, r2s))):
                     distance = math.sqrt(sum([(x1 - x2) ** 2 for x1, x2
                                               in zip(c1, c2)]))
                     if distance <= r1 + r2 + self.cap:

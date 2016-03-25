@@ -1,7 +1,12 @@
-from __future__ import unicode_literals
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
 
 import argparse
 import copy
+
+from six.moves import zip
 
 from pymatgen.io.qchem import QcInput
 
@@ -16,17 +21,17 @@ def assign_basis_set_by_range(qcinp, basis_def_file):
                               for t in basis_def_token_strs]
     for i, t in enumerate(basis_def_token_values):
         if t[1] < t[0]:
-            print "The current line is:"
-            print basis_def_texts[i]
+            print("The current line is:")
+            print(basis_def_texts[i])
             raise ValueError(
                 "The atom order specifications must be in ascending order inside a line")
         if i > 0:
             prev_t = basis_def_token_values[i - 1]
             if t[0] - prev_t[1] != 1:
-                print "The previous line is:"
-                print basis_def_texts[i - 1]
-                print "The current line is:"
-                print basis_def_texts[i]
+                print("The previous line is:")
+                print(basis_def_texts[i - 1])
+                print("The current line is:")
+                print(basis_def_texts[i])
                 raise ValueError(
                     "The index of first atom must be exactly 1 larger than the previous line")
     mol = qcinp.jobs[0].mol
@@ -38,7 +43,7 @@ def assign_basis_set_by_range(qcinp, basis_def_file):
     for t in basis_def_token_values:
         natoms = t[1] - t[0] + 1
         basis.extend([t[2]] * natoms)
-    elements_and_basis = zip(elements, basis)
+    elements_and_basis = list(zip(elements, basis))
     qcinp_with_basis = copy.deepcopy(qcinp)
     for j in qcinp_with_basis.jobs:
         j.set_basis_set(elements_and_basis)

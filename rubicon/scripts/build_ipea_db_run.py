@@ -1,3 +1,8 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 import json
 import os
 
@@ -42,7 +47,7 @@ def build_ipea_db():
         ip_sol = None
         ea_vaccum = None
         ea_sol = None
-        print j['submission_id']
+        print(j['submission_id'])
         if 'singlet neutral single point energy' in j['task_dict']:
             neutral_tid = j['task_dict'][
                 'singlet neutral single point energy']
@@ -76,11 +81,11 @@ def build_ipea_db():
                             "calculations.scf_pcm.energies": True})[0]
             if cation_energy_dict["state"] == "successful":
                 cation_vaccum_energy = \
-                cation_energy_dict['calculations']['scf'][
-                    'energies'][-1][-1]
+                    cation_energy_dict['calculations']['scf'][
+                        'energies'][-1][-1]
                 cation_sol_energy = \
-                cation_energy_dict['calculations']['scf_pcm'][
-                    'energies'][-1][-1]
+                    cation_energy_dict['calculations']['scf_pcm'][
+                        'energies'][-1][-1]
             else:
                 cation_tid = None
 
@@ -95,8 +100,8 @@ def build_ipea_db():
                 anion_vaccum_energy = anion_energy_dict['calculations']['scf'][
                     'energies'][-1][-1]
                 anion_sol_energy = \
-                anion_energy_dict['calculations']['scf_pcm'][
-                    'energies'][-1][-1]
+                    anion_energy_dict['calculations']['scf_pcm'][
+                        'energies'][-1][-1]
             else:
                 anion_tid = None
         if neutral_tid:

@@ -1,7 +1,13 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 """
 Build molecules collection
 Adapted from Dan Gunter and Wei Chen's vasp materials builder
 """
+
 import copy
 import datetime
 import logging
@@ -10,6 +16,8 @@ import sys
 
 from rubicon.builders import eg_shared
 from rubicon.submission.submission_mongo_eg import SubmissionMongoAdapterEG
+from six.moves import map
+from six.moves import zip
 
 __author__ = "Xiaohui Qu"
 __copyright__ = "Copyright 2012-2013, The Electrolyte Genome Project"
@@ -39,11 +47,11 @@ class TaskKeys:
         'calculations',
         'formula', 'task_id_deprecated', 'svg', 'xyz')
     reactions_fields = (
-    'reaction_id', 'num_reactants', 'num_products', 'reactant_nicknames',
-    'product_nicknames', 'reactant_inchis', 'product_inchis',
-    'reactant_submission_ids', 'product_submission_ids', 'all_inchis',
-    'reactant_spin_multiplicities', 'product_spin_multiplicities',
-    'reactant_charges', 'product_charges', "submitter_email")
+        'reaction_id', 'num_reactants', 'num_products', 'reactant_nicknames',
+        'product_nicknames', 'reactant_inchis', 'product_inchis',
+        'reactant_submission_ids', 'product_submission_ids', 'all_inchis',
+        'reactant_spin_multiplicities', 'product_spin_multiplicities',
+        'reactant_charges', 'product_charges', "submitter_email")
 
 
 class ReactionsBuilder(eg_shared.ParallelBuilder):
@@ -76,7 +84,7 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
         _log.info("Getting Reaction Indices")
         reactions = list(self.source_reactions.find(filter={},
                                                     projection=TaskKeys.reactions_fields))
-        map(self.add_item, reactions)
+        list(map(self.add_item, reactions))
         _log.info("Beginning analysis")
         states = self.run_parallel()
         return self.combine_status(states)
@@ -161,8 +169,9 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
                 return None
             product_sol_docs.append(sol_doc)
 
-        return [zip(reactant_freq_docs, reactant_sol_docs, reactant_sp_docs),
-                zip(product_freq_docs, product_sol_docs, product_sp_docs)]
+        return [
+            list(zip(reactant_freq_docs, reactant_sol_docs, reactant_sp_docs)),
+            list(zip(product_freq_docs, product_sol_docs, product_sp_docs))]
 
     def build_reaction_data(self, docs, reaction, solution_phase=True):
         data = dict()
@@ -209,8 +218,8 @@ class ReactionsBuilder(eg_shared.ParallelBuilder):
                     scf_all.remove('scf')
                     scf_name = scf_all.pop()
                     specie["solvation_energy"] = \
-                    sol_doc[scf_name]["energies"][-1][-1] - \
-                    sol_doc["scf"]["energies"][-1][-1]
+                        sol_doc[scf_name]["energies"][-1][-1] - \
+                        sol_doc["scf"]["energies"][-1][-1]
                 specie["scf_energy"] = sp_cal_doc["scf"]["energies"][-1][-1]
                 for task_type, d in zip(["freq", "sol", "sp"], freq_sol_sp):
                     specie["task_id"][task_type] = d["task_id"]

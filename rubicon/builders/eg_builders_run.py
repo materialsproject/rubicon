@@ -1,14 +1,21 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 """
 Build derived collections for Electrolyte Genome.
 """
+
 import logging
 import sys
 import time
 import traceback
 
-import eg_molecules_builder as mols
-import eg_reactions_builder as reactions
+from rubicon.builders import eg_molecules_builder as mols
+from rubicon.builders.eg_reactions_builder import ReactionsBuilder
 from rubicon.builders import eg_shared
+from six.moves import map
 
 __author__ = 'Xiaohui Qu <xqu@lbl.gov>'
 __date__ = '1/1/14'
@@ -33,14 +40,14 @@ def run(colls, args):
     _log.info("create_builders.start")
     try:
         builders = [mols.MoleculesBuilder(colls, **kw),
-                    reactions.ReactionsBuilder(colls, **kw)]
-    except Exception, err:
+                    ReactionsBuilder(colls, **kw)]
+    except Exception as err:
         tb = traceback.format_exc()
         _log.error("create_builders.end.error msg={} traceback="
                    "{}".format(err, tb))
         raise
     _log.info("create_builders.end num={}".format(len(builders)))
-    map(_run_one, builders)
+    list(map(_run_one, builders))
     return 0
 
 

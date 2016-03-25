@@ -1,3 +1,8 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 import copy
 import itertools
 import math
@@ -6,13 +11,14 @@ import shutil
 
 from custodian import Custodian
 from monty.tempfile import ScratchDir
+from six.moves import zip
 
 from pymatgen.core.structure import Molecule
 from pymatgen.core.units import Energy
 from pymatgen.io.babel import BabelMolAdaptor
-from rubicon.io.mopacio.custodian.mopac_error_handlers import MopacErrorHandler
-from rubicon.io.mopacio.custodian.mopacjob import MopacJob
-from rubicon.io.mopacio.mopacio import MopOutput, MopTask
+from rubicon.io.mopac.mopacio import MopOutput, MopTask
+from rubicon.io.mopac.mopacio import MopacErrorHandler
+from rubicon.io.mopac.mopacio import MopacJob
 from rubicon.utils.ion_arranger.energy_evaluator import EnergyEvaluator
 from rubicon.utils.ion_arranger.hard_sphere_energy_evaluators import \
     HardSphereEnergyEvaluator, AtomicRadiusUtils, \

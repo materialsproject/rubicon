@@ -1,20 +1,25 @@
-import json
+# coding: utf-8
 
-__author__ = 'xiaohuiqu'
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
 
 import copy
+import json
 import logging
+import math
+import os
 import re
 import shlex
-import os
 import socket
+import sys
+
 from custodian import Custodian
 from custodian.qchem.handlers import QChemErrorHandler
 from custodian.qchem.jobs import QchemJob
-import math
+from six.moves import zip
+
 from pymatgen import Molecule
 from pymatgen.io.qchem import QcInput, QcOutput
-import sys
 
 __author__ = 'xiaohuiqu'
 

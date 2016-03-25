@@ -1,6 +1,11 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 import argparse
 
-from rubicon.io.mopacio.mopacio import MopOutput
+from rubicon.io.mopac.mopacio import MopOutput
 
 __author__ = 'xiaohuiqu'
 

@@ -1,3 +1,8 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 import json
 import logging
 import os
@@ -39,7 +44,7 @@ def transform_molecule_doc(mol1):
 
     mol2["task_id"] = mol1["vacuum_properties"]["task_id"]["neutral"]
     mol2["task_id_deprecated"] = \
-    mol1["vacuum_properties"]["task_id_deprecated"]["neutral"]
+        mol1["vacuum_properties"]["task_id_deprecated"]["neutral"]
     mol2["snlgroup_id_final"] = mol1["vacuum_properties"]["snlgroup_id_final"][
         "neutral"]
     mol2["charge"] = mol1["charge"]
@@ -76,14 +81,15 @@ def transform_molecule_doc(mol1):
             if "electrochemical_window_width" in mol1["solvated_properties"][
                 solname]:
                 mol2["electrochemical_window_width"] = \
-                mol1["solvated_properties"][
-                    solname]["electrochemical_window_width"]
+                    mol1["solvated_properties"][
+                        solname]["electrochemical_window_width"]
             if "implicit_solvent" in mol1["solvated_properties"][solname]:
                 mol2["implicit_solvent"] = \
-                mol1["solvated_properties"][solname]["implicit_solvent"]
+                    mol1["solvated_properties"][solname]["implicit_solvent"]
             if "electrode_potentials" in mol1["solvated_properties"][solname]:
                 mol2["electrode_potentials"] = \
-                mol1["solvated_properties"][solname]["electrode_potentials"]
+                    mol1["solvated_properties"][solname][
+                        "electrode_potentials"]
                 if "oxidation" in mol2["electrode_potentials"]:
                     mol2["IE"] = mol2["electrode_potentials"]["oxidation"][
                         "lithium"]

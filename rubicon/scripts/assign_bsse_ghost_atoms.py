@@ -1,6 +1,14 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 import argparse
 import copy
 import itertools
+
+from six.moves import range
+from six.moves import zip
 
 from pymatgen.core.structure import Molecule
 from pymatgen.io.qchem import QcInput
@@ -52,10 +60,10 @@ def parse_fragments_definition(frag_def_file_name, qcinp_file_name):
         for t in token[0].split(','):
             if '-' in t:
                 if t.count('-') != 1:
-                    print "current line is \'{}\'".format(frag_def_text[i])
+                    print("current line is \'{}\'".format(frag_def_text[i]))
                     raise ValueError("can't understand range \'{}\'".format(t))
                 start_index, end_index = [int(x) for x in t.split('-')]
-                frag_atoms.extend(range(start_index, end_index + 1))
+                frag_atoms.extend(list(range(start_index, end_index + 1)))
             else:
                 frag_atoms.append(int(t))
         frag_atoms = [x - 1 for x in frag_atoms]
@@ -67,9 +75,9 @@ def parse_fragments_definition(frag_def_file_name, qcinp_file_name):
         bsse_fragments.append(frag)
     all_atom_from_fragments = itertools.chain(*fragment_atoms)
     if set(all_atom_from_fragments) != set(range(len(parent_mol))):
-        print "The current fragments is:"
+        print("The current fragments is:")
         for i, frag in enumerate(fragment_atoms):
-            print "Fragment {}:".format(i), ', '.join([str(x) for x in frag])
+            print("Fragment {}:".format(i), ', '.join([str(x) for x in frag]))
         raise ValueError("all the fragment should form the complete molecule")
     return bsse_fragments
 
@@ -105,8 +113,8 @@ def main():
         raise ValueError(
             "Please specify {} names of QChem input file for isolated "
             "fragments".format(len(bsse_fragments)))
-    for qcinp, filename in zip(overlapped_qcinps, options.overlapped) + \
-            zip(isolated_qcinps, options.isolated):
+    for qcinp, filename in list(zip(overlapped_qcinps, options.overlapped)) + \
+            list(zip(isolated_qcinps, options.isolated)):
         qcinp.write_file(filename)
 
 

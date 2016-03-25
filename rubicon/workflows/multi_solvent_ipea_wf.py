@@ -1,6 +1,13 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 import itertools
 
 from fireworks import Workflow
+from six.moves import range
+from six.moves import zip
 
 from rubicon.utils.qchem_firework_creator import QChemFireWorkCreator
 
@@ -14,7 +21,7 @@ def multi_solvent_ipea_fws(mol, name, mission, solvents, solvent_method,
     if len(mol) > 50:
         large = True
     energy_method, geom_method = qm_method.split("//") if qm_method else (
-    None, None)
+        None, None)
     fw_creator = QChemFireWorkCreator(mol=mol, molname=name, mission=mission,
                                       dupefinder=dupefinder,
                                       priority=priority, large=large,
@@ -34,7 +41,8 @@ def multi_solvent_ipea_fws(mol, name, mission, solvents, solvent_method,
     cgi_db, ngi_db, agi_db = (None, None, None)
     charges = [ref_charge + i for i in (-1, 0, 1)]
     if len(mol) > 1:
-        fw_ids = zip(*[iter(range(fwid_base + 0, fwid_base + 6))] * 2)
+        fw_ids = list(
+            zip(*[iter(list(range(fwid_base + 0, fwid_base + 6)))] * 2))
         fws = (fw_creator.geom_fw(ch, spin, fwid_cal, fwid_db,
                                   priority=priority + 1, method=geom_method)
                for ch, spin, (fwid_cal, fwid_db)
@@ -44,7 +52,8 @@ def multi_solvent_ipea_fws(mol, name, mission, solvents, solvent_method,
         links_dict.update(dict(fw_ids))
 
         if not large:
-            fw_ids = zip(*[iter(range(fwid_base + 6, fwid_base + 6 + 6))] * 2)
+            fw_ids = list(zip(
+                *[iter(list(range(fwid_base + 6, fwid_base + 6 + 6)))] * 2))
             fws = (fw_creator.freq_fw(ch, spin, fwid_cal, fwid_db,
                                       priority=priority + 1,
                                       method=geom_method)
@@ -65,7 +74,7 @@ def multi_solvent_ipea_fws(mol, name, mission, solvents, solvent_method,
     for sol_id, solvent in enumerate(solvents):
         fwid_start = fwid_base + 12 + (sol_id * 6)
         fwid_end = fwid_base + 12 + (sol_id * 6) + 6
-        fw_ids = zip(*[iter(range(fwid_start, fwid_end))] * 2)
+        fw_ids = list(zip(*[iter(list(range(fwid_start, fwid_end)))] * 2))
         sp_fw_ids.append(fw_ids)
         fws = (fw_creator.sp_fw(ch, spin, fwid_cal, fwid_db,
                                 solvent=solvent,
