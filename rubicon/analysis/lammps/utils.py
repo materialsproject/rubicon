@@ -12,14 +12,13 @@ from six.moves import range
 __author__ = "mhumbert"
 
 
-class MSD:
+class MeanSquareDisplacement(object):
     """
-            Calculates the MSD and diffusivity for all molecules in the system
-            given a list of center of mass coordinates.
+    Calculates the MSD and diffusivity for all molecules in the system
+    given a list of center of mass coordinates.
 
-           Outputs are stored in a dictionary called output to later be stored
-           in JSON format
-
+    Outputs are stored in a dictionary called output to later be stored
+    in JSON format
     """
 
     def runMSD(self, comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2, moltype,

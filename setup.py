@@ -16,7 +16,7 @@ from rubicon import __version__
 
 module_dir = os.path.dirname(os.path.abspath(__file__))
 f90_sources = glob.glob(os.path.join(module_dir, "rubicon", "analysis",
-                                     "lammps", "*.f90"))
+                                     "lammps", "fortran_files", "*.f90"))
 md_analyzer = Extension(name='rubicon.analysis.lammps._md_analyzer',
                         sources=f90_sources)
 
