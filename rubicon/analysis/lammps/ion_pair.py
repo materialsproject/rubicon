@@ -16,7 +16,7 @@ from six.moves import range
 __author__ = "mhumbert"
 
 
-class ionpair:
+class IonPair:
     """
     Calculates the ionpair lifetimes for a lammps simulation.
         

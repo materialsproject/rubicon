@@ -9,14 +9,15 @@ import shlex
 import numpy
 from pymongo import MongoClient
 
-# TODO: Refactor PackMol module to python code and merge the ff_dev branch in pymatgen to master
-from rubicon.analysis.lammps.MSD import MSD
-from rubicon.analysis.lammps.calcCOM import calcCOM
-from rubicon.analysis.lammps.gettimedata import gettimedata
-from rubicon.analysis.lammps.getmoldata import getmoldata
-from rubicon.analysis.lammps.COMradialnofort import COMradialdistribution
-from rubicon.analysis.lammps.getatomcharges import getatomcharges
-from rubicon.analysis.lammps.calcNEconductivity import calcNEconductivity
+# TODO: Refactor PackMol module to python code and merge the ff_dev branch in
+#  pymatgen to master
+from rubicon.analysis.lammps.utils import MeanSquareDisplacement
+from rubicon.analysis.lammps.properties import CenterOfMass, \
+    NernstEinsteinConductivity
+from rubicon.analysis.lammps.radial_distribution import RadialDistributionPure
+from rubicon.analysis.lammps.process import AtomicCharges, MoleculeData, \
+    TimeData
+from rubicon.analysis.lammps.properties import NernstEinsteinConductivity
 
 from fireworks import FireTaskBase, explicit_serialize
 
@@ -57,13 +58,13 @@ class ParselammpsProperties(FireTaskBase):
         in JSON format
         :return: Output
         """
-        c = calcCOM()
-        m = MSD()
-        gt = gettimedata()
-        gm = getmoldata()
-        crd = COMradialdistribution()
-        gc = getatomcharges()
-        ne = calcNEconductivity()
+        c = CenterOfMass()
+        m = MeanSquareDisplacement()
+        gt = TimeData()
+        gm = MoleculeData()
+        crd = RadialDistributionPure()
+        gc = AtomicCharges()
+        ne = NernstEinsteinConductivity()
 
         output = {}
         output['RDF'] = {}

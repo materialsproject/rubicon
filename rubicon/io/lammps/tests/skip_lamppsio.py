@@ -10,7 +10,7 @@ from unittest import TestCase
 from pymatgen import Molecule
 from rubicon.io.lammps.antechamberio import AntechamberRunner
 from rubicon.io.lammps.lammps_data import LmpInput
-from rubicon.packmol.packmol import PackmolRunner
+from rubicon.io.packmol.packmol import PackmolRunner
 
 __author__ = 'navnidhirajput'
 
