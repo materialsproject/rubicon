@@ -421,8 +421,8 @@ class Conductivity(object):
         return j, count
 
     def clacJ(self, j, J):
-        for i in range(0, len(j) / 2):
-            for k in range(i, i + (len(j) / 2)):
+        for i in range(0, int(len(j)/2)):
+            for k in range(i, i + int((len(j)/2))):
                 J[k - i] += np.dot(j[i], j[k])
         J *= float(2) / float(len(j))
         return J
@@ -496,7 +496,7 @@ class Conductivity(object):
         amass = np.zeros(n)
         for i in range(0, n):
             amass[i] = atommass[atype[i]]
-        (comvxt, comvyt, comvzt) = calccomf.calccom(n, nummol, vx, vy, vz, mol,
+        (comvxt, comvyt, comvzt) = calccomf(n, nummol, vx, vy, vz, mol,
                                                     amass, molmass, 0, 0, 0,
                                                     100000, 100000, 100000)
         comvx = copy.deepcopy(comvxt)
