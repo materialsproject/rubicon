@@ -13,12 +13,15 @@ import os
 import numpy as np
 
 try:
+    import matplotlib
+    matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 except ImportError:
     plt = None
     print("Install matplotlib")
 
 from rubicon.analysis.lammps._md_analyzer import comradial, siteradial
+
 
 __author__ = "Michael Humbert, Kiran Mathew"
 
@@ -282,7 +285,7 @@ class SiteRadialDistribution(object):
 
     def radialdistribution(self, x, y, z, aindex1, aindex2, mol, Lx, Ly, Lz,
                            binsize, numbins, maxr, g, count):
-        g1 = siteradial.siteradial(x, y, z, aindex1, aindex2, mol, Lx, Ly, Lz,
+        g1 = siteradial(x, y, z, aindex1, aindex2, mol, Lx, Ly, Lz,
                                    binsize, numbins, maxr)
         g += g1
         count += 1

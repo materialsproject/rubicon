@@ -7,9 +7,10 @@ from __future__ import division, print_function, unicode_literals, \
 """
 Run tests
 
-TODO: convert ot proper unittests
+TODO: convert to proper unittests
 """
 
+import os
 import math
 import time
 
@@ -23,23 +24,23 @@ from rubicon.analysis.lammps.process import AtomicCharges, \
 from rubicon.analysis.lammps.ion_pair import IonPair
 
 
-__author__ = "mhumbert"
+__author__ = "Michael Humbert, Kiran Mathew"
+
+MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 def test_site_radial_distribution():
     tic = time.time()
     ard = SiteRadialDistribution()
-
-    ard.runatomradial('sample_files/NaSCN.lammpstrj',
-                      'sample_files/data.water_1NaSCN', 'H2O', 1, 1, 'H2O', 1,
-                      1,
+    ard.runatomradial(os.path.join(MODULE_DIR, 'tests/sample_files/NaSCN.lammpstrj'),
+                      os.path.join(MODULE_DIR,
+                                   'tests/sample_files/data.water_1NaSCN'),
+                      'H2O', 1, 1, 'H2O', 1, 1,
                       firststep=0)
-
     toc = time.time()
     hours = math.floor((toc - tic) / 3600)
     minutes = math.floor((toc - tic - 3600 * hours) / 60)
     seconds = (toc - tic - 3600 * hours - 60 * minutes)
-
     print(("length of run: " + str(int(hours)) + " hours " + str(
         int(minutes)) + " minutes " + str(int(round(seconds))) + " seconds"))
 
@@ -48,16 +49,14 @@ def test_conductivity():
     g = AtomicCharges()
     gm = MoleculeData()
     cc = Conductivity()
-
     T = 350  # from lammpsio
-
-    trjfilename = ['sample_files/NaSCN.lammpstrj']
-    datfilename = 'sample_files/data.water_1NaSCN'
-    logfilename = 'sample_files/mol.log'
+    trjfilename = [os.path.join(MODULE_DIR,
+                                   'tests/sample_files/NaSCN.lammpstrj')]
+    datfilename = os.path.join(MODULE_DIR,'tests/sample_files/data.water_1NaSCN')
+    logfilename = os.path.join(MODULE_DIR,'tests/sample_files/mol.log')
     output = {}
     output['Conductivity'] = {}
     output['Conductivity']['units'] = 'S/m'
-
     (nummoltype, moltypel, moltype) = gm.getmoltype(datfilename)
     n = g.findnumatoms(datfilename)
     (molcharges, atomcharges, n) = g.getmolcharges(datfilename, n)
@@ -96,9 +95,9 @@ def test_other():
     cn = CoordinationNumber()
     ip = IonPair()
 
-    trjfile = 'rubicon/analysis/lammps/sample_files/NaSCN.lammpstrj'
-    datfile = 'rubicon/analysis/lammps/sample_files/data.water_1NaSCN'
-    logfile = 'rubicon/analysis/lammps/sample_files/mol.log'
+    trjfile = 'rubicon/analysis/lammps/tests/sample_files/NaSCN.lammpstrj'
+    datfile = 'rubicon/analysis/lammps/tests/sample_files/data.water_1NaSCN'
+    logfile = 'rubicon/analysis/lammps/tests/sample_files/mol.log'
     output = {}
     output['RDF'] = {}
     output['RDF']['units'] = 'unitless and angstroms'

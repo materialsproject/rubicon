@@ -25,6 +25,8 @@ from rubicon.analysis.lammps.process import TimeData
 from rubicon.analysis.lammps._md_analyzer import calccom as calccomf
 
 try:
+    import matplotlib
+    matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 except ImportError:
     plt = None
@@ -67,13 +69,12 @@ class Viscosity(object):
                     * self.lammps_log.timestep * 10 ** -15 * 1000 * 101325. ** 2 \
                     * self.lammps_log.LOG['vol'][-1] \
                     * 10 ** -30 / (1.38 * 10 ** -23 * self.lammps_log.temp)
-            plt.plot(np.array(self.lammps_log.LOG['step'][
-                              :len(pcorr) - 1]) * self.lammps_log.timestep,
-                     visco)
-            plt.xlabel('Time (femtoseconds)')
-            plt.ylabel('Viscosity (cp)')
-            plt.savefig('viscosity_parallel.png')
-
+            #plt.plot(np.array(self.lammps_log.LOG['step'][
+            #                  :len(pcorr) - 1]) * self.lammps_log.timestep,
+            #         visco)
+            #plt.xlabel('Time (femtoseconds)')
+            #plt.ylabel('Viscosity (cp)')
+            #plt.savefig('viscosity_parallel.png')
             output = open('viscosity_parallel.txt', 'w')
             output.write(
                 '#Time (fs), Average Pressure Correlation (atm^2), Viscosity (cp)\n')
@@ -420,8 +421,8 @@ class Conductivity(object):
         return j, count
 
     def clacJ(self, j, J):
-        for i in range(0, len(j) / 2):
-            for k in range(i, i + (len(j) / 2)):
+        for i in range(0, int(len(j)/2)):
+            for k in range(i, i + int((len(j)/2))):
                 J[k - i] += np.dot(j[i], j[k])
         J *= float(2) / float(len(j))
         return J
@@ -495,7 +496,7 @@ class Conductivity(object):
         amass = np.zeros(n)
         for i in range(0, n):
             amass[i] = atommass[atype[i]]
-        (comvxt, comvyt, comvzt) = calccomf.calccom(n, nummol, vx, vy, vz, mol,
+        (comvxt, comvyt, comvzt) = calccomf(n, nummol, vx, vy, vz, mol,
                                                     amass, molmass, 0, 0, 0,
                                                     100000, 100000, 100000)
         comvx = copy.deepcopy(comvxt)
