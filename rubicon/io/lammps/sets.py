@@ -12,7 +12,6 @@ import os
 
 __author__ = 'Navnidhi Rajput, Kiran Mathew'
 
-
 MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 

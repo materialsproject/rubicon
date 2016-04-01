@@ -3,19 +3,20 @@
 from __future__ import division, print_function, unicode_literals, \
     absolute_import
 
-import copy
-
-from scipy.integrate import cumtrapz
-
 """
 This module implements classes for processing Lammps output files.
 """
 
 import re
+import copy
+from io import open
+
+from scipy.integrate import cumtrapz
 
 import numpy as np
 
 from monty.json import MSONable
+
 
 __author__ = 'Navnidhi Rajput, Michael Humbert, Kiran Mathew'
 
@@ -126,11 +127,12 @@ class LammpsLog(MSONable):
 
 
 class LammpsRun(object):
-    def __init__(self, data_file, trajectory_file, log_file):
+    def __init__(self, data_file, trajectory_file, log_file=None):
         self.data_file = data_file
         self.trajectory_file = trajectory_file
-        self.log_file = log_file
-        self.llog = LammpsLog.from_file(log_file)
+        if log_file:
+            self.log_file = log_file
+            self.llog = LammpsLog.from_file(log_file)
 
     def natoms(self):
         """
@@ -222,7 +224,6 @@ class LammpsRun(object):
     def timestep(self):
         return self.llog.timestep
 
-    @property
     def jump(self, trajectory_file=None):
         """
         trajectory print frequency
@@ -231,7 +232,10 @@ class LammpsRun(object):
             traj_file = trajectory_file
         else:
             traj_file = self.trajectory_file
-        trjfile = open(traj_file)
+        if isinstance(traj_file, list):
+            trjfile = open(traj_file[0])
+        else:
+            trjfile = open(traj_file)
         trjfile.readline()
         t1 = trjfile.readline()
         t1 = int(t1)
@@ -251,6 +255,7 @@ class CoordinationNumber(object):
     there. Na-H20 represents the coordination number
     for water around sodium.
     """
+
     def compute(self, output, nummoltype, moltypel, V):
         output['Coordination_Number'] = {}
         output['Coordination_Number'][
@@ -324,7 +329,7 @@ class CoordinationNumber(object):
         integrallist = []
         for i in range(0, len(g)):
             integrallist.append(
-                g[i] * nummoltype[moltypel.index(mol)] / V * 4 * numpy.pi * r[
+                g[i] * nummoltype[moltypel.index(mol)] / V * 4 * np.pi * r[
                     i] ** 2)
         integral = cumtrapz(integrallist, x=r)
         integral = integral.tolist()
@@ -342,4 +347,4 @@ def _list2float(seq):
 if __name__ == '__main__':
     filename = 'visc.log'
     log = LammpsLog.from_file(filename)
-    #log.viscosity(100001)
+    # log.viscosity(100001)

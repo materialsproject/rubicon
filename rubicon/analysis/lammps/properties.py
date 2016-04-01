@@ -9,6 +9,7 @@ properties such as viscosity, center of mass, conductivities
 """
 
 import copy
+from io import open
 from multiprocessing import Pool
 
 import numpy as np
@@ -104,7 +105,8 @@ class CenterOfMass(object):
     Do not include blank lines in between the molecule types
     """
     def calcCOM(self, trjfilename, datfilename):
-        (num_lines, n, num_timesteps, count, line) = self.getnum(trjfilename)
+        (num_lines, n, num_timesteps, count, line) = self.getnum(
+            trjfilename)
         (Lx, Lx2, Ly, Ly2, Lz, Lz2) = self.getdimensions(trjfilename[0])
         (x, y, z, mol, atype) = self.createarrays(n)
         (xcol, ycol, zcol, molcol, typecol) = self.getcolumns(trjfilename[0])
@@ -130,20 +132,21 @@ class CenterOfMass(object):
             trjfile.close()
         return comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2
 
-    def getnum(self, trjfilename):
+    def getnum(self, trjfiles):
         # uses the trjectory file and returns the number of lines and the number of atoms
-        trjfile = open(trjfilename[0])
+        trjfilename = trjfiles[0]
+        trjfile = open(trjfilename)
         for i in range(0, 3):
             trjfile.readline()
         n = int(trjfile.readline())
         trjfile.close()
         num_timesteps = 1
         num_lines = []
-        for i in range(0, len(trjfilename)):
-            num_lines.append(int(sum(1 for line in open(trjfilename[i]))))
+        for i in range(0, len(trjfiles)):
+            num_lines.append(int(sum(1 for line in open(trjfiles[i]))))
             num_timesteps += int(num_lines[i] / (n + 9)) - 1
-        line = [10 for x in trjfilename]
-        for j in range(1, len(trjfilename)):
+        line = [10 for x in trjfiles]
+        for j in range(1, len(trjfiles)):
             line[j] += n + 9
         count = 0
         return num_lines, n, num_timesteps, count, line
@@ -284,7 +287,7 @@ class Conductivity(object):
                          datfilename, T, output):
         lrun = LammpsRun(datfilename, trjfilename, logfilename)
         dt = lrun.timestep
-        tsjump = lrun.jump(trjfilename[0])
+        tsjump = lrun.jump(trjfilename)
         (num_lines, n, num_timesteps, count, line) = self.getnum(trjfilename)
         atommass = self.getmass(datfilename)
         V = self.getdimensions(trjfilename[0])

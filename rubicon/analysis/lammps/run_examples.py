@@ -50,7 +50,7 @@ def test_conductivity():
     datfilename = os.path.join(MODULE_DIR, 'tests/sample_files/data.water_1NaSCN')
     logfilename = os.path.join(MODULE_DIR, 'tests/sample_files/mol.log')
 
-    lrun = LammpsRun(datfilename, trjfilename)
+    lrun = LammpsRun(datfilename, trjfilename, logfilename)
 
     cc = Conductivity()
     T = 350  # from lammpsio
@@ -64,6 +64,7 @@ def test_conductivity():
     output = cc.calcConductivity(molcharges, trjfilename, logfilename,
                                  datfilename, T, output)
     print((output['Conductivity']['Green_Kubo']))
+
 
 def test_other():
     """
@@ -86,11 +87,12 @@ def test_other():
     Outputs are stored in a dictionary called output to later be stored
     in JSON format
     """
-    trjfile = 'rubicon/analysis/lammps/tests/sample_files/NaSCN.lammpstrj'
-    datfile = 'rubicon/analysis/lammps/tests/sample_files/data.water_1NaSCN'
-    logfile = 'rubicon/analysis/lammps/tests/sample_files/mol.log'
+    trjfilename = [os.path.join(MODULE_DIR,
+                                'tests/sample_files/NaSCN.lammpstrj')]
+    datfilename = os.path.join(MODULE_DIR, 'tests/sample_files/data.water_1NaSCN')
+    logfilename = os.path.join(MODULE_DIR, 'tests/sample_files/mol.log')
 
-    lrun = LammpsRun(datfile, trjfile)
+    lrun = LammpsRun(datfilename, trjfilename, logfilename)
 
     c = CenterOfMass()
     m = MeanSquareDisplacement()
@@ -113,15 +115,17 @@ def test_other():
     n = lrun.natoms()
     (molcharges, atomcharges, n) = lrun.get_mol_charges(n)
     molcharge = lrun.get_mol_charge_dict(molcharges, moltypel, moltype)
-    (comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2) = c.calcCOM([trjfile],
-                                                              datfile)
+
+    (comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2) = c.calcCOM(trjfilename,
+                                                              datfilename)
+
     output = m.runMSD(comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2, moltype,
                       moltypel, dt, tsjump, output)
     output = ne.calcNEconductivity(output, molcharge, Lx, Ly, Lz, nummoltype,
                                    moltypel, T)
     ip.runionpair(comx, comy, comz, Lx, Ly, Lz, moltypel, moltype, tsjump,
                   dt, output, skipframes=0)
-    output = crd.runradial(datfile, comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2,
+    output = crd.runradial(datfilename, comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2,
                            Lz2, output, nummoltype, moltypel, moltype,
                            firststep=1)
     output = cn.compute(output, nummoltype, moltypel,
