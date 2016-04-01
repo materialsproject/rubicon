@@ -131,6 +131,16 @@ def test_other():
     output = cn.compute(output, nummoltype, moltypel,
                         Lx * Ly * Lz)
 
+def test_new():
+    trjfilename = os.path.join(MODULE_DIR,
+                                'tests/sample_files/NaSCN.lammpstrj')
+    datfilename = os.path.join(MODULE_DIR, 'tests/sample_files/data.water_1NaSCN')
+    logfilename = os.path.join(MODULE_DIR, 'tests/sample_files/mol.log')
+
+    lrun = LammpsRun(datfilename, trjfilename, logfilename)
+
+    comx, comy, comz = lrun.center_of_mass()
+
 
 if __name__ == '__main__':
     test_site_radial_distribution()

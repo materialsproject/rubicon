@@ -56,7 +56,7 @@ class ParselammpsProperties(FireTaskBase):
         in JSON format
         :return: Output
         """
-        lrun = LammpsRun(datafile, trjfile)
+        lrun = LammpsRun(datafile, trjfile, logfile)
 
         c = CenterOfMass()
         m = MeanSquareDisplacement()

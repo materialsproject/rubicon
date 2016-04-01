@@ -17,6 +17,8 @@ import numpy as np
 
 from monty.json import MSONable
 
+from rubicon.analysis.lammps._md_analyzer import calccom as calccomf
+
 
 __author__ = 'Navnidhi Rajput, Michael Humbert, Kiran Mathew'
 
@@ -27,16 +29,20 @@ class LammpsLog(MSONable):
     Saves the output properties (log file) in the form of a dictionary (LOG)
     with the key being the LAMMPS output property (see 'thermo_style custom'
     command in the LAMMPS documentation).
-    For example, LOG['temp'] will return the temperature data array in the log file.
+
+    For example, LOG['temp'] will return the temperature data array in the log
+    file.
     """
 
     def __init__(self, llog, avgs=None):
         """
         Args:
             llog (dict):
-                Dictionary LOG has all the output property data as numpy 1D arrays with the property name as the key
+                Dictionary LOG has all the output property data as numpy 1D a
+                rrays with the property name as the key
             avgs:
-                Dictionary of averages, will be generated automatically if unspecified
+                Dictionary of averages, will be generated automatically if
+                unspecified
         """
         self.llog = llog
         if avgs:
@@ -130,9 +136,8 @@ class LammpsRun(object):
     def __init__(self, data_file, trajectory_file, log_file=None):
         self.data_file = data_file
         self.trajectory_file = trajectory_file
-        if log_file:
-            self.log_file = log_file
-            self.llog = LammpsLog.from_file(log_file)
+        self.log_file = log_file
+        self.llog = LammpsLog.from_file(log_file)
 
     def natoms(self):
         """
@@ -143,7 +148,7 @@ class LammpsRun(object):
         foundnumatoms = False
         for j in range(0, 3):
             datfile.readline()
-        while foundnumatoms == False:
+        while not foundnumatoms:
             line = datfile.readline()
             line = line.split()
             if len(line) >= 2:
@@ -219,6 +224,146 @@ class LammpsRun(object):
                 moltype.append(int(i))
         datfile.close()
         return nummoltype, moltypel, moltype
+
+    def get_box_size(self):
+        # uses trjectory file to get the length of box sides
+        trjfile = open(self.trajectory_file)
+        for i in range(0, 5):
+            trjfile.readline()
+        xbounds = trjfile.readline()
+        xbounds = xbounds.split()
+        ybounds = trjfile.readline()
+        ybounds = ybounds.split()
+        zbounds = trjfile.readline()
+        zbounds = zbounds.split()
+        Lx = float(xbounds[1]) - float(xbounds[0])
+        Lx2 = Lx / 2
+        Ly = float(ybounds[1]) - float(ybounds[0])
+        Ly2 = Ly / 2
+        Lz = float(zbounds[1]) - float(zbounds[0])
+        Lz2 = Lz / 2
+        trjfile.close()
+        return Lx, Lx2, Ly, Ly2, Lz, Lz2
+
+    def get_columns(self):
+        # defines the columns each data type is in in the trjectory file
+        trjfile = open(self.trajectory_file)
+        for j in range(0, 8):
+            trjfile.readline()
+        inline = trjfile.readline()
+        inline = inline.split()
+        inline.remove('ITEM:')
+        inline.remove('ATOMS')
+        xcol = inline.index('x')
+        ycol = inline.index('y')
+        zcol = inline.index('z')
+        molcol = inline.index('mol')
+        typecol = inline.index('type')
+        trjfile.close()
+        return xcol, ycol, zcol, molcol, typecol
+
+    def get_mass(self):
+        # returns a dictionary of the mass of each atom type
+        atommass = {}
+        foundmass = False
+        readingmasses = True
+        atomnum = 1
+        datfile = open(self.data_file)
+        for i in range(0, 4):
+            datfile.readline()
+        while not foundmass:
+            line = datfile.readline()
+            line = line.split()
+            if len(line) > 0:
+                if line[0] == 'Masses':
+                    foundmass = True
+                    datfile.readline()
+        while readingmasses:
+            line = datfile.readline()
+            line = line.split()
+            if len(line) > 0:
+                if int(line[0]) == atomnum:
+                    atommass[int(line[0])] = float(line[1])
+                    atomnum += 1
+                else:
+                    readingmasses = False
+            else:
+                readingmasses = False
+        datfile.close()
+        return atommass
+
+    def get_trajectory(self, trjfile, n, line, xcol, ycol, zcol, molcol,
+                       typecol):
+        # reads data from trjectory file into precreated arrays
+        x = np.zeros(n)
+        y = np.zeros(n)
+        z = np.zeros(n)
+        mol = np.zeros(n)
+        atype = np.zeros(n)
+        #
+        for j in range(line, line+9):
+            trjfile.readline()
+        for a in range(0, n):
+            inline = trjfile.readline()
+            inline = inline.split()
+            x[a] = inline[xcol]
+            y[a] = inline[ycol]
+            z[a] = inline[zcol]
+            mol[a] = inline[molcol]
+            atype[a] = inline[typecol]
+        #trjfile.close()
+        return x, y, z, mol, atype
+
+    def getnum(self):
+        # uses the trjectory file and returns the number of lines and the number of atoms
+        trjfile = open(self.trajectory_file)
+        for i in range(0, 3):
+            trjfile.readline()
+        natoms = int(trjfile.readline())
+        nlines = len(trjfile.readlines())
+        ntimesteps = int(nlines / (natoms + 9))
+        trjfile.close()
+        return nlines, natoms, ntimesteps
+
+    def center_of_mass(self):
+        """
+        calculates the center of mass for each molecule
+        """
+        comx = []
+        comy = []
+        comz = []
+        line = 0
+
+        nlines, natoms, ntimesteps = self.getnum()
+        Lx, Lx2, Ly, Ly2, Lz, Lz2 = self.get_box_size()
+        xcol, ycol, zcol, molcol, typecol = self.get_columns()
+        atomic_mass_dict = self.get_mass()
+
+        amass = np.zeros(natoms)
+
+        trjfile = open(self.trajectory_file)
+
+        while line < nlines:
+            (x, y, z, mol, atype) = self.get_trajectory(trjfile, natoms, line,
+                                                        xcol,
+                                                        ycol,
+                                                        zcol, molcol, typecol)
+            nummol = int(max(mol))
+            molmass = np.zeros(nummol)
+            for atom in range(0, natoms):
+                amass[atom] = atomic_mass_dict[atype[atom]]
+                molmass[mol[atom] - 1] += amass[atom]
+            comxt, comyt, comzt = calccomf(natoms, nummol, x, y, z, mol,
+                                           amass, molmass, Lx, Ly, Lz,
+                                           Lx2, Ly2, Lz2)
+            comx.append(comxt)
+            comy.append(comyt)
+            comz.append(comzt)
+            line += natoms + 9
+
+        trjfile.close()
+
+        return comx, comy, comz
 
     @property
     def timestep(self):
