@@ -16,7 +16,7 @@ except:
     pass
 from rubicon.io.lammps.boxmol import BoxMol
 from rubicon.io.lammps.lammps_data import LmpInput
-from rubicon.io.lammps.antechamberio import AntechamberRunner
+from rubicon.io.antechamber import AntechamberRunner
 from rubicon.io.lammps.lamms_control_nvt import DictLammpsInputSet
 
 __author__ = 'navnidhirajput'

@@ -15,12 +15,11 @@ import numpy as np
 
 from scipy.integrate import cumtrapz
 from scipy.optimize import curve_fit
-import scipy.integrate
 
 from six.moves import range
 from six.moves import zip
 
-from rubicon.io.lammps.lammpsio import LammpsLog
+from rubicon.io.lammps.lammps import LammpsLog
 from rubicon.analysis.lammps.process import TimeData
 from rubicon.analysis.lammps._md_analyzer import calccom as calccomf
 
@@ -36,63 +35,58 @@ except ImportError:
 __author__ = "Michael Humbert, A Sharma, Kiran Mathew"
 
 
+def autocorrelate(a):
+    b = np.concatenate((a, np.zeros(len(a))), axis=1)
+    c = np.fft.ifft(np.fft.fft(b) * np.conjugate(np.fft.fft(b))).real
+    d = c[:len(c) / 2]
+    d = d / (np.array(list(range(len(a)))) + 1)[::-1]
+    return d
+
+
 class Viscosity(object):
     """
     All the properties are evaluated based on the *properties input.
-    Right now, pymatgen only supports viscosity (argument: viscosity) evaluation.
-    Example: 'md_properties log.lammps viscosity' will return the viscosity
-        of the system.
     """
 
-    def __init__(self, log_filename, properties):
-        self.lammps_log = LammpsLog(log_filename, *properties)
+    def __init__(self, log_filename):
+        self.llog = LammpsLog(log_filename)
 
-    def compute(self):
-        self.lammps_log.parselog()
-        self.wline = self.lammps_log.wline
-        print('Done reading the log file. Starting Calculations...')
-        NCORES = 8
-        p = Pool(NCORES)
-        if 'viscosity' in self.lammps_log.properties:
-            a1 = self.lammps_log.LOG['pxy']
-            a2 = self.lammps_log.LOG['pxz']
-            a3 = self.lammps_log.LOG['pyz']
-            a4 = self.lammps_log.LOG['pxx'] - self.lammps_log.LOG['pyy']
-            a5 = self.lammps_log.LOG['pyy'] - self.lammps_log.LOG['pzz']
-            a6 = self.lammps_log.LOG['pxx'] - self.lammps_log.LOG['pzz']
-            array_array = [a1, a2, a3, a4, a5, a6]
-            pv = p.map(self.autocorrelate, array_array)
-            pcorr = (pv[0] + pv[1] + pv[2]) / 6 + (pv[3] + pv[4] + pv[5]) / 24
-            visco = ( scipy.integrate.cumtrapz(pcorr,
-                                               self.lammps_log.LOG['step'][:len(
-                                pcorr)])) \
-                    * self.lammps_log.timestep * 10 ** -15 * 1000 * 101325. ** 2 \
-                    * self.lammps_log.LOG['vol'][-1] \
-                    * 10 ** -30 / (1.38 * 10 ** -23 * self.lammps_log.temp)
-            #plt.plot(np.array(self.lammps_log.LOG['step'][
-            #                  :len(pcorr) - 1]) * self.lammps_log.timestep,
-            #         visco)
-            #plt.xlabel('Time (femtoseconds)')
-            #plt.ylabel('Viscosity (cp)')
-            #plt.savefig('viscosity_parallel.png')
-            output = open('viscosity_parallel.txt', 'w')
-            output.write(
-                '#Time (fs), Average Pressure Correlation (atm^2), Viscosity (cp)\n')
-            for line in zip(np.array(
-                    self.lammps_log.LOG['step'][:len(
-                        pcorr) - 1]) * self.lammps_log.timestep - self.lammps_log.cutoff,
-                            pcorr,
-                            visco):
+    def compute(self, cutoff, ncores=4):
+
+        """
+        cutoff: initial lines ignored during the calculation
+        output: a file named viscosity_parallel.txt,
+        which saves the correlation function and its integration which is teh viscosity in cP
+        """
+        p = Pool(ncores)
+        a1 = self.llog['pxy'][cutoff:]
+        a2 = self.llog['pxz'][cutoff:]
+        a3 = self.llog['pyz'][cutoff:]
+        a4 = self.llog['pxx'][cutoff:] - self.llog['pyy'][cutoff:]
+        a5 = self.llog['pyy'][cutoff:] - self.llog['pzz'][cutoff:]
+        a6 = self.llog['pxx'][cutoff:] - self.llog['pzz'][cutoff:]
+        array_array = [a1, a2, a3, a4, a5, a6]
+        pv = p.map(autocorrelate, array_array)
+        pcorr = (pv[0] + pv[1] + pv[2]) / 6 + (pv[3] + pv[4] + pv[5]) / 24
+        self.pcorr = pcorr
+        temp = np.mean(self.llog['temp'][cutoff:])
+        self.viscosity = (cumtrapz(pcorr,
+                                          self.llog['step'][:len(pcorr)])) * \
+                    self.llog['timestep'] * 10 ** -15 * 1000 * 101325. ** 2 * \
+                    self.llog['vol'][-1] * 10 ** -30 / (1.38 * 10 ** -23 * temp)
+        p.close()
+
+    def to(self, filename='viscosity.txt'):
+        """
+        write to file
+        """
+        with open(filename, 'w') as output:
+            output.write('#Time (fs), '
+                         'Average Pressure Correlation (atm^2), '
+                         'Viscosity (cp)\n')
+            for line in zip(np.array(self.llog['step'][:len(pcorr) - 1]) *
+                                    self.llog['timestep'], self.pcorr, self.viscosity):
                 output.write(' '.join(str(x) for x in line) + '\n')
-            output.close()
-            print('Viscosity Calculation Complete!')
-
-    def autocorrelate(self, a):
-        b = np.concatenate((a, np.zeros(len(a))), axis=1)
-        c = np.fft.ifft(np.fft.fft(b) * np.conjugate(np.fft.fft(b))).real
-        d = c[:len(c) / 2]
-        d = d / (np.array(list(range(len(a)))) + 1)[::-1]
-        return d[:self.wline]
 
 
 class CenterOfMass(object):

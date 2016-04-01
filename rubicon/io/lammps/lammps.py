@@ -4,12 +4,12 @@ from __future__ import division, print_function, unicode_literals, \
     absolute_import
 
 import re
-from multiprocessing import Pool
 
 import numpy as np
-import scipy.integrate
+
 from six.moves import range
-from six.moves import zip
+
+from monty.json import MSONable
 
 
 def _list2float(seq):
@@ -20,35 +20,26 @@ def _list2float(seq):
             yield x
 
 
-def autocorrelate(a):
-    b = np.concatenate((a, np.zeros(len(a))), axis=1)
-    c = np.fft.ifft(np.fft.fft(b) * np.conjugate(np.fft.fft(b))).real
-    d = c[:len(c) / 2]
-    d = d / (np.array(list(range(len(a)))) + 1)[::-1]
-    return d
-
-
-class LammpsLog:
+class LammpsLog(MSONable):
     """
     Parser for LAMMPS log file (parse function).
-    Saves the output properties (log file) in the form of a dictionary (LOG) with the key being
-    the LAMMPS output property (see 'thermo_style custom' command in the LAMMPS documentation).
+    Saves the output properties (log file) in the form of a dictionary (LOG)
+    with the key being the LAMMPS output property (see 'thermo_style custom'
+    command in the LAMMPS documentation).
     For example, LOG['temp'] will return the temperature data array in the log file.
     """
 
     def __init__(self, llog, avgs=None):
         """
         Args:
-            llog:
-                Dictionary of lamps log
+            llog (dict):
+                Dictionary LOG has all the output property data as numpy 1D arrays with the property name as the key
             avgs:
                 Dictionary of averages, will be generated automatically if unspecified
         """
-
-        self.llog = llog  # Dictionary LOG has all the output property data as numpy 1D arrays with the property name as the key
-
+        self.llog = llog
         if avgs:
-            self.avgs = avgs  # Dictionary of averages for storage / query
+            self.avgs = avgs
         else:
             self.avgs = {}
             # calculate the average
@@ -118,49 +109,6 @@ class LammpsLog:
 
             return LammpsLog(llog)
 
-    def list_properties(self):
-        """
-        print the list of properties
-        """
-        print(list(log.llog.keys()))
-
-    # viscosity
-    def viscosity(self, cutoff):
-
-        """
-            cutoff: initial lines ignored during the calculation
-            output: a file named viscosity_parallel.txt, 
-            which saves the correlation function and its integration which is teh viscosity in cP
-        """
-
-        NCORES = 4
-        p = Pool(NCORES)
-
-        a1 = self.llog['pxy'][cutoff:]
-        a2 = self.llog['pxz'][cutoff:]
-        a3 = self.llog['pyz'][cutoff:]
-        a4 = self.llog['pxx'][cutoff:] - self.llog['pyy'][cutoff:]
-        a5 = self.llog['pyy'][cutoff:] - self.llog['pzz'][cutoff:]
-        a6 = self.llog['pxx'][cutoff:] - self.llog['pzz'][cutoff:]
-        array_array = [a1, a2, a3, a4, a5, a6]
-        pv = p.map(autocorrelate, array_array)
-        pcorr = (pv[0] + pv[1] + pv[2]) / 6 + (pv[3] + pv[4] + pv[5]) / 24
-
-        temp = np.mean(self.llog['temp'][cutoff:])
-
-        visco = (scipy.integrate.cumtrapz(pcorr,
-                                          self.llog['step'][:len(pcorr)])) * \
-                self.llog['timestep'] * 10 ** -15 * 1000 * 101325. ** 2 * \
-                self.llog['vol'][-1] * 10 ** -30 / (1.38 * 10 ** -23 * temp)
-        output = open('viscosity_parallel.txt', 'w')
-        output.write(
-            '#Time (fs), Average Pressure Correlation (atm^2), Viscosity (cp)\n')
-        for line in zip(np.array(self.llog['step'][:len(pcorr) - 1]) *
-                                self.llog['timestep'], pcorr, visco):
-            output.write(' '.join(str(x) for x in line) + '\n')
-        output.close()
-        p.close()
-
     @property
     def as_dict(self):
         return {"@module": self.__class__.__module__,
@@ -176,9 +124,5 @@ class LammpsLog:
 if __name__ == '__main__':
     filename = 'visc.log'
     log = LammpsLog.from_file(filename)
-    # print log.LOG.keys()
-    # print log.llog
-    # log.list_properties()
-    log.viscosity(100001)
-    # print np.mean(log.llog['density'])
-    # print log.ave['step']
+    #log.viscosity(100001)
+

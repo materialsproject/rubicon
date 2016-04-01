@@ -10,7 +10,7 @@ import numpy
 from fireworks import FireTaskBase, explicit_serialize
 from pymongo import MongoClient
 
-from rubicon.io.lammps.lammpsio import LammpsLog
+from rubicon.io.lammps.lammps import LammpsLog
 
 __author__ = 'navnidhirajput'
 
