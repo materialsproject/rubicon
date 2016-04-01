@@ -6,7 +6,7 @@ from __future__ import division, print_function, unicode_literals, \
 import six
 from six.moves import range
 
-__author__ = 'navnidhirajput'
+__author__ = 'Navnidhi Rajput'
 
 
 class Topology(object):

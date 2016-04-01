@@ -3,13 +3,13 @@
 from __future__ import division, print_function, unicode_literals, \
     absolute_import
 
-__author__ = 'navnidhirajput'
-
 import json
 import os
 from collections import defaultdict
 
 from monty.json import MSONable
+
+__author__ = 'Navnidhi Rajput'
 
 
 class GeneralizedForceField(MSONable):

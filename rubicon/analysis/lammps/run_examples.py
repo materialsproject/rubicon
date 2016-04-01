@@ -19,8 +19,7 @@ from rubicon.analysis.lammps.properties import CenterOfMass, \
     NernstEinsteinConductivity, Conductivity
 from rubicon.analysis.lammps.radial_distribution import \
     RadialDistributionPure, SiteRadialDistribution
-from rubicon.analysis.lammps.process import AtomicCharges, \
-    CoordinationNumber, MoleculeData, TimeData
+from rubicon.io.lammps.outputs import CoordinationNumber, LammpsRun
 from rubicon.analysis.lammps.ion_pair import IonPair
 
 
@@ -46,20 +45,22 @@ def test_site_radial_distribution():
 
 
 def test_conductivity():
-    g = AtomicCharges()
-    gm = MoleculeData()
+    trjfilename = [os.path.join(MODULE_DIR,
+                                'tests/sample_files/NaSCN.lammpstrj')]
+    datfilename = os.path.join(MODULE_DIR, 'tests/sample_files/data.water_1NaSCN')
+    logfilename = os.path.join(MODULE_DIR, 'tests/sample_files/mol.log')
+
+    lrun = LammpsRun(datfilename, trjfilename)
+
     cc = Conductivity()
     T = 350  # from lammpsio
-    trjfilename = [os.path.join(MODULE_DIR,
-                                   'tests/sample_files/NaSCN.lammpstrj')]
-    datfilename = os.path.join(MODULE_DIR,'tests/sample_files/data.water_1NaSCN')
-    logfilename = os.path.join(MODULE_DIR,'tests/sample_files/mol.log')
+
     output = {}
     output['Conductivity'] = {}
     output['Conductivity']['units'] = 'S/m'
-    (nummoltype, moltypel, moltype) = gm.get_type(datfilename)
-    n = g.natoms(datfilename)
-    (molcharges, atomcharges, n) = g.get_mol_charges(datfilename, n)
+    (nummoltype, moltypel, moltype) = lrun.get_mols()
+    n = lrun.natoms()
+    (molcharges, atomcharges, n) = lrun.get_mol_charges(n)
     output = cc.calcConductivity(molcharges, trjfilename, logfilename,
                                  datfilename, T, output)
     print((output['Conductivity']['Green_Kubo']))
@@ -85,19 +86,20 @@ def test_other():
     Outputs are stored in a dictionary called output to later be stored
     in JSON format
     """
+    trjfile = 'rubicon/analysis/lammps/tests/sample_files/NaSCN.lammpstrj'
+    datfile = 'rubicon/analysis/lammps/tests/sample_files/data.water_1NaSCN'
+    logfile = 'rubicon/analysis/lammps/tests/sample_files/mol.log'
+
+    lrun = LammpsRun(datfile, trjfile)
+
     c = CenterOfMass()
     m = MeanSquareDisplacement()
-    gt = TimeData()
-    gm = MoleculeData()
     crd = RadialDistributionPure()
-    gc = AtomicCharges()
     ne = NernstEinsteinConductivity()
     cn = CoordinationNumber()
     ip = IonPair()
 
-    trjfile = 'rubicon/analysis/lammps/tests/sample_files/NaSCN.lammpstrj'
-    datfile = 'rubicon/analysis/lammps/tests/sample_files/data.water_1NaSCN'
-    logfile = 'rubicon/analysis/lammps/tests/sample_files/mol.log'
+
     output = {}
     output['RDF'] = {}
     output['RDF']['units'] = 'unitless and angstroms'
@@ -105,12 +107,12 @@ def test_other():
     output['Conductivity']['units'] = 'S/m'
     T = 298  # get from lammpsio
 
-    tsjump = gt.jump(trjfile)
-    (nummoltype, moltypel, moltype) = gm.get_type(datfile)
-    dt = gt.dt(logfile)
-    n = gc.natoms(datfile)
-    (molcharges, atomcharges, n) = gc.get_mol_charges(datfile, n)
-    molcharge = gc.get_mol_charge_dict(molcharges, moltypel, moltype)
+    tsjump = lrun.jump()
+    (nummoltype, moltypel, moltype) = lrun.get_mols()
+    dt = lrun.timestep
+    n = lrun.natoms()
+    (molcharges, atomcharges, n) = lrun.get_mol_charges(n)
+    molcharge = lrun.get_mol_charge_dict(molcharges, moltypel, moltype)
     (comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2) = c.calcCOM([trjfile],
                                                               datfile)
     output = m.runMSD(comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2, moltype,

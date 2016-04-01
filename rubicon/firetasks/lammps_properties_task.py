@@ -15,9 +15,7 @@ from rubicon.analysis.lammps.utils import MeanSquareDisplacement
 from rubicon.analysis.lammps.properties import CenterOfMass, \
     NernstEinsteinConductivity
 from rubicon.analysis.lammps.radial_distribution import RadialDistributionPure
-from rubicon.analysis.lammps.process import AtomicCharges, MoleculeData, \
-    TimeData
-from rubicon.analysis.lammps.properties import NernstEinsteinConductivity
+from rubicon.io.lammps.outputs import LammpsRun
 
 from fireworks import FireTaskBase, explicit_serialize
 
@@ -58,12 +56,11 @@ class ParselammpsProperties(FireTaskBase):
         in JSON format
         :return: Output
         """
+        lrun = LammpsRun(datafile, trjfile)
+
         c = CenterOfMass()
         m = MeanSquareDisplacement()
-        gt = TimeData()
-        gm = MoleculeData()
         crd = RadialDistributionPure()
-        gc = AtomicCharges()
         ne = NernstEinsteinConductivity()
 
         output = {}
@@ -73,12 +70,12 @@ class ParselammpsProperties(FireTaskBase):
         output['Conductivity']['units'] = 'S/m'
         T = 298  # get from lammpsio
 
-        tsjump = gt.jump(trjfile)
-        (nummoltype, moltypel, moltype) = gm.get_type(datafile)
-        dt = gt.dt(logfile)
-        n = gc.natoms(datafile)
-        (molcharges, atomcharges, n) = gc.get_mol_charges(datafile, n)
-        molcharge = gc.get_mol_charge_dict(molcharges, moltypel, moltype)
+        tsjump = lrun.jump()
+        (nummoltype, moltypel, moltype) = lrun.get_mols()
+        dt = lrun.timestep
+        n = lrun.natoms()
+        (molcharges, atomcharges, n) = lrun.get_mol_charges(n)
+        molcharge = lrun.get_mol_charge_dict(molcharges, moltypel, moltype)
         (comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2) = c.calcCOM([trjfile],
                                                                   datafile)
 

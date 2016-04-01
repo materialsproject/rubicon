@@ -3,13 +3,13 @@
 from __future__ import division, print_function, unicode_literals, \
     absolute_import
 
+"""
+This module implements classes for processing Lammps input files.
+"""
+
 import six
 from six.moves import range
 from six.moves import zip
-
-"""
-This module implements input and output processing from Lampps.
-"""
 
 import math
 
@@ -669,7 +669,7 @@ class LammpsData(object):
 
         return '\n'.join(my_lammps_list)
 
-    def write_lammps_data(self, filename=None):
+    def to(self, filename=None):
         """
         write lammps data input file
         """

@@ -3,6 +3,10 @@
 from __future__ import division, print_function, unicode_literals, \
     absolute_import
 
+"""
+This module implements classes for generating Lammps input sets.
+"""
+
 import json
 import os
 

@@ -12,9 +12,11 @@ from rubicon.io.lammps.inputs import LammpsData
 from rubicon.io.lammps.sets import DictLammpsInputSet_2
 from rubicon.io.packmol.packmol import PackmolRunner
 
+from fireworks import FireTaskBase, explicit_serialize, FWAction
+
+
 __author__ = 'Navnidhi Rajput, Kiran Mathew'
 
-from fireworks import FireTaskBase, explicit_serialize, FWAction
 
 
 @explicit_serialize
@@ -54,7 +56,7 @@ class WritelammpsInputTask(FireTaskBase):
         data_lammps = LammpsData(ffmol_list, molecules, param_list["number"],
                                  param_list["inside box"], packed_molecule)
 
-        data_lammps.write_lammps_data('mol_data.lammps')
+        data_lammps.to('mol_data.lammps')
         control_lammps = DictLammpsInputSet_2()
         # control_lammps.get_lammps_control('Lammps.json',ensemble='npt',temp=300)
         control_lammps.get_lammps_control('Lammps.json', ensemble1='npt',

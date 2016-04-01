@@ -8,8 +8,6 @@ from __future__ import division, print_function, unicode_literals, \
     for a specified molecule using gaussian output file as input
 """
 
-__author__ = 'navnidhirajput'
-
 import shlex
 import subprocess
 import tempfile
@@ -22,6 +20,9 @@ from rubicon.io.amber.topology import Topology, TopCorruptionException
 from rubicon.io.amber.topology import correct_corrupted_top_files
 from rubicon.io.amber.generalized_force_field import GeneralizedForceField, FFCorruptionException
 from rubicon.io.amber.generalized_force_field import correct_corrupted_frcmod_files
+
+
+__author__ = 'Navnidhi Rajput, Kiran Mathew'
 
 
 class AntechamberRunner(object):

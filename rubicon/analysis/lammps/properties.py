@@ -19,8 +19,7 @@ from scipy.optimize import curve_fit
 from six.moves import range
 from six.moves import zip
 
-from rubicon.io.lammps.outputs import LammpsLog
-from rubicon.analysis.lammps.process import TimeData
+from rubicon.io.lammps.outputs import LammpsLog, LammpsRun
 from rubicon.analysis.lammps._md_analyzer import calccom as calccomf
 
 try:
@@ -280,12 +279,12 @@ class CenterOfMass(object):
 
 
 class Conductivity(object):
-    g = TimeData()
 
     def calcConductivity(self, molcharges, trjfilename, logfilename,
                          datfilename, T, output):
-        dt = self.g.dt(logfilename)
-        tsjump = self.g.jump(trjfilename[0])
+        lrun = LammpsRun(datfilename, trjfilename, logfilename)
+        dt = lrun.timestep
+        tsjump = lrun.jump(trjfilename[0])
         (num_lines, n, num_timesteps, count, line) = self.getnum(trjfilename)
         atommass = self.getmass(datfilename)
         V = self.getdimensions(trjfilename[0])
