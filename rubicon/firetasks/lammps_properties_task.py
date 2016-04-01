@@ -73,12 +73,12 @@ class ParselammpsProperties(FireTaskBase):
         output['Conductivity']['units'] = 'S/m'
         T = 298  # get from lammpsio
 
-        tsjump = gt.getjump(trjfile)
-        (nummoltype, moltypel, moltype) = gm.getmoltype(datafile)
-        dt = gt.getdt(logfile)
-        n = gc.findnumatoms(datafile)
-        (molcharges, atomcharges, n) = gc.getmolcharges(datafile, n)
-        molcharge = gc.molchargedict(molcharges, moltypel, moltype)
+        tsjump = gt.jump(trjfile)
+        (nummoltype, moltypel, moltype) = gm.get_type(datafile)
+        dt = gt.dt(logfile)
+        n = gc.natoms(datafile)
+        (molcharges, atomcharges, n) = gc.get_mol_charges(datafile, n)
+        molcharge = gc.get_mol_charge_dict(molcharges, moltypel, moltype)
         (comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2) = c.calcCOM([trjfile],
                                                                   datafile)
 

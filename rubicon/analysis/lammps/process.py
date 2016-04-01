@@ -18,7 +18,10 @@ __author__ = "Michael Humbert, Kiran Mathew"
 
 
 class AtomicCharges(object):
-    def findnumatoms(self, datfilename):
+    def natoms(self, datfilename):
+        """
+        number of atoms
+        """
         n = None
         datfile = open(datfilename)
         foundnumatoms = False
@@ -34,7 +37,10 @@ class AtomicCharges(object):
         datfile.close()
         return n
 
-    def getmolcharges(self, datfilename, n):
+    def get_mol_charges(self, datfilename, n):
+        """
+        get molecule charges
+        """
         datfile = open(datfilename)
         for j in range(0, 4):
             datfile.readline()
@@ -42,35 +48,32 @@ class AtomicCharges(object):
         mol = [0 for x in range(0, n)]
         foundatoms = False
         readingcharges = True
-
-        while foundatoms == False:
+        while not foundatoms:
             line = datfile.readline()
             line = line.split()
-
             if len(line) > 0:
                 if line[0] == 'Atoms':
                     foundatoms = True
                     datfile.readline()
-
-        while readingcharges == True:
+        while readingcharges:
             line = datfile.readline()
             line = line.split()
             if len(line) >= 6:
                 atomcharges[int(line[0]) - 1] = float(line[3])
                 mol[int(line[0]) - 1] = int(line[1])
-
             else:
                 readingcharges = False
-
         nummol = max(mol)
         molcharges = [0 for x in range(0, nummol)]
         for atom in range(0, n):
             molcharges[mol[atom] - 1] += atomcharges[atom]
-
         datfile.close()
         return molcharges, atomcharges, n
 
-    def molchargedict(self, molcharges, moltypel, moltype):
+    def get_mol_charge_dict(self, molcharges, moltypel, moltype):
+        """
+        molecule charges as dict
+        """
         molcharge = {}
         for molecules in range(0, len(moltypel)):
             molcharge[moltypel[molecules]] = molcharges[
@@ -79,12 +82,21 @@ class AtomicCharges(object):
 
 
 class CoordinationNumber(object):
-    def calccoordinationnumber(self, output, nummoltype, moltypel, V):
+    """
+    This program finds the first three local minima
+    and finds the coordination number integrating until
+    there. Na-H20 represents the coordination number
+    for water around sodium.
+    """
+    def compute(self, output, nummoltype, moltypel, V):
         output['Coordination_Number'] = {}
         output['Coordination_Number'][
             'units'] = 'Minima in angstroms, Coordination numbers in Angstroms'
         output['Coordination_Number'][
-            'explanation'] = 'This program finds the first three local minima and finds the coordination number integrating until there. Na-H20 represents the coordination number for water around sodium.'
+            'explanation'] = 'This program finds the first three local minima ' \
+                             'and finds the coordination number integrating until ' \
+                             'there. Na-H20 represents the coordination number ' \
+                             'for water around sodium.'
         pairlist = list(output['RDF'].keys())
         pairlist.remove('units')
         pairlist.remove('distance')
@@ -94,7 +106,7 @@ class CoordinationNumber(object):
             split = pairlist[i].split('-')
             mol1 = split[0]
             mol2 = split[1]
-            (minima, index) = self.findfirst3minima(g, r)
+            (minima, index) = self.get_minima(g, r)
             output['Coordination_Number'][
                 '{0} around {1}'.format(mol1, mol2)] = {}
             integral = self.integrate(g, r, nummoltype, moltypel, V, mol1)
@@ -124,7 +136,10 @@ class CoordinationNumber(object):
                     'Coordination_Numbers'] = coord
         return output
 
-    def findfirst3minima(self, g, r):
+    def get_minima(self, g, r):
+        """
+        return first 3 minima
+        """
         foundpositive = False
         minima = []
         index = []
@@ -135,13 +150,11 @@ class CoordinationNumber(object):
                 i += 1
             else:
                 i += 1
-
         while len(minima) < 3 and i < len(g) - 2:
             if g[i - 1] > g[i] and g[i + 1] > g[i]:
                 minima.append(r[i])
                 index.append(i)
             i += 1
-
         return minima, index
 
     def integrate(self, g, r, nummoltype, moltypel, V, mol):
@@ -158,22 +171,22 @@ class CoordinationNumber(object):
 class MoleculeData(object):
     """
 
-             Determines molecule types and number of each molecule type and
-             creates a list of molecule type of each molecule
+     Determines molecule types and number of each molecule type and
+     creates a list of molecule type of each molecule
 
-             Requires the following comments in the lammps data file starting
-            at the third line
+     Requires the following comments in the lammps data file starting
+    at the third line
 
-            # "number" "molecule" molecules
+    # "number" "molecule" molecules
 
-            where "number" is the number of that molecule type and
-            "molecule" is a name for that molecule
+    where "number" is the number of that molecule type and
+    "molecule" is a name for that molecule
 
-            Do not include blank lines in between the molecule types
+    Do not include blank lines in between the molecule types
 
     """
 
-    def getmoltype(self, datfilename):
+    def get_type(self, datfilename):
         # determines molecule types and number of each molecule type
         # also creates a list of molecule type of each molecule
         datfile = open(datfilename)
@@ -203,12 +216,12 @@ class MoleculeData(object):
 
 class TimeData(object):
     """
-            Uses a lammps trajectory file and log file to determine the
-            timestep size and the trajectory print frequency
+    Uses a lammps trajectory file and log file to determine the
+    timestep size and the trajectory print frequency
 
     """
 
-    def getdt(self, logfilename):
+    def dt(self, logfilename):
         dt = None
         logfile = open(logfilename)
         foundtimestep = False
@@ -222,7 +235,7 @@ class TimeData(object):
         logfile.close()
         return dt
 
-    def getjump(self, trjfilename):
+    def jump(self, trjfilename):
         trjfile = open(trjfilename)
         trjfile.readline()
         t1 = trjfile.readline()

@@ -57,9 +57,9 @@ def test_conductivity():
     output = {}
     output['Conductivity'] = {}
     output['Conductivity']['units'] = 'S/m'
-    (nummoltype, moltypel, moltype) = gm.getmoltype(datfilename)
-    n = g.findnumatoms(datfilename)
-    (molcharges, atomcharges, n) = g.getmolcharges(datfilename, n)
+    (nummoltype, moltypel, moltype) = gm.get_type(datfilename)
+    n = g.natoms(datfilename)
+    (molcharges, atomcharges, n) = g.get_mol_charges(datfilename, n)
     output = cc.calcConductivity(molcharges, trjfilename, logfilename,
                                  datfilename, T, output)
     print((output['Conductivity']['Green_Kubo']))
@@ -105,12 +105,12 @@ def test_other():
     output['Conductivity']['units'] = 'S/m'
     T = 298  # get from lammpsio
 
-    tsjump = gt.getjump(trjfile)
-    (nummoltype, moltypel, moltype) = gm.getmoltype(datfile)
-    dt = gt.getdt(logfile)
-    n = gc.findnumatoms(datfile)
-    (molcharges, atomcharges, n) = gc.getmolcharges(datfile, n)
-    molcharge = gc.molchargedict(molcharges, moltypel, moltype)
+    tsjump = gt.jump(trjfile)
+    (nummoltype, moltypel, moltype) = gm.get_type(datfile)
+    dt = gt.dt(logfile)
+    n = gc.natoms(datfile)
+    (molcharges, atomcharges, n) = gc.get_mol_charges(datfile, n)
+    molcharge = gc.get_mol_charge_dict(molcharges, moltypel, moltype)
     (comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2) = c.calcCOM([trjfile],
                                                               datfile)
     output = m.runMSD(comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2, Lz2, moltype,
@@ -122,8 +122,8 @@ def test_other():
     output = crd.runradial(datfile, comx, comy, comz, Lx, Ly, Lz, Lx2, Ly2,
                            Lz2, output, nummoltype, moltypel, moltype,
                            firststep=1)
-    output = cn.calccoordinationnumber(output, nummoltype, moltypel,
-                                       Lx * Ly * Lz)
+    output = cn.compute(output, nummoltype, moltypel,
+                        Lx * Ly * Lz)
 
 
 if __name__ == '__main__':

@@ -290,8 +290,8 @@ class Conductivity(object):
 
     def calcConductivity(self, molcharges, trjfilename, logfilename,
                          datfilename, T, output):
-        dt = self.g.getdt(logfilename)
-        tsjump = self.g.getjump(trjfilename[0])
+        dt = self.g.dt(logfilename)
+        tsjump = self.g.jump(trjfilename[0])
         (num_lines, n, num_timesteps, count, line) = self.getnum(trjfilename)
         atommass = self.getmass(datfilename)
         V = self.getdimensions(trjfilename[0])
