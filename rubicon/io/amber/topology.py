@@ -9,7 +9,7 @@ from six.moves import range
 __author__ = 'navnidhirajput'
 
 
-class TopMol(object):
+class Topology(object):
     """
     gff_atom: GAFF atom name in .rtf file
     atom: List to map atom names with gaff atom name, [['C1', 'c'],...]
@@ -75,9 +75,9 @@ class TopMol(object):
                 elif token[0] == 'IMPH':
                     imdihedrals.append(token[1:5])
 
-            topology = TopMol(atoms, charges, bonds, angles, dihedrals,
-                              imdihedrals, len(bonds), number_gaff_atoms,
-                              gaff_atoms)
+            topology = Topology(atoms, charges, bonds, angles, dihedrals,
+                                imdihedrals, len(bonds), number_gaff_atoms,
+                                gaff_atoms)
             return topology
 
     def _get_ff_dihedrals(self, gff_dihedrals, top_dihedral, atom_gaff):
@@ -191,8 +191,8 @@ class TopMol(object):
                     dihedrals.append(token[1:5])
                 elif token[0] == 'IMPH':
                     imdihedrals.append(token[1:5])
-            topology = TopMol(atoms, bonds, angles, dihedrals, imdihedrals,
-                              len(bonds), num_gaff_atoms, gaff_atoms)
+            topology = Topology(atoms, bonds, angles, dihedrals, imdihedrals,
+                                len(bonds), num_gaff_atoms, gaff_atoms)
             return topology
 
 
@@ -204,8 +204,8 @@ def correct_corrupted_top_files(corrupted_file=None, gaff_file=None):
     rtf_lines = []
     rtf_lines.append('{}{}'.format('* Topology File.\n', '*\n'))
 
-    top = TopMol.from_file(corrupted_file, True)
-    top_gaff = TopMol.gaff_fromfile(gaff_file)
+    top = Topology.from_file(corrupted_file, True)
+    top_gaff = Topology.gaff_fromfile(gaff_file)
     atom_index = 1
 
     for x in range(0, len(top.atoms)):

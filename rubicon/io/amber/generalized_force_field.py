@@ -12,7 +12,7 @@ from collections import defaultdict
 from monty.json import MSONable
 
 
-class Gff(MSONable):
+class GeneralizedForceField(MSONable):
     """
     A force field library. Reads the output file from
     AntechamberRunner and populate the FF library
@@ -169,8 +169,8 @@ class Gff(MSONable):
                     epsilon = abs(float(token[2]))
                     vdws[vdw_type.lower()] = (sigma, epsilon)
 
-            gff = Gff(None, bonds, angles, dihedrals, imdihedrals, vdws,
-                      masses, None)
+            gff = GeneralizedForceField(None, bonds, angles, dihedrals, imdihedrals, vdws,
+                                        masses, None)
             return gff
 
     @classmethod
@@ -331,12 +331,12 @@ class Gff(MSONable):
 
     @classmethod
     def from_dict(cls, d):
-        return Gff(bonds=d["bonds"],
-                   angles=d["angles"],
-                   dihedrals=d["dihedrals"],
-                   imdihedrals=d["imdihedrals"],
-                   vdws=d["vdws"]
-                   )
+        return GeneralizedForceField(bonds=d["bonds"],
+                                     angles=d["angles"],
+                                     dihedrals=d["dihedrals"],
+                                     imdihedrals=d["imdihedrals"],
+                                     vdws=d["vdws"]
+                                     )
 
 
 class FFCorruptionException(Exception):
@@ -347,11 +347,11 @@ def correct_corrupted_frcmod_files(corrupted_file=None, gaff_file=None):
     frc_lines = []
     frc_lines.append('{}{}'.format('remark goes here\n', 'MASS\n'))
 
-    gff = Gff.from_forcefield_para(corrupted_file, True)
-    atoms, bonds, angles, specific_dihedrals, general_dihedrals, vdws = Gff.from_gaff_para(
+    gff = GeneralizedForceField.from_forcefield_para(corrupted_file, True)
+    atoms, bonds, angles, specific_dihedrals, general_dihedrals, vdws = GeneralizedForceField.from_gaff_para(
         gaff_file)
     # print atoms
-    gff_para = Gff.from_gaff_para(gaff_file)
+    gff_para = GeneralizedForceField.from_gaff_para(gaff_file)
     for ant_atom_name in gff.masses.keys():
         if ant_atom_name in list(gff_para[0].keys()):
             frc_lines.append(

@@ -7,9 +7,9 @@ import re
 
 import numpy as np
 
-from six.moves import range
-
 from monty.json import MSONable
+
+__author__ = 'Navnidhi Rajput, Kiran Mathew'
 
 
 def _list2float(seq):

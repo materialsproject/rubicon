@@ -18,14 +18,13 @@ from monty.dev import requires
 from monty.os.path import which
 from monty.tempfile import ScratchDir
 
-from rubicon.io.lammps.topology import TopMol, TopCorruptionException
-from rubicon.io.lammps.topology import correct_corrupted_top_files
-from rubicon.io.lammps.gff import Gff, FFCorruptionException
-from rubicon.io.lammps.gff import correct_corrupted_frcmod_files
-from rubicon.io.lammps.ffmol import FFmol
+from rubicon.io.amber.topology import Topology, TopCorruptionException
+from rubicon.io.amber.topology import correct_corrupted_top_files
+from rubicon.io.amber.generalized_force_field import GeneralizedForceField, FFCorruptionException
+from rubicon.io.amber.generalized_force_field import correct_corrupted_frcmod_files
 
 
-class AntechamberRunner:
+class AntechamberRunner(object):
     """
     A wrapper for AntechamberRunner software
 
@@ -80,23 +79,25 @@ class AntechamberRunner:
             self._run_parmchk()
             # if antechamber can't find parameters go to gaff_nidhi.dat
             try:
-                top = TopMol.from_file('mol.rtf')
-
-
+                top = Topology.from_file('mol.rtf')
             except TopCorruptionException:
                 correct_corrupted_top_files('mol.rtf', 'gaff_nidhi.txt')
-                top = TopMol.from_file('mol.rtf')
-
+                top = Topology.from_file('mol.rtf')
             try:
-                gff = Gff.from_forcefield_para('mol.frcmod')
-
+                gff = GeneralizedForceField.from_forcefield_para('mol.frcmod')
             except FFCorruptionException:
                 correct_corrupted_frcmod_files('ANTECHAMBER.FRCMOD',
                                                'gaff_nidhi.txt')
-                gff = Gff.from_forcefield_para('ANTECHAMBER.FRCMOD')
+                gff = GeneralizedForceField.from_forcefield_para('ANTECHAMBER.FRCMOD')
             gff.read_atom_index(mol, 'ANTECHAMBER_AC.AC')
             # gff.read_charges()
 
             mol.add_site_property("atomname", (list(gff.atom_index.values())))
         ffmol = FFmol(gff, top)
         return ffmol
+
+
+class FFmol:
+    def __init__(self, gff, top):
+        self.gff = gff
+        self.top = top

@@ -8,8 +8,8 @@ import unittest
 from unittest import TestCase
 
 from pymatgen import Molecule
-from rubicon.io.antechamber import AntechamberRunner
-from rubicon.io.lammps.lammps_data import LmpInput
+from rubicon.io.amber.antechamber import AntechamberRunner
+from rubicon.io.lammps.inputs import LammpsData
 from rubicon.io.packmol.packmol import PackmolRunner
 
 __author__ = 'navnidhirajput'
@@ -105,7 +105,7 @@ class TestLmpInput(TestCase):
         super(TestLmpInput, cls).setUpClass()
 
     def test_str_(self):
-        data_lammps = LmpInput(self.ffmol, self.mols_in_box)
+        data_lammps = LammpsData(self.ffmol, self.mols_in_box)
         data_lammps._set_atom(self.ffmol, self.mols_in_box)
         lammps_data = data_lammps.__str__()
 

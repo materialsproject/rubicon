@@ -7,19 +7,12 @@ import os
 import shlex
 import subprocess
 
-try:
-    # just a walkaround before the packmol is merged to master branch
-    # after packmol is merged to master branch, the try...catch block
-    # should be removed
-    from pymatgen.packmol.packmol import PackmolRunner
-except:
-    pass
-from rubicon.io.lammps.boxmol import BoxMol
-from rubicon.io.lammps.lammps_data import LmpInput
-from rubicon.io.antechamber import AntechamberRunner
-from rubicon.io.lammps.lamms_control_nvt import DictLammpsInputSet
+from rubicon.io.amber.antechamber import AntechamberRunner
+from rubicon.io.lammps.inputs import LammpsData
+from rubicon.io.lammps.sets import DictLammpsInputSet_2
+from rubicon.io.packmol.packmol import PackmolRunner
 
-__author__ = 'navnidhirajput'
+__author__ = 'Navnidhi Rajput, Kiran Mathew'
 
 from fireworks import FireTaskBase, explicit_serialize, FWAction
 
@@ -49,15 +42,20 @@ class WritelammpsInputTask(FireTaskBase):
         ffmol_list = []
         acr = AntechamberRunner(mol)
         ffmol_list.append(acr.get_ff_top_mol(mol, filename))
-        pmr = PackmolRunner([mol], [{"number": 100,
-                                     "inside box": [-14.82, -14.82, -14.82,
-                                                    14.82, 14.82, 14.82]}])
-        mols_coord = pmr.run()
-        boxmol = BoxMol.from_packmol(pmr, mols_coord)
+        molecules = [mol]
+        param_list = [{"number": 100,
+                       "inside box": [-14.82, -14.82, -14.82,
+                                      14.82, 14.82, 14.82]}]
 
-        data_lammps = LmpInput(ffmol_list, boxmol)
+        pmr = PackmolRunner(molecules, param_list)
+        packed_molecule = pmr.run()
+        #boxmol = BoxMol.from_packmol(pmr, packed_molecule)
+        #data_lammps = LmpInput(ffmol_list, boxmol)
+        data_lammps = LammpsData(ffmol_list, molecules, param_list["number"],
+                                 param_list["inside box"], packed_molecule)
+
         data_lammps.write_lammps_data('mol_data.lammps')
-        control_lammps = DictLammpsInputSet()
+        control_lammps = DictLammpsInputSet_2()
         # control_lammps.get_lammps_control('Lammps.json',ensemble='npt',temp=300)
         control_lammps.get_lammps_control('Lammps.json', ensemble1='npt',
                                           ensemble2='nvt', temp=298)

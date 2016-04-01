@@ -41,7 +41,7 @@ class PackmolRunner(object):
     def __init__(self, mols, param_list, input_file="pack.inp",
                  tolerance=2.0, filetype="xyz",
                  control_params={"maxit": 20, "nloop": 600},
-                 boxit=True, output_file="packed.xyz"):
+                 auto_box=True, output_file="packed.xyz"):
         """
         Create PackMolRunner
 
@@ -59,7 +59,7 @@ class PackmolRunner(object):
                            all parameters other than structure/atoms
               param_list:
                     list of parameters containing dicts for each molecule
-              boxit:
+              auto_box:
                     put the molecule assembly in a box
               output_file:
                     output file name. The extension will be adjusted
@@ -68,7 +68,7 @@ class PackmolRunner(object):
         self.mols = mols
         self.param_list = param_list
         self.input_file = input_file
-        self.boxit = boxit
+        self.boxit = auto_box
         self.control_params = control_params
         if not self.control_params.get("tolerance"):
             self.control_params["tolerance"] = tolerance
@@ -185,5 +185,5 @@ if __name__ == '__main__':
                         input_file="packmol_input.inp", tolerance=2.0,
                         filetype="xyz",
                         control_params={"nloop": 1000},
-                        boxit=False, output_file="cocktail.xyz")
+                        auto_box=False, output_file="cocktail.xyz")
     s = pmr.run()

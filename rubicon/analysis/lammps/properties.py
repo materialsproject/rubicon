@@ -19,7 +19,7 @@ from scipy.optimize import curve_fit
 from six.moves import range
 from six.moves import zip
 
-from rubicon.io.lammps.lammps import LammpsLog
+from rubicon.io.lammps.outputs import LammpsLog
 from rubicon.analysis.lammps.process import TimeData
 from rubicon.analysis.lammps._md_analyzer import calccom as calccomf
 
