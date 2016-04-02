@@ -10,6 +10,7 @@ This module implements classes for processing Lammps output files.
 import re
 import copy
 from io import open
+from collections import defaultdict
 
 from scipy.integrate import cumtrapz
 
@@ -17,10 +18,8 @@ import numpy as np
 
 from monty.json import MSONable
 
-from rubicon.analysis.lammps._md_analyzer import calccom as calccomf
 
-
-__author__ = 'Navnidhi Rajput, Michael Humbert, Kiran Mathew'
+__author__ = 'Kiran Mathew, Navnidhi Rajput, Michael Humbert'
 
 
 class LammpsLog(MSONable):
@@ -101,7 +100,6 @@ class LammpsLog(MSONable):
                 if line == '\n':
                     footer_blank_line += 1
             print(int(md_step / log_save_freq))
-
             if total_lines >= header + md_step / log_save_freq:
                 rawdata = np.genfromtxt(fname=filename, dtype=float,
                                         skip_header=header, skip_footer=int(
@@ -133,241 +131,146 @@ class LammpsLog(MSONable):
 
 
 class LammpsRun(object):
-    def __init__(self, data_file, trajectory_file, log_file=None):
+    """
+    Parse the data file, trajectory file and the log file to extract
+    useful info about the system.
+
+    Args:
+        data_file (str): path to the data file
+        trajectory_file (str): path to the trajectory file
+        log_file (str): path to the log file
+    """
+    def __init__(self, data_file, trajectory_file, log_file):
         self.data_file = data_file
         self.trajectory_file = trajectory_file
         self.log_file = log_file
         self.llog = LammpsLog.from_file(log_file)
+        self._parse_data()
+        self._set_mol_masses_and_charges()
+        self._parse_trajectory()
 
-    def natoms(self):
+    def _parse_data(self):
         """
-        number of atoms
+        parse lammps data file
         """
-        n = None
-        datfile = open(self.data_file)
-        foundnumatoms = False
-        for j in range(0, 3):
-            datfile.readline()
-        while not foundnumatoms:
-            line = datfile.readline()
-            line = line.split()
-            if len(line) >= 2:
-                if line[1] == 'atoms':
-                    n = int(line[0])
-                    foundnumatoms = True
-        datfile.close()
-        return n
+        self.atomic_masses = {} # atom_type: mass
+        self.molecules = defaultdict(list) # mol_num:[[atom,atom_type]]
+        self.atom_to_mol = {} # atom_num: mol_num
+        self.mol_types = {} # 'H2O': 20
+        mols_pattern = re.compile("^#\s+(\d+)\s+([0-9a-zA-Z]+)\s+molecules$")
+        atoms_pattern = re.compile("^(\d+)\s+(\d+)\s+(\d+)\s+([0-9eE\.+-]+)\s+("
+                                 "[0-9eE\.+-]+)\s+([0-9eE\.+-]+)\w*")
+        masses_pattern = re.compile("^(\d+)\s+([0-9\.]+)$")
+        with open(self.data_file) as df:
+            for line in df:
+                if mols_pattern.search(line):
+                    m = mols_pattern.search(line)
+                    self.mol_types[m.group(2)] = int(m.group(1))
+                if masses_pattern.search(line):
+                    m = masses_pattern.search(line)
+                    self.atomic_masses[int(m.group(1))] = float(m.group(
+                        2))
+                if "atoms" in line:
+                    self.natoms = int(line.split()[0])
+                    self.atomic_charges = np.zeros(self.natoms)
+                m = atoms_pattern.search(line)
+                if m:
+                    self.atomic_charges[int(m.group(1))-1] = float(m.group(4))
+                    self.atom_to_mol[int(m.group(1))] = int(m.group(2))
+                    self.molecules[int(m.group(2))-1].append([
+                        int(m.group(1))-1,
+                        int(m.group(3))])
+        self.nmols = len(self.molecules.keys())
+        for k, v in self.molecules.items():
+            self.molecules[k] = np.array(v)
 
-    def get_mol_charges(self, n):
+    def _parse_trajectory(self):
         """
-        get molecule charges
+        parse the trajectory file
         """
-        datfile = open(self.data_file)
-        for j in range(0, 4):
-            datfile.readline()
-        atomcharges = [0 for x in range(0, n)]
-        mol = [0 for x in range(0, n)]
-        foundatoms = False
-        readingcharges = True
-        while not foundatoms:
-            line = datfile.readline()
-            line = line.split()
-            if len(line) > 0:
-                if line[0] == 'Atoms':
-                    foundatoms = True
-                    datfile.readline()
-        while readingcharges:
-            line = datfile.readline()
-            line = line.split()
-            if len(line) >= 6:
-                atomcharges[int(line[0]) - 1] = float(line[3])
-                mol[int(line[0]) - 1] = int(line[1])
-            else:
-                readingcharges = False
-        nummol = max(mol)
-        molcharges = [0 for x in range(0, nummol)]
-        for atom in range(0, n):
-            molcharges[mol[atom] - 1] += atomcharges[atom]
-        datfile.close()
-        return molcharges, atomcharges, n
+        self.box_size = []
+        self.traj_timesteps = []
+        trajectory = []
+        timestep_label = "ITEM: TIMESTEP"
+        # box_label "ITEM: BOX BOUNDS"
+        # traj_label, "ITEM: ATOMS id type x y z vx vy vz mol"
+        box_pattern = re.compile("^([0-9\.-]+)\s+([0-9\.-]+)$")
+        traj_pattern = re.compile("\s*(\d+)\s+(\d+)\s+([0-9eE\.+-]+)\s+([0-9eE\.+-]+)\s+"
+                                  "([0-9eE\.+-]+)\s+"
+                                  "([0-9eE\.+-]+)\s+"
+                                "([0-9eE\.+-]+)\s+([0-9eE\.+-]+)\s+(\d+)\s*")
+        parse_timestep = False
+        with open(self.trajectory_file) as tf:
+            for line in tf:
+                if timestep_label in line:
+                    parse_timestep = True
+                    continue
+                if parse_timestep:
+                    self.traj_timesteps.append(float(line))
+                    parse_timestep = False
+                if box_pattern.search(line) and len(self.traj_timesteps) == 1:
+                        m = box_pattern.search(line)
+                        #self.box_size.append(m.group(1))
+                        self.box_size.append(float(m.group(2)))
+                if traj_pattern.search(line):
+                    m = traj_pattern.search(line)
+                    line_data = []
+                    line_data.append(int(m.group(1))-1)
+                    line_data.append(self.atomic_masses[int(m.group(2))])
+                    line_data.extend([float(x) for i, x in enumerate(
+                        m.groups()) if i+1 > 2 and i+1 < 9])
+                    line_data.append(int(m.group(9)))
+                    trajectory.append(tuple(line_data))
+        traj_dtype = np.dtype([('Atoms_id'.encode("ascii"), np.int64),
+                               ('mass'.encode("ascii"), np.float64),
+                               ('x'.encode("ascii"), np.float64),
+                               ('y'.encode("ascii"), np.float64),
+                               ('z'.encode("ascii"), np.float64),
+                               ('vx'.encode("ascii"), np.float64),
+                               ('vy'.encode("ascii"), np.float64),
+                               ('vz'.encode("ascii"), np.float64),
+                               ('mol'.encode("ascii"), np.int64)])
+        self.trajectory = np.array(trajectory, dtype=traj_dtype)
 
-    def get_mol_charge_dict(self, molcharges, moltypel, moltype):
+    def _set_mol_masses_and_charges(self):
         """
-        molecule charges as dict
+        set the charge and mass for each molecule
         """
-        molcharge = {}
-        for molecules in range(0, len(moltypel)):
-            molcharge[moltypel[molecules]] = molcharges[
-                moltype.index(molecules)]
-        return molcharge
-
-    def get_mols(self):
-        # determines molecule types and number of each molecule type
-        # also creates a list of molecule type of each molecule
-        datfile = open(self.data_file)
-        datfile.readline()
-        datfile.readline()
-        nummoltype = []
-        moltypel = []
-        moltype = []
-        readingmolecules = True
-        while readingmolecules == True:
-            line = datfile.readline()
-            line = line.split()
-            if len(line) == 4:
-                nummoltype.append(int(line[1]))
-                moltypel.append(line[2])
-            else:
-                readingmolecules = False
-        for i in range(0, len(moltypel)):
-            for j in range(0, nummoltype[i]):
-                moltype.append(int(i))
-        datfile.close()
-        return nummoltype, moltypel, moltype
-
-    def get_box_size(self):
-        # uses trjectory file to get the length of box sides
-        trjfile = open(self.trajectory_file)
-        for i in range(0, 5):
-            trjfile.readline()
-        xbounds = trjfile.readline()
-        xbounds = xbounds.split()
-        ybounds = trjfile.readline()
-        ybounds = ybounds.split()
-        zbounds = trjfile.readline()
-        zbounds = zbounds.split()
-        Lx = float(xbounds[1]) - float(xbounds[0])
-        Lx2 = Lx / 2
-        Ly = float(ybounds[1]) - float(ybounds[0])
-        Ly2 = Ly / 2
-        Lz = float(zbounds[1]) - float(zbounds[0])
-        Lz2 = Lz / 2
-        trjfile.close()
-        return Lx, Lx2, Ly, Ly2, Lz, Lz2
-
-    def get_columns(self):
-        # defines the columns each data type is in in the trjectory file
-        trjfile = open(self.trajectory_file)
-        for j in range(0, 8):
-            trjfile.readline()
-        inline = trjfile.readline()
-        inline = inline.split()
-        inline.remove('ITEM:')
-        inline.remove('ATOMS')
-        xcol = inline.index('x')
-        ycol = inline.index('y')
-        zcol = inline.index('z')
-        molcol = inline.index('mol')
-        typecol = inline.index('type')
-        trjfile.close()
-        return xcol, ycol, zcol, molcol, typecol
-
-    def get_mass(self):
-        # returns a dictionary of the mass of each atom type
-        atommass = {}
-        foundmass = False
-        readingmasses = True
-        atomnum = 1
-        datfile = open(self.data_file)
-        for i in range(0, 4):
-            datfile.readline()
-        while not foundmass:
-            line = datfile.readline()
-            line = line.split()
-            if len(line) > 0:
-                if line[0] == 'Masses':
-                    foundmass = True
-                    datfile.readline()
-        while readingmasses:
-            line = datfile.readline()
-            line = line.split()
-            if len(line) > 0:
-                if int(line[0]) == atomnum:
-                    atommass[int(line[0])] = float(line[1])
-                    atomnum += 1
-                else:
-                    readingmasses = False
-            else:
-                readingmasses = False
-        datfile.close()
-        return atommass
-
-    def get_trajectory(self, trjfile, n, line, xcol, ycol, zcol, molcol,
-                       typecol):
-        # reads data from trjectory file into precreated arrays
-        x = np.zeros(n)
-        y = np.zeros(n)
-        z = np.zeros(n)
-        mol = np.zeros(n)
-        atype = np.zeros(n)
-        #
-        for j in range(line, line+9):
-            trjfile.readline()
-        for a in range(0, n):
-            inline = trjfile.readline()
-            inline = inline.split()
-            x[a] = inline[xcol]
-            y[a] = inline[ycol]
-            z[a] = inline[zcol]
-            mol[a] = inline[molcol]
-            atype[a] = inline[typecol]
-        #trjfile.close()
-        return x, y, z, mol, atype
-
-    def getnum(self):
-        # uses the trjectory file and returns the number of lines and the number of atoms
-        trjfile = open(self.trajectory_file)
-        for i in range(0, 3):
-            trjfile.readline()
-        natoms = int(trjfile.readline())
-        nlines = len(trjfile.readlines())
-        ntimesteps = int(nlines / (natoms + 9))
-        trjfile.close()
-        return nlines, natoms, ntimesteps
-
-    def center_of_mass(self):
-        """
-        calculates the center of mass for each molecule
-        """
-        comx = []
-        comy = []
-        comz = []
-        line = 0
-
-        nlines, natoms, ntimesteps = self.getnum()
-        Lx, Lx2, Ly, Ly2, Lz, Lz2 = self.get_box_size()
-        xcol, ycol, zcol, molcol, typecol = self.get_columns()
-        atomic_mass_dict = self.get_mass()
-
-        amass = np.zeros(natoms)
-
-        trjfile = open(self.trajectory_file)
-
-        while line < nlines:
-            (x, y, z, mol, atype) = self.get_trajectory(trjfile, natoms, line,
-                                                        xcol,
-                                                        ycol,
-                                                        zcol, molcol, typecol)
-            nummol = int(max(mol))
-            molmass = np.zeros(nummol)
-            for atom in range(0, natoms):
-                amass[atom] = atomic_mass_dict[atype[atom]]
-                molmass[mol[atom] - 1] += amass[atom]
-            comxt, comyt, comzt = calccomf(natoms, nummol, x, y, z, mol,
-                                           amass, molmass, Lx, Ly, Lz,
-                                           Lx2, Ly2, Lz2)
-            comx.append(comxt)
-            comy.append(comyt)
-            comz.append(comzt)
-            line += natoms + 9
-
-        trjfile.close()
-
-        return comx, comy, comz
+        self.mol_charges = np.zeros(self.nmols)  # mol_num: mol charge,
+        # np arrays
+        self.mol_masses = np.zeros(self.nmols)  # mol_num: mol charge, np array
+        for id, val in self.molecules.items():
+            self.mol_masses[id-1] = sum([self.atomic_masses[atom[1]] for
+                                        atom in val])
+            self.mol_charges[id-1] = sum([self.atomic_charges[atom[0]-1] for
+                                       atom in val])
 
     @property
     def timestep(self):
         return self.llog.timestep
+
+    def center_of_mass(self):
+        """
+        calculates the center of mass of each molecule for each time step.
+        """
+        self.com = []
+        for step in range(len(self.traj_timesteps)):
+            tmp_mol = []
+            trajectory = self.trajectory[step*self.natoms:(step+1)*self.natoms]
+            trajectory = np.sort(trajectory, order="Atoms_id".encode("ascii"))
+            for mol_id in range(self.nmols):
+                mol_coords_structured = trajectory[
+                    self.molecules[mol_id][:,0]][["x","y","z"]].copy()
+                mol_coords = mol_coords_structured.view(
+                    np.float64).reshape(mol_coords_structured.shape + (-1,))
+                pbc_wrap(mol_coords, self.box_size)
+                mol_atom_masses_structured = trajectory[
+                    self.molecules[mol_id][:,0]]["mass"].copy()
+                mol_atom_masses = mol_atom_masses_structured.view(
+                    np.float64).reshape(mol_atom_masses_structured.shape)
+                tmp_mol.append([np.sum(mol_coords[:, dim] *
+                                       mol_atom_masses)/ np.sum(mol_atom_masses) for dim in range(3)])
+            self.com.append(tmp_mol)
 
     def jump(self, trajectory_file=None):
         """
@@ -393,92 +296,20 @@ class LammpsRun(object):
         return tsjump
 
 
-class CoordinationNumber(object):
+def pbc_wrap(array, box_size):
     """
-    This program finds the first three local minima
-    and finds the coordination number integrating until
-    there. Na-H20 represents the coordination number
-    for water around sodium.
+    wrap the array for molecule coordinates around the periodic boundary
+
+    Args:
+        array (numpy.ndarray): molecule coordinates, [[x1,y1,z1],[x2,y2,z2],..]
+        box_size (list): [x_length, y_length, z_length]
     """
-
-    def compute(self, output, nummoltype, moltypel, V):
-        output['Coordination_Number'] = {}
-        output['Coordination_Number'][
-            'units'] = 'Minima in angstroms, Coordination numbers in Angstroms'
-        output['Coordination_Number'][
-            'explanation'] = 'This program finds the first three local minima ' \
-                             'and finds the coordination number integrating until ' \
-                             'there. Na-H20 represents the coordination number ' \
-                             'for water around sodium.'
-        pairlist = list(output['RDF'].keys())
-        pairlist.remove('units')
-        pairlist.remove('distance')
-        r = output['RDF']['distance']
-        for i in range(0, len(pairlist)):
-            g = output['RDF'][pairlist[i]]
-            split = pairlist[i].split('-')
-            mol1 = split[0]
-            mol2 = split[1]
-            (minima, index) = self.get_minima(g, r)
-            output['Coordination_Number'][
-                '{0} around {1}'.format(mol1, mol2)] = {}
-            integral = self.integrate(g, r, nummoltype, moltypel, V, mol1)
-            output['Coordination_Number']['{0} around {1}'.format(mol1, mol2)][
-                'Cumulative_Integral'] = copy.deepcopy(integral)
-            output['Coordination_Number']['{0} around {1}'.format(mol1, mol2)][
-                'Minima'] = minima
-            coord = []
-            for j in range(0, len(minima)):
-                coord.append(integral[index[j]])
-            output['Coordination_Number']['{0} around {1}'.format(mol1, mol2)][
-                'Coordination_Numbers'] = coord
-            if mol2 != mol1:
-                output['Coordination_Number'][
-                    '{0} around {1}'.format(mol2, mol1)] = {}
-                integral = self.integrate(g, r, nummoltype, moltypel, V, mol2)
-                output['Coordination_Number'][
-                    '{0} around {1}'.format(mol2, mol1)][
-                    'Cumulative_Integral'] = copy.deepcopy(integral)
-                output['Coordination_Number'][
-                    '{0} around {1}'.format(mol2, mol1)]['Minima'] = minima
-                coord = []
-                for j in range(0, len(minima)):
-                    coord.append(integral[index[j]])
-                output['Coordination_Number'][
-                    '{0} around {1}'.format(mol2, mol1)][
-                    'Coordination_Numbers'] = coord
-        return output
-
-    def get_minima(self, g, r):
-        """
-        return first 3 minima
-        """
-        foundpositive = False
-        minima = []
-        index = []
-        i = 0
-        while not foundpositive:
-            if g[i] > 1:
-                foundpositive = True
-                i += 1
-            else:
-                i += 1
-        while len(minima) < 3 and i < len(g) - 2:
-            if g[i - 1] > g[i] and g[i + 1] > g[i]:
-                minima.append(r[i])
-                index.append(i)
-            i += 1
-        return minima, index
-
-    def integrate(self, g, r, nummoltype, moltypel, V, mol):
-        integrallist = []
-        for i in range(0, len(g)):
-            integrallist.append(
-                g[i] * nummoltype[moltypel.index(mol)] / V * 4 * np.pi * r[
-                    i] ** 2)
-        integral = cumtrapz(integrallist, x=r)
-        integral = integral.tolist()
-        return integral
+    ref = array[0,0]
+    for i in range(3):
+        array[:, i] = np.where((array[:, i] - ref) >= box_size[i] / 2,
+                               array[:, i] - box_size[i] / 2, array[:, i])
+        array[:, i] = np.where((array[:, i] - ref) < -box_size[i] / 2,
+                               array[:, i] + box_size[i] / 2, array[:, i])
 
 
 def _list2float(seq):
