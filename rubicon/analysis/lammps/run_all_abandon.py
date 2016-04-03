@@ -14,11 +14,10 @@ import os
 import math
 import time
 
-from rubicon.analysis.lammps.utils import MeanSquareDisplacement
-from rubicon.analysis.lammps.properties import CenterOfMass, \
-    NernstEinsteinConductivity, Conductivity
-from rubicon.analysis.lammps.radial_distribution import \
-    RadialDistributionPure, SiteRadialDistribution
+from rubicon.analysis.lammps.properties import MeanSquareDisplacement
+from rubicon.analysis.lammps.properties_abandon import CenterOfMass, \
+    NernstEinsteinConductivity, Conductivity, MeanSquareDisplacement, \
+    SiteRadialDistribution, RadialDistributionPure
 from rubicon.io.lammps.outputs import CoordinationNumber, LammpsRun
 from rubicon.analysis.lammps.ion_pair import IonPair
 
@@ -139,7 +138,7 @@ def test_new():
 
     lrun = LammpsRun(datfilename, trjfilename, logfilename)
 
-    comx, comy, comz = lrun.center_of_mass()
+    comx, comy, comz = lrun._weighted_average()
 
 
 if __name__ == '__main__':

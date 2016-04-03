@@ -8,11 +8,8 @@ This module implements classes for processing Lammps output files.
 """
 
 import re
-import copy
 from io import open
 from collections import defaultdict
-
-from scipy.integrate import cumtrapz
 
 import numpy as np
 
@@ -55,63 +52,50 @@ class LammpsLog(MSONable):
     @classmethod
     def from_file(cls, filename):
         """
-        Parses the log file. 
+        Parse the log file.
         """
         md = 0  # To avoid reading the minimization data steps
         header = 0
         footer_blank_line = 0
         llog = {}
-
         with open(filename, 'r') as logfile:
             total_lines = len(logfile.readlines())
             logfile.seek(0)
-
             for line in logfile:
-
                 # timestep
                 time = re.search('timestep\s+([0-9]+)', line)
                 if time:
                     timestep = float(time.group(1))
                     llog['timestep'] = timestep
-
                 # total steps of MD
                 steps = re.search('run\s+([0-9]+)', line)
                 if steps:
                     md_step = float(steps.group(1))
                     md = 1
-
                 # save freq to log
                 thermo = re.search('thermo\s+([0-9]+)', line)
                 if thermo:
                     log_save_freq = float(thermo.group(1))
-
                 # log format
                 format = re.search('thermo_style.+', line)
                 if format:
                     data_format = format.group().split()[2:]
-
                 if all(isinstance(x, float) for x in
                        list(_list2float(line.split()))) and md == 1: break
-
                 header += 1
-
             # note: we are starting from the "break" above
             for line in logfile:
                 if line == '\n':
                     footer_blank_line += 1
-            print(int(md_step / log_save_freq))
             if total_lines >= header + md_step / log_save_freq:
                 rawdata = np.genfromtxt(fname=filename, dtype=float,
                                         skip_header=header, skip_footer=int(
                         total_lines - header - md_step / log_save_freq - 1) - footer_blank_line)
-
             else:
                 rawdata = np.genfromtxt(fname=filename, dtype=float,
                                         skip_header=header, skip_footer=1)
-
             for column, property in enumerate(data_format):
                 llog[property] = rawdata[:, column]
-
             return LammpsLog(llog)
 
     @property
@@ -122,12 +106,12 @@ class LammpsLog(MSONable):
     def as_dict(self):
         return {"@module": self.__class__.__module__,
                 "@class": self.__class__.__name__,
-                "llog": self.llog,
+                "lammpslog": self.llog,
                 "avgs": self.avgs}
 
     @classmethod
     def from_dict(cls, d):
-        return LammpsLog(d['llog'], d['avgs'])
+        return LammpsLog(d['lammpslog'], d['avgs'])
 
 
 class LammpsRun(object):
@@ -144,7 +128,7 @@ class LammpsRun(object):
         self.data_file = data_file
         self.trajectory_file = trajectory_file
         self.log_file = log_file
-        self.llog = LammpsLog.from_file(log_file)
+        self.lammpslog = LammpsLog.from_file(log_file)
         self._parse_data()
         self._set_mol_masses_and_charges()
         self._parse_trajectory()
@@ -247,20 +231,29 @@ class LammpsRun(object):
 
     @property
     def timestep(self):
-        return self.llog.timestep
+        return self.lammpslog.timestep
 
-    def center_of_mass(self):
+    def _weighted_average(self, param=["x", "y", "z"]):
         """
-        calculates the center of mass of each molecule for each time step.
+        calculates the weighted average 'param' of each molecule for each
+        time step.
+
+        Args:
+            param (list): the molecular parameters for which the weighted
+                average is to be computed
+
+        Returns:
+            wavg (list): list of weighted averages of the molecular property for
+                each timestep
         """
-        self.com = []
+        wavg = []
         for step in range(len(self.traj_timesteps)):
             tmp_mol = []
             trajectory = self.trajectory[step*self.natoms:(step+1)*self.natoms]
             trajectory = np.sort(trajectory, order="Atoms_id".encode("ascii"))
             for mol_id in range(self.nmols):
                 mol_coords_structured = trajectory[
-                    self.molecules[mol_id][:,0]][["x","y","z"]].copy()
+                    self.molecules[mol_id][:,0]][param].copy()
                 mol_coords = mol_coords_structured.view(
                     np.float64).reshape(mol_coords_structured.shape + (-1,))
                 pbc_wrap(mol_coords, self.box_size)
@@ -268,32 +261,38 @@ class LammpsRun(object):
                     self.molecules[mol_id][:,0]]["mass"].copy()
                 mol_atom_masses = mol_atom_masses_structured.view(
                     np.float64).reshape(mol_atom_masses_structured.shape)
-                tmp_mol.append([np.sum(mol_coords[:, dim] *
+                tmp_mol.append([np.dot(mol_coords[:, dim],
                                        mol_atom_masses)/ np.sum(mol_atom_masses) for dim in range(3)])
-            self.com.append(tmp_mol)
+            wavg.append(tmp_mol)
+        return np.array(wavg)
 
-    def jump(self, trajectory_file=None):
+    @property
+    def mol_traj(self):
         """
-        trajectory print frequency
+        compute the position of each molecule at each timestep
         """
-        if trajectory_file:
-            traj_file = trajectory_file
-        else:
-            traj_file = self.trajectory_file
-        if isinstance(traj_file, list):
-            trjfile = open(traj_file[0])
-        else:
-            trjfile = open(traj_file)
-        trjfile.readline()
-        t1 = trjfile.readline()
-        t1 = int(t1)
-        trjfile.readline()
-        n = int(trjfile.readline())
-        for i in range(0, n + 6):
-            trjfile.readline()
-        t2 = int(trjfile.readline())
-        tsjump = t2 - t1
-        return tsjump
+        return self._weighted_average(param=["x", "y", "z"])
+
+    @property
+    def mol_vel(self):
+        """
+         compute the velcoity of each molecule at each timestep
+         """
+        return self._weighted_average(param=["vx", "vy", "vz"])
+
+    @property
+    def current(self):
+        """
+        net molecular current for each timestep
+        J = sum(v_mol * charge_mol)
+        """
+        jx = np.dot(self.mol_vel[:, :, 0], self.mol_charges[:])
+        jy = np.dot(self.mol_vel[:, :, 1], self.mol_charges[:])
+        jz = np.dot(self.mol_vel[:, :, 2], self.mol_charges[:])
+        jx = jx.reshape(jx.shape+(-1,))
+        jy = jy.reshape(jy.shape+(-1,))
+        jz = jz.reshape(jz.shape+(-1,))
+        return np.concatenate((jx, jy, jz), axis=1)
 
 
 def pbc_wrap(array, box_size):

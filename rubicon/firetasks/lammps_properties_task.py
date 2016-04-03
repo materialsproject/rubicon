@@ -11,10 +11,9 @@ from pymongo import MongoClient
 
 # TODO: Refactor PackMol module to python code and merge the ff_dev branch in
 #  pymatgen to master
-from rubicon.analysis.lammps.utils import MeanSquareDisplacement
-from rubicon.analysis.lammps.properties import CenterOfMass, \
-    NernstEinsteinConductivity
-from rubicon.analysis.lammps.radial_distribution import RadialDistributionPure
+from rubicon.analysis.lammps.properties import MeanSquareDisplacement
+from rubicon.analysis.lammps.properties_abandon import CenterOfMass, \
+    NernstEinsteinConductivity, MeanSquareDisplacement, RadialDistributionPure
 from rubicon.io.lammps.outputs import LammpsRun
 
 from fireworks import FireTaskBase, explicit_serialize

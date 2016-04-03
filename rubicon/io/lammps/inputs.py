@@ -21,17 +21,16 @@ class LammpsData(object):
     Lammps data input file
     """
 
-    def __init__(self, ffmol_list, mols, num_mols, box_size, packed_molecule):
+    def __init__(self, ffmol_list, mols, nmols, box_size, packed_molecule):
         self.ffmol_list = ffmol_list
         self.mols = mols
-        self.num_mols = num_mols
+        self.nmols = nmols
         self.box_size = box_size
         self.packed_molecule = packed_molecule
         self.lines = []
         self.num_improper_dihedrals = None
 
     def _set_gff_types(self, ffmol_list):
-
         """
         set force field information about number of atom types, bond types etc.
         """
@@ -48,7 +47,7 @@ class LammpsData(object):
         dihedral_type_list = []
         improper_type_list = []
         lines.append('LAMMPS data File\n')
-        for mol, num_mols in zip(self.mols, self.num_mols):
+        for mol, num_mols in zip(self.mols, self.nmols):
             lines.append("{} {} {} {}".format('#', num_mols,
                                               mol.site_properties["mol_name"][
                                                   0],
@@ -83,7 +82,6 @@ class LammpsData(object):
         """
         set force field information about number of atom types, bond types etc.
         """
-
         lines = []
         num_atoms = 0
         num_bonds = 0
@@ -91,7 +89,7 @@ class LammpsData(object):
         num_dihedrals = 0
         num_impropers = 0
         num_total_dih = 0
-        for ffmol, num_mols in zip(ffmol_list, self.num_mols):
+        for ffmol, num_mols in zip(ffmol_list, self.nmols):
             gff = ffmol.gff
         top = ffmol.top
         top._get_ff_dihedrals(gff.dihedrals, top.dihedrals, gff.atom_gaff)
@@ -135,14 +133,13 @@ class LammpsData(object):
         return '\n'.join(lines)
 
     def _set_masses(self, ffmol_list):
-
         lines = []
         num_atoms = 0
         mol_index = 1
         element_list = []
         lines.append('Masses\n')
         for ffmol, mol, num_mols in zip(ffmol_list, self.mols,
-                                        self.num_mols):
+                                        self.nmols):
             gff = ffmol.gff
             if gff.masses is not None:
                 for i, v in enumerate(gff.masses.values()):
@@ -162,7 +159,6 @@ class LammpsData(object):
         return '\n'.join(lines)
 
     def _set_pair_coeffs(self, ffmol_list):
-
         lines = []
         num_atoms = 0
         mol_index = 1
@@ -225,7 +221,6 @@ class LammpsData(object):
         return '\n'.join(lines)
 
     def _set_angle_coeffs(self, ffmol_list):
-
         lines = []
         num_atoms = 0
         element_list = []
@@ -264,7 +259,6 @@ class LammpsData(object):
         return '\n'.join(lines)
 
     def _set_dihedral_coeffs(self, ffmol_list):
-
         lines = []
         num_atoms = 0
         j = 0
@@ -359,7 +353,7 @@ class LammpsData(object):
         i = 0
         mol_index = 0
         for ffmol, mol, num_mols in zip(ffmol_list, self.mols,
-                                        self.num_mols):
+                                        self.nmols):
             gff = ffmol.gff
             top = ffmol.top
             if gff.masses is not None:
@@ -415,7 +409,7 @@ class LammpsData(object):
         mol_index = 0
         lines.append('Bonds\n')
         for ffmol, mol, num_mols in zip(ffmol_list, self.mols,
-                                        self.num_mols):
+                                        self.nmols):
             gff = ffmol.gff
             top = ffmol.top
             if gff.bonds:
@@ -467,7 +461,7 @@ class LammpsData(object):
         mol_index = 0
         lines.append('Angles\n')
         for ffmol, mol, num_mols in zip(ffmol_list, self.mols,
-                                        self.num_mols):
+                                        self.nmols):
             gff = ffmol.gff
             top = ffmol.top
             if gff.angles:
@@ -520,7 +514,7 @@ class LammpsData(object):
         mol_index = 0
         lines.append('Dihedrals\n')
         for ffmol, mol, num_mols in zip(ffmol_list, self.mols,
-                                        self.num_mols):
+                                        self.nmols):
             gff = ffmol.gff
             top = ffmol.top
             if gff.dihedrals is not None:
@@ -587,7 +581,7 @@ class LammpsData(object):
 
         lines.append('Impropers\n')
         for ffmol, mol, num_mols in zip(ffmol_list, self.mols,
-                                        self.num_mols):
+                                        self.nmols):
             gff = ffmol.gff
             top = ffmol.top
             if gff.imdihedrals is not None:
@@ -673,6 +667,5 @@ class LammpsData(object):
         """
         write lammps data input file
         """
-
         with open(filename, 'w') as f:
             f.write(self.__str__())
