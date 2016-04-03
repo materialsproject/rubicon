@@ -173,7 +173,7 @@ class LammpsRun(object):
         parse the trajectory file
         """
         self.box_size = []
-        self.traj_timesteps = []
+        traj_timesteps = []
         trajectory = []
         timestep_label = "ITEM: TIMESTEP"
         # box_label "ITEM: BOX BOUNDS"
@@ -190,9 +190,9 @@ class LammpsRun(object):
                     parse_timestep = True
                     continue
                 if parse_timestep:
-                    self.traj_timesteps.append(float(line))
+                    traj_timesteps.append(float(line))
                     parse_timestep = False
-                if box_pattern.search(line) and len(self.traj_timesteps) == 1:
+                if box_pattern.search(line) and len(traj_timesteps) == 1:
                         m = box_pattern.search(line)
                         #self.box_size.append(m.group(1))
                         self.box_size.append(float(m.group(2)))
@@ -215,6 +215,12 @@ class LammpsRun(object):
                                ('vz'.encode("ascii"), np.float64),
                                ('mol'.encode("ascii"), np.int64)])
         self.trajectory = np.array(trajectory, dtype=traj_dtype)
+        self.traj_timesteps = np.array(traj_timesteps, dtype=np.float64)
+        for step in range(self.traj_timesteps.size):
+            begin = step * self.natoms
+            end = (step + 1) * self.natoms
+            self.trajectory[begin:end] = np.sort(self.trajectory[begin:end],
+                                                 order="Atoms_id".encode("ascii"))
 
     def _set_mol_masses_and_charges(self):
         """
@@ -233,66 +239,93 @@ class LammpsRun(object):
     def timestep(self):
         return self.lammpslog.timestep
 
-    def _weighted_average(self, param=["x", "y", "z"]):
+    def _weighted_average(self, step, mol_id, mol_vector):
         """
-        calculates the weighted average 'param' of each molecule for each
-        time step.
+        calculates the weighted average of mol_vector of each molecule for
+        each time step.
 
         Args:
+            step (int): time step
+            mol_id (int): molecule id
+            mol_vector (numpy array): the vector to be averaged
+
+        Returns:
+            numpy array of weighted averages in x,y, z directions
+        """
+        mol_masses = self._get_mol_masses(step, mol_id)
+        return np.array([np.dot(mol_vector[:, dim],
+                                mol_masses) / np.sum(mol_masses) for dim in range(3)])
+
+    def _get_mol_vector(self, step, mol_id, param=["x", "y", "z"]):
+        """
+        Return the vector paramter "param" for the given step and molecule id
+
+        Args:
+            step (int): time step
+            mol_id (int): molecule id
             param (list): the molecular parameters for which the weighted
                 average is to be computed
 
         Returns:
-            wavg (list): list of weighted averages of the molecular property for
-                each timestep
+            2D numpy array of vector
         """
-        wavg = []
-        for step in range(len(self.traj_timesteps)):
-            tmp_mol = []
-            trajectory = self.trajectory[step*self.natoms:(step+1)*self.natoms]
-            trajectory = np.sort(trajectory, order="Atoms_id".encode("ascii"))
-            for mol_id in range(self.nmols):
-                mol_coords_structured = trajectory[
-                    self.molecules[mol_id][:,0]][param].copy()
-                mol_coords = mol_coords_structured.view(
-                    np.float64).reshape(mol_coords_structured.shape + (-1,))
-                pbc_wrap(mol_coords, self.box_size)
-                mol_atom_masses_structured = trajectory[
-                    self.molecules[mol_id][:,0]]["mass"].copy()
-                mol_atom_masses = mol_atom_masses_structured.view(
-                    np.float64).reshape(mol_atom_masses_structured.shape)
-                tmp_mol.append([np.dot(mol_coords[:, dim],
-                                       mol_atom_masses)/ np.sum(mol_atom_masses) for dim in range(3)])
-            wavg.append(tmp_mol)
-        return np.array(wavg)
+        begin = step * self.natoms
+        end = (step + 1) * self.natoms
+        mol_vector_structured = \
+            self.trajectory[begin:end][self.molecules[mol_id][:,0]][param]
+        new_shape = mol_vector_structured.shape + (-1,)
+        mol_vector = mol_vector_structured.view(np.float64).reshape(new_shape)
+        return mol_vector
+
+    def _get_mol_masses(self, step, mol_id):
+        """
+        Return the masses for the given step and molecule id
+
+        Args:
+            step (int): time step
+            mol_id (int): molecule id
+
+        Returns:
+            1D numpy array of masses
+        """
+        begin = step * self.natoms
+        end = (step + 1) * self.natoms
+        mol_masses_structured = \
+        self.trajectory[begin:end][self.molecules[mol_id][:, 0]]["mass"]
+        new_shape = mol_masses_structured.shape
+        mol_masses = mol_masses_structured.view(np.float64).reshape(new_shape)
+        return mol_masses
 
     @property
-    def mol_traj(self):
+    def mol_trajectory(self):
         """
         compute the position of each molecule at each timestep
         """
-        return self._weighted_average(param=["x", "y", "z"])
+        traj = []
+        for step in range(self.traj_timesteps.size):
+            tmp_mol = []
+            for mol_id in range(self.nmols):
+                mol_coords = self._get_mol_vector(step, mol_id,
+                                                  param=["x", "y", "z"])
+                pbc_wrap(mol_coords, self.box_size)
+                tmp_mol.append(self._weighted_average(step, mol_id, mol_coords))
+            traj.append(tmp_mol)
+        return np.array(traj)
 
     @property
-    def mol_vel(self):
+    def mol_velocity(self):
         """
          compute the velcoity of each molecule at each timestep
          """
-        return self._weighted_average(param=["vx", "vy", "vz"])
-
-    @property
-    def current(self):
-        """
-        net molecular current for each timestep
-        J = sum(v_mol * charge_mol)
-        """
-        jx = np.dot(self.mol_vel[:, :, 0], self.mol_charges[:])
-        jy = np.dot(self.mol_vel[:, :, 1], self.mol_charges[:])
-        jz = np.dot(self.mol_vel[:, :, 2], self.mol_charges[:])
-        jx = jx.reshape(jx.shape+(-1,))
-        jy = jy.reshape(jy.shape+(-1,))
-        jz = jz.reshape(jz.shape+(-1,))
-        return np.concatenate((jx, jy, jz), axis=1)
+        velocity = []
+        for step in range(self.traj_timesteps.size):
+            tmp_mol = []
+            for mol_id in range(self.nmols):
+                mol_velocities = self._get_mol_vector(step, mol_id,
+                                                      param=["vx", "vy", "vz"])
+                tmp_mol.append(self._weighted_average(step, mol_id, mol_velocities))
+            velocity.append(tmp_mol)
+        return np.array(velocity)
 
 
 def pbc_wrap(array, box_size):

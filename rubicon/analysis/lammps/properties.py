@@ -20,14 +20,36 @@ class TransportProperties(object):
         self.lammpsrun = lammpsrun
 
     def get_integrated_correlation(self, array):
+        """
+        compute the autocorrelation and the integrate it wrt time
+        """
         auto_corr_full = np.correlate(array, array,mode="full")
         auto_corr = auto_corr_full[auto_corr_full.size / 2:]
         time = self.lammpsrun.traj_timesteps * self.lammpsrun.timestep
         return sp_integrate.simps(auto_corr, time)
 
     @property
+    def current(self):
+        """
+        net molecular current for each timestep
+        J = sum(v_mol * charge_mol)
+        """
+        mol_velocity = self.lammpsrun.mol_velocity
+        mol_charges = self.lammpsrun.mol_charges
+        jx = np.dot(mol_velocity[:, :, 0], mol_charges[:])
+        jy = np.dot(mol_velocity[:, :, 1], mol_charges[:])
+        jz = np.dot(mol_velocity[:, :, 2], mol_charges[:])
+        jx = jx.reshape(jx.shape + (-1,))
+        jy = jy.reshape(jy.shape + (-1,))
+        jz = jz.reshape(jz.shape + (-1,))
+        return np.concatenate((jx, jy, jz), axis=1)
+
+    @property
     def electrical_conductivity(self):
-        mol_current = self.lammpsrun.current
+        """
+        TODO: fix the units
+        """
+        mol_current = self.current
         kappa = [self.get_integrated_correlation(mol_current[:,dim]) for dim
                  in range(3)]
         return kappa
@@ -42,6 +64,9 @@ class TransportProperties(object):
 
     @property
     def viscosity(self, skip):
+        """
+        TODO: Fix units
+        """
         if not self.lammpsrun.lammpslog.get('pxy'):
             print("no pressure data")
             raise KeyError
