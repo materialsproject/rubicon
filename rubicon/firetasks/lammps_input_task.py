@@ -8,7 +8,7 @@ import shlex
 import subprocess
 
 from rubicon.io.lammps.inputs import LammpsAmberData
-from rubicon.io.lammps.sets import DictLammpsInputSet_2
+from rubicon.io.lammps.sets import DictLammpsInputSet_to_be_replaced
 from rubicon.io.packmol.packmol import PackmolRunner
 
 from fireworks import FireTaskBase, explicit_serialize, FWAction
@@ -50,8 +50,8 @@ class WritelammpsInputTask(FireTaskBase):
         data_lammps = LammpsAmberData(molecules, param_list["number"],
                                       param_list["inside box"],
                                       packed_molecule, gaussian_file)
-        data_lammps.to('mol_data.lammps')
-        control_lammps = DictLammpsInputSet_2()
+        data_lammps.write_input('mol_data.lammps')
+        control_lammps = DictLammpsInputSet_to_be_replaced()
         # control_lammps.get_lammps_control('Lammps.json',ensemble='npt',temp=300)
         control_lammps.get_lammps_control('Lammps.json', ensemble1='npt',
                                           ensemble2='nvt', temp=298)

@@ -19,7 +19,18 @@ from rubicon.io.amber.antechamber import AntechamberRunner
 __author__ = 'Navnidhi Rajput, Kiran Mathew'
 
 
-class LammpsAmberData(object):
+class LammpsData(object):
+    def __init__(self, structure):
+        self.structure = structure
+
+    def write_input(self, filename):
+        """
+        TODO: write a simple data file for the given structure
+        """
+        pass
+
+
+class LammpsAmberData(LammpsData):
     """
     Sets Lammps data input file using antechamber(amber) generated force field
     parameters
@@ -39,6 +50,7 @@ class LammpsAmberData(object):
         self.mols_number = mols_number
         self.box_size = box_size
         self.packed_molecule = packed_molecule
+        super(LammpsAmberData, self).__init__(self.packed_molecule)
         self.lines = []
         self.num_improper_dihedrals = None
         self.gaussian_file = gaussian_file
@@ -685,7 +697,7 @@ class LammpsAmberData(object):
 
         return '\n'.join(my_lammps_list)
 
-    def to(self, filename=None):
+    def write_input(self, filename=None):
         """
         write lammps data input file
         """
