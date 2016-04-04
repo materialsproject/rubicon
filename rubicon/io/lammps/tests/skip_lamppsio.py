@@ -8,11 +8,13 @@ import unittest
 from unittest import TestCase
 
 from pymatgen import Molecule
-from rubicon.io.amber.antechamber import AntechamberRunner
-from rubicon.io.lammps.inputs import LammpsData
+
+from rubicon.io.lammps.inputs import LammpsAmberData
 from rubicon.io.packmol.packmol import PackmolRunner
 
+
 __author__ = 'navnidhirajput'
+
 
 coords_n1c = [[4.522, 8.999, 5.512],
               [6.666, 9.383, 5.971],
@@ -85,13 +87,7 @@ class TestLmpInput(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        mols = [tfn, n1c, pc]
-        cls.ffmol = AntechamberRunner(mols)
-        cls.gff_list, top_list = cls.ffmol.get_ff_top_mol(mols, 'mol.pdb')
-        # cls.mols_in_box = PackmolRunner(mols, [{"number":1,"inside box":[0.,0.,0.,40.,40.,40.]},{"number":1},{"number":1}])
-        # mols_in_box_dict={"mols":[m.as_dict for m in cls.mols_in_box.mols],"param_list":cls.mols_in_box.param_list}
-        # with open("packmol_data.json",'w') as f:
-        #     json.dump(mols_in_box_dict,f,indent=4)
+        cls.mols = [tfn, n1c, pc]
         with open("packmol_data.json") as f:
             mol_in_box = json.load(f)
             mol_in_box["mols"] = [Molecule.from_dict(m) for m in
@@ -101,14 +97,17 @@ class TestLmpInput(TestCase):
 
             packmol.mols = mol_in_box["mols"]
             packmol.param_list = mol_in_box["param_list"]
-            cls.mols_in_box = packmol
+            cls.mols_in_box = mol_in_box
         super(TestLmpInput, cls).setUpClass()
 
     def test_str_(self):
-        data_lammps = LammpsData(self.ffmol, self.mols_in_box)
-        data_lammps._set_atom(self.ffmol, self.mols_in_box)
+        data_lammps = LammpsAmberData(
+            self.mols,
+            self.mols_in_box["param_list"]["number"],
+            self.mols_in_box["param_list"]["inside box"],
+            self.mols_in_box["mols"],
+            "mol.pdb")
         lammps_data = data_lammps.__str__()
-
         ans = """LAMMPS Data File
 
 # 1 mol 1 molecule

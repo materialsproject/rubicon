@@ -16,107 +16,13 @@ import numpy as np
 from monty.json import MSONable
 
 
-__author__ = 'Kiran Mathew, Navnidhi Rajput, Michael Humbert'
-
-
-class LammpsLog(MSONable):
-    """
-    Parser for LAMMPS log file (parse function).
-    Saves the output properties (log file) in the form of a dictionary (LOG)
-    with the key being the LAMMPS output property (see 'thermo_style custom'
-    command in the LAMMPS documentation).
-
-    For example, LOG['temp'] will return the temperature data array in the log
-    file.
-    """
-
-    def __init__(self, llog, avgs=None):
-        """
-        Args:
-            llog (dict):
-                Dictionary LOG has all the output property data as numpy 1D a
-                rrays with the property name as the key
-            avgs:
-                Dictionary of averages, will be generated automatically if
-                unspecified
-        """
-        self.llog = llog
-        if avgs:
-            self.avgs = avgs
-        else:
-            self.avgs = {}
-            # calculate the average
-            for key in self.llog.keys():
-                self.avgs[str(key)] = np.mean(self.llog[key])
-
-    @classmethod
-    def from_file(cls, filename):
-        """
-        Parse the log file.
-        """
-        md = 0  # To avoid reading the minimization data steps
-        header = 0
-        footer_blank_line = 0
-        llog = {}
-        with open(filename, 'r') as logfile:
-            total_lines = len(logfile.readlines())
-            logfile.seek(0)
-            for line in logfile:
-                # timestep
-                time = re.search('timestep\s+([0-9]+)', line)
-                if time:
-                    timestep = float(time.group(1))
-                    llog['timestep'] = timestep
-                # total steps of MD
-                steps = re.search('run\s+([0-9]+)', line)
-                if steps:
-                    md_step = float(steps.group(1))
-                    md = 1
-                # save freq to log
-                thermo = re.search('thermo\s+([0-9]+)', line)
-                if thermo:
-                    log_save_freq = float(thermo.group(1))
-                # log format
-                format = re.search('thermo_style.+', line)
-                if format:
-                    data_format = format.group().split()[2:]
-                if all(isinstance(x, float) for x in
-                       list(_list2float(line.split()))) and md == 1: break
-                header += 1
-            # note: we are starting from the "break" above
-            for line in logfile:
-                if line == '\n':
-                    footer_blank_line += 1
-            if total_lines >= header + md_step / log_save_freq:
-                rawdata = np.genfromtxt(fname=filename, dtype=float,
-                                        skip_header=header, skip_footer=int(
-                        total_lines - header - md_step / log_save_freq - 1) - footer_blank_line)
-            else:
-                rawdata = np.genfromtxt(fname=filename, dtype=float,
-                                        skip_header=header, skip_footer=1)
-            for column, property in enumerate(data_format):
-                llog[property] = rawdata[:, column]
-            return LammpsLog(llog)
-
-    @property
-    def timestep(self):
-        return self.llog['timestep']
-
-    @property
-    def as_dict(self):
-        return {"@module": self.__class__.__module__,
-                "@class": self.__class__.__name__,
-                "lammpslog": self.llog,
-                "avgs": self.avgs}
-
-    @classmethod
-    def from_dict(cls, d):
-        return LammpsLog(d['lammpslog'], d['avgs'])
+__author__ = "Kiran Mathew, Navnidhi Rajput, Michael Humbert"
+__email__ = "kmathew@lbl.gov"
 
 
 class LammpsRun(object):
     """
-    Parse the data file, trajectory file and the log file to extract
+    Parse the lammps data file, trajectory file and the log file to extract
     useful info about the system.
 
     Args:
@@ -226,14 +132,13 @@ class LammpsRun(object):
         """
         set the charge and mass for each molecule
         """
-        self.mol_charges = np.zeros(self.nmols)  # mol_num: mol charge,
-        # np arrays
-        self.mol_masses = np.zeros(self.nmols)  # mol_num: mol charge, np array
-        for id, val in self.molecules.items():
-            self.mol_masses[id-1] = sum([self.atomic_masses[atom[1]] for
+        self.mol_charges = np.zeros(self.nmols)
+        self.mol_masses = np.zeros(self.nmols)
+        for mol_id, val in self.molecules.items():
+            self.mol_masses[mol_id-1] = sum([self.atomic_masses[atom[1]] for
                                         atom in val])
-            self.mol_charges[id-1] = sum([self.atomic_charges[atom[0]-1] for
-                                       atom in val])
+            self.mol_charges[mol_id-1] = sum([self.atomic_charges[atom[0]-1]
+                                              for atom in val])
 
     @property
     def timestep(self):
@@ -241,16 +146,18 @@ class LammpsRun(object):
 
     def _weighted_average(self, step, mol_id, mol_vector):
         """
-        calculates the weighted average of mol_vector of each molecule for
+        Calculate the weighted average of the array comprising of
+        atomic vectors corresponding to the molecule with id mol_id for
         each time step.
 
         Args:
             step (int): time step
             mol_id (int): molecule id
-            mol_vector (numpy array): the vector to be averaged
+            mol_vector (numpy array): array of shape,
+                natoms_in_molecule with id mol_id x 3
 
         Returns:
-            numpy array of weighted averages in x,y, z directions
+            1D numpy array(3 x 1) of weighted averages in x, y, z directions
         """
         mol_masses = self._get_mol_masses(step, mol_id)
         return np.array([np.dot(mol_vector[:, dim],
@@ -258,16 +165,17 @@ class LammpsRun(object):
 
     def _get_mol_vector(self, step, mol_id, param=["x", "y", "z"]):
         """
-        Return the vector paramter "param" for the given step and molecule id
+        Returns numpy array corresponding to atomic vectors of paramter
+        "param" for the given time step and molecule id
 
         Args:
             step (int): time step
             mol_id (int): molecule id
-            param (list): the molecular parameters for which the weighted
+            param (list): the atomic parameter for which the weighted
                 average is to be computed
 
         Returns:
-            2D numpy array of vector
+            2D numpy array(natoms_in_molecule x 3) of atomic vectors
         """
         begin = step * self.natoms
         end = (step + 1) * self.natoms
@@ -279,14 +187,15 @@ class LammpsRun(object):
 
     def _get_mol_masses(self, step, mol_id):
         """
-        Return the masses for the given step and molecule id
+        Return the array comprising of atomic masses for the given
+        molecule and time step.
 
         Args:
             step (int): time step
             mol_id (int): molecule id
 
         Returns:
-            1D numpy array of masses
+            1D numpy array(natoms_in_molecule x 1).
         """
         begin = step * self.natoms
         end = (step + 1) * self.natoms
@@ -299,7 +208,11 @@ class LammpsRun(object):
     @property
     def mol_trajectory(self):
         """
-        compute the position of each molecule at each timestep
+        Compute the weighted average trajectory of each molecule at each
+        timestep
+
+        Returns:
+            2D numpy array ((n_timesteps*mols_number) x 3)
         """
         traj = []
         for step in range(self.traj_timesteps.size):
@@ -307,6 +220,7 @@ class LammpsRun(object):
             for mol_id in range(self.nmols):
                 mol_coords = self._get_mol_vector(step, mol_id,
                                                   param=["x", "y", "z"])
+                # take care of periodic boundary conditions
                 pbc_wrap(mol_coords, self.box_size)
                 tmp_mol.append(self._weighted_average(step, mol_id, mol_coords))
             traj.append(tmp_mol)
@@ -315,8 +229,12 @@ class LammpsRun(object):
     @property
     def mol_velocity(self):
         """
-         compute the velcoity of each molecule at each timestep
-         """
+         Compute the weighted average velcoity of each molecule at each
+         timestep.
+
+         Returns:
+            2D numpy array ((n_timesteps*mols_number) x 3)
+        """
         velocity = []
         for step in range(self.traj_timesteps.size):
             tmp_mol = []
@@ -328,9 +246,104 @@ class LammpsRun(object):
         return np.array(velocity)
 
 
+class LammpsLog(MSONable):
+    """
+    Parser for LAMMPS log file (parse function).
+    Saves the output properties (log file) in the form of a dictionary (LOG)
+    with the key being the LAMMPS output property (see 'thermo_style custom'
+    command in the LAMMPS documentation).
+
+    For example, LOG['temp'] will return the temperature data array in the log
+    file.
+    """
+
+    def __init__(self, llog, avgs=None):
+        """
+        Args:
+            llog (dict):
+                Dictionary LOG has all the output property data as numpy 1D a
+                rrays with the property name as the key
+            avgs:
+                Dictionary of averages, will be generated automatically if
+                unspecified
+        """
+        self.llog = llog
+        if avgs:
+            self.avgs = avgs
+        else:
+            self.avgs = {}
+            # calculate the average
+            for key in self.llog.keys():
+                self.avgs[str(key)] = np.mean(self.llog[key])
+
+    @classmethod
+    def from_file(cls, filename):
+        """
+        Parse the log file.
+        """
+        md = 0  # To avoid reading the minimization data steps
+        header = 0
+        footer_blank_line = 0
+        llog = {}
+        with open(filename, 'r') as logfile:
+            total_lines = len(logfile.readlines())
+            logfile.seek(0)
+            for line in logfile:
+                # timestep
+                time = re.search('timestep\s+([0-9]+)', line)
+                if time:
+                    timestep = float(time.group(1))
+                    llog['timestep'] = timestep
+                # total steps of MD
+                steps = re.search('run\s+([0-9]+)', line)
+                if steps:
+                    md_step = float(steps.group(1))
+                    md = 1
+                # save freq to log
+                thermo = re.search('thermo\s+([0-9]+)', line)
+                if thermo:
+                    log_save_freq = float(thermo.group(1))
+                # log format
+                format = re.search('thermo_style.+', line)
+                if format:
+                    data_format = format.group().split()[2:]
+                if all(isinstance(x, float) for x in
+                       list(_list2float(line.split()))) and md == 1: break
+                header += 1
+            # note: we are starting from the "break" above
+            for line in logfile:
+                if line == '\n':
+                    footer_blank_line += 1
+            if total_lines >= header + md_step / log_save_freq:
+                rawdata = np.genfromtxt(fname=filename, dtype=float,
+                                        skip_header=header, skip_footer=int(
+                        total_lines - header - md_step / log_save_freq - 1) - footer_blank_line)
+            else:
+                rawdata = np.genfromtxt(fname=filename, dtype=float,
+                                        skip_header=header, skip_footer=1)
+            for column, property in enumerate(data_format):
+                llog[property] = rawdata[:, column]
+            return LammpsLog(llog)
+
+    @property
+    def timestep(self):
+        return self.llog['timestep']
+
+    @property
+    def as_dict(self):
+        return {"@module": self.__class__.__module__,
+                "@class": self.__class__.__name__,
+                "lammpslog": self.llog,
+                "avgs": self.avgs}
+
+    @classmethod
+    def from_dict(cls, d):
+        return LammpsLog(d['lammpslog'], d['avgs'])
+
+
 def pbc_wrap(array, box_size):
     """
-    wrap the array for molecule coordinates around the periodic boundary
+    wrap the array for molecule coordinates around the periodic boundary.
 
     Args:
         array (numpy.ndarray): molecule coordinates, [[x1,y1,z1],[x2,y2,z2],..]
@@ -339,9 +352,9 @@ def pbc_wrap(array, box_size):
     ref = array[0,0]
     for i in range(3):
         array[:, i] = np.where((array[:, i] - ref) >= box_size[i] / 2,
-                               array[:, i] - box_size[i] / 2, array[:, i])
+                               array[:, i] - box_size[i], array[:, i])
         array[:, i] = np.where((array[:, i] - ref) < -box_size[i] / 2,
-                               array[:, i] + box_size[i] / 2, array[:, i])
+                               array[:, i] + box_size[i], array[:, i])
 
 
 def _list2float(seq):

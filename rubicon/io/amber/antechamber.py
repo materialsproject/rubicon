@@ -57,7 +57,7 @@ class AntechamberRunner(object):
 
     def get_ff_top_mol(self, mol, filename=None):
         """
-        run antechamber using gaussian output file then run parmchk
+        run antechamber using gaussian output file, then run parmchk
         to generate missing force field parameters. Store and return
         the force field and topology information in ff_mol.
 

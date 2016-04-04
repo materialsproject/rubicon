@@ -7,8 +7,7 @@ import os
 import shlex
 import subprocess
 
-from rubicon.io.amber.antechamber import AntechamberRunner
-from rubicon.io.lammps.inputs import LammpsData
+from rubicon.io.lammps.inputs import LammpsAmberData
 from rubicon.io.lammps.sets import DictLammpsInputSet_2
 from rubicon.io.packmol.packmol import PackmolRunner
 
@@ -38,12 +37,9 @@ class WritelammpsInputTask(FireTaskBase):
     _fw_name = "Lammps Input Writer"
 
     def run_task(self, fw_spec):
-        filename = fw_spec['prev_gaussian_freq']
+        gaussian_file = fw_spec['prev_gaussian_freq']
         mols_dict = fw_spec["molecule"]
         mol = mols_dict
-        ffmol_list = []
-        acr = AntechamberRunner(mol)
-        ffmol_list.append(acr.get_ff_top_mol(mol, filename))
         molecules = [mol]
         param_list = [{"number": 100,
                        "inside box": [-14.82, -14.82, -14.82,
@@ -51,11 +47,9 @@ class WritelammpsInputTask(FireTaskBase):
 
         pmr = PackmolRunner(molecules, param_list)
         packed_molecule = pmr.run()
-        #boxmol = BoxMol.from_packmol(pmr, packed_molecule)
-        #data_lammps = LmpInput(ffmol_list, boxmol)
-        data_lammps = LammpsData(ffmol_list, molecules, param_list["number"],
-                                 param_list["inside box"], packed_molecule)
-
+        data_lammps = LammpsAmberData(molecules, param_list["number"],
+                                      param_list["inside box"],
+                                      packed_molecule, gaussian_file)
         data_lammps.to('mol_data.lammps')
         control_lammps = DictLammpsInputSet_2()
         # control_lammps.get_lammps_control('Lammps.json',ensemble='npt',temp=300)
