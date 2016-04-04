@@ -8,7 +8,7 @@ import shlex
 import subprocess
 
 from rubicon.io.lammps.inputs import LammpsAmberData
-from rubicon.io.lammps.sets import DictLammpsInputSet_to_be_replaced
+from rubicon.io.lammps.sets import NPTNVTLammpsInputSet
 from rubicon.io.packmol.packmol import PackmolRunner
 
 from fireworks import FireTaskBase, explicit_serialize, FWAction
@@ -47,19 +47,33 @@ class WritelammpsInputTask(FireTaskBase):
 
         pmr = PackmolRunner(molecules, param_list)
         packed_molecule = pmr.run()
-        data_lammps = LammpsAmberData(molecules, param_list["number"],
+
+        # lammps input
+        control_filename = 'mol_control.lammps'
+        data_filename = 'mol_data.lammps'
+        # generate amber data
+        lammps_data = LammpsAmberData(molecules, param_list["number"],
                                       param_list["inside box"],
                                       packed_molecule, gaussian_file)
-        data_lammps.write_input('mol_data.lammps')
-        control_lammps = DictLammpsInputSet_to_be_replaced()
-        # control_lammps.get_lammps_control('Lammps.json',ensemble='npt',temp=300)
-        control_lammps.get_lammps_control('Lammps.json', ensemble1='npt',
-                                          ensemble2='nvt', temp=298)
-        control_lammps.write_lampps_control('mol_control.lammps')
 
-        with open("mol_control.lammps") as f:
+        user_lammps_settings = {
+                                 "temp": 298,
+                                 "fix1": {
+                                     "style": "npt",
+                                     "ID": "npt",
+                                     "Tstart": 298,
+                                     "Tstop": 298},
+                                 "fix2": {
+                                     "style": "nvt",
+                                      "ID": "nvt"}
+                                }
+        lis = NPTNVTLammpsInputSet(lammps_data=lammps_data,
+                                   user_lammps_settings=user_lammps_settings)
+        lis.write_input(control_filename, data_filename=data_filename)
+
+        with open(control_filename) as f:
             subprocess.call(shlex.split("srun -n 48 lmp_edison"), stdin=f)
-
+        # lammps output
         prev_lammps_log = os.path.join(os.getcwd(), 'mol.log')
         prev_lammps_trj = os.path.join(os.getcwd(), "mol.lammpstrj")
         prev_lammps_data = os.path.join(os.getcwd(), "mol_data.lammps")
