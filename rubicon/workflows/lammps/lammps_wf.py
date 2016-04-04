@@ -8,12 +8,12 @@ import os
 
 from fireworks import Workflow, LaunchPad
 from fireworks.core.firework import Firework
+from pymatgen import Molecule
 
 import rubicon
-from pymatgen import Molecule
-from rubicon.firetasks.lammps_input_task import WritelammpsInputTask
-from rubicon.firetasks.lammps_output_task import WritelammpsOutputTask
-from rubicon.firetasks.lammps_properties_task import ParselammpsProperties
+from rubicon.firetasks.lammps.lammps_input_task import WritelammpsInputTask
+from rubicon.firetasks.lammps.lammps_output_task import WritelammpsOutputTask
+from rubicon.firetasks.lammps.lammps_properties_task import ParselammpsProperties
 
 __author__ = 'navnidhirajput'
 

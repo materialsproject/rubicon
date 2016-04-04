@@ -3,12 +3,12 @@
 from __future__ import division, print_function, unicode_literals, \
     absolute_import
 
-from fireworks.core.firework import Firework, Workflow
-from fireworks.utilities.fw_serializers import FWSerializable
 from six.moves import range
 
+from fireworks.core.firework import Firework, Workflow
+from fireworks.utilities.fw_serializers import FWSerializable
 from pymatgen.core.structure import Molecule
-from rubicon.firetasks.multistep_qchem_task import \
+from rubicon.firetasks.qchem.multistep_qchem_task import \
     BasisSetSuperpositionErrorCalculationTask, \
     CounterpoiseCorrectionGenerationTask
 from rubicon.utils.qchem_firework_creator import QChemFireWorkCreator

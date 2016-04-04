@@ -11,17 +11,17 @@ import math
 import os
 import sys
 
-from fireworks.core.firework import FireTaskBase, FWAction, Workflow
-from fireworks.utilities.fw_serializers import FWSerializable
 from pymongo import MongoClient
 from six.moves import zip
 
+from fireworks.core.firework import FireTaskBase, FWAction, Workflow
+from fireworks.utilities.fw_serializers import FWSerializable
 from pymatgen import Molecule
 from pymatgen.analysis.molecule_structure_comparator import \
     MoleculeStructureComparator
 from pymatgen.io.qchem import QcInput
 from rubicon.borg.hive import DeltaSCFQChemToDbTaskDrone
-from rubicon.dupefinders.dupefinder_eg import DupeFinderEG
+from rubicon.firetasks.dupefinder_eg import DupeFinderEG
 from rubicon.utils.atomic_charge_mixed_basis_set_generator import \
     AtomicChargeMixedBasisSetGenerator
 from rubicon.utils.eg_wf_utils import get_eg_file_loc, \
