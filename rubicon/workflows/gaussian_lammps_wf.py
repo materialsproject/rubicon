@@ -34,7 +34,7 @@ if __name__ == '__main__':
     coords = []
     sp = []
     solvent_molecules_path = os.path.join(rubicon.__path__[0],
-                                          'workflows/test_mols/solvent_molecules')
+                                          'workflows/test_mols/test_lammps')
     moleculelist = glob.glob(solvent_molecules_path + '/*.pdb')
     for filename in moleculelist:
         mol = Molecule.from_file(filename)
