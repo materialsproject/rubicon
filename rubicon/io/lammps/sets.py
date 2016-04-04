@@ -12,8 +12,7 @@ the data file.
 import json
 import os
 from functools import partial
-
-from monty.serialization import loadfn
+from collections import OrderedDict
 
 
 __author__ = 'Navnidhi Rajput, Kiran Mathew'
@@ -37,7 +36,7 @@ class DictLammpsInputSet(object):
             or bond type.
     """
 
-    def __init__(self, name, config_dict, lammps_data, data_filename,
+    def __init__(self, name, config_dict, lammps_data=None, data_filename=None,
                  user_lammps_settings=None):
         self.name = name
         self.lines = []
@@ -76,12 +75,23 @@ class DictLammpsInputSet(object):
         # write the main input file
         with open(filename, 'w') as f:
             f.write(self.__str__())
-        # write the data file
-        self.lammps_data.write_input(filename=self.data_filename)
+        # write the data file if present
+        if self.lammps_data and self.data_filename:
+            self.lammps_data.write_input(filename=self.data_filename)
 
     @staticmethod
     def from_file(name, filename, **kwargs):
-        return DictLammpsInputSet(name, loadfn(filename), **kwargs)
+        """
+        Read in the input settings from json file as ordereddict.
+        Reads only the main input file from the json file, skips the data file.
+        Note: with monty.serialization.loadfn the order of paramters in the
+        json file is not preserved
+        """
+        with open(filename) as f:
+            return DictLammpsInputSet(name,
+                                      json.load(f,
+                                                object_pairs_hook=OrderedDict),
+                                      **kwargs)
 
     @property
     def to_dict(self):
@@ -89,13 +99,16 @@ class DictLammpsInputSet(object):
                 "@class": self.__class__.__name__,
                 "name": self.name,
                 "config_dict": self.config_dict,
+                "lammps_data": self.lammps_data,
+                "data_filename": self.data_filename,
                 "user_lammps_settings": self.user_lammps_settings}
 
     @classmethod
     def from_dict(cls, d):
         return DictLammpsInputSet(d["name"], d["config_dict"],
-                                  user_lammps_settings=d.get(
-                                      "user_lammps_settings"))
+                                  lammps_data=d.get("lammps_data"),
+                                  data_filename=d.get("data_filename"),
+                                  user_lammps_settings=d.get("user_lammps_settings"))
 
 
 NPTLammpsInputSet = partial(DictLammpsInputSet.from_file, "NPT",
