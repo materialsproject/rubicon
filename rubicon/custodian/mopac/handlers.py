@@ -1,3 +1,8 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 import glob
 import logging
 import os
@@ -5,7 +10,7 @@ import tarfile
 
 from custodian.custodian import ErrorHandler
 
-from rubicon.io.mopacio import MopOutput, MopTask
+from rubicon.io.mopac.mopacio import MopOutput, MopTask
 
 __author__ = 'xiaohuiqu'
 

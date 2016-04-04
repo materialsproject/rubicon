@@ -1,12 +1,16 @@
-import os
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 import glob
+import os
 
 from fireworks import Workflow, LaunchPad
 from fireworks.core.firework import Firework
 
-from pymatgen import Molecule
-
 import rubicon
+from pymatgen import Molecule
 from rubicon.firetasks.lammps_input_task import WritelammpsInputTask
 from rubicon.firetasks.lammps_output_task import WritelammpsOutputTask
 from rubicon.firetasks.lammps_properties_task import ParselammpsProperties
@@ -168,9 +172,9 @@ if __name__ == '__main__':
 
     coords = []
     sp = []
-    solvent_molecules_path = os.path.join(rubicon.__path__[0], 
+    solvent_molecules_path = os.path.join(rubicon.__path__[0],
                                           'workflows/test_mols/solvent_molecules')
-    moleculelist = glob.glob(solvent_molecules_path+'/*.pdb')
+    moleculelist = glob.glob(solvent_molecules_path + '/*.pdb')
     for filename in moleculelist:
         mol = Molecule.from_file(filename)
         for site in mol:

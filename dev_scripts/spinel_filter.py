@@ -1,15 +1,15 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
+import os
+
+import pymongo
+
 from pymatgen import MPRester, Element, Structure
 from pymatgen.analysis.structure_matcher import StructureMatcher, \
     ElementComparator
-
-__author__ = 'Miao Liu'
-
-import os
-import numpy as np
-from openpyxl import Workbook
-import pymongo
-import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
 
 __author__ = 'miaoliu'
 
@@ -48,19 +48,19 @@ for working_ion in Working_ion_pool:
         formula_list.append([redox_ion, working_ion])
 
 for formula in formula_list:
-    print formula
+    print(formula)
     charged_entry = mpr.get_entries(charged_prototype, inc_structure="final")[
         0]
     charged_structure = charged_entry.structure
     discharged_entry = \
-    mpr.get_entries(discharged_prototype, inc_structure="final")[0]
+        mpr.get_entries(discharged_prototype, inc_structure="final")[0]
     discharged_structure = discharged_entry.structure
 
-    print charged_structure.formula, ":", discharged_structure.formula
+    print(charged_structure.formula, ":", discharged_structure.formula)
     charged_structure.replace_species({Element("Mn"): Element(formula[0])})
     discharged_structure.replace_species({Element("Mn"): Element(formula[0]),
                                           Element("Mg"): Element(formula[1])})
-    print charged_structure.formula, ":", discharged_structure.formula
+    print(charged_structure.formula, ":", discharged_structure.formula)
 
     cursor = materials.find({"pretty_formula": formula[0] + "O2"}, {"_id": 0})
     counter = 1
@@ -69,8 +69,8 @@ for formula in formula_list:
         # print counter,c["pretty_formula"],c["spacegroup"]["number"],c["task_id"]
         c_structure = Structure.from_dict(c["structure"])
         if sm.fit(charged_structure, c_structure):
-            print counter, c["pretty_formula"], c["spacegroup"]["number"], c[
-                "task_id"], c["final_energy_per_atom"]
+            print(counter, c["pretty_formula"], c["spacegroup"]["number"], c[
+                "task_id"], c["final_energy_per_atom"])
             cl.append(c["task_id"])
         counter += 1
 
@@ -88,15 +88,15 @@ for formula in formula_list:
     for c in cursor:
         # print counter,c["pretty_formula"],c["spacegroup"]["number"],c["task_id"]
         c_structure = Structure.from_dict(c["structure"])
-        print counter, c["pretty_formula"], c["spacegroup"]["number"], c[
-            "task_id"], c["final_energy_per_atom"]
+        print(counter, c["pretty_formula"], c["spacegroup"]["number"], c[
+            "task_id"], c["final_energy_per_atom"])
         if sm.fit(discharged_structure, c_structure):
-            print counter, c["pretty_formula"], c["spacegroup"]["number"], c[
-                "task_id"], c["final_energy_per_atom"]
+            print(counter, c["pretty_formula"], c["spacegroup"]["number"], c[
+                "task_id"], c["final_energy_per_atom"])
             dcl.append(c["task_id"])
         counter += 1
 
     spinel_list.append([formula, cl, dcl])
 
 for spinel in spinel_list:
-    print spinel
+    print(spinel)

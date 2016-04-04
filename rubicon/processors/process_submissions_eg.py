@@ -1,3 +1,8 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 import time
 import traceback
 
@@ -10,7 +15,7 @@ from rubicon.utils.snl.egsnl import EGStructureNL
 from rubicon.workflows.snl_to_eg_wf import snl_to_eg_wf
 
 
-class SubmissionProcessorEG():
+class SubmissionProcessorEG:
     MAX_SITES = 500
 
     # This is run on the server end
@@ -26,7 +31,7 @@ class SubmissionProcessorEG():
             self.update_existing_workflows()
             if not infinite:
                 break
-            print 'sleeping', sleep_time
+            print('sleeping', sleep_time)
             time.sleep(sleep_time)
 
     def submit_all_new_workflows(self):
@@ -49,15 +54,15 @@ class SubmissionProcessorEG():
                 if len(snl.structure.sites) > SubmissionProcessorEG.MAX_SITES:
                     self.sma.update_state(submission_id, 'REJECTED',
                                           'too many sites', {})
-                    print 'REJECTED WORKFLOW FOR {} - too many sites ' \
+                    print('REJECTED WORKFLOW FOR {} - too many sites ' \
                           '({})'.format(snl.structure.formula,
-                                        len(snl.structure.sites))
+                                        len(snl.structure.sites)))
                 elif not job['is_valid']:
                     self.sma.update_state(submission_id, 'REJECTED',
                                           'invalid structure (atoms too close)',
                                           {})
-                    print 'REJECTED WORKFLOW FOR {} - invalid ' \
-                          'structure'.format(snl.structure.formula)
+                    print('REJECTED WORKFLOW FOR {} - invalid ' \
+                          'structure'.format(snl.structure.formula))
                 else:
                     snl.data['_electrolytegenome'] = \
                         snl.data.get('_electrolytegenome', {})
@@ -67,7 +72,8 @@ class SubmissionProcessorEG():
                     # create a workflow
                     wf = snl_to_eg_wf(snl, job['parameters'])
                     self.launchpad.add_wf(wf)
-                    print 'ADDED WORKFLOW FOR {}'.format(snl.structure.formula)
+                    print('ADDED WORKFLOW FOR {}'.format(
+                        snl.structure.formula))
             except:
                 self.jobs.find_and_modify({'submission_id': submission_id},
                                           {'$set': {'state': 'ERROR'}})
@@ -95,7 +101,7 @@ class SubmissionProcessorEG():
                 # update workflow
                 self.update_wf_state(wf, submission_id)
             except:
-                print 'ERROR while processing s_id', submission_id
+                print('ERROR while processing s_id', submission_id)
                 traceback.print_exc()
 
     def update_wf_state(self, wf, submission_id):

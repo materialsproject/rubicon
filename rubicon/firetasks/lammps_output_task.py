@@ -1,20 +1,16 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 import json
 import shlex
 
 import numpy
+from fireworks import FireTaskBase, explicit_serialize
 from pymongo import MongoClient
 
-from rubicon.io.lammpsio import LammpsLog
-
-try:
-    # just a walkaround before the packmol is merged to master branch
-    # after packmol is merged to master branch, the try...catch block
-    # should be removed
-    from pymatgen.packmol.packmol import PackmolRunner
-    # from pymatgen.packmol.lammpsio import LammpsLog
-except:
-    pass
-from fireworks import FireTaskBase, explicit_serialize
+from rubicon.io.lammps.outputs import LammpsLog
 
 __author__ = 'navnidhirajput'
 
@@ -40,7 +36,7 @@ class WritelammpsOutputTask(FireTaskBase):
             db_creds = json.load(f)
         conn = MongoClient(db_creds['host'], db_creds['port'], )
         db = conn[db_creds['database']]
-        print "+++++", db_creds
+        print("+++++", db_creds)
         if db_creds['admin_user']:
             db.authenticate(db_creds['admin_user'], db_creds['admin_password'])
             coll = db['lammps_output']

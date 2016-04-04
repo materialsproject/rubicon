@@ -1,3 +1,8 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 """
 Shared code for EG builders.
 
@@ -7,10 +12,14 @@ For developers implementing a new builder,
 you should inherit from `ParallelBuilder`. See the
 documentation of this class for details.
 """
+
+from six.moves import map
+from six.moves import range
+
 __author__ = 'Xiaohui Qu <xqu@lbl.gov>'
 __date__ = '12/31/13'
 
-import Queue
+import six.moves.queue
 import logging
 import multiprocessing
 import threading
@@ -100,7 +109,7 @@ class Builder(object):
 
         Return: -1 if any is nonzero, else 0
         """
-        return (-1, 0)[not filter(None, codes)]
+        return (-1, 0)[not [_f for _f in codes if _f]]
 
     def __str__(self):
         return self.__class__.__name__
@@ -134,7 +143,7 @@ class ParallelBuilder(Builder):
         self._ncores = ncores if ncores else 15
         self._threaded = threads
         if threads:
-            self._queue = Queue.Queue()
+            self._queue = six.moves.queue.Queue()
             self._states_lock = threading.Lock()
             self._run_parallel_mode = self._run_parallel_threaded
         else:
@@ -185,11 +194,11 @@ class ParallelBuilder(Builder):
         """
         _log.debug("run.parallel.threaded.start")
         threads = []
-        for i in xrange(self._ncores):
+        for i in range(self._ncores):
             thr = threading.Thread(target=self._run)
             thr.start()
             threads.append(thr)
-        for i in xrange(self._ncores):
+        for i in range(self._ncores):
             threads[i].join()
             if threads[i].isAlive():  # timed out
                 _log.warn("run.parallel.threaded: timeout for thread="
@@ -206,12 +215,12 @@ class ParallelBuilder(Builder):
         _log.debug("run.parallel.multiprocess.start")
         processes = []
         ProcRunner.instance = self
-        for i in xrange(self._ncores):
+        for i in range(self._ncores):
             proc = multiprocessing.Process(target=ProcRunner.run)
             proc.start()
             processes.append(proc)
         states = []
-        for i in xrange(self._ncores):
+        for i in range(self._ncores):
             processes[i].join()
             states.append(processes[i].exitcode)
         _log.debug("run.parallel.multiprocess.end states="
@@ -227,9 +236,9 @@ class ParallelBuilder(Builder):
             try:
                 item = self._queue.get(timeout=2)
                 self.process_item(item)
-            except Queue.Empty:
+            except six.moves.queue.Empty:
                 break
-            except Exception, err:
+            except Exception as err:
                 _log.error("Processing exception: {}".format(err))
                 self._set_status(-1)
                 raise

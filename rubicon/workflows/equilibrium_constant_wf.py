@@ -1,3 +1,8 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 import logging
 import os
 import sys
@@ -6,6 +11,7 @@ import yaml
 from fireworks import Workflow, Firework
 from fireworks.utilities.fw_utilities import get_slug
 from pymongo import MongoClient
+from six.moves import zip
 
 from pymatgen.matproj.snl import StructureNL
 from rubicon.firetasks.egsnl_tasks import AddEGSNLTask

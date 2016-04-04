@@ -1,20 +1,25 @@
-import json
+# coding: utf-8
 
-__author__ = 'xiaohuiqu'
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
 
 import copy
+import json
 import logging
+import math
+import os
 import re
 import shlex
-import os
 import socket
+import sys
+
 from custodian import Custodian
 from custodian.qchem.handlers import QChemErrorHandler
 from custodian.qchem.jobs import QchemJob
-import math
+from six.moves import zip
+
 from pymatgen import Molecule
 from pymatgen.io.qchem import QcInput, QcOutput
-import sys
 
 __author__ = 'xiaohuiqu'
 
@@ -36,10 +41,10 @@ def run_qchem(filename):
         half_cpus_cmd = shlex.split("qchem -np {}".format(min(12, len(mol))))
         openmp_cmd = shlex.split("qchem -seq -nt 24")
     elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"] == "cori":
-        num_numa_nodes = 2
+        nodelist = os.environ["QCNODE"].split(',')
+        num_numa_nodes = 2 * len(nodelist)
         low_nprocess = max(
             int(len(mol) / num_numa_nodes) * num_numa_nodes, 1)
-        nodelist = os.environ["QCNODE"].split(',')
         num_cores = 32 * len(nodelist)
         qc_exe = shlex.split(
             "qchem -np {}".format(min(num_cores, low_nprocess)))

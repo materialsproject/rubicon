@@ -1,22 +1,21 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 import os
 import shlex
 import subprocess
 
-try:
-    # just a walkaround before the packmol is merged to master branch
-    # after packmol is merged to master branch, the try...catch block
-    # should be removed
-    from pymatgen.packmol.packmol import PackmolRunner
-except:
-    pass
-from rubicon.gff.boxmol import BoxMol
-from rubicon.gff.lammps_data import LmpInput
-from rubicon.gff.antechamberio import AntechamberRunner
-from rubicon.gff.lamms_control_nvt import DictLammpsInputSet
-
-__author__ = 'navnidhirajput'
+from rubicon.io.lammps.inputs import LammpsAmberData
+from rubicon.io.lammps.sets import DictLammpsInputSet_to_be_replaced
+from rubicon.io.packmol.packmol import PackmolRunner
 
 from fireworks import FireTaskBase, explicit_serialize, FWAction
+
+
+__author__ = 'Navnidhi Rajput, Kiran Mathew'
+
 
 
 @explicit_serialize
@@ -38,21 +37,21 @@ class WritelammpsInputTask(FireTaskBase):
     _fw_name = "Lammps Input Writer"
 
     def run_task(self, fw_spec):
-        filename = fw_spec['prev_gaussian_freq']
+        gaussian_file = fw_spec['prev_gaussian_freq']
         mols_dict = fw_spec["molecule"]
         mol = mols_dict
-        ffmol_list = []
-        acr = AntechamberRunner(mol)
-        ffmol_list.append(acr.get_ff_top_mol(mol, filename))
-        pmr = PackmolRunner([mol], [{"number": 100,
-                                     "inside box": [-14.82, -14.82, -14.82,
-                                                    14.82, 14.82, 14.82]}])
-        mols_coord = pmr.run()
-        boxmol = BoxMol.from_packmol(pmr, mols_coord)
+        molecules = [mol]
+        param_list = [{"number": 100,
+                       "inside box": [-14.82, -14.82, -14.82,
+                                      14.82, 14.82, 14.82]}]
 
-        data_lammps = LmpInput(ffmol_list, boxmol)
-        data_lammps.write_lammps_data('mol_data.lammps')
-        control_lammps = DictLammpsInputSet()
+        pmr = PackmolRunner(molecules, param_list)
+        packed_molecule = pmr.run()
+        data_lammps = LammpsAmberData(molecules, param_list["number"],
+                                      param_list["inside box"],
+                                      packed_molecule, gaussian_file)
+        data_lammps.write_input('mol_data.lammps')
+        control_lammps = DictLammpsInputSet_to_be_replaced()
         # control_lammps.get_lammps_control('Lammps.json',ensemble='npt',temp=300)
         control_lammps.get_lammps_control('Lammps.json', ensemble1='npt',
                                           ensemble2='nvt', temp=298)

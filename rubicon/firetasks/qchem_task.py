@@ -1,3 +1,8 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 import copy
 import datetime
 import json
@@ -174,10 +179,10 @@ class QChemTask(FireTaskBase, FWSerializable):
             openmp_cmd = shlex.split("qchem -seq -nt 24")
         elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"] == "cori":
             if (not fw_data.MULTIPROCESSING) or (fw_data.SUB_NPROCS is None):
-                num_numa_nodes = 2
+                nodelist = os.environ["QCNODE"].split(',')
+                num_numa_nodes = 2 * len(nodelist)
                 low_nprocess = max(
                     int(len(mol) / num_numa_nodes) * num_numa_nodes, 1)
-                nodelist = os.environ["QCNODE"].split(',')
                 num_cores = 32 * len(nodelist)
                 qc_exe = shlex.split(
                     "qchem -np {}".format(min(num_cores, low_nprocess)))

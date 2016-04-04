@@ -1,3 +1,8 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 import  rubicon.scripts.run_qchem_standalone as run_qchem
 
 run_qchem.main()

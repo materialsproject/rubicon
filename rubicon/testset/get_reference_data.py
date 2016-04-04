@@ -1,9 +1,14 @@
+# coding: utf-8
+
+from __future__ import division, print_function, unicode_literals, \
+    absolute_import
+
 from rubicon.testset.get_g3_benchmark import get_g3_bench_collection
 
 __author__ = 'Xiaohui Qu'
 
-import urllib2
-from BeautifulSoup import BeautifulSoup
+import urllib.request
+from bs4 import BeautifulSoup
 from collections import defaultdict
 import json
 
@@ -17,11 +22,14 @@ bench_dict['unit'] = 'kcal/mol'
 
 def get_table(url, title, keyname, result):
     global soup, row, tds
-    soup = BeautifulSoup(urllib2.urlopen(url).read())
+    soup = BeautifulSoup(urllib.request.urlopen(url).read(), "html.parser")
     if soup.title.string != title:
-        print "Warning! webpage", url, "changed"
-    for row in soup.table.findAll('tr')[1:]:
+        print("Warning! webpage", url, "changed")
+    rows = soup.table.findAll('tr')[1:]
+    for row in rows:
         tds = row.findAll('td')
+        if len(tds) != 4:
+            continue
         formula = str(tds[0].p.text).strip()
         d = result[formula]
         d[keyname] = dict(G3=float(tds[1].p.string),
