@@ -6,18 +6,18 @@ from __future__ import division, print_function, unicode_literals, \
 import glob
 import os
 
-from fireworks import Workflow, LaunchPad
-from fireworks.core.firework import Firework
-
-import rubicon
-from pymatgen import Molecule
-from rubicon.firetasks.gaussian_input_task import WritegaussianGeoTask, \
-    WritegaussianFreqESPTask
 from rubicon.firetasks.lammps_input_task import WritelammpsInputTask
-from rubicon.firetasks.lammps_output_task import WritelammpsOutputTask
 from rubicon.firetasks.lammps_properties_task import ParselammpsProperties
 from rubicon.firetasks.multistep_gaussian_task import \
     GaussianGeomOptDBInsertionTask, GaussianFreqESPDBInsertionTask
+
+import rubicon
+from fireworks import Workflow, LaunchPad
+from fireworks.core.firework import Firework
+from pymatgen import Molecule
+from rubicon.firetasks.gaussian.gaussian_input_task import WritegaussianGeoTask, \
+    WritegaussianFreqESPTask
+from rubicon.firetasks.lammps.lammps_output_task import WritelammpsOutputTask
 
 __author__ = 'navnidhirajput'
 

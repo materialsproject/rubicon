@@ -5,9 +5,8 @@ from __future__ import division, print_function, unicode_literals, \
 
 from fireworks.core.firework import Firework, Workflow
 from fireworks.utilities.fw_utilities import get_slug
-
 from pymatgen import Composition
-from rubicon.dupefinders.dupefinder_eg import DupeFinderEG
+from rubicon.firetasks.dupefinder_eg import DupeFinderEG
 from rubicon.firetasks.egsnl_tasks import AddEGSNLTask
 from rubicon.utils.snl.egsnl import EGStructureNL, get_meta_from_structure
 from rubicon.workflows.bsse_wf import counterpoise_correction_generation_fw

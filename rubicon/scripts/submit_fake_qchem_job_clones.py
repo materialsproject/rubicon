@@ -7,15 +7,15 @@ import glob
 import json
 import os
 
-from fireworks import Firework, Workflow, LaunchPad
-from fireworks.utilities.fw_utilities import get_slug
 from monty.io import zopen
 from monty.os.path import zpath
 
+from fireworks import Firework, Workflow, LaunchPad
+from fireworks.utilities.fw_utilities import get_slug
 from pymatgen import Molecule
 from pymatgen.matproj.snl import StructureNL
 from rubicon.firetasks.egsnl_tasks import AddEGSNLTask
-from rubicon.firetasks.fake_run_qchem_task import FakeRunQChemTask
+from rubicon.firetasks.qchem.fake_run_qchem_task import FakeRunQChemTask
 
 __author__ = 'xiaohuiqu'
 

@@ -9,15 +9,15 @@ import math
 import os
 
 import six
-from fireworks import Firework
-from fireworks.core.firework import Tracker
 from six.moves import zip
 
+from fireworks import Firework
+from fireworks.core.firework import Tracker
 from pymatgen.core.periodic_table import Element
 from pymatgen.io.babel import BabelMolAdaptor
 from pymatgen.io.qchem import QcTask, QcInput
-from rubicon.dupefinders.dupefinder_eg import DupeFinderEG
-from rubicon.firetasks.qchem_task import QChemTask
+from rubicon.firetasks.dupefinder_eg import DupeFinderEG
+from rubicon.firetasks.qchem.qchem_task import QChemTask
 
 __author__ = 'xiaohuiqu'
 
@@ -183,7 +183,7 @@ class QChemFireWorkCreator:
         if priority:
             spec['_priority'] = priority
         task_name = self.molname + ' ' + state_name + ' ' + task_type
-        from rubicon.firetasks.multistep_qchem_task \
+        from rubicon.firetasks.qchem.multistep_qchem_task \
             import QChemGeomOptDBInsertionTask
         fw_geom_cal = Firework([QChemTask()],
                                spec=spec, name=task_name, fw_id=fw_id_cal)
@@ -231,7 +231,7 @@ class QChemFireWorkCreator:
         if priority:
             spec['_priority'] = priority
         task_name = self.molname + ' ' + state_name + ' ' + task_type
-        from rubicon.firetasks.multistep_qchem_task \
+        from rubicon.firetasks.qchem.multistep_qchem_task \
             import QChemFrequencyDBInsertionTask
         fw_freq_cal = Firework([QChemTask()],
                                spec=spec, name=task_name, fw_id=fw_id_cal)
@@ -440,7 +440,7 @@ class QChemFireWorkCreator:
         spec["qm_method"] = qm_method
         spec['implicit_solvent'] = implicit_solvent
         task_name = self.molname + ' ' + state_name + ' ' + task_type
-        from rubicon.firetasks.multistep_qchem_task \
+        from rubicon.firetasks.qchem.multistep_qchem_task \
             import QChemSinglePointEnergyDBInsertionTask
         fw_sp_cal = Firework([QChemTask()],
                              spec=spec, name=task_name, fw_id=fw_id_cal)
@@ -529,7 +529,7 @@ class QChemFireWorkCreator:
         if mixed_aux_basis_generator:
             spec["_mixed_aux_basis_set_generator"] = mixed_aux_basis_generator
         task_name = self.molname + ' ' + state_name + ' ' + task_type
-        from rubicon.firetasks.multistep_qchem_task \
+        from rubicon.firetasks.qchem.multistep_qchem_task \
             import QChemSinglePointEnergyDBInsertionTask
         fw_sp_cal = Firework([QChemTask()],
                              spec=spec, name=task_name, fw_id=fw_id_cal)
@@ -583,7 +583,7 @@ class QChemFireWorkCreator:
         spec['run_tags']['rem_params'] = rem_params
         spec["qm_method"] = qm_method
         task_name = self.molname + ' ' + state_name + ' ' + task_type
-        from rubicon.firetasks.multistep_qchem_task \
+        from rubicon.firetasks.qchem.multistep_qchem_task \
             import QChemAIMDDBInsertionTask
         fw_sp_cal = Firework([QChemTask()],
                              spec=spec, name=task_name, fw_id=fw_id_cal)
