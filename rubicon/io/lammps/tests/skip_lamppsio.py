@@ -9,7 +9,7 @@ from unittest import TestCase
 
 from pymatgen import Molecule
 
-from rubicon.io.lammps.inputs import LammpsAmberData
+from rubicon.io.lammps.data import LammpsAmberData
 from rubicon.io.packmol.packmol import PackmolRunner
 
 

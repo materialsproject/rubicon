@@ -7,8 +7,8 @@ import os
 import shlex
 import subprocess
 
-from rubicon.io.lammps.inputs import LammpsAmberData
-from rubicon.io.lammps.sets import NPTNVTLammpsInputSet
+from rubicon.io.lammps.data import LammpsAmberData
+from rubicon.io.lammps.input import NPTNVTLammpsInput
 from rubicon.io.packmol.packmol import PackmolRunner
 
 from fireworks import FireTaskBase, explicit_serialize, FWAction
@@ -67,8 +67,8 @@ class WritelammpsInputTask(FireTaskBase):
                                      "style": "nvt",
                                       "ID": "nvt"}
                                 }
-        lis = NPTNVTLammpsInputSet(lammps_data=lammps_data,
-                                   user_lammps_settings=user_lammps_settings)
+        lis = NPTNVTLammpsInput(lammps_data=lammps_data,
+                                user_lammps_settings=user_lammps_settings)
         lis.write_input(control_filename, data_filename=data_filename)
 
         with open(control_filename) as f:

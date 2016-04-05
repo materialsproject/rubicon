@@ -20,7 +20,7 @@ __author__ = 'Kiran Mathew, Navnidhi Rajput'
 MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
-class DictLammpsInputSet(object):
+class DictLammpsInput(object):
     """
     Implementation of LammpsInputSet that is initialized from a dict
     settings. It is typically used by other LammpsInputSets for
@@ -58,7 +58,7 @@ class DictLammpsInputSet(object):
         for k1, v1 in in_dict.items():
             lines = lines + "{} ".format(k1)
             if isinstance(v1,dict):
-                lines = lines + DictLammpsInputSet.get_lines_from_dict(v1)
+                lines = lines + DictLammpsInput.get_lines_from_dict(v1)
             elif isinstance(v1, list):
                 lines = lines + " ".join([str(x) for x in v1]) + os.linesep
             else:
@@ -96,10 +96,10 @@ class DictLammpsInputSet(object):
         json file is not preserved
         """
         with open(filename) as f:
-            return DictLammpsInputSet(name,
-                                      json.load(f,
+            return DictLammpsInput(name,
+                                   json.load(f,
                                                 object_pairs_hook=OrderedDict),
-                                      **kwargs)
+                                   **kwargs)
 
     @property
     def to_dict(self):
@@ -113,17 +113,17 @@ class DictLammpsInputSet(object):
 
     @classmethod
     def from_dict(cls, d):
-        return DictLammpsInputSet(d["name"], d["config_dict"],
-                                  lammps_data=d.get("lammps_data"),
-                                  data_filename=d.get("data_filename"),
-                                  user_lammps_settings=d.get("user_lammps_settings"))
+        return DictLammpsInput(d["name"], d["config_dict"],
+                               lammps_data=d.get("lammps_data"),
+                               data_filename=d.get("data_filename"),
+                               user_lammps_settings=d.get("user_lammps_settings"))
 
 
 # NPT
-NPTLammpsInputSet = partial(DictLammpsInputSet.from_file, "NPT",
-                            os.path.join(MODULE_DIR, "data_files", "Lammps.json"))
+NPTLammpsInput = partial(DictLammpsInput.from_file, "NPT",
+                         os.path.join(MODULE_DIR, "data_files", "Lammps.json"))
 
 
 # NPT followed by NVT
-NPTNVTLammpsInputSet = partial(DictLammpsInputSet.from_file, "NPT_NVT",
+NPTNVTLammpsInput = partial(DictLammpsInput.from_file, "NPT_NVT",
                             os.path.join(MODULE_DIR, "data_files","Lammps_min_npt_nvt.json"))

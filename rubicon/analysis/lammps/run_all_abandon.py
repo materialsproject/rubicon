@@ -18,7 +18,7 @@ from rubicon.analysis.lammps.properties import MeanSquareDisplacement
 from rubicon.analysis.lammps.properties_abandon import CenterOfMass, \
     NernstEinsteinConductivity, Conductivity, MeanSquareDisplacement, \
     SiteRadialDistribution, RadialDistributionPure
-from rubicon.io.lammps.outputs import CoordinationNumber, LammpsRun
+from rubicon.io.lammps.output import CoordinationNumber, LammpsRun
 from rubicon.analysis.lammps.ion_pair_to_replace import IonPair
 
 
