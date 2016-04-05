@@ -82,9 +82,12 @@ class LammpsRun(object):
         traj_timesteps = []
         trajectory = []
         timestep_label = "ITEM: TIMESTEP"
-        # box_label "ITEM: BOX BOUNDS"
-        # traj_label, "ITEM: ATOMS id type x y z vx vy vz mol"
+        traj_label_pattern = re.compile("^(ITEM:\s+ATOMS)\w*")
+        box_label_pattern = re.compile("^(ITEM:\s+BOX\s+BOUNDS)\w*")
+        # updated below based on the field names in the ITEM: BOX BOUNDS line
         box_pattern = re.compile("^([0-9\.-]+)\s+([0-9\.-]+)$")
+        # default: "ITEM: ATOMS id type x y z vx vy vz mol"
+        # updated below based on the field names in the ITEM: ATOMS line
         traj_pattern = re.compile("\s*(\d+)\s+(\d+)\s+([0-9eE\.+-]+)\s+([0-9eE\.+-]+)\s+"
                                   "([0-9eE\.+-]+)\s+"
                                   "([0-9eE\.+-]+)\s+"
@@ -98,11 +101,24 @@ class LammpsRun(object):
                 if parse_timestep:
                     traj_timesteps.append(float(line))
                     parse_timestep = False
+                if box_label_pattern.search(line) and len(traj_timesteps) == 1:
+                    # check for tilt
+                    if "xy" in line.split():
+                        box_pattern = re.compile(
+                            "^([0-9\.-]+)\s+([0-9\.-]+)\s+([0-9\.-]+)$")
                 if box_pattern.search(line) and len(traj_timesteps) == 1:
                         m = box_pattern.search(line)
-                        #self.box_size.append(m.group(1))
-                        self.box_size.append(float(m.group(2)))
+                        # box lengths
+                        self.box_size.append(float(m.group(2)) - float(m.group(1)))
+                if traj_label_pattern.search(line):
+                    fields = line.split()[4:]
+                    # example:- "ITEM: ATOMS id type x y z vx vy vz mol"
+                    traj_pattern_string = "\s*(\d+)\s+(\d+)".join(["\s+(["
+                                                                   "0-9eE\.+-]+)" for _ in range(len(fields))])
+                    traj_pattern = re.compile(traj_pattern_string)
                 if traj_pattern.search(line):
+                    # first 2 fields must be id and type, the rest of them
+                    # will be casted as floats
                     m = traj_pattern.search(line)
                     line_data = []
                     line_data.append(int(m.group(1))-1)
@@ -112,14 +128,7 @@ class LammpsRun(object):
                     line_data.append(int(m.group(9)))
                     trajectory.append(tuple(line_data))
         traj_dtype = np.dtype([('Atoms_id'.encode("ascii"), np.int64),
-                               ('mass'.encode("ascii"), np.float64),
-                               ('x'.encode("ascii"), np.float64),
-                               ('y'.encode("ascii"), np.float64),
-                               ('z'.encode("ascii"), np.float64),
-                               ('vx'.encode("ascii"), np.float64),
-                               ('vy'.encode("ascii"), np.float64),
-                               ('vz'.encode("ascii"), np.float64),
-                               ('mol'.encode("ascii"), np.int64)])
+                               ('mass'.encode("ascii"), np.float64)] +[(fld.encode("ascii"), np.float64) for fld in fields])
         self.trajectory = np.array(trajectory, dtype=traj_dtype)
         self.traj_timesteps = np.array(traj_timesteps, dtype=np.float64)
         for step in range(self.traj_timesteps.size):
