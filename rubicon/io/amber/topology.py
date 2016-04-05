@@ -53,8 +53,7 @@ class Topology(object):
         number_gaff_atoms = []
         gaff_atoms = []
         with open(filename) as f:
-            lines = f.readlines()
-            for line in lines:
+            for line in f:
                 if 'need revision' in line and not continue_on_corrupt_file:
                     raise TopCorruptionException
                 if len(line.strip()) == 0:
@@ -74,7 +73,6 @@ class Topology(object):
                     dihedrals.append(token[1:5])
                 elif token[0] == 'IMPH':
                     imdihedrals.append(token[1:5])
-
             topology = Topology(atoms, charges, bonds, angles, dihedrals,
                                 imdihedrals, len(bonds), number_gaff_atoms,
                                 gaff_atoms)

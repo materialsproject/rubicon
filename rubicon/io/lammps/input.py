@@ -14,13 +14,15 @@ import os
 from functools import partial
 from collections import OrderedDict
 
+from monty.json import MSONable
+
 
 __author__ = 'Kiran Mathew, Navnidhi Rajput'
 
 MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
-class DictLammpsInput(object):
+class DictLammpsInput(MSONable):
     """
     Implementation of LammpsInputSet that is initialized from a dict
     settings. It is typically used by other LammpsInputSets for
