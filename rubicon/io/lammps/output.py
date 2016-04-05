@@ -46,11 +46,11 @@ class LammpsRun(object):
         self.atomic_masses = {} # atom_type: mass
         self.molecules = defaultdict(list) # mol_num:[[atom,atom_type]]
         self.atom_to_mol = {} # atom_num: mol_num
-        self.mol_types = {} # 'H2O': 20
+        self.mol_types = {} # optional, example: 'H2O': 25
         mols_pattern = re.compile("^#\s+(\d+)\s+([0-9a-zA-Z]+)\s+molecules$")
-        atoms_pattern = re.compile("^(\d+)\s+(\d+)\s+(\d+)\s+([0-9eE\.+-]+)\s+("
+        atoms_pattern = re.compile("^\s*(\d+)\s+(\d+)\s+(\d+)\s+([0-9eE\.+-]+)\s+("
                                  "[0-9eE\.+-]+)\s+([0-9eE\.+-]+)\w*")
-        masses_pattern = re.compile("^(\d+)\s+([0-9\.]+)$")
+        masses_pattern = re.compile("^\s*(\d+)\s+([0-9\.]+)$")
         with open(self.data_file) as df:
             for line in df:
                 if mols_pattern.search(line):
