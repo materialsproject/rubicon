@@ -1,0 +1,12 @@
+TITLE     ACETONITRILE               
+REMARK    THIS IS A SIMULATION BOX
+CRYST1    3.500    2.500    2.500  90.00  90.00  90.00 P 1           1
+MODEL        1
+ATOM      1  CB  ACL     1       2.747   1.230   1.177  1.00  0.00            
+ATOM      2  NB  ACL     1       3.947   1.200   1.087  1.00  0.00            
+ATOM      3  CT  ACL     1       1.227   1.260   1.287  1.00  0.00            
+ATOM      4  HT  ACL     1       0.937   1.310   2.347  1.00  0.00            
+ATOM      5  HT  ACL     1       0.807   0.360   0.837  1.00  0.00            
+ATOM      6  HT  ACL     1       0.837   2.140   0.767  1.00  0.00            
+TER
+ENDMDL
