@@ -8,7 +8,7 @@ import os
 
 from rubicon.firetasks.lammps_input_task import WritelammpsInputTask
 from rubicon.firetasks.lammps_properties_task import ParselammpsProperties
-from rubicon.firetasks.multistep_gaussian_task import \
+from rubicon.firetasks.gaussian.multistep_gaussian_task import  \
     GaussianGeomOptDBInsertionTask, GaussianFreqESPDBInsertionTask
 
 import rubicon
