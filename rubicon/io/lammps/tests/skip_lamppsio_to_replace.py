@@ -9,7 +9,7 @@ from unittest import TestCase
 
 from pymatgen import Molecule
 
-from rubicon.io.lammps.data import LammpsAmberData_to_replace
+from rubicon.io.lammps.data import LammpsAmberData_to_delete
 from rubicon.io.packmol.packmol import PackmolRunner
 
 
@@ -101,7 +101,7 @@ class TestLmpInput(TestCase):
         super(TestLmpInput, cls).setUpClass()
 
     def test_str_(self):
-        data_lammps = LammpsAmberData_to_replace(
+        data_lammps = LammpsAmberData_to_delete(
             self.mols,
             self.mols_in_box["param_list"]["number"],
             self.mols_in_box["param_list"]["inside box"],

@@ -7,7 +7,7 @@ import os
 import shlex
 import subprocess
 
-from rubicon.io.lammps.data import LammpsAmberData_to_replace
+from rubicon.io.lammps.data import LammpsForceFieldData
 from rubicon.io.lammps.input import NPTNVTLammpsInput
 from rubicon.io.packmol.packmol import PackmolRunner
 
@@ -38,9 +38,10 @@ class WritelammpsInputTask(FireTaskBase):
 
     def run_task(self, fw_spec):
         gaussian_file = fw_spec['prev_gaussian_freq']
-        mols_dict = fw_spec["molecule"]
-        mol = mols_dict
+        mol = fw_spec["molecule"]
         molecules = [mol]
+        # list of gaussian files, one for each molecule type in molecules
+        gaussian_files = [gaussian_file]
         param_list = [{"number": 100,
                        "inside box": [-14.82, -14.82, -14.82,
                                       14.82, 14.82, 14.82]}]
@@ -51,11 +52,11 @@ class WritelammpsInputTask(FireTaskBase):
         # lammps input
         control_filename = 'mol_control.lammps'
         data_filename = 'mol_data.lammps'
-        # generate amber data
-        lammps_data = LammpsAmberData_to_replace(molecules, param_list["number"],
-                                                 param_list["inside box"],
-                                                 packed_molecule, gaussian_file)
-
+        # generate amber force filed data
+        lammps_data = LammpsForceFieldData.from_amber(molecules, param_list["number"],
+                                                      param_list["inside box"],
+                                                      packed_molecule,
+                                                      gaussian_files)
         user_lammps_settings = {
                                  "temp": 298,
                                  "fix1": {

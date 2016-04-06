@@ -53,10 +53,18 @@ class AntechamberRunner(object):
         """
         command_parmchk = (
             'parmchk -i ' + filename + ' -f ac -o mol.frcmod -a Y')
-        return_cmd = subprocess.call(shlex.split(command_parmchk))
-        return return_cmd
+        exit_code = subprocess.call(shlex.split(command_parmchk))
+        return exit_code
 
-    def _get_gaussian_ff_top_single(self, mol, filename=None):
+    def _run_antechamber(self, filename):
+        """
+        run antechmaber using the provided gaussian output file
+        """
+        command = 'antechamber -i ' + filename + " -fi gout -o mol -fo charmm -c resp -s 2 runinfo"
+        exit_code = subprocess.call(shlex.split(command))
+        return exit_code
+
+    def _get_gaussian_ff_top_single(self, filename=None):
         """
         run antechamber using gaussian output file, then run parmchk
         to generate missing force field parameters. Store and return
@@ -64,9 +72,9 @@ class AntechamberRunner(object):
 
         Args:
             filename: gaussian output file of the molecule
-            mol: molecule
+
         Returns:
-            Amberff object that contains information on force field and
+            Amberff namedtuple object that contains information on force field and
             topology
         """
         scratch = tempfile.gettempdir()
@@ -74,11 +82,10 @@ class AntechamberRunner(object):
         with ScratchDir(scratch, copy_from_current_on_enter=True,
                         copy_to_current_on_exit=True) as d:
             # self._convert_to_pdb(mol, 'mol.pdb')
-            command = 'antechamber -i ' + filename + " -fi gout -o mol -fo charmm -c resp -s 2 runinfo"
-            return_cmd = subprocess.call(shlex.split(command))
-            self.molname = filename.split('.')[0]
+            # self.molname = filename.split('.')[0]
+            self._run_antechamber(filename)
             self._run_parmchk()
-            # if antechamber can't find parameters go to gaff_nidhi.dat
+            # if antechamber can't find parameters go to gaff_example.dat
             try:
                 top = Topology.from_file('mol.rtf')
             except TopCorruptionException:
@@ -87,21 +94,26 @@ class AntechamberRunner(object):
             try:
                 gff = GeneralizedForceField.from_file('mol.frcmod')
             except FFCorruptionException:
-                correct_corrupted_frcmod_files('ANTECHAMBER.FRCMOD',
-                                               'gaff_example.txt')
+                correct_corrupted_frcmod_files('ANTECHAMBER.FRCMOD', 'gaff_example.txt')
                 gff = GeneralizedForceField.from_file('ANTECHAMBER.FRCMOD')
-            gff.set_atom_mappings('ANTECHAMBER_AC.AC')
+            # gff.set_atom_mappings('ANTECHAMBER_AC.AC')
             # gff.read_charges()
             # decorate the molecule with the sire property "atomname"
-            mol.add_site_property("atomname", (list(gff.atom_index.values())))
+            #mol.add_site_property("atomname", (list(gff.atom_index.values())))
         return Amberff(gff, top)
 
-    def get_gaussian_ff_top(self, filename=None):
+    def get_gaussian_ff_top(self, filenames):
         """
         return a list of amber force field and topology for the list of
-        moelcules in self.mols
+        gaussian output filenames corresponding to each molecule in mols list.
+
+        Args:
+            filenames (list): list of gaussian output files for each type of molecule
+
+        Returns:
+            list of Amberff namedtuples
         """
         amber_ffs = []
-        for mol in self.mols:
-            amber_ffs.append(self._get_gaussian_ff_top_single(mol, filename))
+        for fname in filenames:
+            amber_ffs.append(self._get_gaussian_ff_top_single(filename=fname))
         return amber_ffs
