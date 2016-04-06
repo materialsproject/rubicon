@@ -17,8 +17,7 @@ from pymatgen.core.structure import Molecule, Structure
 
 from rubicon.io.amber.antechamber import AntechamberRunner
 
-
-__author__ = 'Navnidhi Rajput, Kiran Mathew'
+__author__ = 'Kiran Mathew, Navnidhi Rajput'
 
 
 class LammpsData(object):
@@ -31,11 +30,15 @@ class LammpsData(object):
     Args:
         molecule (Molecule): molecule
         box_size (list): size of the box that embeds the packed molecule.
-            [x_min, y_min, z_min, x_max, y_max, z_max]    """
+            [x_min, y_min, z_min, x_max, y_max, z_max]
+    """
+
     def __init__(self, molecule, box_size):
         self.box_size = box_size
         box_lengths = [box_size[dim + 3] - box_size[dim] for dim in range(3)]
         self.boxed_molecule = None
+        self.atoms_data = []
+        # be defensive about the box size
         if isinstance(molecule, Molecule):
             self.boxed_molecule = molecule.get_boxed_structure(*box_lengths)
         elif isinstance(molecule, Structure):
@@ -52,8 +55,14 @@ class LammpsData(object):
         else:
             raise ValueError("molecule must be an object of Molecule or "
                              "Structure ")
+        self._set_basic_system_info()
+        self._set_atoms_data()
 
-    def _set_basic_data(self):
+    def _set_basic_system_info(self):
+        """
+        basic system info such as number of atoms, atom types, masses and
+        box size
+        """
         self.natoms = len(self.boxed_molecule)
         self.natom_types = len(self.boxed_molecule.symbol_set)
         self.box_size = [0, self.boxed_molecule.lattice.a, 0,
@@ -61,7 +70,12 @@ class LammpsData(object):
                          self.boxed_molecule.lattice.c]
         self.atomic_masses = [site.specie.data["Atomic mass"] for site in
                               self.boxed_molecule]
-        self.atoms_data = []
+
+    def _set_atoms_data(self):
+        """
+        atoms data:
+        atom_id, atom_type, charge(if present), x, y, z
+        """
         for i, site in enumerate(self.boxed_molecule):
             atom_type = self.boxed_molecule.symbol_set.index(
                 site.species_string)
@@ -90,7 +104,7 @@ class LammpsData(object):
                       self.atoms_data]
         return '\n'.join(lines)
 
-    def write_data_file(self, filename=None):
+    def write_data_file(self, filename):
         """
         write lammps data input file
         """
@@ -114,6 +128,7 @@ class LammpsAmberDataNew(LammpsData):
         gaussian_file (str): the name of gaussian output file that will be
             used by Antechamber to generate the force field parameters
     """
+
     def __init__(self, mols, mols_number, box_size, packed_molecule,
                  gaussian_file):
         self.mols = mols
@@ -124,9 +139,33 @@ class LammpsAmberDataNew(LammpsData):
         self.num_improper_dihedrals = None
         super(LammpsAmberData, self).__init__(self.packed_molecule,
                                               self.box_size)
+        self.nbond_types = 0
+        self.nangle_types = 0
+        self.nimproper_dih = 0
+        self.ndih = 0
+        self.nbonds = 0
+        self.nangles = 0
+        self.nimdihs = 0
+        self.bond_coeffs = []
+        self.pair_coeffs = []
+        self.angle_coeffs = []
+        self.dihedral_coeffs = []
+        self.improper_coeffs = []
+        self.atoms_data = []
+        self.bonds_data = []
+        self.vdw_data = []
+        self.angles_data = []
+        self.dihedrals_data = []
+        self.imdihedrals_data = []
+        self.bond_map = {}
+        self.angles_map = {}
+        self.dihedral_map = {}
+        self.vdw_map = {}
+        self.imdihedral_map = {}
         self._get_force_field()
-        self._set_data()
+        self._set_system_info()
         self._set_coeffs()
+        self._set_data()
 
     def _get_force_field(self):
         """
@@ -136,15 +175,14 @@ class LammpsAmberDataNew(LammpsData):
         acr = AntechamberRunner(self.mols)
         self.amber_ffs = acr.get_gaussian_ff_top(self.gaussian_file)
 
-    def _set_data(self):
-        self._set_basic_data()
-        self.nbond_types = 0
-        self.nangle_types = 0
-        self.nimproper_dih = 0
-        self.ndih = 0
-        self.nbonds = 0
-        self.nangles = 0
-        self.nimdihs = 0
+    def _set_system_info(self):
+        """
+        set the system inforamtion. It comprises of the number of atoms,
+        number of
+        molecules, box size, number of bond types/bonds, number of
+        angle types/angles, number of dihedral types/dihedrals and the
+        number of improper dihedral types/improper dihedrals
+        """
         for i, amber_ff in enumerate(self.amber_ffs):
             gff = amber_ff.force_field
             top = amber_ff.topology
@@ -158,35 +196,48 @@ class LammpsAmberDataNew(LammpsData):
             self.nimdihs += len(top.imdihedrals) * self.mols_number[i]
 
     def _set_coeffs(self):
-        self.bond_coeffs = []
-        self.pair_coeffs = []
-        self.angle_coeffs = []
-        self.dihedral_coeffs = []
-        self.improper_coeffs = []
+        """
+        set the coefficients for pair potentials, bonds, angles and
+        dihedrals using the force field object.
+        Also sets up the map between the molecule type in self.mols list and the
+        parmameter type aand the parameter label. For example: bond_map maps
+        molecule type to [[bond_type, bond_key], ...]
+        note: mol_type starts from 0
+        """
         bond_id_offset = 0
         angle_id_offset = 0
         vdw_id_offset = 0
         dih_id_offset = 0
         imdih_id_offset = 0
-        for mol_id, amber_ff in enumerate(self.amber_ffs):
+        for mol_type, amber_ff in enumerate(self.amber_ffs):
             gff = amber_ff.force_field
-            top = amber_ff.topology
-            # atom_id = mol_number[mol_id] * len(mol)
-            # mol_id --> [[atom_id1, atom_type1, atom_name1], ... ]
             # mol_id --> [[bond_type, bond_key], ...]
-            self.bond_coeffs, self.bond_map[mol_id] = \
+            self.bond_coeffs, self.bond_map[mol_type] = \
                 self._get_param_coeff(gff, "bonds", bond_id_offset)
-            self.angle_coeffs, self.angle_map[mol_id] = \
+            self.angle_coeffs, self.angle_map[mol_type] = \
                 self._get_param_coeff(gff, "angles", angle_id_offset)
-            self.vdw_coeffs, self.vdw_map[mol_id] = \
+            self.vdw_coeffs, self.vdw_map[mol_type] = \
                 self._get_param_coeff(gff, "vdws", vdw_id_offset)
-            self.dihedral_coeffs, self.dihedral_map[mol_id] = \
+            self.dihedral_coeffs, self.dihedral_map[mol_type] = \
                 self._get_param_coeff(gff, "dihedrals", dih_id_offset)
-            self.improper_coeffs, self.imdihedral_map[mol_id] = \
+            self.improper_coeffs, self.imdihedral_map[mol_type] = \
                 self._get_param_coeff(gff, "imdihedrals", imdih_id_offset)
-        # set the atom, bond, etc data
 
     def _get_param_coeff(self, obj, param, offset):
+        """
+        generalized method to set the parameter coefficients the mapping
+        from the given force field object
+
+        Args:
+            obj (GeneralizedForceField): force field object
+            param (str): parameter for the coefficient are to be set
+            offset (int): the offset used to assign a unique id(starting
+                from 1) to each parameter value
+
+        Returns:
+            [[unique paramter id, parameter values],..] and
+            [[paramter type, paramter key],...]
+        """
         if hasattr(obj, param):
             mapping = []
             p = getattr(obj, param)
@@ -202,78 +253,144 @@ class LammpsAmberDataNew(LammpsData):
         else:
             raise AttributeError
 
+    def _set_data(self):
+        topologies = [amber_ff.topology for amber_ff in self.amber_ffs]
+        force_fields = [amber_ff.force_field for amber_ff in self.amber_ffs]
+        self._set_atoms_data(topologies)
+        self.bonds_data = self._get_param_data(force_fields, topologies, "bonds", self.bond_map)
+        self.angles_data = self._get_param_data(force_fields, topologies, "angles",
+                                                self.angles_map)
+        self.vdw_data = self._get_param_data(force_fields, topologies, "vdw", self.vdw_map)
+        self.dihedrals_data = self._get_param_data(force_fields, topologies, "dihedrals",
+                                                   self.dihedral_map)
+        self.imdihedrals_data = self._get_param_data(force_fields, topologies, "imdihedral",
+                                                     self.imdihedral_map)
+
     def _set_atoms_data(self, topologies):
-        self.atoms_data = []
-        # map atom_id --> [mol_id, atom id in the mol]  in self.mols list
-        self.atom_to_mol = []
+        """
+        set the atoms data i.e atom id, mol type, atom type, charge, x, y, z
+        where atom id is the global atom id, mol type is the type of the
+        molecule(from self.mols). Also sets up the maps 'atom_to_mol' and
+        'atom_to_global_molid'.
+        'atom_to_mol' maps global atom id to mol id and the local atom id
+        'atomid_to_molid' maps global molecule id(this not the the
+        same as mol type in self.mols) to list of global atom id of the
+        atoms in that molecule.
+
+        Args:
+            topologies (list): list of topologies, used to set the atom charge
+        """
+        self.atom_to_mol = {}
+        self.atomid_to_molid = []
         nmols = len(self.mols)
-        shift = [0] + [len(self.mols[i]) * self.mols_number[i] for i in range(
-            nmols - 1)]
-        for mol_id in range(nmols):
-            natoms = len(self.mols[mol_id])
-            for num_mol_id in range(self.mols_number[mol_id]):
+        shift = [0] + [len(self.mols[i]) * self.mols_number[i] for i in range(nmols - 1)]
+        # set up map atom_id --> [mol_type, local atom id in the mol] in self.mols
+        # set up map gobal molecule id --> [[atom_id,...],...]
+        for mol_type in range(nmols):
+            natoms = len(self.mols[mol_type])
+            for num_mol_id in range(self.mols_number[mol_type]):
+                tmp = []
                 for mol_atom_id in range(natoms):
-                    atom_id = num_mol_id * natoms + mol_atom_id + shift[mol_id]
-                    self.atom_to_mol.append([mol_id, mol_atom_id])
-        # set atoms data: atom id, mol id, atom type, charge from topology,
-        # x, y, z
+                    atom_id = num_mol_id * natoms + mol_atom_id + shift[mol_type]
+                    self.atom_to_mol[atom_id] = [mol_type, mol_atom_id]
+                    tmp.append(atom_id)
+                self.atomid_to_molid.append(tmp)
+        # set atoms data from the final molecule assembly(the packed molecule
+        # obtained from packmol using the molecules from mols list and the
+        # molecule numbers from mol_number list).
+        # atom id, mol id, atom type, charge from topology, x, y, z
         for i, site in enumerate(self.packed_molecule):
             atom_type = self.packed_molecule.symbol_set.index(
                 site.species_string) + 1
-            atom_id = i+1
-            mol_id = self.atom_to_mol[i][0] +1
+            atom_id = i + 1
+            mol_type = self.atom_to_mol[i][0] + 1
             mol_atom_id = self.atom_to_mol[i][1] + 1
-            charge = topologies[mol_id-1].charges[mol_atom_id-1][0]
-            self.atoms_data.append([atom_id, mol_id, atom_type,
-                                    charge,
+            charge = topologies[mol_type - 1].charges[mol_atom_id - 1][0]
+            self.atoms_data.append([atom_id, mol_type, atom_type, charge,
                                     site.x, site.y, site.z])
 
-    def _set_bond_data(self, force_fields, topologies):
-        self.bonds_data = []
-        # map bond_id --> [mol_id, bond id in the bond]
-        self.bond_to_mol = []
+    def _get_param_data(self, force_fields, topologies, param_name, param_map):
+        """
+        set the data for the parameter named param_name
+
+        Args:
+            force_fields (list): list of force field objects
+            topologies (list): list of topology objects
+            param_name (str): parameter name
+            param_map (dict): maps molecule type to [[param_type, param_key], ...]
+        """
+        param_data = []
+        param_to_mol = {}
         nmols = len(self.mols)
-        shift = [0] + [len(self.mols[i]) * self.mols_number[i] for i in \
-                range(
-            nmols - 1)]
-        for mol_id in range(nmols):
-            nbonds = len(topologies[i].bonds)
-            for num_mol_id in range(self.mols_number[mol_id]):
-                for mol_bond_id in range(nbonds):
-                    bond_id = num_mol_id * nbonds + mol_bond_id + shift[mol_id]
-                    self.bond_to_mol.append([mol_id, mol_bond_id])
-        for bond_id, bm in enumerate(self.bond_to_mol):
-            mol_id = bm[0]
-            mol_bond_id = bm[1]
-            bond = topologies[mol_id].bonds[mol_bond_id]
-            bond_type = self.bond_map[mol_id + 1][mol_bond_id][0]
-            bond_atomid_1 = force_fields[mol_id].gaffname_to_atomindex[
-                bond[0]]
-            bond_atomid_2 = force_fields[mol_id].gaffname_to_atomindex[bond[1]]
-            #bond_key = self.bond_map[mol_id + 1][mol_bond_id][1]
-                self.bonds_data.append([bond_id, bond_type, bond_atomid_1, bond_atomid_2])
+        shift = [0] + [len(self.mols[i]) * self.mols_number[i] for i in range(nmols - 1)]
+        mol_id = 0
+        # map param_id --> [mol_id, param id in the param]
+        for mol_type in range(nmols):
+            param_obj = getattr(topologies[mol_type], param_name)
+            nparams = len(param_obj)
+            for num_mol_id in range(self.mols_number[mol_type]):
+                mol_id += 1
+                for mol_param_id in range(nparams):
+                    param_id = num_mol_id * nparams +  mol_param_id + shift[mol_type]
+                    param_to_mol[param_id] = [mol_type,  mol_param_id, mol_id - 1]
+        # set the parameter dat using the topology info
+        for param_id, bm in enumerate(param_to_mol):
+            mol_type = bm[0]
+            mol_param_id = bm[1]
+            mol_id = bm[2]
+            param_obj = getattr(topologies[mol_type], param_name)
+            param = param_obj[mol_param_id]
+            param_type = param_map[mol_type + 1][mol_param_id][0]
+            param_atomids = []
+            for i in range(len(param)):
+                lpa = force_fields[mol_type].gaffname_to_atomindex[param[i]]
+                pa = self.atomid_to_molid[mol_id][lpa]
+                param_atomids.append(pa)
+            param_data.append([param_id, param_type] + param_atomids)
+        return param_data
+
+    def _set_lines_from_list(self, lines, coeff_name, input_list):
+        lines.append("\n"+coeff_name+" \n")
+        _, __, ___ = [lines.append(" ".join([str(x) for x in ad])) for ad in input_list]
 
     def __str__(self):
         """
         returns a string of lammps data input file
         """
         lines = []
-        for i, amber_ff in enumerate(self.amber_ffs):
-            lines.append(self._set_gff_types(amber_ff))
-            lines.append(self._set_top_types(amber_ff))
-            lines.append(self._set_box_dimensions())
-            lines.append(self._set_masses(amber_ff))
-            lines.append(self._set_pair_coeffs(amber_ff))
-            lines.append(self._set_bond_coeffs(amber_ff))
-            lines.append(self._set_angle_coeffs(amber_ff))
-            lines.append(self._set_dihedral_coeffs(amber_ff))
-            lines.append(self._set_improper_coeffs(amber_ff))
-            lines.append(self._set_atom(amber_ff))
-            lines.append(self._set_bonds(amber_ff))
-            lines.append(self._set_angles(amber_ff))
-            lines.append(self._set_dihedrals(amber_ff))
-            lines.append(self._set_imdihedrals(amber_ff))
+        # title
+        lines.append("Data file generated by rubicon\n")
+        # count
+        lines.append("{} atoms".format(self.natoms))
+        lines.append("{} bonds".format(self.nbonds))
+        lines.append("{} angles".format(self.nangles))
+        lines.append("{} dihedrals".format(self.ndih))
+        lines.append("{} impropers\n".format(self.nimproper_dih))
+        # types
+        lines.append("{} atom types".format(self.natom_types))
+        lines.append("{} bond types".format(self.nbond_types))
+        lines.append("{} angle types".format(self.nangle_types))
+        lines.append("{} dihedral types".format(self.ndih_types))
+        lines.append("{} improper types\n".format(self.nimdih_types))
+        # box size
+        lines.append("{} {} xlo xhi\n{} {} ylo yhi\n{} {} zlo zhi\n".format(*self.box_size))
+        # masses
+        lines.append("Masses \n")
+        for i, m in enumerate(self.atomic_masses):
+            lines.append("{} {}".format(i + 1, m))
+        # coefficients
+        self._set_lines_from_list(lines, "Bond Coeffs", self.bond_coeffs)
+        self._set_lines_from_list(lines, "Angle Coeffs", self.angle_coeffs)
+        self._set_lines_from_list(lines, "Dihedral Coeffs", self.dihedral_coeffs)
+        self._set_lines_from_list(lines, "Improper Coeffs", self.improper_coeffs)
+        # data
+        self._set_lines_from_list(lines, "Atoms", self.atoms_data)
+        self._set_lines_from_list(lines, "Bonds", self.bonds_data)
+        self._set_lines_from_list(lines, "Angles", self.angles_data)
+        self._set_lines_from_list(lines, "Dihedrals", self.dihedrals_data)
+        self._set_lines_from_list(lines, "Impropers", self.imdihedrals_data)
         return '\n'.join(lines)
+
 
 class LammpsAmberData(LammpsData):
     """
@@ -290,6 +407,7 @@ class LammpsAmberData(LammpsData):
         gaussian_file (str): the name of gaussian output file that will be
             used by Antechamber to generate the force field parameters
     """
+
     def __init__(self, mols, mols_number, box_size, packed_molecule,
                  gaussian_file):
         self.mols = mols
