@@ -7,7 +7,7 @@ import os
 import shlex
 import subprocess
 
-from rubicon.io.lammps.data import LammpsAmberData
+from rubicon.io.lammps.data import LammpsAmberData_to_replace
 from rubicon.io.lammps.input import NPTNVTLammpsInput
 from rubicon.io.packmol.packmol import PackmolRunner
 
@@ -52,9 +52,9 @@ class WritelammpsInputTask(FireTaskBase):
         control_filename = 'mol_control.lammps'
         data_filename = 'mol_data.lammps'
         # generate amber data
-        lammps_data = LammpsAmberData(molecules, param_list["number"],
-                                      param_list["inside box"],
-                                      packed_molecule, gaussian_file)
+        lammps_data = LammpsAmberData_to_replace(molecules, param_list["number"],
+                                                 param_list["inside box"],
+                                                 packed_molecule, gaussian_file)
 
         user_lammps_settings = {
                                  "temp": 298,

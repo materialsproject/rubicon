@@ -112,7 +112,7 @@ class LammpsData(object):
             f.write(self.__str__())
 
 
-class LammpsAmberDataNew(LammpsData):
+class LammpsAmberData(LammpsData):
     """
     Sets Lammps data input file using antechamber(amber) generated force field
     parameters
@@ -137,8 +137,8 @@ class LammpsAmberDataNew(LammpsData):
         self.packed_molecule = packed_molecule
         self.gaussian_file = gaussian_file
         self.num_improper_dihedrals = None
-        super(LammpsAmberData, self).__init__(self.packed_molecule,
-                                              self.box_size)
+        super(LammpsAmberData_to_replace, self).__init__(self.packed_molecule,
+                                                         self.box_size)
         self.nbond_types = 0
         self.nangle_types = 0
         self.nimproper_dih = 0
@@ -392,7 +392,7 @@ class LammpsAmberDataNew(LammpsData):
         return '\n'.join(lines)
 
 
-class LammpsAmberData(LammpsData):
+class LammpsAmberData_to_replace(LammpsData):
     """
     Sets Lammps data input file using antechamber(amber) generated force field
     parameters
@@ -419,8 +419,8 @@ class LammpsAmberData(LammpsData):
         self.num_improper_dihedrals = None
         self._generate_data()
         box_lengths = [box_size[dim + 3] - box_size[dim] for dim in range(3)]
-        super(LammpsAmberData, self).__init__(self.packed_molecule,
-                                              box_lengths)
+        super(LammpsAmberData_to_replace, self).__init__(self.packed_molecule,
+                                                         box_lengths)
 
     def _generate_data(self):
         """
