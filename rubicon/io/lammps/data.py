@@ -171,8 +171,9 @@ class LammpsAmberDataNew(LammpsData):
         for mol_id, amber_ff in enumerate(self.amber_ffs):
             gff = amber_ff.force_field
             top = amber_ff.topology
-            # mol_id --> [atom_id, atom_type, atom_name]
-            # mol_id --> [[bond_id, bond_type],..]
+            # atom_id = mol_number[mol_id] * len(mol)
+            # mol_id --> [[atom_id1, atom_type1, atom_name1], ... ]
+            # mol_id --> [[bond_type, bond_key], ...]
             self.bond_coeffs, self.bond_map[mol_id] = \
                 self._get_param_coeff(gff, "bonds", bond_id_offset)
             self.angle_coeffs, self.angle_map[mol_id] = \
@@ -200,6 +201,57 @@ class LammpsAmberDataNew(LammpsData):
             return param_coeffs, mapping
         else:
             raise AttributeError
+
+    def _set_atoms_data(self, topologies):
+        self.atoms_data = []
+        # map atom_id --> [mol_id, atom id in the mol]  in self.mols list
+        self.atom_to_mol = []
+        nmols = len(self.mols)
+        shift = [0] + [len(self.mols[i]) * self.mols_number[i] for i in range(
+            nmols - 1)]
+        for mol_id in range(nmols):
+            natoms = len(self.mols[mol_id])
+            for num_mol_id in range(self.mols_number[mol_id]):
+                for mol_atom_id in range(natoms):
+                    atom_id = num_mol_id * natoms + mol_atom_id + shift[mol_id]
+                    self.atom_to_mol.append([mol_id, mol_atom_id])
+        # set atoms data: atom id, mol id, atom type, charge from topology,
+        # x, y, z
+        for i, site in enumerate(self.packed_molecule):
+            atom_type = self.packed_molecule.symbol_set.index(
+                site.species_string) + 1
+            atom_id = i+1
+            mol_id = self.atom_to_mol[i][0] +1
+            mol_atom_id = self.atom_to_mol[i][1] + 1
+            charge = topologies[mol_id-1].charges[mol_atom_id-1][0]
+            self.atoms_data.append([atom_id, mol_id, atom_type,
+                                    charge,
+                                    site.x, site.y, site.z])
+
+    def _set_bond_data(self, force_fields, topologies):
+        self.bonds_data = []
+        # map bond_id --> [mol_id, bond id in the bond]
+        self.bond_to_mol = []
+        nmols = len(self.mols)
+        shift = [0] + [len(self.mols[i]) * self.mols_number[i] for i in \
+                range(
+            nmols - 1)]
+        for mol_id in range(nmols):
+            nbonds = len(topologies[i].bonds)
+            for num_mol_id in range(self.mols_number[mol_id]):
+                for mol_bond_id in range(nbonds):
+                    bond_id = num_mol_id * nbonds + mol_bond_id + shift[mol_id]
+                    self.bond_to_mol.append([mol_id, mol_bond_id])
+        for bond_id, bm in enumerate(self.bond_to_mol):
+            mol_id = bm[0]
+            mol_bond_id = bm[1]
+            bond = topologies[mol_id].bonds[mol_bond_id]
+            bond_type = self.bond_map[mol_id + 1][mol_bond_id][0]
+            bond_atomid_1 = force_fields[mol_id].gaffname_to_atomindex[
+                bond[0]]
+            bond_atomid_2 = force_fields[mol_id].gaffname_to_atomindex[bond[1]]
+            #bond_key = self.bond_map[mol_id + 1][mol_bond_id][1]
+                self.bonds_data.append([bond_id, bond_type, bond_atomid_1, bond_atomid_2])
 
     def __str__(self):
         """

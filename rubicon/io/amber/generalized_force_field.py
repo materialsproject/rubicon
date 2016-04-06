@@ -54,6 +54,7 @@ class GeneralizedForceField(MSONable):
         self.atomindex_to_atomname = dict()
         self.atomindex_to_gaffname = dict()
         self.atomname_to_gaffname = dict()
+        self.gaffname_to_atomindex = dict()
 
     @classmethod
     def from_file(cls, filename=None, continue_on_corrupt_file=False):
@@ -292,6 +293,7 @@ class GeneralizedForceField(MSONable):
                     index = int(token[1])
                     atom_name = token[2]
                     gaff_name = token[-1]
+                    self.gaffname_to_atomindex[gaff_name] = index
                     self.atomname_to_gaffname[atom_name] = gaff_name
                     self.atomindex_to_atomname[index] = atom_name
                     self.atomindex_to_gaffname[index] = gaff_name
