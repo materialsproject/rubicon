@@ -4,7 +4,8 @@ from __future__ import division, print_function, unicode_literals, \
     absolute_import
 
 """
-This module implements classes for processing Lammps input files.
+This module implements classes for generating Lammps data files.
+TODO: add unittests
 """
 
 import six
