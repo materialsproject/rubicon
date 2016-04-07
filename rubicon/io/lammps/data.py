@@ -8,17 +8,15 @@ This module implements classes for generating Lammps data files.
 TODO: add unittests
 """
 
-import six
 from six.moves import range
-from six.moves import zip
 from io import open
-import math
 
 from pymatgen.core.structure import Molecule, Structure
 
 from rubicon.io.amber.antechamber import AntechamberRunner
 
 __author__ = 'Kiran Mathew, Navnidhi Rajput'
+__email__ = "kmathew@lbl.gov"
 
 
 class LammpsData(object):
@@ -194,12 +192,11 @@ class LammpsForceFieldData(LammpsData):
 
     def _set_coeffs(self):
         """
-        set the coefficients for pair potentials, bonds, angles and dihedrals using the force
-        field object.
+        set the coefficients for pair potentials, bonds, angles and dihedrals
+        using the force field object.
         Also sets up the map between the molecule type in self.mols list and the
         parameter type and the parameter label.
-        For example: bond_map maps each molecule type to {bond_key(or label) : unique bond number}
-        i.e {mol_type: {bond_key : unique bond number}}.
+        For example: bond_map -> {mol_type: {bond_key : unique bond number}}.
 
         note: mol_type starts from 0
         """
@@ -227,9 +224,10 @@ class LammpsForceFieldData(LammpsData):
         get the parameter coefficients from the force field
 
         Args:
-            param_name (str): name of the parameter for which the coefficient are to be set.
-            offset (int): the offset used to assign a unique id(starting from 0) to each
-                parameter value
+            param_name (str): name of the parameter for which the coefficients
+                are to be set.
+            offset (int): the offset used to assign a unique id(starting from 0)
+                to each parameter value
 
         Returns:
             [[unique paramter id, parameter values, ... ], ... ] and
@@ -335,16 +333,17 @@ class LammpsForceFieldData(LammpsData):
         # example: loop over all bonds in the system
         param_data = []
         for param_id, pinfo in param_to_mol.items():
-            mol_id = pinfo[0] # global molecule id
-            mol_type = pinfo[1] # type of molecule
-            mol_param_id = pinfo[2] # local parameter id in that molecule
+            mol_id = pinfo[0]  # global molecule id
+            mol_type = pinfo[1]  # type of molecule
+            mol_param_id = pinfo[2]  # local parameter id in that molecule
             # example: get the bonds list for mol_type molecule
             param_obj = getattr(self.topologies[mol_type], param_name)
             # connectivity info(local atom ids and type) for the parameter with the local id
             # 'mol_param_id'. example: single bond = [i, j, bond_type]
             param = param_obj[mol_param_id]
             param_atomids = []
-            # loop over local atom ids that constitute the parameter for the molecule type, mol_type
+            # loop over local atom ids that constitute the parameter
+            # for the molecule type, mol_type
             # example: single bond = [i,j,bond_label]
             for atomid in param[:-1]:
                 # local atom id to global atom id
@@ -402,8 +401,8 @@ class LammpsForceFieldData(LammpsData):
         force field and the topology data for the lammps calculation.
 
         Args:
-            gaussian_files (list): list of gaussian output filenames, one for each molecule
-                in the mols list.
+            gaussian_files (list): list of gaussian output filenames, one for
+                each molecule in the mols list.
         """
         acr = AntechamberRunner(mols)
         amber_ffs = acr.get_gaussian_ff_top(gaussian_files)

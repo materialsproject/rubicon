@@ -4,8 +4,8 @@ from __future__ import division, print_function, unicode_literals, \
     absolute_import
 
 """
-This module implements classes for generating Lammps input sets.
-The input set consists of the main input file with the control parameters and
+This module implements classes for generating Lammps input files.
+The input files consist of the main input file with the control parameters and
 the data file.
 """
 
@@ -18,6 +18,7 @@ from monty.json import MSONable
 
 
 __author__ = 'Kiran Mathew, Navnidhi Rajput'
+__email__ = "kmathew@lbl.gov"
 
 MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -45,10 +46,10 @@ class DictLammpsInput(MSONable):
         self.config_dict = config_dict
         self.lammps_data = lammps_data
         self.data_filename = data_filename
-        self.config_dict["LAMMPSINNPT"]["read_data"] = data_filename
+        self.config_dict["read_data"] = data_filename
         self.user_lammps_settings = user_lammps_settings
         if user_lammps_settings:
-            self.config_dict["LAMMPSINNPT"].update(user_lammps_settings)
+            self.config_dict.update(user_lammps_settings)
 
     @staticmethod
     def get_lines_from_dict(in_dict):
@@ -68,7 +69,7 @@ class DictLammpsInput(MSONable):
         return lines
 
     def __str__(self):
-        return self.get_lines_from_dict(self.config_dict['LAMMPSINNPT'])
+        return self.get_lines_from_dict(self.config_dict)
 
     def write_input(self, filename=None, data_filename=None):
         """
@@ -123,9 +124,9 @@ class DictLammpsInput(MSONable):
 
 # NPT
 NPTLammpsInput = partial(DictLammpsInput.from_file, "NPT",
-                         os.path.join(MODULE_DIR, "data_files", "Lammps.json"))
+                         os.path.join(MODULE_DIR, "data_files", "Lammps_npt.json"))
 
 
 # NPT followed by NVT
 NPTNVTLammpsInput = partial(DictLammpsInput.from_file, "NPT_NVT",
-                            os.path.join(MODULE_DIR, "data_files","Lammps_min_npt_nvt.json"))
+                            os.path.join(MODULE_DIR, "data_files","Lammps_npt_nvt.json"))
