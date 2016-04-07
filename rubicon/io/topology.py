@@ -32,7 +32,7 @@ class Topology(object):
         TODO: remove the rest of the params, dont see the need
     """
 
-    def __init__(self, atoms, charges, bonds, angles, dihedrals, imdihedrals,
+    def __init__(self, atoms, bonds, angles, charges=None, dihedrals=None, imdihedrals=None,
                  num_bonds=None, num_gaff_atoms=None, gaff_atoms=None):
         self.atoms = atoms
         self.charges = dict() if charges is None else charges
