@@ -6,6 +6,8 @@ import unittest
 
 from collections import OrderedDict
 
+import numpy as np
+
 from pymatgen.core.structure import Molecule
 
 from rubicon.io.force_field import ForceField
@@ -60,7 +62,8 @@ class TestLammpsForceFieldData(unittest.TestCase):
         nimdih_types = 0
         nimdihs = 0
         self.assertEqual(self.lammps_ff_data.atomic_masses, atomic_masses)
-        self.assertEqual(self.lammps_ff_data.atoms_data, atoms_data)
+        np.testing.assert_almost_equal(self.lammps_ff_data.atoms_data, atoms_data, decimal=10)
+        #self.assertEqual(self.lammps_ff_data.atoms_data, atoms_data)
         self.assertEqual(self.lammps_ff_data.natom_types, natom_types)
         self.assertEqual(self.lammps_ff_data.natoms, natoms)
         self.assertEqual(self.lammps_ff_data.nbond_types, nbond_types)

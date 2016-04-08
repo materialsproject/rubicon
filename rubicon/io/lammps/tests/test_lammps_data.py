@@ -4,7 +4,10 @@ from __future__ import division, print_function, unicode_literals, absolute_impo
 
 import unittest
 
+import numpy as np
+
 from pymatgen.core.structure import Molecule
+
 from rubicon.io.lammps.data import LammpsData
 
 
@@ -31,7 +34,8 @@ class TestLammpsData(unittest.TestCase):
         natom_types = 2
         natoms = 3
         self.assertEqual(self.lammps_data.atomic_masses, atomic_masses)
-        self.assertEqual(self.lammps_data.atoms_data, atoms_data)
+        np.testing.assert_almost_equal(self.lammps_data.atoms_data, atoms_data, decimal=10)
+        #self.assertEqual(self.lammps_data.atoms_data, atoms_data)
         self.assertEqual(self.lammps_data.natom_types, natom_types)
         self.assertEqual(self.lammps_data.natoms, natoms)
 
