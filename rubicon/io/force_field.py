@@ -44,8 +44,8 @@ class ForceField(MSONable):
             { "gaff atom name": [sigma, epsilon], ... }
     """
 
-    def __init__(self, atoms, bonds, angles, dihedrals, imdihedrals, vdws, masses=None,
-                 charges=None):
+    def __init__(self, atoms, bonds, angles, dihedrals=None, imdihedrals=None, vdws=None,
+                 masses=None, charges=None):
         self.atoms = atoms
         self.bonds = bonds
         self.angles = angles
