@@ -24,10 +24,10 @@ class TestLammpsData(unittest.TestCase):
                       [10.203, 7.604, 12.673]]
         molecule = Molecule(["H", "H", "O"], h2o_coords)
         box_size = [0, 0, 0, 10, 10, 10]
-        cls.lammps_data = LammpsData(molecule, box_size)
+        cls.lammps_data = LammpsData.from_structure(molecule, box_size)
 
     def test_system_info(self):
-        atomic_masses = [[1,1.00794], [2, 1.00794], [3, 15.9994]]
+        atomic_masses = [[1, 1.00794], [2, 15.9994]]
         atoms_data = [[1, 1, 4.4875653445297559, 4.1830559491720365, 5.0000000000000018],
                       [2, 1, 4.4875653445297559, 5.8160559491720365, 5.0000000000000018],
                       [3, 2, 5.0645653445297558, 5.0000559491720367, 5.0000000000000018]]
@@ -48,8 +48,7 @@ class TestLammpsData(unittest.TestCase):
                      '0 10.0 zlo zhi\n\n' \
                      'Masses \n\n' \
                      '1 1.00794\n' \
-                     '2 1.00794\n' \
-                     '3 15.9994\n\n' \
+                     '2 15.9994\n\n' \
                      'Atoms \n\n' \
                      '1 1 4.48756534453 4.18305594917 5.0\n' \
                      '2 1 4.48756534453 5.81605594917 5.0\n' \

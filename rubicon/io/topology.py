@@ -27,7 +27,7 @@ class Topology(object):
             angle_type = (ff atomname_i, ff atomname_j, ff atomname_k)
         dihedrals (list): List of dihedrals, [[i,j,k,l, dihedral_type], ... ]
             dihedral_type = (ff atomname_i, ff atomname_j, ff atomname_k, ff atomname_l)
-        imdihedrals (list): List of improper dihedrals, [['i,j,k,l,_type dihedral], ... ]
+        imdihedrals (list): List of improper dihedrals, [['i,j,k,l, dihedral_type], ... ]
 
         TODO: remove the rest of the params, dont see the need
     """

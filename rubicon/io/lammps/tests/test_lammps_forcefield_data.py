@@ -43,11 +43,11 @@ class TestLammpsForceFieldData(unittest.TestCase):
         box_size = [0, 0, 0, 10, 10, 10]
         molecule = h2o
         topologies = [topology]
-        cls.lammps_ff_data = LammpsForceFieldData(mols, mols_number, box_size, molecule,
-                                                  forcefield, topologies)
+        cls.lammps_ff_data = LammpsForceFieldData.from_forcefield_and_topology(mols, mols_number, box_size, molecule, forcefield,
+                                     topologies)
 
     def test_system_info(self):
-        atomic_masses = [[1, 1.00794], [2, 1.00794], [3, 15.9994]]
+        atomic_masses = [[1, 1.00794], [2, 15.9994]]
         atoms_data = [[1, 1, 1, 0.0, 4.4875653445297559, 4.1830559491720365, 5.0000000000000018],
                       [2, 1, 1, 0.0, 4.4875653445297559, 5.8160559491720365, 5.0000000000000018],
                       [3, 1, 2, 0.0, 5.0645653445297558, 5.0000559491720367, 5.0000000000000018]]
@@ -89,8 +89,7 @@ class TestLammpsForceFieldData(unittest.TestCase):
                      '0 10.0 zlo zhi\n\n' \
                      'Masses \n\n' \
                      '1 1.00794\n' \
-                     '2 1.00794\n' \
-                     '3 15.9994\n\n' \
+                     '2 15.9994\n\n' \
                      'Pair Coeffs \n\n' \
                      '1 0.0000 0.0000\n' \
                      '2 1.7683 0.1520\n\n' \
