@@ -3,6 +3,7 @@
 from __future__ import division, print_function, unicode_literals, absolute_import
 
 import unittest
+import os
 
 from collections import OrderedDict
 
@@ -18,6 +19,8 @@ from rubicon.io.lammps.data import LammpsForceFieldData
 __author__ = 'Kiran Mathew'
 __email__ = 'kmathew@lbl.gov'
 
+module_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)))
+
 
 class TestLammpsForceFieldData(unittest.TestCase):
 
@@ -27,7 +30,7 @@ class TestLammpsForceFieldData(unittest.TestCase):
         bonds = OrderedDict([((u'hw', u'ow'), [553.0, 0.957]),
                              ((u'hw', u'hw'), [553.0, 1.513])])
         angles = OrderedDict([((u'hw', u'ow', u'hw'), [0.0, 104.52])])
-        vdws = OrderedDict([(u'hw', [u'0.0000', u'0.0000']), (u'ow', [u'1.7683', u'0.1520'])])
+        vdws = OrderedDict([(u'hw', [0.0, 0.0]), (u'ow', [1.7683, 0.1520])])
         forcefield = ForceField(atoms, bonds, angles, vdws=vdws)
         h2o_coords = [[9.626, 6.787, 12.673],
                       [9.626, 8.420, 12.673],
@@ -40,11 +43,13 @@ class TestLammpsForceFieldData(unittest.TestCase):
         topology = Topology(top_atoms, top_bonds, top_angles)
         mols = [h2o]
         mols_number = [1]
-        box_size = [0, 0, 0, 10, 10, 10]
+        box_size = [[0.0, 10.0], [0.0, 10.0], [0.0, 10.0]]
         molecule = h2o
         topologies = [topology]
-        cls.lammps_ff_data = LammpsForceFieldData.from_forcefield_and_topology(mols, mols_number, box_size, molecule, forcefield,
-                                     topologies)
+        cls.lammps_ff_data = LammpsForceFieldData.from_forcefield_and_topology(mols, mols_number,
+                                                                               box_size, molecule,
+                                                                               forcefield,
+                                                                               topologies)
 
     def test_system_info(self):
         atomic_masses = [[1, 1.00794], [2, 15.9994]]
@@ -84,15 +89,15 @@ class TestLammpsForceFieldData(unittest.TestCase):
                      '2 atom types\n' \
                      '2 bond types\n' \
                      '1 angle types\n\n' \
-                     '0 10.0 xlo xhi\n' \
-                     '0 10.0 ylo yhi\n' \
-                     '0 10.0 zlo zhi\n\n' \
+                     '0.0 10.0 xlo xhi\n' \
+                     '0.0 10.0 ylo yhi\n' \
+                     '0.0 10.0 zlo zhi\n\n' \
                      'Masses \n\n' \
                      '1 1.00794\n' \
                      '2 15.9994\n\n' \
                      'Pair Coeffs \n\n' \
-                     '1 0.0000 0.0000\n' \
-                     '2 1.7683 0.1520\n\n' \
+                     '1 0.0 0.0\n' \
+                     '2 1.7683 0.152\n\n' \
                      'Bond Coeffs \n\n' \
                      '1 553.0 0.957\n' \
                      '2 553.0 1.513\n\n' \
@@ -109,6 +114,29 @@ class TestLammpsForceFieldData(unittest.TestCase):
                      '1 1 1 3 2'
         self.assertEqual(str(self.lammps_ff_data), string_rep)
 
+    def test_from_file(self):
+        self.lammps_ff_data.write_data_file("lammps_ff_data.dat")
+        lammps_ff_data = LammpsForceFieldData.from_file("lammps_ff_data.dat")
+        np.testing.assert_almost_equal(lammps_ff_data.atomic_masses,
+                                       self.lammps_ff_data.atomic_masses, decimal=10)
+        np.testing.assert_almost_equal(lammps_ff_data.pair_coeffs,
+                                       self.lammps_ff_data.pair_coeffs, decimal=10)
+        np.testing.assert_almost_equal(lammps_ff_data.bond_coeffs,
+                                       self.lammps_ff_data.bond_coeffs, decimal=10)
+        np.testing.assert_almost_equal(lammps_ff_data.angle_coeffs,
+                                       self.lammps_ff_data.angle_coeffs, decimal=10)
+        np.testing.assert_almost_equal(lammps_ff_data.atoms_data,
+                                       self.lammps_ff_data.atoms_data, decimal=10)
+        np.testing.assert_almost_equal(lammps_ff_data.bonds_data,
+                                       self.lammps_ff_data.bonds_data, decimal=10)
+        np.testing.assert_almost_equal(lammps_ff_data.angles_data,
+                                       self.lammps_ff_data.angles_data, decimal=10)
+        self.assertEqual(str(lammps_ff_data), str(self.lammps_ff_data))
+
+    def tearDown(self):
+        for x in ["lammps_ff_data.dat"]:
+            if os.path.exists(os.path.join(module_dir, x)):
+                os.remove(os.path.join(module_dir, x))
 
 
 if __name__ == "__main__":
