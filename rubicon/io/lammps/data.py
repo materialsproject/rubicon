@@ -5,13 +5,12 @@ from __future__ import division, print_function, unicode_literals, \
 
 """
 This module implements classes for generating Lammps data files.
-TODO: add unittests
 """
 
 from six.moves import range
 from io import open
 import re
-from collections import  OrderedDict
+from collections import OrderedDict
 
 from pymatgen.core.structure import Molecule, Structure
 
@@ -642,7 +641,7 @@ def get_boxed_molecule(input_structure, box_size):
         box_size (list): [[x_min, x_max], [y_min, y_max], [z_min, z_max]]
 
     Returns:
-        Molecule
+        Structure
     """
     box_lengths = [min_max[1]-min_max[0] for min_max in box_size]
     # be defensive about the box size
