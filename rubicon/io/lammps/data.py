@@ -4,7 +4,7 @@ from __future__ import division, print_function, unicode_literals, \
     absolute_import
 
 """
-This module implements classes for generating Lammps data files.
+This module implements classes for generating/parsing Lammps data files.
 """
 
 from six.moves import range
@@ -230,24 +230,24 @@ class LammpsForceFieldData(LammpsData):
     def __init__(self, box_size, atomic_masses, pair_coeffs, bond_coeffs, angle_coeffs,
                  dihedral_coeffs, improper_coeffs, atoms_data, bonds_data, angles_data,
                  dihedrals_data, imdihedrals_data):
-        self.natom_types = len(atomic_masses)
+        super(LammpsForceFieldData, self).__init__(box_size, atomic_masses, atoms_data)
+        # number of types
         self.nbond_types = len(bond_coeffs)
         self.nangle_types = len(angle_coeffs)
         self.ndih_types = len(dihedral_coeffs)
         self.nimdih_types = len(improper_coeffs)
-        self.natoms = len(atoms_data)
+        # number of parameters
         self.nbonds = len(bonds_data)
         self.nangles = len(angles_data)
         self.ndih = len(dihedrals_data)
         self.nimdihs = len(imdihedrals_data)
-        self.box_size = box_size
-        self.atomic_masses = atomic_masses
+        # coefficients
         self.pair_coeffs = pair_coeffs
         self.bond_coeffs = bond_coeffs
         self.angle_coeffs = angle_coeffs
         self.dihedral_coeffs = dihedral_coeffs
         self.improper_coeffs = improper_coeffs
-        self.atoms_data = atoms_data
+        # data
         self.bonds_data = bonds_data
         self.angles_data = angles_data
         self.dihedrals_data = dihedrals_data

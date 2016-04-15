@@ -36,9 +36,8 @@ class TestLammpsData(unittest.TestCase):
                       [3, 1, 2, 0.0, 5.0645653445297558, 5.0000559491720367, 5.0000000000000018]]
         natom_types = 2
         natoms = 3
-        self.assertEqual(self.lammps_data.atomic_masses, atomic_masses)
+        np.testing.assert_almost_equal(self.lammps_data.atomic_masses, atomic_masses, decimal=10)
         np.testing.assert_almost_equal(self.lammps_data.atoms_data, atoms_data, decimal=10)
-        #self.assertEqual(self.lammps_data.atoms_data, atoms_data)
         self.assertEqual(self.lammps_data.natom_types, natom_types)
         self.assertEqual(self.lammps_data.natoms, natoms)
 

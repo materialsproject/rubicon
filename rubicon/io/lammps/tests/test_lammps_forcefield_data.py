@@ -68,7 +68,6 @@ class TestLammpsForceFieldData(unittest.TestCase):
         nimdihs = 0
         self.assertEqual(self.lammps_ff_data.atomic_masses, atomic_masses)
         np.testing.assert_almost_equal(self.lammps_ff_data.atoms_data, atoms_data, decimal=10)
-        #self.assertEqual(self.lammps_ff_data.atoms_data, atoms_data)
         self.assertEqual(self.lammps_ff_data.natom_types, natom_types)
         self.assertEqual(self.lammps_ff_data.natoms, natoms)
         self.assertEqual(self.lammps_ff_data.nbond_types, nbond_types)
