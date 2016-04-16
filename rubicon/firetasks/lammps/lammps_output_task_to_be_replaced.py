@@ -41,7 +41,7 @@ class WritelammpsOutputTask(FireTaskBase):
             db.authenticate(db_creds['admin_user'], db_creds['admin_password'])
             coll = db['lammps_output']
 
-        parse_lammps = LammpsLog.from_file(filename)
+        parse_lammps = LammpsLog._parse_log(filename)
         docs = parse_lammps.llog
         docs = {k: list(v) if isinstance(v, numpy.ndarray) else v for k, v in
                 docs.items()}

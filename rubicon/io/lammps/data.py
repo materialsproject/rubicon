@@ -186,7 +186,7 @@ class LammpsData(object):
                                        "[0-9eE\.+-]+)\s+([0-9eE\.+-]+)\w*")
         # atom_type, mass
         masses_pattern = re.compile("^\s*(\d+)\s+([0-9\.]+)$")
-        box_pattern = re.compile("^([0-9\.-]+)\s+([0-9\.-]+)\s+[x,y,z]lo\s+[x,y,z]hi")
+        box_pattern = re.compile("^([0-9eE\.+-]+)\s+([0-9eE\.+-]+)\s+[xyz]lo\s+[xyz]hi")
         with open(data_file) as df:
             for line in df:
                 if masses_pattern.search(line):
@@ -516,7 +516,7 @@ class LammpsForceFieldData(LammpsData):
         atoms_pattern = re.compile("^\s*(\d+)\s+(\d+)\s+(\d+)\s+([0-9eE\.+-]+)\s+("
                                    "[0-9eE\.+-]+)\s+([0-9eE\.+-]+)\s+([0-9eE\.+-]+)\w*")
         masses_pattern = re.compile("^\s*(\d+)\s+([0-9\.]+)$")
-        box_pattern = re.compile("^([0-9\.-]+)\s+([0-9\.-]+)\s+[x,y,z]lo\s+[x,y,z]hi")
+        box_pattern = re.compile("^\s*([0-9eE\.+-]+)\s+([0-9eE\.+-]+)\s+[xyz]lo\s+[xyz]hi")
         # id, value1, value2
         general_coeff_pattern = re.compile("^\s*(\d+)\s+([0-9\.]+)\s+([0-9\.]+)$")
         # id, type, atom_id1, atom_id2

@@ -41,42 +41,36 @@ class DictLammpsInput(MSONable):
             or bond type.
     """
 
-    def __init__(self, name, config_dict, lammps_data=None, data_filename="in.data",
+    def __init__(self, name, config_dict, lammps_data=None, data_file="in.data",
                  user_lammps_settings={}):
         self.name = name
         self.lines = []
         self.config_dict = config_dict
         self.lammps_data = lammps_data
-        self.data_filename = data_filename
-        self.config_dict["read_data"] = data_filename
+        self.data_file = data_file
+        self.config_dict["read_data"] = data_file
         self.user_lammps_settings = user_lammps_settings
         if self.user_lammps_settings:
             self.config_dict.update(self.user_lammps_settings)
-
-    @staticmethod
-    def get_lines_from_dict(in_dict):
-        """
-        recursively convert the nested dict to an appropriate string
-        representation to be used as lammps input file with the control paramters.
-        """
-        lines = " "
-        for k1, v1 in in_dict.items():
-            lines = lines + "{} ".format(k1)
-            if isinstance(v1,dict):
-                lines = lines + DictLammpsInput.get_lines_from_dict(v1)
-            elif isinstance(v1, list):
-                lines = lines + " ".join([str(x) for x in v1]) + os.linesep
-            else:
-                lines = lines + " {}{}".format(str(v1), os.linesep)
-        return lines
 
     def __str__(self):
         """
         string representation of the lammps input file with the control parameters
         """
-        return self.get_lines_from_dict(self.config_dict)
+        lines = ""
+        for k1, v1 in self.config_dict.items():
+            if isinstance(v1, dict):
+                v1 = v1.values()
+            if isinstance(v1, list):
+                for x in v1:
+                    lines = "".join([lines, "{} ".format(k1)])
+                    lines = "".join([lines, str(x), os.linesep])
+            else:
+                lines = "".join([lines, "{} ".format(k1)])
+                lines = "".join([lines, " {}{}".format(str(v1), os.linesep)])
+        return lines
 
-    def write_input(self, filename):
+    def write_input(self, filename, data_file=None):
         """
         get the string representation of the main input file and write it.
         Also writes the data file if the lammps_data attribute is set.
@@ -84,16 +78,19 @@ class DictLammpsInput(MSONable):
         Args:
             filename (string): name of the input file
         """
+        if data_file:
+            self.config_dict["read_data"] = data_file
+            self.data_file = data_file
         # write the main input file
         with open(filename, 'w') as f:
             f.write(self.__str__())
         # write the data file if present
         if self.lammps_data:
-            print("Writing the data to {}".format(self.data_filename))
-            self.lammps_data.write_data_file(filename=self.data_filename)
+            print("Writing the data to {}".format(self.data_file))
+            self.lammps_data.write_data_file(filename=self.data_file)
 
     @staticmethod
-    def from_file(name, filename, data_filename=None, is_forcefield=False, **kwargs):
+    def from_file(name, filename, data_obj=None, data_file=None, is_forcefield=False):
         """
         Read in the input settings from json file as ordereddict. Also reads in the
         datafile if provided.
@@ -102,7 +99,8 @@ class DictLammpsInput(MSONable):
 
         Args:
             filename (string): name of the file with the lamps control paramters
-            data_filename (string): name of the data file name
+            data_obj (LammpsData): LammpsData object
+            data_file (string): name of the data file name
             is_forcefield (bool): whether the data file has forcefield and topology info
                 in it
 
@@ -112,12 +110,14 @@ class DictLammpsInput(MSONable):
         with open(filename) as f:
             config_dict = json.load(f, object_pairs_hook=OrderedDict)
         lammps_data = None
-        if data_filename:
+        if data_file:
             if is_forcefield:
-                lammps_data = LammpsForceFieldData.from_file(data_filename)
+                lammps_data = LammpsForceFieldData.from_file(data_file)
             else:
-                lammps_data = LammpsData.from_file(data_filename)
-        return DictLammpsInput(name, config_dict, lammps_data, data_filename, **kwargs)
+                lammps_data = LammpsData.from_file(data_file)
+        if data_obj and isinstance(data_obj, LammpsData):
+            lammps_data = data_obj
+        return DictLammpsInput(name, config_dict, lammps_data)
 
     @property
     def as_dict(self):
@@ -126,22 +126,30 @@ class DictLammpsInput(MSONable):
                 "name": self.name,
                 "config_dict": self.config_dict,
                 "lammps_data": self.lammps_data,
-                "data_filename": self.data_filename,
+                "data_filename": self.data_file,
                 "user_lammps_settings": self.user_lammps_settings}
 
     @classmethod
     def from_dict(cls, d):
         return DictLammpsInput(d["name"], d["config_dict"],
                                lammps_data=d.get("lammps_data"),
-                               data_filename=d.get("data_filename"),
+                               data_file=d.get("data_filename"),
                                user_lammps_settings=d.get("user_lammps_settings"))
+
+# NVT
+NVTLammpsInput = partial(DictLammpsInput.from_file, "NVT", os.path.join(MODULE_DIR,
+                                                                        "tests",
+                                                                        "test_files",
+                                                                        "NVT.json"))
 
 
 # NPT
-NPTLammpsInput = partial(DictLammpsInput.from_file, "NPT",
-                         os.path.join(MODULE_DIR, "data_files", "Lammps_npt.json"))
+NPTLammpsInput = partial(DictLammpsInput.from_file, "NPT", os.path.join(MODULE_DIR,
+                                                                        "tests",
+                                                                        "test_files", "NPT.json"))
 
 
 # NPT followed by NVT
-NPTNVTLammpsInput = partial(DictLammpsInput.from_file, "NPT_NVT",
-                            os.path.join(MODULE_DIR, "data_files","Lammps_npt_nvt.json"))
+NPTNVTLammpsInput = partial(DictLammpsInput.from_file, "NPT_NVT", os.path.join(MODULE_DIR, "tests",
+                                                                               "test_files",
+                                                                               "NPT_NVT.json"))

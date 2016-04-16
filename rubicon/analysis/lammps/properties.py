@@ -34,7 +34,7 @@ class TransportProperties(object):
         """
         auto_corr_full = np.correlate(array, array,mode="full")
         auto_corr = auto_corr_full[auto_corr_full.size / 2:]
-        time = self.lammpsrun.traj_timesteps * self.lammpsrun.timestep
+        time = self.lammpsrun.traj_timesteps
         return sp_integrate.simps(auto_corr, time)
 
     @property

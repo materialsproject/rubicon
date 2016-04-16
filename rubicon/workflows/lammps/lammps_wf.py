@@ -11,14 +11,14 @@ from fireworks.core.firework import Firework
 from pymatgen import Molecule
 
 import rubicon
-from rubicon.firetasks.lammps.lammps_input_task import WritelammpsInputTask
-from rubicon.firetasks.lammps.lammps_output_task import WritelammpsOutputTask
-from rubicon.firetasks.lammps.lammps_properties_task import ParselammpsProperties
+from rubicon.firetasks.lammps.input_tasks import WritelammpsInputFromGaussian
+from rubicon.firetasks.lammps.lammps_output_task_to_be_replaced import WritelammpsOutputTask
+from rubicon.firetasks.lammps.lammps_properties_task_to_be_replaced import ParselammpsProperties
 
 __author__ = 'navnidhirajput'
 
 if __name__ == '__main__':
-    task1 = WritelammpsInputTask()
+    task1 = WritelammpsInputFromGaussian()
     task2 = WritelammpsOutputTask()
     task3 = ParselammpsProperties()
 
