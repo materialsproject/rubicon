@@ -16,10 +16,10 @@ from monty.dev import requires
 from monty.os.path import which
 from monty.tempfile import ScratchDir
 
-from rubicon.io.topology import Topology, TopCorruptionException
-from rubicon.io.topology import correct_corrupted_top_files
-from rubicon.io.force_field import ForceField, FFCorruptionException
-from rubicon.io.force_field import correct_corrupted_frcmod_files
+from rubicon.io.lammps.topology import Topology, TopCorruptionException
+from rubicon.io.lammps.topology import correct_corrupted_top_files
+from rubicon.io.lammps.force_field import ForceField, FFCorruptionException
+from rubicon.io.lammps.force_field import correct_corrupted_frcmod_files
 
 
 __author__ = 'Navnidhi Rajput, Kiran Mathew'

@@ -2,18 +2,16 @@
 
 from __future__ import division, print_function, unicode_literals, absolute_import
 
-import unittest
 import os
-
+import unittest
 from collections import OrderedDict
 
 import numpy as np
 
 from pymatgen.core.structure import Molecule
-
-from rubicon.io.force_field import ForceField
-from rubicon.io.topology import Topology
 from rubicon.io.lammps.data import LammpsForceFieldData
+from rubicon.io.lammps.force_field import ForceField
+from rubicon.io.lammps.topology import Topology
 
 
 __author__ = 'Kiran Mathew'
