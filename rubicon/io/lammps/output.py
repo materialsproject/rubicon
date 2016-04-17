@@ -343,7 +343,7 @@ class LammpsLog(object):
                 # total number md steps
                 steps = re.search('run\s+([0-9]+)', line)
                 if steps and not thermo_data:
-                    self.nmdsteps = float(steps.group(1))
+                    self.nmdsteps = int(steps.group(1))
                 # logging interval
                 thermo = re.search('thermo\s+([0-9]+)', line)
                 if thermo and not thermo_data:

@@ -19,7 +19,8 @@ from monty.json import MSONable
 from rubicon.io.lammps.data import LammpsData, LammpsForceFieldData
 
 
-__author__ = 'Kiran Mathew, Navnidhi Rajput'
+__author__ = "Kiran Mathew"
+__credits__= "Navnidhi Rajput"
 __email__ = "kmathew@lbl.gov"
 
 MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -137,16 +138,15 @@ class DictLammpsInput(MSONable):
                                user_lammps_settings=d.get("user_lammps_settings"))
 
 # NVT
-NVTLammpsInput = partial(DictLammpsInput.from_file, "NVT", os.path.join(MODULE_DIR,
-                                                                        "tests",
+NVTLammpsInput = partial(DictLammpsInput.from_file, "NVT", os.path.join(MODULE_DIR, "tests",
                                                                         "test_files",
                                                                         "NVT.json"))
 
 
 # NPT
-NPTLammpsInput = partial(DictLammpsInput.from_file, "NPT", os.path.join(MODULE_DIR,
-                                                                        "tests",
-                                                                        "test_files", "NPT.json"))
+NPTLammpsInput = partial(DictLammpsInput.from_file, "NPT", os.path.join(MODULE_DIR, "tests",
+                                                                        "test_files",
+                                                                        "NPT.json"))
 
 
 # NPT followed by NVT

@@ -14,7 +14,7 @@ __email__ = 'kmathew@lbl.gov'
 module_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)))
 
 
-class TestLammpsData(unittest.TestCase):
+class TestLammpsInput(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
