@@ -58,8 +58,8 @@ class TestLammpsData(unittest.TestCase):
         self.assertEqual(str(self.lammps_data), string_rep)
 
     def test_from_file(self):
-        self.lammps_data.write_data_file("lammps_data.dat")
-        lammps_data = LammpsData.from_file("lammps_data.dat")
+        self.lammps_data.write_data_file(os.path.join(module_dir, "lammps_data.dat"))
+        lammps_data = LammpsData.from_file(os.path.join(module_dir, "lammps_data.dat"))
         self.assertEqual(str(lammps_data), str(self.lammps_data))
 
     def tearDown(self):

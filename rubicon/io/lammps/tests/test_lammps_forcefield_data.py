@@ -112,8 +112,9 @@ class TestLammpsForceFieldData(unittest.TestCase):
         self.assertEqual(str(self.lammps_ff_data), string_rep)
 
     def test_from_file(self):
-        self.lammps_ff_data.write_data_file("lammps_ff_data.dat")
-        lammps_ff_data = LammpsForceFieldData.from_file("lammps_ff_data.dat")
+        self.lammps_ff_data.write_data_file(os.path.join(module_dir, "lammps_ff_data.dat"))
+        lammps_ff_data = LammpsForceFieldData.from_file(os.path.join(module_dir,
+                                                                     "lammps_ff_data.dat"))
         np.testing.assert_almost_equal(lammps_ff_data.atomic_masses,
                                        self.lammps_ff_data.atomic_masses, decimal=10)
         np.testing.assert_almost_equal(lammps_ff_data.pair_coeffs,
