@@ -22,6 +22,19 @@ class TransportProperties(object):
     def __init__(self, lammpsrun):
         self.lammpsrun = lammpsrun
 
+    def properties_summary_from_diffusion_analyzer(self, specie, temperature, time_step, step_skip,
+                                               smoothed=None, min_obs=30, avg_nsteps=1000):
+        """
+        Use the pymatgen diffusion analyzer to get a summary of transport
+        properties as computed by pymatgen.
+
+        See pymatgen.analysis.diffusion_analyzer for the documentation.
+        """
+        diffusion_analyzer = self.lammpsrun.get_diffusion_analyzer(specie, temperature, time_step,
+                                                                   step_skip, smoothed, min_obs,
+                                                                   avg_nsteps)
+        return diffusion_analyzer.get_summary_dict()
+
     def get_integrated_correlation(self, array):
         """
         compute the autocorrelation and integrate it wrt time
