@@ -7,6 +7,9 @@ from __future__ import division, print_function, unicode_literals, \
 This module implements classes for generating/parsing Lammps data files.
 """
 
+from rubicon.io.lammps import lammps_warning
+lammps_warning()
+
 from six.moves import range
 from io import open
 import re

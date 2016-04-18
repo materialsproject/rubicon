@@ -9,6 +9,9 @@ This module defines classes that set the force field parametrs for the bonds, an
 WARNING: I do not think the amber stuff are consistent
 """
 
+from rubicon.io.lammps import lammps_warning
+lammps_warning()
+
 import json
 import os
 from io import open

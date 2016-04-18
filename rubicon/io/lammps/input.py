@@ -9,6 +9,9 @@ The input files consist of the main input file with the control parameters and
 the data file.
 """
 
+from rubicon.io.lammps import lammps_warning
+lammps_warning()
+
 import json
 import os
 from functools import partial
