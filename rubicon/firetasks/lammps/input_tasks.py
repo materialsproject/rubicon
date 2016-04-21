@@ -3,8 +3,8 @@
 from __future__ import division, print_function, unicode_literals, \
     absolute_import
 
-from rubicon.io.lammps.data import LammpsForceFieldData
-from rubicon.io.lammps.input import NPTNVTLammpsInput
+from pymatgen.io.lammps.data import LammpsForceFieldData
+from pymatgen.io.lammps.input import NPTNVTLammpsInput
 from rubicon.io.packmol.packmol import PackmolRunner
 
 from fireworks import FireTaskBase, explicit_serialize, FWAction

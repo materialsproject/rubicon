@@ -26,7 +26,7 @@ from scipy.optimize import curve_fit
 from six.moves import range
 from six.moves import zip
 
-from rubicon.io.lammps.output import LammpsLog, LammpsRun
+from pymatgen.io.lammps.output import LammpsLog, LammpsRun
 from rubicon.analysis.lammps._md_analyzer import calccom as calccomf, comradial, \
     siteradial
 
