@@ -8,6 +8,7 @@ import logging
 import os
 import sys
 
+from pymatgen import Composition
 from pymongo import MongoClient
 
 
@@ -40,6 +41,8 @@ def transform_molecule_doc(mol1):
     mol2["reduced_cell_formula_abc"] = mol1["reduced_cell_formula_abc"]
     mol2["pretty_formula"] = mol1["pretty_formula"]
     mol2["formula"] = mol1["formula"]
+    mol_weight = float(Composition(mol2["formula"]).weight)
+    mol2["MW"] = mol_weight
     mol2["pointgroup"] = mol1["pointgroup"]
 
     mol2["task_id"] = mol1["vacuum_properties"]["task_id"]["neutral"]
