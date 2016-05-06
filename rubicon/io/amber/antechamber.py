@@ -1,11 +1,10 @@
 # coding: utf-8
 
-from __future__ import division, print_function, unicode_literals, \
-    absolute_import
+from __future__ import division, print_function, unicode_literals, absolute_import
 
 """
-    A wrapper for AntechamberRunner which generates force field files
-    for a specified molecule using gaussian output file as input
+A wrapper for AntechamberRunner which generates force field files
+or a specified molecule using gaussian output file as input
 """
 
 import shlex
@@ -17,10 +16,12 @@ from monty.dev import requires
 from monty.os.path import which
 from monty.tempfile import ScratchDir
 
-from rubicon.io.amber.topology import Topology, TopCorruptionException
-from rubicon.io.amber.topology import correct_corrupted_top_files
-from rubicon.io.amber.generalized_force_field import GeneralizedForceField, FFCorruptionException
-from rubicon.io.amber.generalized_force_field import correct_corrupted_frcmod_files
+from pymatgen.io.lammps.topology import Topology
+from rubicon.io.lammps.topology import correct_corrupted_top_files, \
+    TopCorruptionException
+from pymatgen.io.lammps.force_field import ForceField
+from rubicon.io.lammps.force_field import correct_corrupted_frcmod_files, \
+    FFCorruptionException
 
 
 __author__ = 'Navnidhi Rajput, Kiran Mathew'
@@ -29,7 +30,6 @@ __author__ = 'Navnidhi Rajput, Kiran Mathew'
 class AntechamberRunner(object):
     """
     A wrapper for AntechamberRunner software
-
     """
 
     @requires(which('parmchk'), "Requires the binary parmchk."
@@ -41,26 +41,33 @@ class AntechamberRunner(object):
         Args:
             mols: List of molecules
         """
-
         self.mols = mols
 
-    def _run_parmchk(self, filename='ANTECHAMBER_AC.AC'):
+    def _run_parmchk(self, filename="ANTECHAMBER_AC.AC", format="ac", outfile_name="mol.frcmod",
+                     print_improper_dihedrals="Y"):
         """
-        run parmchk using ANTECHAMBER_AC.AC file
-
-        Args:
-            filename: pdb file of the molecule
+        run parmchk
         """
-        command_parmchk = (
-            'parmchk -i ' + filename + ' -f ac -o mol.frcmod -a Y')
-        exit_code = subprocess.call(shlex.split(command_parmchk))
+        command = "parmchk -i {} -f {} -o {} -w {}".format(filename, format, outfile_name,
+                                                           print_improper_dihedrals)
+        exit_code = subprocess.call(shlex.split(command))
         return exit_code
 
-    def _run_antechamber(self, filename):
+    def _run_antechamber(self, filename, infile_format="gout", outfile_name="mol",
+                         outfile_format="ac", charge_method="resp", status_info=2):
         """
-        run antechmaber using the provided gaussian output file
+        run antechamber using the provided gaussian output file
         """
-        command = 'antechamber -i ' + filename + " -fi gout -o mol -fo charmm -c resp -s 2 runinfo"
+        command = "antechamber -i {} -fi {} -o {} -fo {} -c {} -s {}".format(filename,
+                                                                             infile_format,
+                                                                             outfile_name,
+                                                                             outfile_format,
+                                                                             charge_method,
+                                                                             status_info)
+        # dont think 'charmm' is even an option for -fo
+        # GeneralizedForceFiled tries to read in *.ac(antechamber format) file and Toplogy
+        # is trying to readin *.rtf(charmm format topology) file !!! WHY?!!
+        # command = 'antechamber -i ' + filename + " -fi gout -o mol -fo charmm -c resp -s 2"
         exit_code = subprocess.call(shlex.split(command))
         return exit_code
 
@@ -89,13 +96,13 @@ class AntechamberRunner(object):
             try:
                 top = Topology.from_file('mol.rtf')
             except TopCorruptionException:
-                correct_corrupted_top_files('mol.rtf', 'gaff_example.txt')
+                correct_corrupted_top_files('mol.rtf', 'gaff_data.txt')
                 top = Topology.from_file('mol.rtf')
             try:
-                gff = GeneralizedForceField.from_file('mol.frcmod')
+                gff = ForceField.from_file('mol.frcmod')
             except FFCorruptionException:
-                correct_corrupted_frcmod_files('ANTECHAMBER.FRCMOD', 'gaff_example.txt')
-                gff = GeneralizedForceField.from_file('ANTECHAMBER.FRCMOD')
+                correct_corrupted_frcmod_files('ANTECHAMBER.FRCMOD', 'gaff_data.txt')
+                gff = ForceField.from_file('ANTECHAMBER.FRCMOD')
             # gff.set_atom_mappings('ANTECHAMBER_AC.AC')
             # gff.read_charges()
             # decorate the molecule with the sire property "atomname"

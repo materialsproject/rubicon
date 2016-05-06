@@ -3,46 +3,50 @@
 from __future__ import division, print_function, unicode_literals, \
     absolute_import
 
+"""
+This module defines classes that set the force field parametrs for the bonds, angles and dihedrals.
+
+WARNING: I do not think the amber stuff are consistent
+"""
+
+from rubicon.io.lammps import lammps_warning
+lammps_warning()
+
 import json
 import os
-from collections import defaultdict, OrderedDict
+from io import open
+from collections import OrderedDict
 
 from monty.json import MSONable
 
-__author__ = 'Navnidhi Rajput'
+__author__ = 'Kiran Mathew, Navnidhi Rajput'
 
 
-class GeneralizedForceField(MSONable):
+class ForceField(MSONable):
     """
-    A force field library. Reads the output file from
-    AntechamberRunner and populate the FF library
+    Stores force field information.
 
     Args:
+        atoms (OrderedDict): store atomic mass for each atom name.
+            { "atom name": atom mass, ... }
         bonds (OrderedDict): store the bond distance (A) and spring constant (
-            Kcal/molA2).
-        angles (OrderedDict): store the bond distance (A) and spring constant
+            Kcal/molA2) for each bond.
+            { ("atom name1", "atom name2"): [spring const, distance], ... }
+        angles (OrderedDict): store the bond angle and spring constant
             (Kcal/mol*radian2).
-        dihedral (OrderedDict): store the magnitude of torsion (Kcal/mol),
-            {type: [function type, phase offset in degree, the periodicity of
-            torsion]}.
+            { ("atom name1", "atom name2", "atom name3"): [spring const, angle], ... }
+        dihedrals (OrderedDict): store the magnitude of torsion (Kcal/mol).
+            { ("atom name1", "atom name2", "atom name3", "atom name4"): [
+            function type, value, angle], ... }
         imdihedrals (OrderedDict): store improper dihedral information.
-            {type: [function type, imdihedral_distance, imdihedral_angle]}
-            the magnitude of torsion (Kcal/mol), phase
-            offset in degree and the periodicity of torsion in a dict
+            similar to dihedrals but the gaff atom name1 and gaff atom name2 are marked 'X'
         vdws (OrderedDict): store the van der waal radius (A) and van der wall
-            depth for a given atom (Kcal/mol).
-
-        Example:
-            {'bonds': {'c-o': (648.0, 1.214)
-            'angles': {'os-c-os': (76.45, 111.38)
-            'dihedrals': {'X-c-os-X': (func_type, 2.7, 180.0)
-            'imdihedrals': {'o-os-c-os': (func_type, 1.1, 180.0)}
-            'vdws': {'c': (1.908, 0.086)}
+            depth for a given atom (Kcal/mol). Lennard-Jones parameters.
+            { "atom name": [sigma, epsilon], ... }
     """
 
-    def __init__(self, atoms, bonds, angles, dihedrals, imdihedrals, vdws,
+    def __init__(self, atoms, bonds, angles, dihedrals=None, imdihedrals=None, vdws=None,
                  masses=None, charges=None):
-
         self.atoms = atoms
         self.bonds = bonds
         self.angles = angles
@@ -55,20 +59,20 @@ class GeneralizedForceField(MSONable):
         self.atomindex_to_gaffname = OrderedDict()
         self.atomname_to_gaffname = OrderedDict()
         self.gaffname_to_atomindex = OrderedDict()
-        self.set_atom_mappings()
+        #self.set_atom_mappings()
 
     def set_atom_mappings(self, filename=None):
         """
-        read ANTECHAMBER_AC.AC to store the antechamber atom name
-        and GAFF atom name and index of atoms in a dict
+        read ANTECHAMBER_AC.AC(intermediate file produced by antechamber) to store the antechamber
+        atom name and GAFF atom name and index of atoms in a dict
         """
         with open(filename) as f:
             for line in f.readlines():
                 token = line.split()
                 if token[0] == 'ATOM':
                     index = int(token[1])
-                    atom_name = token[2]
-                    gaff_name = token[-1]
+                    gaff_name = token[2]
+                    atom_name = token[-1]
                     self.gaffname_to_atomindex[gaff_name] = index
                     self.atomname_to_gaffname[atom_name] = gaff_name
                     self.atomindex_to_atomname[index] = atom_name
@@ -96,17 +100,17 @@ class GeneralizedForceField(MSONable):
 
     @classmethod
     def from_dict(cls, d):
-        return GeneralizedForceField(bonds=d["bonds"],
-                                     angles=d["angles"],
-                                     dihedrals=d["dihedrals"],
-                                     imdihedrals=d["imdihedrals"],
-                                     vdws=d["vdws"]
-                                     )
+        return ForceField(bonds=d["bonds"],
+                          angles=d["angles"],
+                          dihedrals=d["dihedrals"],
+                          imdihedrals=d["imdihedrals"],
+                          vdws=d["vdws"]
+                          )
 
     @classmethod
     def from_file(cls, filename=None, continue_on_corrupt_file=False):
         """
-        reads ANTECHAMBER.FRCMOD and stores the force field parameters for
+        reads ANTECHAMBER.FRCMOD(produced by prmchk) and stores the force field parameters for
         bonds, angles, dihedrals, improper dihedrals, van der waals and Masses
         """
         atoms = OrderedDict()
@@ -124,7 +128,7 @@ class GeneralizedForceField(MSONable):
             imdihedral_section = False
             vdw_section = False
             mass_section = False
-            for line in f.readlines():
+            for line in f:
                 if 'need revision' in line and not continue_on_corrupt_file:
                     raise FFCorruptionException
                 if line.startswith('atom_name'):
@@ -219,15 +223,15 @@ class GeneralizedForceField(MSONable):
                     sigma = float(token[1])
                     epsilon = abs(float(token[2]))
                     vdws[vdw_type.lower()] = (sigma, epsilon)
-            return GeneralizedForceField(None, bonds, angles, dihedrals,
-                                           imdihedrals, vdws, masses, None)
+            return ForceField(None, bonds, angles, dihedrals,
+                              imdihedrals, vdws, masses, None)
 
 
 class FFCorruptionException(Exception):
     pass
 
-
-def get_from_gaff_file(filename='gaff_example.txt'):
+# This is the same as from_file , refactor
+def get_from_gaff_file(filename='gaff_data.txt'):
     """
     reads gaff_example.dat and stores the force field parameters for
     bonds, angles, dihedrals, improper dihedrals, van der waals and Masses
@@ -330,10 +334,11 @@ def get_from_gaff_file(filename='gaff_example.txt'):
                 vdws[vdw_type] = [sigma, epsilon]
         return atoms, bonds, angles, specific_dihedrals, general_dihedrals, vdws
 
+
 def correct_corrupted_frcmod_files(corrupted_file=None, gaff_file=None):
     frc_lines = []
     frc_lines.append('{}{}'.format('remark goes here\n', 'MASS\n'))
-    gff = GeneralizedForceField.from_file(corrupted_file, True)
+    gff = ForceField.from_file(corrupted_file, True)
     gff_para = get_from_gaff_file(gaff_file)
     for ant_atom_name in gff.masses.keys():
         if ant_atom_name in list(gff_para[0].keys()):

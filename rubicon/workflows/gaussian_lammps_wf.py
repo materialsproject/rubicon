@@ -17,7 +17,7 @@ from fireworks.core.firework import Firework
 from pymatgen import Molecule
 from rubicon.firetasks.gaussian.gaussian_input_task import WritegaussianGeoTask, \
     WritegaussianFreqESPTask
-from rubicon.firetasks.lammps.lammps_output_task import WritelammpsOutputTask
+from rubicon.firetasks.lammps.lammps_output_task_to_be_replaced import WritelammpsOutputTask
 
 __author__ = 'navnidhirajput'
 

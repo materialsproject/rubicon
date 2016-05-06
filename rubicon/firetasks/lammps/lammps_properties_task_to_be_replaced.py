@@ -14,7 +14,7 @@ from pymongo import MongoClient
 from rubicon.analysis.lammps.properties import MeanSquareDisplacement
 from rubicon.analysis.lammps.properties_abandon import CenterOfMass, \
     NernstEinsteinConductivity, MeanSquareDisplacement, RadialDistributionPure
-from rubicon.io.lammps.output import LammpsRun
+from pymatgen.io.lammps.output import LammpsRun
 
 from fireworks import FireTaskBase, explicit_serialize
 
