@@ -27,7 +27,7 @@ class RunLammpsDirect(FireTaskBase):
     required_params = ["lammps_cmd"]
 
     def run_task(self, fw_spec):
-        lammps_cmd = self["vasp_cmd"]
+        lammps_cmd = self["lammps_cmd"]
         print("Running LAMMPS using exe: {}".format(lammps_cmd))
         return_code = subprocess.call(lammps_cmd, shell=True)
         print("VASP finished running with returncode: {}".format(return_code))

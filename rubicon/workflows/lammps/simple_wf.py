@@ -6,7 +6,8 @@ from __future__ import division, print_function, unicode_literals, \
 from fireworks import Workflow, LaunchPad
 from fireworks.core.firework import Firework
 
-from rubicon.io.lammps.input import NVTLammpsInput
+from pymatgen.io.lammps.input import NVTLammpsInput
+
 from rubicon.firetasks.lammps.input_tasks import WritelammpsInputFromDictInput
 from rubicon.firetasks.lammps.run_tasks import RunLammpsDirect
 

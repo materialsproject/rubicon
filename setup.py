@@ -31,7 +31,7 @@ if __name__ == "__main__":
           author_email='xqu@lbl.gov',
           license='modified BSD',
           packages=find_packages(),
-          install_requires=['pymatgen>=3.5.0', 'fireworks>=1.2.5',
+          install_requires=['pymatgen>=3.5.2', 'fireworks>=1.2.5',
                             'custodian>=0.7', 'monty>=0.7.0', 'simplerandom'],
           extras_require={"plotting": ["matplotlib>=1.1"],
                           "molecules": ["openbabel"],

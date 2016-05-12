@@ -7,7 +7,7 @@ from pymatgen.io.lammps.data import LammpsForceFieldData
 from pymatgen.io.lammps.input import NPTNVTLammpsInput
 from rubicon.io.packmol.packmol import PackmolRunner
 
-from fireworks import FireTaskBase, explicit_serialize, FWAction
+from fireworks import FireTaskBase, explicit_serialize
 
 
 __author__ = 'Kiran Mathew, Navnidhi Rajput'

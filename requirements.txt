@@ -1,6 +1,6 @@
 inspyred
 numpy>=1.9.0
-pymatgen>=3.5.0
+pymatgen>=3.5.2
 fireworks>=1.2.5
 custodian>=0.7
 pymongo>=3.0
