@@ -1,8 +1,8 @@
 inspyred
 numpy>=1.9.0
-pymatgen>=3.5.2
-fireworks>=1.2.5
-custodian>=0.7
+pymatgen>=3.5.3
+fireworks>=1.3.0
+custodian>=1.0
 pymongo>=3.0
 BeautifulSoup4>=4.4.1
 monty>=0.7.0
