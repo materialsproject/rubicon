@@ -20,7 +20,7 @@ if __name__ == '__main__':
     input_file = "nvt.inp"
     lammps_dict_input = NVTLammpsInput(data_file=data_file, is_forcefield=True)
     task1 = WritelammpsInputFromDictInput(lammps_dict_input=lammps_dict_input, input_file=input_file)
-    task2 = RunLammpsDirect(lammps_cmd="pwd "+input_file)
+    task2 = RunLammpsDirect(lammps_cmd="lammps -in "+input_file)
     fw1 = Firework([task1], name='write input', fw_id=1)
     fw2 = Firework([task2], name='run lammps', fw_id=2)
     wf = Workflow([fw1, fw2], name="LAMMPS")

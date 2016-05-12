@@ -30,7 +30,7 @@ class RunLammpsDirect(FireTaskBase):
         lammps_cmd = self["lammps_cmd"]
         print("Running LAMMPS using exe: {}".format(lammps_cmd))
         return_code = subprocess.call(lammps_cmd, shell=True)
-        print("VASP finished running with returncode: {}".format(return_code))
+        print("LAMMPS finished running with returncode: {}".format(return_code))
 
 
 @explicit_serialize
