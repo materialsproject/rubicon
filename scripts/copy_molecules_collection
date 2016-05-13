@@ -7,7 +7,7 @@ from __future__ import division, print_function, unicode_literals, \
 
 __author__ = 'xiaohuiqu'
 
-import rubicon.scripts.copy_molecules_collection
+import rubicon.builders.copy_molecules_collection
 
 if __name__ == '__main__':
     rubicon.scripts.copy_molecules_collection.main()
