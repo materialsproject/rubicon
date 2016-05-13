@@ -8,15 +8,15 @@ import os
 import sys
 
 import yaml
-from fireworks import Workflow, Firework
-from fireworks.utilities.fw_utilities import get_slug
 from pymongo import MongoClient
+from rubicon.workflows.bsse_wf import counterpoise_correction_generation_fw
+from rubicon.workflows.qchem.single_point_energy_wf import single_point_energy_fws
 from six.moves import zip
 
+from fireworks import Workflow, Firework
+from fireworks.utilities.fw_utilities import get_slug
 from pymatgen.matproj.snl import StructureNL
-from rubicon.firetasks.egsnl_tasks import AddEGSNLTask
-from rubicon.workflows.bsse_wf import counterpoise_correction_generation_fw
-from rubicon.workflows.single_point_energy_wf import single_point_energy_fws
+from rubicon.firetasks.qchem.egsnl_tasks import AddEGSNLTask
 
 __author__ = 'xiaohuiqu'
 

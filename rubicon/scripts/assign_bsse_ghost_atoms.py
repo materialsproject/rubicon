@@ -7,12 +7,12 @@ import argparse
 import copy
 import itertools
 
+from rubicon.workflows.qchem.bsse_wf import BSSEFragment, get_sub_mol
 from six.moves import range
 from six.moves import zip
 
 from pymatgen.core.structure import Molecule
 from pymatgen.io.qchem import QcInput
-from rubicon.workflows.bsse_wf import BSSEFragment, get_sub_mol
 
 __author__ = 'xiaohuiqu'
 

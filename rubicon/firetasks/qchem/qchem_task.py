@@ -17,14 +17,14 @@ import sys
 from custodian.custodian import Custodian
 from custodian.qchem.handlers import QChemErrorHandler
 from custodian.qchem.jobs import QchemJob
+from rubicon.workflows.qchem.wf_settings import MOVE_TO_EG_GARDEN
+
 from fireworks.core.firework import FireTaskBase, FWAction
 from fireworks.fw_config import FWData
 from fireworks.utilities.fw_serializers import FWSerializable
-
 from pymatgen.core.structure import Molecule
 from pymatgen.io.qchem import QcInput
 from rubicon.utils.eg_wf_utils import move_to_eg_garden
-from rubicon.workflows.wf_settings import MOVE_TO_EG_GARDEN
 
 __author__ = 'Anubhav Jain'
 __copyright__ = 'Copyright 2013, The Materials Project'

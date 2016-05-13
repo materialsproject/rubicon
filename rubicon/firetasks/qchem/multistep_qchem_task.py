@@ -21,7 +21,7 @@ from pymatgen.analysis.molecule_structure_comparator import \
     MoleculeStructureComparator
 from pymatgen.io.qchem import QcInput
 from rubicon.borg.hive import DeltaSCFQChemToDbTaskDrone
-from rubicon.firetasks.dupefinder_eg import DupeFinderEG
+from rubicon.firetasks.qchem.dupefinder_eg import DupeFinderEG
 from rubicon.utils.atomic_charge_mixed_basis_set_generator import \
     AtomicChargeMixedBasisSetGenerator
 from rubicon.utils.eg_wf_utils import get_eg_file_loc, \
@@ -358,7 +358,7 @@ class QChemFrequencyDBInsertionTask(FireTaskBase, FWSerializable):
 def get_bsse_update_specs(fw_spec, d):
     if "super_mol_snlgroup_id" in fw_spec["run_tags"]:
         ghost_atoms = fw_spec["run_tags"].get("ghost_atoms", list())
-        from rubicon.workflows.bsse_wf import BSSEFragment
+        from rubicon.workflows.qchem.bsse_wf import BSSEFragment
         fragment_type = fw_spec["run_tags"].get("bsse_fragment_type",
                                                 BSSEFragment.ISOLATED)
         fragment_key = BasisSetSuperpositionErrorCalculationTask.get_fragment_key(
@@ -429,7 +429,7 @@ class BasisSetSuperpositionErrorCalculationTask(FireTaskBase, FWSerializable):
 
     def run_task(self, fw_spec):
         fragment_dicts = fw_spec["fragments"]
-        from rubicon.workflows.bsse_wf import BSSEFragment
+        from rubicon.workflows.qchem.bsse_wf import BSSEFragment
         if len(fragment_dicts) > 0 and isinstance(fragment_dicts[0], dict):
             fragments = [BSSEFragment.from_dict(d) for d in fragment_dicts]
         else:
@@ -573,7 +573,7 @@ class CounterpoiseCorrectionGenerationTask(FireTaskBase, FWSerializable):
         qm_method = fw_spec["qm_method"]
         fragment_dicts = fw_spec["fragments"]
         large = fw_spec["large"]
-        from rubicon.workflows.bsse_wf import bsse_wf, BSSEFragment
+        from rubicon.workflows.qchem.bsse_wf import bsse_wf, BSSEFragment
         if len(fragment_dicts) > 0 and isinstance(fragment_dicts[0], dict):
             fragments = [BSSEFragment.from_dict(d) for d in fragment_dicts]
         else:

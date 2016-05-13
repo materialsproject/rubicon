@@ -10,13 +10,13 @@ import os
 import shutil
 import sys
 
-from fireworks import FireTaskBase, FWAction
-from fireworks.utilities.fw_serializers import FWSerializable
 from monty.io import zopen
 from monty.os.path import zpath
+from rubicon.workflows.qchem.wf_settings import MOVE_TO_EG_GARDEN
 
+from fireworks import FireTaskBase, FWAction
+from fireworks.utilities.fw_serializers import FWSerializable
 from rubicon.utils.eg_wf_utils import move_to_eg_garden
-from rubicon.workflows.wf_settings import MOVE_TO_EG_GARDEN
 
 __author__ = 'xiaohuiqu'
 

@@ -6,13 +6,13 @@ from __future__ import division, print_function, unicode_literals, \
 import time
 import traceback
 
-from fireworks.core.launchpad import LaunchPad
+from rubicon.workflows.qchem.snl_to_eg_wf import snl_to_eg_wf
 
+from fireworks.core.launchpad import LaunchPad
 from pymatgen.matproj.snl import StructureNL
 from rubicon.submission.submission_mongo_eg import SubmissionMongoAdapterEG
 from rubicon.utils.qchem_firework_creator import QChemFireWorkCreator
 from rubicon.utils.snl.egsnl import EGStructureNL
-from rubicon.workflows.snl_to_eg_wf import snl_to_eg_wf
 
 
 class SubmissionProcessorEG:

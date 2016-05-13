@@ -3,19 +3,20 @@
 from __future__ import division, print_function, unicode_literals, \
     absolute_import
 
-from fireworks.core.firework import Firework, Workflow
-from fireworks.utilities.fw_utilities import get_slug
-from pymatgen import Composition
-from rubicon.firetasks.dupefinder_eg import DupeFinderEG
 from rubicon.firetasks.egsnl_tasks import AddEGSNLTask
-from rubicon.utils.snl.egsnl import EGStructureNL, get_meta_from_structure
 from rubicon.workflows.bsse_wf import counterpoise_correction_generation_fw
 from rubicon.workflows.equilibrium_constant_wf import equilibrium_constant_fws
 from rubicon.workflows.md_relax_workflow import md_relax_fws
-from rubicon.workflows.multi_solvent_ipea_wf import multi_solvent_ipea_fws
 from rubicon.workflows.multistep_ipea_wf import multistep_ipea_fws
+from rubicon.workflows.qchem.multi_solvent_ipea_wf import multi_solvent_ipea_fws
 from rubicon.workflows.single_point_energy_wf import single_point_energy_fws
 from rubicon.workflows.solvation_energy_wf import solvation_energy_fws
+
+from fireworks.core.firework import Firework, Workflow
+from fireworks.utilities.fw_utilities import get_slug
+from pymatgen import Composition
+from rubicon.firetasks.qchem.dupefinder_eg import DupeFinderEG
+from rubicon.utils.snl.egsnl import EGStructureNL, get_meta_from_structure
 
 
 def snl_to_eg_wf(snl, parameters=None):

@@ -16,7 +16,7 @@ from fireworks.core.firework import Tracker
 from pymatgen.core.periodic_table import Element
 from pymatgen.io.babel import BabelMolAdaptor
 from pymatgen.io.qchem import QcTask, QcInput
-from rubicon.firetasks.dupefinder_eg import DupeFinderEG
+from rubicon.firetasks.qchem.dupefinder_eg import DupeFinderEG
 from rubicon.firetasks.qchem.qchem_task import QChemTask
 
 __author__ = 'xiaohuiqu'
@@ -468,7 +468,7 @@ class QChemFireWorkCreator:
         if priority:
             spec['_priority'] = priority
         if super_mol_snlgroup_id:
-            from rubicon.workflows.bsse_wf import BSSEFragment
+            from rubicon.workflows.qchem.bsse_wf import BSSEFragment
             task_type = "bsse {} fragment".format(
                 BSSEFragment.OVERLAPPED if bs_overlap else BSSEFragment.ISOLATED)
         else:
@@ -521,7 +521,7 @@ class QChemFireWorkCreator:
             spec["inchi_root"] = super_mol_inchi_root
         if ghost_atoms:
             spec["run_tags"]["ghost_atoms"] = sorted(set(ghost_atoms))
-            from rubicon.workflows.bsse_wf import BSSEFragment
+            from rubicon.workflows.qchem.bsse_wf import BSSEFragment
             spec["run_tags"][
                 "bsse_fragment_type"] = BSSEFragment.OVERLAPPED if bs_overlap else BSSEFragment.ISOLATED
         if mixed_basis_generator:

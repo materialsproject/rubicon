@@ -9,7 +9,7 @@ This module defines firetasks for running lammps
 
 import subprocess
 
-from fireworks import explicit_serialize, FireTaskBase, FWAction
+from fireworks import explicit_serialize, FireTaskBase
 
 
 __author__ = 'Kiran Mathew'

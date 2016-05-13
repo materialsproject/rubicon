@@ -14,7 +14,7 @@ from fireworks import Firework, Workflow, LaunchPad
 from fireworks.utilities.fw_utilities import get_slug
 from pymatgen import Molecule
 from pymatgen.matproj.snl import StructureNL
-from rubicon.firetasks.egsnl_tasks import AddEGSNLTask
+from rubicon.firetasks.qchem.egsnl_tasks import AddEGSNLTask
 from rubicon.firetasks.qchem.fake_run_qchem_task import FakeRunQChemTask
 
 __author__ = 'xiaohuiqu'

@@ -6,14 +6,14 @@ from __future__ import division, print_function, unicode_literals, \
 import glob
 import os
 
+from rubicon.firetasks.lammps.lammps_properties_task_to_be_replaced import ParselammpsProperties
+from rubicon.firetasks.lammps.old_tasks.lammps_output_task_to_be_replaced import WritelammpsOutputTask
+
+import rubicon
 from fireworks import Workflow, LaunchPad
 from fireworks.core.firework import Firework
 from pymatgen import Molecule
-
-import rubicon
-from rubicon.firetasks.lammps.input_tasks import WritelammpsInputFromGaussian
-from rubicon.firetasks.lammps.lammps_output_task_to_be_replaced import WritelammpsOutputTask
-from rubicon.firetasks.lammps.lammps_properties_task_to_be_replaced import ParselammpsProperties
+from rubicon.firetasks.lammps.old_tasks.input_tasks import WritelammpsInputFromGaussian
 
 __author__ = 'navnidhirajput'
 
