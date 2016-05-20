@@ -9,7 +9,7 @@ import sys
 
 import yaml
 from pymongo import MongoClient
-from rubicon.workflows.bsse_wf import counterpoise_correction_generation_fw
+from rubicon.workflows.qchem.bsse_wf import counterpoise_correction_generation_fw
 from rubicon.workflows.qchem.single_point_energy_wf import single_point_energy_fws
 from six.moves import zip
 
