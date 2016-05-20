@@ -56,7 +56,7 @@ class QChemFireWorkCreator:
     def get_inchi(mol):
         bb = BabelMolAdaptor(mol)
         pbmol = bb.pybel_mol
-        return pbmol.write("inchi").strip()
+        return pbmol.write(str("inchi")).strip()
 
     @staticmethod
     def get_state_name(charge, spin_multiplicity):
