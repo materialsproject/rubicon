@@ -3,14 +3,14 @@
 from __future__ import division, print_function, unicode_literals, \
     absolute_import
 
-from rubicon.firetasks.egsnl_tasks import AddEGSNLTask
-from rubicon.workflows.bsse_wf import counterpoise_correction_generation_fw
-from rubicon.workflows.equilibrium_constant_wf import equilibrium_constant_fws
-from rubicon.workflows.md_relax_workflow import md_relax_fws
-from rubicon.workflows.multistep_ipea_wf import multistep_ipea_fws
+from rubicon.firetasks.qchem.egsnl_tasks import AddEGSNLTask
+from rubicon.workflows.qchem.bsse_wf import counterpoise_correction_generation_fw
+from rubicon.workflows.qchem.equilibrium_constant_wf import equilibrium_constant_fws
+from rubicon.workflows.qchem.md_relax_workflow import md_relax_fws
+from rubicon.workflows.qchem.multistep_ipea_wf import multistep_ipea_fws
 from rubicon.workflows.qchem.multi_solvent_ipea_wf import multi_solvent_ipea_fws
-from rubicon.workflows.single_point_energy_wf import single_point_energy_fws
-from rubicon.workflows.solvation_energy_wf import solvation_energy_fws
+from rubicon.workflows.qchem.single_point_energy_wf import single_point_energy_fws
+from rubicon.workflows.qchem.solvation_energy_wf import solvation_energy_fws
 
 from fireworks.core.firework import Firework, Workflow
 from fireworks.utilities.fw_utilities import get_slug
