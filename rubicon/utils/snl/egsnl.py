@@ -43,7 +43,7 @@ def get_meta_from_structure(mol):
     elsyms = sorted(set([e.symbol for e in comp.elements]))
     bb = BabelMolAdaptor(mol)
     pbmol = bb.pybel_mol
-    inchi = pbmol.write("inchi").strip()
+    inchi = pbmol.write(str("inchi")).strip()
     bonds = get_bonds_from_obmol(bb._obmol)
     meta = {'nsites': len(mol),
             'elements': elsyms,
