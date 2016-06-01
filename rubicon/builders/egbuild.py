@@ -87,7 +87,7 @@ def main():
     subp = subparsers.add_parser("eg",
                                  help="Build EG derived collections",
                                  parents=[common])
-    subp.set_defaults(func=eg_builders_run.run, func_name='eg')
+    subp.set_defaults(func=eg_builders_run.run, __name__='eg')
     subp.add_argument("-W", "--wipe", dest="wipe_target", action="store_true",
                       help="Wipe target collection, removing all data in it, "
                            "before merge")
