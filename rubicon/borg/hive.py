@@ -170,7 +170,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
         bb = BabelMolAdaptor(mol)
         pbmol = bb.pybel_mol
         xyz = XYZ(mol)
-        smiles = pbmol.write("smi").split()[0]
+        smiles = pbmol.write(str("smi")).split()[0]
         can = pbmol.write("can").split()[0]
         inchi_final = pbmol.write("inchi").strip()
         svg = cls.modify_svg(cls.xyz2svg(xyz))
