@@ -109,6 +109,8 @@ class QChemTask(FireTaskBase, FWSerializable):
             qj.params["rem"]["parallel_tasks"] = num_nodes
             if qj.params["rem"]["jobtype"] != "freq":
                 qj.params["rem"]["BLAS3_DFT"] = 1
+            if qj.params["rem"]["jobtype"] == "freq":
+                qj.params["rem"]["ideriv"] = 1
             qj.params["rem"]["PDIAG_ON"] = 1
             solvent_params = qj.params.pop("pcm_solvent", None)
             if solvent_params is not None:
