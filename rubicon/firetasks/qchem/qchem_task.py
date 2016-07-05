@@ -107,8 +107,6 @@ class QChemTask(FireTaskBase, FWSerializable):
     def _customize_alcf_qcinp(qcinp, num_nodes=8):
         for qj in qcinp.jobs:
             qj.params["rem"]["parallel_tasks"] = num_nodes
-            if qj.params["rem"]["jobtype"] != "freq":
-                qj.params["rem"]["BLAS3_DFT"] = 1
             if qj.params["rem"]["jobtype"] == "freq":
                 qj.params["rem"]["ideriv"] = 1
             qj.params["rem"]["PDIAG_ON"] = 1

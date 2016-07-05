@@ -6,9 +6,9 @@
         "INT_OMP_MIN_LENSTEP_PATH1": 25
     }, 
     "small size": {
-        "INT_OMP_MAX_LENSTEP": 3, 
-        "INT_OMP_MAX_LENSTEP_PATH1": 3, 
-        "INT_OMP_MIN_LENSTEP": 3, 
-        "INT_OMP_MIN_LENSTEP_PATH1": 3
+        "INT_OMP_MAX_LENSTEP": 1, 
+        "INT_OMP_MAX_LENSTEP_PATH1": 1, 
+        "INT_OMP_MIN_LENSTEP": 1, 
+        "INT_OMP_MIN_LENSTEP_PATH1": 1
     }
 }
