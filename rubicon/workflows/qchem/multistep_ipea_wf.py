@@ -21,7 +21,7 @@ def multistep_ipea_fws(mol, name, mission, solvent, solvent_method,
                        parent_fwid=None, additional_user_tags=None,
                        qm_method=None, check_large=True):
     large = False
-    if len(mol) > 50 and check_large:
+    if len(mol) > 70 and check_large:
         large = True
     energy_method, geom_method = qm_method.split("//") if qm_method else (
         None, None)
