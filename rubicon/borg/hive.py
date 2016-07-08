@@ -166,7 +166,10 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
         logger.info("Getting task doc for file:{}".format(path))
         qcout = QcOutput(zpath(path))
         data = qcout.data
+        initial_mol = data[0]["molecules"][0]
         mol = data[0]["molecules"][-1]
+        if data[0]["jobtype"] == "freq":
+            mol = Molecule.from_dict(initial_mol.as_dict())
         bb = BabelMolAdaptor(mol)
         pbmol = bb.pybel_mol
         xyz = XYZ(mol)
@@ -175,7 +178,6 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
         inchi_final = pbmol.write(str("inchi")).strip()
         svg = cls.modify_svg(cls.xyz2svg(xyz))
         comp = mol.composition
-        initial_mol = data[0]["molecules"][0]
         charge = mol.charge
         spin_mult = mol.spin_multiplicity
         data_dict = {}
