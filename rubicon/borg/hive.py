@@ -138,7 +138,7 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
         """
         dirname = os.path.dirname(qcout_path)
         fw_spec_path = os.path.join(dirname, "FW.json")
-        with zopen(zpath(fw_spec_path)) as f:
+        with zopen(zpath(fw_spec_path), 'rt') as f:
             fw = json.load(f)
         if 'egsnl' not in fw['spec']:
             raise ValueError("Can't find initial SNL")
