@@ -155,8 +155,8 @@ class DeltaSCFQChemToDbTaskDrone(AbstractDrone):
                              stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE)
-        out, err = p.communicate(str(xyz))
-        return out
+        out, err = p.communicate(str(xyz).encode('utf-8'))
+        return str(out)
 
     @classmethod
     def get_task_doc(cls, path, fw_spec=None):
