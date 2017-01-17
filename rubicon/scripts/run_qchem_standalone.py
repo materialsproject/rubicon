@@ -21,94 +21,35 @@ from six.moves import zip
 from pymatgen import Molecule
 from pymatgen.io.qchem import QcInput, QcOutput
 
+from rubicon.firetasks.qchem.qchem_task import QChemTask
+from rubicon.utils.qchem_firework_creator import QChemFireWorkCreator
+
 __author__ = 'xiaohuiqu'
 
 
-def run_qchem(filename):
+def call_qchem_task(filename, solvent=None, mixed_basis=None, mixed_aux_basis=None):
     base_filename = os.path.splitext(filename)[0]
     output_filename = base_filename + ".qcout"
     log_filename = base_filename + ".qclog"
     qcinp = QcInput.from_file(filename)
+    solvent_token = set_solvent_data(qcinp, solvent)
+    QChemTask.run_qchem(qcinp, solvent_token, mixed_aux_basis, mixed_basis)
+
+def set_solvent_data(qcinp, solvent, vdw_surface=True):
+    if not solvent:
+        return None
     mol = qcinp.jobs[0].mol
-    carver_name_pattern = re.compile("c[0-9]{4}-ib")
-    half_cpus_cmd = None
-    openmp_cmd = None
-    if "PBS_JOBID" in os.environ and \
-            ("hopque" in os.environ["PBS_JOBID"] or
-                     "edique" in os.environ["PBS_JOBID"]):
-        # hopper or edison compute nodes
-        qc_exe = shlex.split("qchem -np {}".format(min(24, len(mol))))
-        half_cpus_cmd = shlex.split("qchem -np {}".format(min(12, len(mol))))
-        openmp_cmd = shlex.split("qchem -seq -nt 24")
-    elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"] == "cori":
-        nodelist = os.environ["QCNODE"].split(',')
-        num_numa_nodes = 2 * len(nodelist)
-        low_nprocess = max(
-            int(len(mol) / num_numa_nodes) * num_numa_nodes, 1)
-        num_cores = 32 * len(nodelist)
-        qc_exe = shlex.split(
-            "qchem -np {}".format(min(num_cores, low_nprocess)))
-        half_cpus_cmd = shlex.split(
-            "qchem -np {}".format(min(num_cores, low_nprocess)))
-    elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"] == "matgen":
-        num_numa_nodes = 2
-        low_nprocess = max(int(len(mol) / num_numa_nodes) * num_numa_nodes, 1)
-        qc_exe = shlex.split("qchem -np {}".format(min(16, low_nprocess)))
-        half_cpus_cmd = shlex.split(
-            "qchem -np {}".format(min(8, low_nprocess)))
-        openmp_cmd = shlex.split("qchem -nt 8")
-    elif carver_name_pattern.match(socket.gethostname()):
-        # mendel compute nodes
-        qc_exe = shlex.split("qchem -np {}".format(min(8, len(mol))))
-        half_cpus_cmd = shlex.split("qchem -np {}".format(min(4, len(mol))))
-        openmp_cmd = shlex.split("qchem -seq -nt 8")
-    elif "MacQu" in socket.gethostname():
-        qc_exe = shlex.split("qchem -nt 2")
-    else:
-        qc_exe = ["qchem"]
+    qctask_creator = QChemFireWorkCreator(mol, molname=mol.formula,
+                                          mission="Standalone calculation")
+    solvent_token = None
+    for qctask in qcinp.jobs:
+        if "solvent_method" in qctask.params["rem"]:
+            # Is a solution phase calculation
+            solvent_method = qctask.params["rem"].get("solvent_method")
+            solvent_token = qctask_creator.set_solvent_method(
+                qctask, solvent, solvent_method, use_vdw_surface=vdw_surface)
+    return solvent_token
 
-    logging.basicConfig(level=logging.INFO)
-    qchem_logger = logging.getLogger('QChemIndependentRun')
-    qchem_logger.setLevel(logging.INFO)
-    sh = logging.StreamHandler(stream=sys.stdout)
-    sh.setLevel(getattr(logging, 'INFO'))
-    qchem_logger.addHandler(sh)
-
-    scf_max_cycles = 200
-    geom_max_cycles = 200
-    alt_cmd = {"half_cpus": half_cpus_cmd,
-               "openmp": openmp_cmd}
-    if len(mol) > 50:
-        scf_max_cycles = 300
-        geom_max_cycles = 500
-
-    job = QchemJob(qc_exe, input_file=filename, output_file=output_filename,
-                   qclog_file=log_filename, alt_cmd=alt_cmd, gzipped=False)
-    handler = QChemErrorHandler(qchem_job=job,
-                                scf_max_cycles=scf_max_cycles,
-                                geom_max_cycles=geom_max_cycles,
-                                input_file=filename,
-                                output_file=output_filename)
-    c = Custodian(handlers=[handler], jobs=[job], max_errors=50)
-    c.run()
-
-
-def write_smx_solvent_data(solvent):
-    smx_data_file = os.path.join(os.path.dirname(__file__),
-                                 "../utils/data", "smx_data.json")
-    with open(smx_data_file) as f:
-        smx_data = json.load(f)
-    if solvent not in smx_data["builtin_solvent"]:
-        if solvent not in smx_data["custom_solvent"]:
-            raise Exception("Don't know the SMx parameters for "
-                            "solvent '{}'".format(solvent))
-        solvent_data = smx_data["custom_solvent"][solvent]
-    values = ['{:.4f}'.format(solvent_data[t]) for t in
-              ['Dielec', 'SolN', 'SolA', 'SolB', 'SolG', 'SolC',
-               'SolH']]
-    solvent_text = ' '.join(values)
-    with open('solvent_data', 'w') as f:
-        f.write(solvent_text)
 
 
 def perturb_molecule(old_mol, vib_mode, reversed_direction=False,
@@ -142,13 +83,17 @@ def main():
     parser.add_argument("-e", "--eliminate", dest="eli_img",
                         action="store_true",
                         help="whether to eliminate imaginary frequency")
+    parser.add_argument("-b", "--mixed_basis", dest="mixed_basis", type=json.loads,
+                        required=False,
+                        help="The mixed basis as a dict")
+    parser.add_argument("-a", "--mixed_aux_basis", dest="mixed_aux_basis", type=json.loads,
+                        required=False,
+                        help="The mixed auxiliary basis as a dict")
     parser.add_argument("-s", "--solvent", dest="solvent", type=str,
                         required=False,
                         help="the implicit solvent")
     options = parser.parse_args()
-    if options.solvent:
-        write_smx_solvent_data(options.solvent)
-    run_qchem(options.filename)
+    call_qchem_task(options.filename, options.solvent, options.mixed_basis, options.mixed_aux_basis)
     if options.eli_img:
         base_filename = os.path.splitext(options.filename)[0]
         output_filename = base_filename + ".qcout"
@@ -177,7 +122,7 @@ def main():
             qcinp = QcInput([qctask_opt, qctask_freq])
             eli_file_1 = base_filename + "_eli_img_1.qcinp"
             qcinp.write_file(eli_file_1)
-            run_qchem(eli_file_1)
+            call_qchem_task(eli_file_1)
 
             output_filename = base_filename + "_eli_img_1.qcout"
             qcout = QcOutput(output_filename)
@@ -203,7 +148,7 @@ def main():
                         j.set_geom_max_iterations(100)
                 eli_file_2 = base_filename + "_eli_img_2.qcinp"
                 qcinp.write_file(eli_file_2)
-                run_qchem(eli_file_2)
+                call_qchem_task(eli_file_2)
 
                 output_filename = base_filename + "_eli_img_2.qcout"
                 qcout = QcOutput(output_filename)
@@ -229,7 +174,7 @@ def main():
                             j.set_geom_max_iterations(100)
                     eli_file_3 = base_filename + "_eli_img_3.qcinp"
                     qcinp.write_file(eli_file_3)
-                    run_qchem(eli_file_3)
+                    call_qchem_task(eli_file_3, options.solvent, options.mixed_basis, options.mixed_aux_basis)
 
 
 if __name__ == '__main__':

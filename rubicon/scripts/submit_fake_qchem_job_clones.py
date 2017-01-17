@@ -55,7 +55,7 @@ def main():
         if not (os.path.exists(fw_json_filename) or os.path.exists(
                     fw_json_filename + ".gz")):
             continue
-        with zopen(zpath(fw_json_filename)) as f:
+        with zopen(zpath(fw_json_filename), 'rt') as f:
             fw_dict = json.load(f)
         print("{percent:4.2%} completed, processing directory {d:s}, "
               "molecule name {molname:s}," \

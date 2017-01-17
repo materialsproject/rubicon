@@ -44,7 +44,7 @@ class FakeRunQChemTask(FireTaskBase, FWSerializable):
 
         if os.path.exists("custodian.json") or os.path.exists(
                         "custodian.json" + ".gz"):
-            with zopen(zpath("custodian.json")) as f:
+            with zopen(zpath("custodian.json", 'rt')) as f:
                 custodian_out = json.load(f)
         else:
             custodian_out = []

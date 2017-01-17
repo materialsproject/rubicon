@@ -25,7 +25,7 @@ from fireworks.core.firework import FireTaskBase, FWAction
 from fireworks.fw_config import FWData
 from fireworks.utilities.fw_serializers import FWSerializable
 from pymatgen.core.structure import Molecule
-from pymatgen.io.qchem import QcInput
+from pymatgen.io.qchem import QcInput, QcTask
 from rubicon.utils.eg_wf_utils import move_to_eg_garden
 
 __author__ = 'Anubhav Jain'
@@ -145,203 +145,13 @@ class QChemTask(FireTaskBase, FWSerializable):
         shutil.copy(pathtable_src, "pathtable")
 
     def run_task(self, fw_spec):
-        if isinstance(fw_spec["qcinp"], dict):
-            qcinp = QcInput.from_dict(fw_spec["qcinp"])
-        else:
-            qcinp = fw_spec["qcinp"]
-        if 'mol' in fw_spec:
-            if isinstance(fw_spec["mol"], dict):
-                mol = Molecule.from_dict(fw_spec["mol"])
-            else:
-                mol = fw_spec["mol"]
-            for qj in qcinp.jobs:
-                if isinstance(qj.mol, Molecule):
-                    qj.mol = copy.deepcopy(mol)
-        mol = qcinp.jobs[0].mol
-        if "mixed_basis" in fw_spec:
-            for qj in qcinp.jobs:
-                if qj.params["rem"]["jobtype"] != "sp":
-                    qj.set_basis_set(fw_spec["mixed_basis"])
-        if "mixed_aux_basis" in fw_spec:
-            for qj in qcinp.jobs:
-                if qj.params["rem"]["jobtype"] != "sp":
-                    qj.set_aux_basis_set(fw_spec["mixed_aux_basis"])
+        qcinp = self._get_qcinp_from_fw_spec(fw_spec)
+        mixed_basis = fw_spec.get("mixed_basis", None)
+        mixed_aux_basis = fw_spec.get("mixed_aux_basis", None)
+        implicit_solvent = fw_spec.get("implicit_solvent", None)
 
-        carver_name_pattern = re.compile("c[0-9]{4}-ib")
-        fw_data = FWData()
-        half_cpus_cmd = shlex.split("qchem -np 12")
-        prev_qchem_dir = os.getcwd()
-        parent_qchem_dir = os.path.abspath(os.path.join(prev_qchem_dir, os.pardir))
-
-# These are variables used to support the usage of a file system scratch directory
-# on BGQ for pcm solvation jobs which use too much disk space for the ramdisk
-# Put the scratch directory in ../scratch and keep the names as short as possible
-# since the qchem binary has 114 char max for the full path to the scratch save dir
-        use_fs_scr = False
-        filesys_scr_dir = parent_qchem_dir + "/scratch/s" + ''.join(random.choice(string.ascii_lowercase) for i in range(10))
-        if "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"] == "edison":
-            # edison compute nodes
-            if (not fw_data.MULTIPROCESSING) or (fw_data.SUB_NPROCS is None):
-                num_numa_nodes = 2
-                low_nprocess = max(
-                    int(len(mol) / num_numa_nodes) * num_numa_nodes, 1)
-                qc_exe = shlex.split(
-                    "qchem -np {}".format(min(24, low_nprocess)))
-                half_cpus_cmd = shlex.split(
-                    "qchem -np {}".format(min(12, low_nprocess)))
-            else:
-                nodelist = ",".join(fw_data.NODE_LIST)
-                os.environ["QCNODE"] = nodelist
-                num_numa_nodes = 2 * len(fw_data.NODE_LIST)
-                low_nprocess = max(
-                    int(len(mol) / num_numa_nodes) * num_numa_nodes, 1)
-                qc_exe = shlex.split("qchem -np {}".format(
-                    min(fw_data.SUB_NPROCS, low_nprocess)))
-                half_cpus_cmd = shlex.split("qchem -np {}".format(
-                    min(fw_data.SUB_NPROCS / 2, low_nprocess)))
-            openmp_cmd = shlex.split("qchem -nt 24")
-        elif "PBS_JOBID" in os.environ and "hopque" in os.environ["PBS_JOBID"]:
-            if (not fw_data.MULTIPROCESSING) or (fw_data.SUB_NPROCS is None):
-                qc_exe = shlex.split("qchem -np {}".format(min(24, len(mol))))
-                half_cpus_cmd = shlex.split("qchem -np {}".format(
-                    min(12, len(mol))))
-            else:
-                nodelist = ",".join(fw_data.NODE_LIST)
-                os.environ["QCNODE"] = nodelist
-                qc_exe = shlex.split("qchem -np {}".format(
-                    min(fw_data.SUB_NPROCS, len(mol))))
-                half_cpus_cmd = shlex.split("qchem -np {}".format(
-                    min(fw_data.SUB_NPROCS / 2, len(mol))))
-            openmp_cmd = shlex.split("qchem -seq -nt 24")
-        elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"] == "cori":
-            if (not fw_data.MULTIPROCESSING) or (fw_data.SUB_NPROCS is None):
-                nodelist = os.environ["QCNODE"].split(',')
-                num_numa_nodes = 2 * len(nodelist)
-                low_nprocess = max(
-                    int(len(mol) / num_numa_nodes) * num_numa_nodes, 1)
-                num_cores = 32 * len(nodelist)
-                qc_exe = shlex.split(
-                    "qchem -np {}".format(min(num_cores, low_nprocess)))
-                half_cpus_cmd = shlex.split(
-                    "qchem -np {}".format(min(num_cores, low_nprocess)))
-            else:
-                nodelist = ",".join(fw_data.NODE_LIST)
-                os.environ["QCNODE"] = nodelist
-                num_numa_nodes = 2 * len(fw_data.NODE_LIST)
-                low_nprocess = max(
-                    int(len(mol) / num_numa_nodes) * num_numa_nodes, 1)
-                qc_exe = shlex.split("qchem -np {}".format(
-                    min(fw_data.SUB_NPROCS, low_nprocess)))
-                half_cpus_cmd = shlex.split("qchem -np {}".format(
-                    min(fw_data.SUB_NPROCS / 2, low_nprocess)))
-            openmp_cmd = shlex.split("qchem -nt 32")
-        elif "NERSC_HOST" in os.environ and os.environ[
-            "NERSC_HOST"] == "matgen":
-            if (not fw_data.MULTIPROCESSING) or (fw_data.SUB_NPROCS is None):
-                num_numa_nodes = 2
-                low_nprocess = max(
-                    int(len(mol) / num_numa_nodes) * num_numa_nodes, 1)
-                qc_exe = shlex.split(
-                    "qchem -np {}".format(min(16, low_nprocess)))
-                half_cpus_cmd = shlex.split(
-                    "qchem -np {}".format(min(8, low_nprocess)))
-            else:
-                nodelist = ",".join(fw_data.NODE_LIST)
-                os.environ["QCNODE"] = nodelist
-                num_numa_nodes = 2 * len(fw_data.NODE_LIST)
-                low_nprocess = max(
-                    int(len(mol) / num_numa_nodes) * num_numa_nodes, 1)
-                qc_exe = shlex.split("qchem -np {}".format(
-                    min(fw_data.SUB_NPROCS, low_nprocess)))
-                half_cpus_cmd = shlex.split("qchem -np {}".format(
-                    min(fw_data.SUB_NPROCS / 2, low_nprocess)))
-            openmp_cmd = shlex.split("qchem -nt 16")
-        elif carver_name_pattern.match(socket.gethostname()):
-            # mendel compute nodes
-            qc_exe = shlex.split("qchem -np {}".format(min(8, len(mol))))
-            openmp_cmd = shlex.split("qchem -seq -nt 8")
-        elif 'vesta' in socket.gethostname():
-            # ALCF, Blue Gene
-            num_nodes = 4
-            num_threads = 32
-            scr_size_GB = 0.9313
-            max_minutes = 8 * 60
-
-# For BGQ for sp use a file system scratch directory instead of the ramdisk
-# because the amount of storage required can easily exceed the ramdisk for the pcm step
-
-            for qj in qcinp.jobs:
-                 if qj.params["rem"]["jobtype"] == "sp":
-                     use_fs_scr = True
-            if use_fs_scr == True:
-# for BGQ hang a short savedir name off the scratch dir
-                save_dir = filesys_scr_dir + "/sd"
-                os.makedirs(save_dir)
-                qc_exe = shlex.split(self._calibrate_alcf_cmd(
-                    num_nodes=num_nodes, max_minutes=max_minutes,
-                    num_threads=num_threads,
-                    scr_size_GB=scr_size_GB,use_ramdisk=False,fs_scr_dir=save_dir))
-                half_cpus_cmd = shlex.split(self._calibrate_alcf_cmd(
-                    num_nodes=num_nodes, max_minutes=max_minutes,
-                    num_threads=num_threads / 2,
-                    scr_size_GB=scr_size_GB,use_ramdisk=False,fs_scr_dir=save_dir))
-
-            else:
-                qc_exe = shlex.split(self._calibrate_alcf_cmd(
-                    num_nodes=num_nodes, max_minutes=max_minutes,
-                    num_threads=num_threads,
-                    scr_size_GB=scr_size_GB))
-                half_cpus_cmd = shlex.split(self._calibrate_alcf_cmd(
-                    num_nodes=num_nodes, max_minutes=max_minutes,
-                    num_threads=num_threads / 2,
-                    scr_size_GB=scr_size_GB))
-            self._customize_alcf_qcinp(qcinp, num_nodes=num_nodes)
-            openmp_cmd = None
-        elif "macqu" in socket.gethostname().lower():
-            qc_exe = shlex.split("qchem -nt 2")
-            openmp_cmd = None
-        else:
-            qc_exe = ["qchem"]
-            openmp_cmd = None
-
-        logging.basicConfig(level=logging.INFO)
-        qchem_logger = logging.getLogger('QChemDrone')
-        qchem_logger.setLevel(logging.INFO)
-        sh = logging.StreamHandler(stream=sys.stdout)
-        sh.setLevel(getattr(logging, 'INFO'))
-        qchem_logger.addHandler(sh)
-
-        scf_max_cycles = 200
-        geom_max_cycles = 200
-        alt_cmd = {"half_cpus": half_cpus_cmd,
-                   "openmp": openmp_cmd}
-        if 'vesta' in socket.gethostname():
-            alt_cmd.pop("openmp")
-        if fw_spec['num_atoms'] > 50:
-            scf_max_cycles = 300
-            geom_max_cycles = 500
-
-        qcinp.write_file("mol.qcinp")
-        if 'implicit_solvent' in fw_spec and \
-                        'solvent_data' in fw_spec['implicit_solvent']:
-            solvent_data = fw_spec['implicit_solvent']['solvent_data']
-            values = ['{:.4f}'.format(solvent_data[t]) for t in
-                      ['Dielec', 'SolN', 'SolA', 'SolB', 'SolG', 'SolC',
-                       'SolH']]
-            solvent_text = ' '.join(values)
-            with open('solvent_data', 'w') as f:
-                f.write(solvent_text)
-        job = QchemJob(qc_exe, input_file="mol.qcinp", output_file="mol.qcout",
-                       qclog_file="mol.qclog", alt_cmd=alt_cmd, gzipped=True)
-        handler = QChemErrorHandler(qchem_job=job,
-                                    scf_max_cycles=scf_max_cycles,
-                                    geom_max_cycles=geom_max_cycles)
-        c = Custodian(handlers=[handler], jobs=[job], max_errors=50)
-        custodian_out = c.run()
-# on BGQ if we used the filesystem for the scratch directory clean it up
-        if 'vesta' in socket.gethostname():
-            if use_fs_scr == True:
-                shutil.rmtree(filesys_scr_dir)
+        custodian_out, prev_qchem_dir = self.run_qchem(
+            qcinp, implicit_solvent, mixed_aux_basis, mixed_basis)
         all_errors = set()
         for run in custodian_out:
             for correction in run['corrections']:
@@ -355,8 +165,223 @@ class QChemTask(FireTaskBase, FWSerializable):
                        'prev_task_type': fw_spec['task_type']}
         propagate_keys = ['egsnl', 'snlgroup_id', 'inchi_root',
                           'mixed_basis', 'mixed_aux_basis', 'mol']
+
         for k in propagate_keys:
             if k in fw_spec:
                 update_spec[k] = fw_spec[k]
 
         return FWAction(stored_data=stored_data, update_spec=update_spec)
+
+    @classmethod
+    def run_qchem(cls, qcinp, implicit_solvent, mixed_aux_basis, mixed_basis):
+        mol = qcinp.jobs[0].mol
+        num_atoms = len(mol)
+        for qj in qcinp.jobs:
+            if qj.params["rem"]["jobtype"] != "sp":
+                if mixed_basis is not None:
+                    qj.set_basis_set(mixed_basis)
+                if mixed_aux_basis is not None:
+                    qj.set_aux_basis_set(mixed_aux_basis)
+        carver_name_pattern = re.compile("c[0-9]{4}-ib")
+        fw_data = FWData()
+        half_cpus_cmd = shlex.split("qchem -np 12")
+        prev_qchem_dir = os.getcwd()
+        parent_qchem_dir = os.path.abspath(os.path.join(prev_qchem_dir, os.pardir))
+        # These are variables used to support the usage of a file system scratch directory
+        # on BGQ for pcm solvation jobs which use too much disk space for the ramdisk
+        # Put the scratch directory in ../scratch and keep the names as short as possible
+        # since the qchem binary has 114 char max for the full path to the scratch save dir
+        use_fs_scr = False
+        filesys_scr_dir = parent_qchem_dir + "/scratch/s" + ''.join(
+            random.choice(string.ascii_lowercase) for i in range(10))
+        if "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"] == "edison":
+            # edison compute nodes
+            if (not fw_data.MULTIPROCESSING) or (fw_data.SUB_NPROCS is None):
+                num_numa_nodes = 2
+                low_nprocess = max(
+                    int(num_atoms / num_numa_nodes) * num_numa_nodes, 1)
+                qc_exe = shlex.split(
+                    "qchem -np {}".format(min(24, low_nprocess)))
+                half_cpus_cmd = shlex.split(
+                    "qchem -np {}".format(min(12, low_nprocess)))
+            else:
+                nodelist = ",".join(fw_data.NODE_LIST)
+                os.environ["QCNODE"] = nodelist
+                num_numa_nodes = 2 * len(fw_data.NODE_LIST)
+                low_nprocess = max(
+                    int(num_atoms / num_numa_nodes) * num_numa_nodes, 1)
+                qc_exe = shlex.split("qchem -np {}".format(
+                    min(fw_data.SUB_NPROCS, low_nprocess)))
+                half_cpus_cmd = shlex.split("qchem -np {}".format(
+                    min(fw_data.SUB_NPROCS / 2, low_nprocess)))
+            openmp_cmd = shlex.split("qchem -nt 24")
+        elif "PBS_JOBID" in os.environ and "hopque" in os.environ["PBS_JOBID"]:
+            if (not fw_data.MULTIPROCESSING) or (fw_data.SUB_NPROCS is None):
+                qc_exe = shlex.split("qchem -np {}".format(min(24, num_atoms)))
+                half_cpus_cmd = shlex.split("qchem -np {}".format(
+                    min(12, num_atoms)))
+            else:
+                nodelist = ",".join(fw_data.NODE_LIST)
+                os.environ["QCNODE"] = nodelist
+                qc_exe = shlex.split("qchem -np {}".format(
+                    min(fw_data.SUB_NPROCS, num_atoms)))
+                half_cpus_cmd = shlex.split("qchem -np {}".format(
+                    min(fw_data.SUB_NPROCS / 2, num_atoms)))
+            openmp_cmd = shlex.split("qchem -seq -nt 24")
+        elif "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"] == "cori":
+            if (not fw_data.MULTIPROCESSING) or (fw_data.SUB_NPROCS is None):
+                nodelist = os.environ["QCNODE"].split(',')
+                num_numa_nodes = 2 * len(nodelist)
+                low_nprocess = max(
+                    int(num_atoms / num_numa_nodes) * num_numa_nodes, 1)
+                num_cores = 32 * len(nodelist)
+                qc_exe = shlex.split(
+                    "qchem -np {}".format(min(num_cores, low_nprocess)))
+                half_cpus_cmd = shlex.split(
+                    "qchem -np {}".format(min(num_cores, low_nprocess)))
+            else:
+                nodelist = ",".join(fw_data.NODE_LIST)
+                os.environ["QCNODE"] = nodelist
+                num_numa_nodes = 2 * len(fw_data.NODE_LIST)
+                low_nprocess = max(
+                    int(num_atoms / num_numa_nodes) * num_numa_nodes, 1)
+                qc_exe = shlex.split("qchem -np {}".format(
+                    min(fw_data.SUB_NPROCS, low_nprocess)))
+                half_cpus_cmd = shlex.split("qchem -np {}".format(
+                    min(fw_data.SUB_NPROCS / 2, low_nprocess)))
+            openmp_cmd = shlex.split("qchem -nt 32")
+        elif "NERSC_HOST" in os.environ and os.environ[
+            "NERSC_HOST"] == "matgen":
+            if (not fw_data.MULTIPROCESSING) or (fw_data.SUB_NPROCS is None):
+                num_numa_nodes = 2
+                low_nprocess = max(
+                    int(num_atoms / num_numa_nodes) * num_numa_nodes, 1)
+                qc_exe = shlex.split(
+                    "qchem -np {}".format(min(16, low_nprocess)))
+                half_cpus_cmd = shlex.split(
+                    "qchem -np {}".format(min(8, low_nprocess)))
+            else:
+                nodelist = ",".join(fw_data.NODE_LIST)
+                os.environ["QCNODE"] = nodelist
+                num_numa_nodes = 2 * len(fw_data.NODE_LIST)
+                low_nprocess = max(
+                    int(num_atoms / num_numa_nodes) * num_numa_nodes, 1)
+                qc_exe = shlex.split("qchem -np {}".format(
+                    min(fw_data.SUB_NPROCS, low_nprocess)))
+                half_cpus_cmd = shlex.split("qchem -np {}".format(
+                    min(fw_data.SUB_NPROCS / 2, low_nprocess)))
+            openmp_cmd = shlex.split("qchem -nt 16")
+        elif carver_name_pattern.match(socket.gethostname()):
+            # mendel compute nodes
+            qc_exe = shlex.split("qchem -np {}".format(min(8, num_atoms)))
+            openmp_cmd = shlex.split("qchem -seq -nt 8")
+        elif 'vesta' in socket.gethostname():
+            # ALCF, Blue Gene
+            num_nodes = 4
+            num_threads = 32
+            scr_size_GB = 0.9313
+            max_minutes = 8 * 60
+
+            # For BGQ for sp use a file system scratch directory instead of the ramdisk
+            # because the amount of storage required can easily exceed the ramdisk for the pcm step
+
+            for qj in qcinp.jobs:
+                if qj.params["rem"]["jobtype"] == "sp":
+                    use_fs_scr = True
+            if use_fs_scr == True:
+                # for BGQ hang a short savedir name off the scratch dir
+                save_dir = filesys_scr_dir + "/sd"
+                os.makedirs(save_dir)
+                qc_exe = shlex.split(cls._calibrate_alcf_cmd(
+                    num_nodes=num_nodes, max_minutes=max_minutes,
+                    num_threads=num_threads,
+                    scr_size_GB=scr_size_GB, use_ramdisk=False, fs_scr_dir=save_dir))
+                half_cpus_cmd = shlex.split(cls._calibrate_alcf_cmd(
+                    num_nodes=num_nodes, max_minutes=max_minutes,
+                    num_threads=num_threads / 2,
+                    scr_size_GB=scr_size_GB, use_ramdisk=False, fs_scr_dir=save_dir))
+
+            else:
+                qc_exe = shlex.split(cls._calibrate_alcf_cmd(
+                    num_nodes=num_nodes, max_minutes=max_minutes,
+                    num_threads=num_threads,
+                    scr_size_GB=scr_size_GB))
+                half_cpus_cmd = shlex.split(cls._calibrate_alcf_cmd(
+                    num_nodes=num_nodes, max_minutes=max_minutes,
+                    num_threads=num_threads / 2,
+                    scr_size_GB=scr_size_GB))
+            cls._customize_alcf_qcinp(qcinp, num_nodes=num_nodes)
+            openmp_cmd = None
+        elif "macqu" in socket.gethostname().lower():
+            qc_exe = shlex.split("qchem -nt 2")
+            openmp_cmd = None
+        else:
+            qc_exe = ["qchem"]
+            openmp_cmd = None
+        logging.basicConfig(level=logging.INFO)
+        qchem_logger = logging.getLogger('QChemDrone')
+        qchem_logger.setLevel(logging.INFO)
+        sh = logging.StreamHandler(stream=sys.stdout)
+        sh.setLevel(getattr(logging, 'INFO'))
+        qchem_logger.addHandler(sh)
+        scf_max_cycles = 200
+        geom_max_cycles = 200
+        alt_cmd = {"half_cpus": half_cpus_cmd,
+                   "openmp": openmp_cmd}
+        if cls._is_openmp_only_job(qcinp):
+            qc_exe = shlex.split(" ".join(qc_exe).replace("-np", "-nt"))
+            alt_cmd["half_cpus"] = shlex.split(" ".join(half_cpus_cmd).replace("-np", "-nt"))
+            alt_cmd.pop("openmp")
+        if 'vesta' in socket.gethostname():
+            alt_cmd.pop("openmp")
+        if num_atoms > 50:
+            scf_max_cycles = 300
+            geom_max_cycles = 500
+        qcinp.write_file("mol.qcinp")
+        if implicit_solvent is not None:
+            solvent_data = implicit_solvent.get('solvent_data', None)
+            if solvent_data is not None:
+                values = ['{:.4f}'.format(solvent_data[t]) for t in
+                          ['Dielec', 'SolN', 'SolA', 'SolB', 'SolG', 'SolC',
+                           'SolH']]
+                solvent_text = ' '.join(values)
+                with open('solvent_data', 'w') as f:
+                    f.write(solvent_text)
+        job = QchemJob(qc_exe, input_file="mol.qcinp", output_file="mol.qcout",
+                       qclog_file="mol.qclog", alt_cmd=alt_cmd, gzipped=True)
+        handler = QChemErrorHandler(qchem_job=job,
+                                    scf_max_cycles=scf_max_cycles,
+                                    geom_max_cycles=geom_max_cycles)
+        c = Custodian(handlers=[handler], jobs=[job], max_errors=50)
+        custodian_out = c.run()
+        # on BGQ if we used the filesystem for the scratch directory clean it up
+        if 'vesta' in socket.gethostname():
+            if use_fs_scr == True:
+                shutil.rmtree(filesys_scr_dir)
+        return custodian_out, prev_qchem_dir
+
+    @staticmethod
+    def _is_openmp_only_job(qcinp):
+        for qctask in qcinp.jobs:
+            rems = qctask.params["rem"]
+            theor_method = rems.get("method", rems.get("exchange", "hf"))
+            for mp2task in ["mp2", "xyg", "ccsd"]:
+                if mp2task in theor_method:
+                    return True
+        return False
+
+    @staticmethod
+    def _get_qcinp_from_fw_spec(fw_spec):
+        if isinstance(fw_spec["qcinp"], dict):
+            qcinp = QcInput.from_dict(fw_spec["qcinp"])
+        else:
+            qcinp = fw_spec["qcinp"]
+        if 'mol' in fw_spec:
+            if isinstance(fw_spec["mol"], dict):
+                mol = Molecule.from_dict(fw_spec["mol"])
+            else:
+                mol = fw_spec["mol"]
+            for qj in qcinp.jobs:
+                if isinstance(qj.mol, Molecule):
+                    qj.mol = copy.deepcopy(mol)
+        return qcinp
