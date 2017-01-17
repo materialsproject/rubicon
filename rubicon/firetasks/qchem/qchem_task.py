@@ -25,7 +25,7 @@ from fireworks.core.firework import FireTaskBase, FWAction
 from fireworks.fw_config import FWData
 from fireworks.utilities.fw_serializers import FWSerializable
 from pymatgen.core.structure import Molecule
-from pymatgen.io.qchem import QcInput
+from pymatgen.io.qchem import QcInput, QcTask
 from rubicon.utils.eg_wf_utils import move_to_eg_garden
 
 __author__ = 'Anubhav Jain'
@@ -328,6 +328,10 @@ class QChemTask(FireTaskBase, FWSerializable):
         geom_max_cycles = 200
         alt_cmd = {"half_cpus": half_cpus_cmd,
                    "openmp": openmp_cmd}
+        if cls._is_openmp_only_job(qcinp):
+            qc_exe = shlex.split(" ".join(qc_exe).replace("-np", "-nt"))
+            alt_cmd["half_cpus"] = shlex.split(" ".join(half_cpus_cmd).replace("-np", "-nt"))
+            alt_cmd.pop("openmp")
         if 'vesta' in socket.gethostname():
             alt_cmd.pop("openmp")
         if num_atoms > 50:
@@ -355,6 +359,16 @@ class QChemTask(FireTaskBase, FWSerializable):
             if use_fs_scr == True:
                 shutil.rmtree(filesys_scr_dir)
         return custodian_out, prev_qchem_dir
+
+    @staticmethod
+    def _is_openmp_only_job(qcinp):
+        for qctask in qcinp.jobs:
+            rems = qctask.params["rem"]
+            theor_method = rems.get("method", rems.get("exchange", "hf"))
+            for mp2task in ["mp2", "xyg", "ccsd"]:
+                if mp2task in theor_method:
+                    return True
+        return False
 
     @staticmethod
     def _get_qcinp_from_fw_spec(fw_spec):
