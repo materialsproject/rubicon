@@ -13,6 +13,8 @@ import shlex
 import shutil
 import socket
 import sys
+import random
+import string
 
 from custodian.custodian import Custodian
 from custodian.qchem.handlers import QChemErrorHandler
@@ -47,29 +49,54 @@ class QChemTask(FireTaskBase, FWSerializable):
     @staticmethod
     def _calibrate_alcf_cmd(input_file="mol.qcinp", max_minutes=60,
                             num_nodes=8, ranks_per_node=1,
-                            num_threads=64, scr_size_GB=2.0, use_runjob=False):
+                            num_threads=64, scr_size_GB=2.0, use_ramdisk=True,
+                            fs_scr_dir="",use_runjob=False):
         qc_package_path = "/projects/JCESR/pkcoff/qchem43.mod1"
         qcaux_path = "/projects/JCESR/qcaux"
-        qc_exe_path = "/projects/JCESR/pkcoff/public/qcprog-43-optv3.exe"
+        qc_exe_path = "/projects/JCESR/pkcoff/public/qcprog-43-optv5.exe"
         qc_scr_dir = "/dev/local/qchem"
+# on BGQ if the ramdisk is not used then use the file system for scrach space
+        if use_ramdisk == False:
+            qc_scr_dir = fs_scr_dir
         scr_size_bytes = int(scr_size_GB * (2 ** 30))
-        qc_envs = {
-            "HOME": os.environ["HOME"],
-            "QC": qc_package_path,
-            "QCAUX": qcaux_path,
-            "QCSCRATCH": qc_scr_dir,
-            "QCFILEPREF": os.path.join(qc_scr_dir, "qc_job"),
-            "QCTMPDIR": qc_scr_dir,
-            "QCTHREADS": num_threads,
-            "OMP_NUM_THREADS": num_threads,
-            "QCLOCALFSSIZE": scr_size_bytes,
-            "INT_OMP_MIN_LENSTEP_PATH1": 1,
-            "INT_OMP_MAX_LENSTEP": 1,
-            "INT_OMP_MAX_LENSTEP_PATH1": 1,
-            "INT_OMP_MIN_LENSTEP": 1,
-            "BLAS3_DFT_OMP": 1,
-            "PAMI_CLIENTS": "MPI,SharedCounter"
-        }
+
+# if not using the ramdisk then do not set QCLOCALFSSIZE
+        if use_ramdisk == True:
+            qc_envs = {
+                "HOME": os.environ["HOME"],
+                "QC": qc_package_path,
+                "QCAUX": qcaux_path,
+                "QCSCRATCH": qc_scr_dir,
+                "QCFILEPREF": os.path.join(qc_scr_dir, "qc_job"),
+                "QCTMPDIR": qc_scr_dir,
+                "QCTHREADS": num_threads,
+                "OMP_NUM_THREADS": num_threads,
+                "QCLOCALFSSIZE": scr_size_bytes,
+                "INT_OMP_MIN_LENSTEP_PATH1": 1,
+                "INT_OMP_MAX_LENSTEP": 1,
+                "INT_OMP_MAX_LENSTEP_PATH1": 1,
+                "INT_OMP_MIN_LENSTEP": 1,
+                "BLAS3_DFT_OMP": 1,
+                "PAMI_CLIENTS": "MPI,SharedCounter"
+            }
+        else:
+            qc_envs = {
+                "HOME": os.environ["HOME"],
+                "QC": qc_package_path,
+                "QCAUX": qcaux_path,
+                "QCSCRATCH": qc_scr_dir,
+                "QCFILEPREF": os.path.join(qc_scr_dir, "qc_job"),
+                "QCTMPDIR": qc_scr_dir,
+                "QCTHREADS": num_threads,
+                "OMP_NUM_THREADS": num_threads,
+                "INT_OMP_MIN_LENSTEP_PATH1": 1,
+                "INT_OMP_MAX_LENSTEP": 1,
+                "INT_OMP_MAX_LENSTEP_PATH1": 1,
+                "INT_OMP_MIN_LENSTEP": 1,
+                "BLAS3_DFT_OMP": 1,
+                "PAMI_CLIENTS": "MPI,SharedCounter"
+            }
+
         with open(os.path.abspath(os.path.join(os.path.dirname(__file__),
                                                "data/qc_lenstep_config_set"))) \
                 as f:
@@ -143,6 +170,15 @@ class QChemTask(FireTaskBase, FWSerializable):
         carver_name_pattern = re.compile("c[0-9]{4}-ib")
         fw_data = FWData()
         half_cpus_cmd = shlex.split("qchem -np 12")
+        prev_qchem_dir = os.getcwd()
+        parent_qchem_dir = os.path.abspath(os.path.join(prev_qchem_dir, os.pardir))
+
+# These are variables used to support the usage of a file system scratch directory
+# on BGQ for pcm solvation jobs which use too much disk space for the ramdisk
+# Put the scratch directory in ../scratch and keep the names as short as possible
+# since the qchem binary has 114 char max for the full path to the scratch save dir
+        use_fs_scr = False
+        filesys_scr_dir = parent_qchem_dir + "/scratch/s" + ''.join(random.choice(string.ascii_lowercase) for i in range(10))
         if "NERSC_HOST" in os.environ and os.environ["NERSC_HOST"] == "edison":
             # edison compute nodes
             if (not fw_data.MULTIPROCESSING) or (fw_data.SUB_NPROCS is None):
@@ -230,14 +266,35 @@ class QChemTask(FireTaskBase, FWSerializable):
             num_threads = 32
             scr_size_GB = 0.9313
             max_minutes = 8 * 60
-            qc_exe = shlex.split(self._calibrate_alcf_cmd(
-                num_nodes=num_nodes, max_minutes=max_minutes,
-                num_threads=num_threads,
-                scr_size_GB=scr_size_GB))
-            half_cpus_cmd = shlex.split(self._calibrate_alcf_cmd(
-                num_nodes=num_nodes, max_minutes=max_minutes,
-                num_threads=num_threads / 2,
-                scr_size_GB=scr_size_GB))
+
+# For BGQ for sp use a file system scratch directory instead of the ramdisk
+# because the amount of storage required can easily exceed the ramdisk for the pcm step
+
+            for qj in qcinp.jobs:
+                 if qj.params["rem"]["jobtype"] == "sp":
+                     use_fs_scr = True
+            if use_fs_scr == True:
+# for BGQ hang a short savedir name off the scratch dir
+                save_dir = filesys_scr_dir + "/sd"
+                os.makedirs(save_dir)
+                qc_exe = shlex.split(self._calibrate_alcf_cmd(
+                    num_nodes=num_nodes, max_minutes=max_minutes,
+                    num_threads=num_threads,
+                    scr_size_GB=scr_size_GB,use_ramdisk=False,fs_scr_dir=save_dir))
+                half_cpus_cmd = shlex.split(self._calibrate_alcf_cmd(
+                    num_nodes=num_nodes, max_minutes=max_minutes,
+                    num_threads=num_threads / 2,
+                    scr_size_GB=scr_size_GB,use_ramdisk=False,fs_scr_dir=save_dir))
+
+            else:
+                qc_exe = shlex.split(self._calibrate_alcf_cmd(
+                    num_nodes=num_nodes, max_minutes=max_minutes,
+                    num_threads=num_threads,
+                    scr_size_GB=scr_size_GB))
+                half_cpus_cmd = shlex.split(self._calibrate_alcf_cmd(
+                    num_nodes=num_nodes, max_minutes=max_minutes,
+                    num_threads=num_threads / 2,
+                    scr_size_GB=scr_size_GB))
             self._customize_alcf_qcinp(qcinp, num_nodes=num_nodes)
             openmp_cmd = None
         elif "macqu" in socket.gethostname().lower():
@@ -281,13 +338,15 @@ class QChemTask(FireTaskBase, FWSerializable):
                                     geom_max_cycles=geom_max_cycles)
         c = Custodian(handlers=[handler], jobs=[job], max_errors=50)
         custodian_out = c.run()
-
+# on BGQ if we used the filesystem for the scratch directory clean it up
+        if 'vesta' in socket.gethostname():
+            if use_fs_scr == True:
+                shutil.rmtree(filesys_scr_dir)
         all_errors = set()
         for run in custodian_out:
             for correction in run['corrections']:
                 all_errors.update(correction['errors'])
 
-        prev_qchem_dir = os.getcwd()
         if MOVE_TO_EG_GARDEN:
             prev_qchem_dir = move_to_eg_garden(prev_qchem_dir)
 
