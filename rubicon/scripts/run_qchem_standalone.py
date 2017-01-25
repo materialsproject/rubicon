@@ -33,7 +33,8 @@ def call_qchem_task(filename, solvent=None, mixed_basis=None, mixed_aux_basis=No
     log_filename = base_filename + ".qclog"
     qcinp = QcInput.from_file(filename)
     solvent_token = set_solvent_data(qcinp, solvent)
-    QChemTask.run_qchem(qcinp, solvent_token, mixed_aux_basis, mixed_basis)
+    QChemTask.run_qchem(qcinp, solvent_token, mixed_aux_basis, mixed_basis,
+                        input_file=filename, output_file=output_filename, gzipped=False)
 
 def set_solvent_data(qcinp, solvent, vdw_surface=True):
     if not solvent:
