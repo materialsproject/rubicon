@@ -173,7 +173,8 @@ class QChemTask(FireTaskBase, FWSerializable):
         return FWAction(stored_data=stored_data, update_spec=update_spec)
 
     @classmethod
-    def run_qchem(cls, qcinp, implicit_solvent, mixed_aux_basis, mixed_basis):
+    def run_qchem(cls, qcinp, implicit_solvent, mixed_aux_basis, mixed_basis,
+                  input_file="mol.qcinp", output_file="mol.qcout", gzipped=True):
         mol = qcinp.jobs[0].mol
         num_atoms = len(mol)
         for qj in qcinp.jobs:
@@ -337,7 +338,7 @@ class QChemTask(FireTaskBase, FWSerializable):
         if num_atoms > 50:
             scf_max_cycles = 300
             geom_max_cycles = 500
-        qcinp.write_file("mol.qcinp")
+        qcinp.write_file(input_file)
         if implicit_solvent is not None:
             solvent_data = implicit_solvent.get('solvent_data', None)
             if solvent_data is not None:
@@ -347,8 +348,9 @@ class QChemTask(FireTaskBase, FWSerializable):
                 solvent_text = ' '.join(values)
                 with open('solvent_data', 'w') as f:
                     f.write(solvent_text)
-        job = QchemJob(qc_exe, input_file="mol.qcinp", output_file="mol.qcout",
-                       qclog_file="mol.qclog", alt_cmd=alt_cmd, gzipped=True)
+        qclog_file = os.path.splitext(output_file)[0] + ".qclog"
+        job = QchemJob(qc_exe, input_file=input_file, output_file=output_file,
+                       qclog_file=qclog_file, alt_cmd=alt_cmd, gzipped=gzipped)
         handler = QChemErrorHandler(qchem_job=job,
                                     scf_max_cycles=scf_max_cycles,
                                     geom_max_cycles=geom_max_cycles)
