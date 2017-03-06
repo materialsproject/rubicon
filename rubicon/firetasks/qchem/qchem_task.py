@@ -111,7 +111,7 @@ class QChemTask(FireTaskBase, FWSerializable):
         nproc = min(physical_nproc, natoms)
         half_nproc = min(physical_nproc // 2, natoms)
         qc_exe = shlex.split("qchem -np {}".format(nproc))
-        half_cpus_cmd = shlex.split(half_nproc)
+        half_cpus_cmd = shlex.split("qchem -np {}".format(half_nproc))
         openmp_cmd = shlex.split("qchem -nt {}".format(nproc))
         return qc_exe, half_cpus_cmd, openmp_cmd
 
