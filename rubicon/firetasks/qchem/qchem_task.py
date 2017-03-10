@@ -179,7 +179,8 @@ class QChemTask(FireTaskBase, FWSerializable):
         job = QchemJob(qc_exe, input_file=input_file, output_file=output_file,
                        qclog_file=qclog_file, alt_cmd=alt_cmd, gzipped=gzipped,
                        total_physical_memory=total_physical_memory)
-        handler = QChemErrorHandler(qchem_job=job, output_file=output_file,
+        handler = QChemErrorHandler(qchem_job=job, input_file=input_file,
+                                    output_file=output_file,
                                     scf_max_cycles=scf_max_cycles,
                                     geom_max_cycles=geom_max_cycles)
         c = Custodian(handlers=[handler], jobs=[job], max_errors=50)
