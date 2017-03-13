@@ -20,8 +20,6 @@ try:
 except ImportError:
     ob = None
 
-import simplerandom.random as srr
-
 from pymatgen.core.structure import Molecule
 from pymatgen.io.babel import BabelMolAdaptor
 from pymatgen.io.qchem import QcOutput
@@ -35,17 +33,12 @@ from rubicon.utils.ion_arranger.semi_emprical_qm_energy_evaluator import \
 
 class IonPlacer:
     def __init__(self, molecule, fragments, nums_fragments, energy_evaluator,
-                 prng="kiss", random_seed=None, taboo_tolerance_ang=1.0,
+                 random_seed=None, taboo_tolerance_ang=1.0,
                  taboo_tolerance_particle_ratio=0.5,
                  topology="ring", initial_guess="breadth",
                  bound_setter="chain", always_write_best=False,
                  max_generations_each_conformer=100):
-        if prng == "kiss":
-            self.prng = srr.KISS()
-        elif prng == "python":
-            self.prng = Random()
-        else:
-            raise Exception("Random number generator is not supported")
+        self.prng = Random()
         self.seed = random_seed if random_seed else int(time())
         self.prng.seed(self.seed)
         print("Random Seed:", self.seed)
