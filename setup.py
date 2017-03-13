@@ -32,7 +32,7 @@ if __name__ == "__main__":
           license='modified BSD',
           packages=find_packages(),
           install_requires=['pymatgen>=3.6.0', 'fireworks>=1.3.0',
-                            'custodian>=1.0', 'monty>=0.8.0', 'simplerandom'],
+                            'custodian>=1.0', 'monty>=0.8.0'],
           extras_require={"plotting": ["matplotlib>=1.1"],
                           "molecules": ["openbabel"],
                           "molecular dynamics": ["Packmol", "AmberTools"]},
