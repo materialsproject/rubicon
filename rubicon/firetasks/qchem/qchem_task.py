@@ -97,6 +97,10 @@ class QChemTask(FireTaskBase, FWSerializable):
                               "cori": 32,
                               "matgen": 16,
                               "macqu": 2}
+        numa_num_map = {"edison": 2,
+                        "cori": 2,
+                        "matgen": 2,
+                        "macqu": 1}
         hostname = cls.get_hostname()
         if hostname in physical_nproc_map:
             physical_nproc = physical_nproc_map[hostname]
@@ -109,7 +113,10 @@ class QChemTask(FireTaskBase, FWSerializable):
         if fw_data.MULTIPROCESSING and fw_data.SUB_NPROCS is not None:
             physical_nproc = int(fw_data.SUB_NPROCS)
         nproc = min(physical_nproc, natoms)
+        numa_num = numa_num_map[hostname]
+        nproc = max((nproc // numa_num) * numa_num, 1)
         half_nproc = min(physical_nproc // 2, natoms)
+        half_nproc = max((half_nproc // numa_num) * numa_num, 1)
         qc_exe = shlex.split("qchem -np {}".format(nproc))
         half_cpus_cmd = shlex.split("qchem -np {}".format(half_nproc))
         openmp_cmd = shlex.split("qchem -nt {}".format(nproc))
